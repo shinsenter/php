@@ -1,0 +1,33 @@
+{
+    "editor.rulers": [80, 100, 120],
+    "editor.formatOnSaveMode": "modificationsIfAvailable",
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/bower_components": true,
+        "**/*.code-search": true,
+        "*debug*": true,
+        "*old_gcm*": true,
+        "*gcm_renew*": true,
+        "gateway": true,
+        "**/debugbar": true,
+        "data": true
+    },
+    "files.eol": "\n",
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "*debug*": true,
+        "*old_gcm*": true,
+        "*gcm_renew*": true,
+        "dev-new-gcm.sh": true,
+        "debug-new-gcm.sh": true,
+        "build.sh": true,
+        ".docker": true,
+        "data": true
+    },
+    "editor.trimAutoWhitespace": true
+}

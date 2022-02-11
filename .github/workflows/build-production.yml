@@ -1,0 +1,97 @@
+name: Publish Docker (shinsenter/docker-phpfpm)
+
+################################################################################
+################################################################################
+
+on:
+  schedule:
+    - cron: '0 0 * * 2'
+  push:
+    branches:
+      - main
+
+################################################################################
+################################################################################
+
+jobs:
+
+################################################################################
+################################################################################
+
+  base_image:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 3
+      matrix:
+        image:
+          - shinsenter/s6-ubuntu
+        platform:
+          - linux/amd64
+        base:
+          - ubuntu
+        version: 
+          - "20.04"
+          - latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: main
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      - name: Build images
+        run: >
+          OS_BASE=${{ matrix.base }} OS_VERSION=${{ matrix.version }} 
+          docker build --pull --platform=${{ matrix.platform }} src/base/ 
+          --tag ${{ matrix.image }}:${{ matrix.version }}
+      - name: Push version image to DockerHub
+        run: >
+          docker push ${{ matrix.image }}:${{ matrix.version }}
+
+################################################################################
+################################################################################
+
+  php_images:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 3
+      matrix:
+        image:
+          - shinsenter/php
+        platform:
+          - linux/amd64
+        base:
+          - shinsenter/s6-ubuntu:latest
+          - shinsenter/s6-ubuntu:20.04
+          - shinsenter/s6-ubuntu:22.04
+        version: 
+          - "7.4"
+          - "8.0"
+          - "8.1"
+        variation:
+          - cli
+          - fpm
+          - fpm-nginx
+          - fpm-apache
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: main
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      - name: Build images
+        run: >
+          BASE_IMAGE=${{ matrix.base }} PHP_VERSION=${{ matrix.version }}
+          docker build --pull --platform=${{ matrix.platform }} src/php/${{ matrix.variation }}/
+          --tag ${{ matrix.image }}-${{ matrix.variation }}:${{ matrix.version }}
+      - name: Push version image to DockerHub
+        run: >
+          docker push ${{ matrix.image }}-${{ matrix.variation }}:${{ matrix.version }}
+
+################################################################################
+################################################################################
