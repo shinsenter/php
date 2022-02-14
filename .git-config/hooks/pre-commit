@@ -1,0 +1,5 @@
+#!/bin/sh
+
+PROJECT_DIR="$(git rev-parse --show-toplevel)"
+
+exit 0

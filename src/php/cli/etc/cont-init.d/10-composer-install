@@ -1,0 +1,5 @@
+#!/command/with-contenv bash
+
+if [ -f $WEBHOME/composer.json ] && [ ! -e $WEBHOME/vendor/ ]; then
+    composer install -o
+fi

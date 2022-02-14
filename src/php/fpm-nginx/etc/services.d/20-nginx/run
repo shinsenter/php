@@ -1,0 +1,3 @@
+#!/command/with-contenv sh
+echo && /usr/sbin/nginx -v
+exec /usr/sbin/nginx

@@ -1,0 +1,32 @@
+#!/command/with-contenv bash
+
+TZ=${TZ:-UTC}
+PUID=${PUID:-9999}
+PGID=${PGID:-9999}
+WEBHOME=${WEBHOME:-"/var/www/html"}
+
+if [[ $PUID != 9999 || $PGID != 9999 ]]; then
+    groupmod -o -g "$PGID" webgroup
+    usermod  -o -u "$PUID" webuser
+    chown webuser:webgroup $WEBHOME
+fi
+
+if [ -f /usr/share/zoneinfo/$TZ ]; then
+    ln -sf /usr/share/zoneinfo/$TZ /etc/localtime
+fi
+
+if [ -f /etc/welcome.txt ]; then
+    echo
+    cat /etc/welcome.txt
+fi
+
+echo "
+
+------------------------------
+  User UID: $(id -u webuser)
+  User GID: $(id -g webuser)
+------------------------------
+
+To get support from the project owner, please contact:
+    admin@appseeds.net
+"
