@@ -1,64 +1,34 @@
 server {
-    server_name _;
     listen 80 default_server;
     listen [::]:80 default_server;
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
 
-    root /var/www/html/public;
-    index index.html;
-
-    client_max_body_size 2048M;
-    include /etc/nginx/server-opts.d/*.conf;
-
-    location /ping {
-        access_log off;
-        fastcgi_read_timeout 5s;
-
-        include        fastcgi_params;
-        fastcgi_param  SCRIPT_NAME     /ping;
-        fastcgi_param  SCRIPT_FILENAME /ping;
-        fastcgi_pass   unix:/var/run/php/php-fpm.sock;
-    }
-
-    location ~ \.php$ {
-        include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/var/run/php/php-fpm.sock;
-    }
-
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
-}
-
-server {
     server_name _;
-    listen 443 http2 ssl default_server;
-    listen [::]:443 http2 ssl default_server;
+    root /var/www/html;
 
-    ssl_certificate /etc/ssl/web/ssl.crt;
-    ssl_certificate_key /etc/ssl/web/ssl.key;
-    ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384;
+    # SSL
+    ssl_certificate /etc/ssl/web/server.crt;
+    ssl_certificate_key /etc/ssl/web/server.key;
 
-    root /var/www/html/public;
-    index index.html;
+    # additional config
+    include extra.d/*.conf;
 
-    client_max_body_size 2048M;
-    include /etc/nginx/server-opts.d/*.conf;
-
+    # health check
     location /ping {
         access_log off;
+        include snippets/fastcgi-php.conf;
         fastcgi_read_timeout 5s;
-
-        include        fastcgi_params;
-        fastcgi_param  SCRIPT_NAME     /ping;
-        fastcgi_param  SCRIPT_FILENAME /ping;
-        fastcgi_pass   unix:/var/run/php/php-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php-fpm.sock;
     }
 
+    # handle .php
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
         fastcgi_pass unix:/var/run/php/php-fpm.sock;
     }
 
+    # index.php fallback
     location / {
         try_files $uri $uri/ /index.php?$query_string;
     }

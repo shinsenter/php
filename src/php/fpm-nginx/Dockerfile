@@ -19,6 +19,8 @@ RUN apt-update \
     && apt-install msmtp msmtp-mta \
     && apt-install nginx-extras \
     && service nginx stop && update-rc.d nginx disable \
+    && ln -sf /dev/stdout /var/log/nginx/access.log \
+    && ln -sf /dev/stderr /var/log/nginx/error.log \
     \
     # cleanup
     && apt-cleanup
@@ -27,6 +29,8 @@ ENV DEBUG_MODE=false
 
 ENV MSMTP_RELAY_SERVER_HOSTNAME=mailhog
 ENV MSMTP_RELAY_SERVER_PORT=1025
+
+ENV NGINX_DOCUMENT_ROOT=${NGINX_DOCUMENT_ROOT:-$WEBHOME}
 
 ################################################################################
 

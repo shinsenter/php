@@ -1,3 +1,5 @@
 #!/command/with-contenv sh
+find /etc/nginx/sites-available -type f | \
+    xargs -I {} sed -i "s#\/var\/www\/html#${NGINX_DOCUMENT_ROOT:-/var/www/html/public}#g" {}
 echo && /usr/sbin/nginx -v
 exec /usr/sbin/nginx
