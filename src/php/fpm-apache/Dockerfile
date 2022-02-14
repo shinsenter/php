@@ -2,7 +2,7 @@
 ################################################################################
 
 # base image and platform
-FROM ${IMAGE_NAME:-shinsenter/php}:${PHP_VERSION:-7.4}-fpm as base
+FROM ${IMAGE_BASE:-shinsenter/php}:${PHP_VERSION:-7.4}-fpm as base
 
 ARG APACHE_PPA_URL="http://ppa.launchpadcontent.net/ondrej/apache2/ubuntu"
 ARG APACHE_PPA_KEY="14AA40EC0831756756D7F66C4F4EA0AAE5267A6C"
@@ -28,7 +28,6 @@ RUN apt-update \
     && echo "ServerName localhost" >>/etc/apache2/apache2.conf \
     && sed -i 's/LogFormat "%h %l %u %t \\\"%r\\\" %>s %O \\\"/LogFormat "%a %l %u %t \\\"%r\\\" %>s %O \\\"/' /etc/apache2/apache2.conf \
     && ln -sf /dev/stdout /var/log/apache2/access.log \
-    && ln -sf /dev/stdout /var/log/apache2/other_vhosts_access.log \
     && ln -sf /dev/stderr /var/log/apache2/error.log \
     \
     # cleanup

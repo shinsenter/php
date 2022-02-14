@@ -1,5 +1,12 @@
 #!/command/with-contenv bash
 
 if [ -f $WEBHOME/composer.json ] && [ ! -e $WEBHOME/vendor/ ]; then
-    composer install -o
+    /usr/bin/composer install \
+        --no-ansi \
+        --no-dev \
+        --no-interaction \
+        --no-plugins \
+        --no-progress \
+        --no-scripts \
+        --optimize-autoloader
 fi

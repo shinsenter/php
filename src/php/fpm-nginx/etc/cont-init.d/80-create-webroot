@@ -1,0 +1,6 @@
+#!/command/with-contenv bash
+
+if [ ! -z "$NGINX_DOCUMENT_ROOT" ] && [ ! -e "$NGINX_DOCUMENT_ROOT" ]; then
+    mkdir -p $NGINX_DOCUMENT_ROOT
+    chown webuser:webgroup $NGINX_DOCUMENT_ROOT
+fi

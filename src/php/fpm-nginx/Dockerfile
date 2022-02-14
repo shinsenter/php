@@ -2,7 +2,7 @@
 ################################################################################
 
 # base image and platform
-FROM ${IMAGE_NAME:-shinsenter/php}:${PHP_VERSION:-7.4}-fpm as base
+FROM ${IMAGE_BASE:-shinsenter/php}:${PHP_VERSION:-7.4}-fpm as base
 
 ARG NGINX_PPA_URL="https://ppa.launchpadcontent.net/ondrej/nginx-mainline/ubuntu"
 ARG NGINX_PPA_KEY="14AA40EC0831756756D7F66C4F4EA0AAE5267A6C"
