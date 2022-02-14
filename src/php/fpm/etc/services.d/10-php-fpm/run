@@ -4,4 +4,4 @@
 su webuser
 
 #Bring up PHP FPM
-exec /usr/sbin/php-fpm${PHP_VERSION} --nodaemonize
+/usr/sbin/php-fpm${PHP_VERSION} --nodaemonize

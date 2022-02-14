@@ -10,19 +10,20 @@ ARG NGINX_SOURCES="/etc/apt/sources.list.d/ondrej-nginx.list"
 
 RUN apt-update \
     \
-    # adds ondrej repos for Ubuntu
+    # adds ondrej repos for Nginx
     && echo "deb $NGINX_PPA_URL ${OS_VERSION:-focal} main" >$NGINX_SOURCES \
     && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $NGINX_PPA_KEY 2>/dev/null \
     \
     # installs nginx, msmtp
     && apt-update \
     && apt-install msmtp msmtp-mta \
-    && apt-install nginx-extras \
+    && apt-install nginx \
     && service nginx stop && update-rc.d nginx disable \
     && ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log \
     \
     # cleanup
+    && rm -f $NGINX_SOURCES \
     && apt-cleanup
 
 ENV DEBUG_MODE=false

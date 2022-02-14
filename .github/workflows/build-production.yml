@@ -88,7 +88,7 @@ jobs:
           - "8.1"
     env:
       PHP_VERSION: ${{ matrix.version }}
-      IMAGE_BASE: shinsenter/s6-ubuntu:latest
+      IMAGE_BASE: shinsenter/s6-ubuntu:focal
     steps:
       - uses: actions/checkout@v2
         with:

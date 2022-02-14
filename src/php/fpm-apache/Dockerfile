@@ -13,24 +13,29 @@ ENV APACHE_RUN_USER=webuser
 
 RUN apt-update \
     \
-    # adds ondrej repos for Ubuntu
-    && echo "deb $APACHE_PPA_URL ${OS_VERSION:-focal} main" >$APACHE_SOURCES \
-    && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $APACHE_PPA_KEY 2>/dev/null \
+    # adds ondrej repos for Apache2
+    # && echo "deb $APACHE_PPA_URL ${OS_VERSION:-focal} main" >$APACHE_SOURCES \
+    # && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $APACHE_PPA_KEY 2>/dev/null \
     \
     # installs apache, msmtp
     && apt-update \
     && apt-install msmtp msmtp-mta \
     && apt-install apache2 \
-    && a2enmod actions autoindex deflate headers http2 proxy proxy_fcgi remoteip rewrite setenvif ssl unique_id \
     && service apache2 stop && update-rc.d apache2 disable \
+    && a2enmod \
+        actions autoindex deflate headers http2 \
+        proxy proxy_fcgi \
+        remoteip rewrite setenvif ssl unique_id \
+    && sed -i 's/LogFormat "%h %l %u %t \\\"%r\\\" %>s %O \\\"/LogFormat "%a %l %u %t \\\"%r\\\" %>s %O \\\"/' /etc/apache2/apache2.conf \
     && echo "export APACHE_RUN_USER=${APACHE_RUN_USER}" >>/etc/apache2/envvars \
     && echo "export APACHE_RUN_GROUP=${APACHE_RUN_GROUP}" >>/etc/apache2/envvars \
     && echo "ServerName localhost" >>/etc/apache2/apache2.conf \
-    && sed -i 's/LogFormat "%h %l %u %t \\\"%r\\\" %>s %O \\\"/LogFormat "%a %l %u %t \\\"%r\\\" %>s %O \\\"/' /etc/apache2/apache2.conf \
     && ln -sf /dev/stdout /var/log/apache2/access.log \
+    && ln -sf /dev/stdout /var/log/apache2/other_vhosts_access.log \
     && ln -sf /dev/stderr /var/log/apache2/error.log \
     \
     # cleanup
+    && rm -f $APACHE_SOURCES \
     && apt-cleanup
 
 ENV DEBUG_MODE=false
@@ -38,9 +43,6 @@ ENV DEBUG_MODE=false
 ENV MSMTP_RELAY_SERVER_HOSTNAME=mailhog
 ENV MSMTP_RELAY_SERVER_PORT=1025
 
-ENV APACHE_RUN_DIR=/etc/apache2
-ENV APACHE_PID_FILE=/var/run/apache2.pid
-ENV APACHE_LOG_DIR=/var/log/apache2
 ENV APACHE_DOCUMENT_ROOT=${APACHE_DOCUMENT_ROOT:-$WEBHOME}
 ENV APACHE_MAX_CONNECTIONS_PER_CHILD=0
 ENV APACHE_MAX_REQUEST_WORKERS=150
