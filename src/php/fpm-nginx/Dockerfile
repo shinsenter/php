@@ -2,27 +2,31 @@
 ################################################################################
 
 # base image and platform
-# FROM ${BASE_IMAGE:-shinsenter/php-fpm:latest} as base
-FROM php-fpm as base
+FROM ${IMAGE_NAME:-shinsenter/php}:${PHP_VERSION:-7.4}-fpm as base
+
+ARG NGINX_PPA_URL="https://ppa.launchpadcontent.net/ondrej/nginx-mainline/ubuntu"
+ARG NGINX_PPA_KEY="14AA40EC0831756756D7F66C4F4EA0AAE5267A6C"
+ARG NGINX_SOURCES="/etc/apt/sources.list.d/ondrej-nginx.list"
+
+RUN apt-update \
+    \
+    # adds ondrej repos for Ubuntu
+    && echo "deb $NGINX_PPA_URL ${OS_VERSION:-focal} main" >$NGINX_SOURCES \
+    && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $NGINX_PPA_KEY 2>/dev/null \
+    \
+    # installs nginx, msmtp
+    && apt-update \
+    && apt-install msmtp msmtp-mta \
+    && apt-install nginx-extras \
+    && service nginx stop && update-rc.d nginx disable \
+    \
+    # cleanup
+    && apt-cleanup
+
+ENV DEBUG_MODE=false
 
 ENV MSMTP_RELAY_SERVER_HOSTNAME=mailhog
 ENV MSMTP_RELAY_SERVER_PORT=1025
-
-RUN DEBIAN_FRONTEND=noninteractive \
-    \
-    # adds nginx repos for Ubuntu
-    && echo 'deb https://nginx.org/packages/ubuntu/ focal nginx' \
-        >/etc/apt/sources.list.d/nginx.list \
-    && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 \
-    && apt-get update \
-    \
-    && apt-get install -y --no-install-recommends --no-install-suggests \
-        msmtp \
-        msmtp-mta \
-        nginx \
-    \
-    && apt-get -y autoremove && apt-get -y clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
 ################################################################################
 
@@ -32,6 +36,7 @@ FROM base
 # adds config files
 ADD etc/ /etc/
 
+# exposes ports
 EXPOSE 80
 EXPOSE 443
 EXPOSE 443/udp

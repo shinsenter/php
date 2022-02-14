@@ -5,7 +5,6 @@
 The following versions of Ubuntu are being actively updated:
 
 - 20.04 (Focal)
-- 22.04 (Jammy)
 
 ## Reporting a vulnerability
 

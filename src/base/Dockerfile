@@ -9,6 +9,10 @@ LABEL base_image="${OS_BASE:-ubuntu}:${OS_VERSION:-focal}"
 LABEL publisher="shinsenter"
 LABEL maintainer="admin@appseeds.net"
 
+# sets environment variables for platform
+ENV OS_BASE=${OS_BASE:-ubuntu}
+ENV OS_VERSION=${OS_VERSION:-focal}
+
 # sets environment variables for OS
 ENV TERM=xterm
 ENV DEBIAN_FRONTEND=noninteractive
@@ -17,21 +21,22 @@ ENV LANG=C.UTF-8
 ENV LANGUAGE=C.UTF-8
 ENV TZ=UTC
 
+# common methods
+ADD usr/ /usr/
+
 ################################################################################
 
 # extracts s6-overlay bundles into a temporary image
 FROM base as source
 
 # sets version for s6 overlay
-ARG S6_SRC="https://github.com/just-containers/s6-overlay/releases/download"
+ARG S6_SRC="http://github.com/just-containers/s6-overlay/releases/download"
 ARG S6_ARCH="aarch64"
 ARG S6_VERSION="3.0.0.2"
 ARG S6_BUILD_DEP="ca-certificates xz-utils wget"
 
 # installation pipeline
-RUN DEBIAN_FRONTEND=noninteractive apt-get update \
-    && apt-get install -y --no-install-recommends --no-install-suggests \
-        $S6_BUILD_DEP \
+RUN apt-update && apt-install $S6_BUILD_DEP \
     \
     # adds s6 overlay
     && mkdir -p /usr/src/s6 \
@@ -42,7 +47,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
 ################################################################################
 
 # main image
-FROM  base
+FROM base
 
 # sets environment variables for user
 ENV PUID=9999 
@@ -59,8 +64,7 @@ RUN useradd  -r -g $PGID -u $PUID -d $WEBHOME \
 COPY --from=source /usr/src/s6/ /
 ADD  etc/ /etc/
 
-WORKDIR $WEBHOME
-
+WORKDIR     $WEBHOME
 ENTRYPOINT  ["/init"]
 
 ################################################################################

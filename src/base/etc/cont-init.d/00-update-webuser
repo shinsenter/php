@@ -21,6 +21,7 @@ if [ -f /etc/welcome.txt ]; then
 fi
 
 echo "
+
 ------------------------------
   User UID: $(id -u webuser)
   User GID: $(id -g webuser)

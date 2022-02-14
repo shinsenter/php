@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: ✨ Request a feature
-    url: https://github.com/shinsenter/docker-phpfpm/issues/new/choose
+    url: https://github.com/shinsenter/php/issues/new/choose
     about: Suggest a request for a feature.
 
   - name: 🤵 Get Professional Support & Customizations

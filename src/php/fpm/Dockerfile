@@ -2,9 +2,17 @@
 ################################################################################
 
 # base image and platform
-# FROM ${BASE_IMAGE:-shinsenter/php-cli:latest} as base
-FROM php-cli as base
+FROM ${IMAGE_NAME:-shinsenter/php}:${PHP_VERSION:-7.4}-cli as base
 
+# installs php-fpm
+RUN apt-update && apt-install php${PHP_VERSION}-fpm \
+    && swap-dir /etc/php/${PHP_VERSION}/fpm /etc/php/fpm \
+    && sed -i -e 's/\[www\]/\[$\{PHP_POOL_NAME\}]/g' /etc/php/fpm/pool.d/www.conf \
+    \
+    # cleanup
+    && apt-cleanup
+
+# adds PHP configs
 ENV PHP_DATE_TIMEZONE=${TZ:-UTC}
 ENV PHP_DISPLAY_ERRORS=On
 ENV PHP_ERROR_REPORTING="E_ALL & ~E_DEPRECATED & ~E_STRICT"
@@ -18,17 +26,6 @@ ENV PHP_PM_START_SERVERS=2
 ENV PHP_POOL_NAME=www
 ENV PHP_POST_MAX_SIZE=100M
 ENV PHP_UPLOAD_MAX_FILE_SIZE=100M
-
-# installs php-fpm
-RUN DEBIAN_FRONTEND=noninteractive apt-get update \
-    && apt-get install -y --no-install-recommends --no-install-suggests \
-        php${PHP_VERSION}-fpm \
-    && mv -f  /etc/php/${PHP_VERSION}/fpm /etc/php/fpm \
-    && ln -sf /etc/php/fpm /etc/php/${PHP_VERSION}/fpm \
-    && sed -i -e 's/\[www\]/\[$\{PHP_POOL_NAME\}]/g' /etc/php/fpm/pool.d/www.conf \
-    \
-    && apt-get -y autoremove && apt-get -y clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
 ################################################################################
 
