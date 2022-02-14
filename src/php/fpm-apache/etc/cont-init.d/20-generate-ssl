@@ -1,9 +1,9 @@
 #!/command/with-contenv bash
 
-if [ ! -f /etc/ssl/web/ssl.key ]; then
+if [ ! -f /etc/ssl/web/server.key ]; then
     echo "🔐 Generating a self-signed SSL certificate..."
     mkdir -p /etc/ssl/web/
-    openssl req -x509 -subj "/C=US/ST=Wisconsin/L=Milwaukee/O=IT/CN=default.test" \
-                -nodes -newkey rsa:2048 -keyout /etc/ssl/web/ssl.key \
-                -out /etc/ssl/web/ssl.crt -days 365
+    openssl req -x509 -subj "/C=VN/ST=Ho_Chi_Minh/L=Ho_Chi_Minh/O=AppSeeds/OU=R&D/CN=local.dev" \
+                -nodes -newkey rsa:2048 -keyout /etc/ssl/web/server.key \
+                -out /etc/ssl/web/server.crt -days 365
 fi
