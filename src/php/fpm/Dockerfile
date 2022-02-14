@@ -2,7 +2,7 @@
 ################################################################################
 
 # base image and platform
-FROM ${IMAGE_NAME:-shinsenter/php}:${PHP_VERSION:-7.4}-cli as base
+FROM ${IMAGE_BASE:-shinsenter/php}:${PHP_VERSION:-7.4}-cli as base
 
 # installs php-fpm
 RUN apt-update && apt-install php${PHP_VERSION}-fpm \

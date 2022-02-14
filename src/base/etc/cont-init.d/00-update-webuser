@@ -1,6 +1,5 @@
 #!/command/with-contenv bash
 
-TZ=${TZ:-UTC}
 PUID=${PUID:-9999}
 PGID=${PGID:-9999}
 WEBHOME=${WEBHOME:-"/var/www/html"}
@@ -11,18 +10,19 @@ if [[ $PUID != 9999 || $PGID != 9999 ]]; then
     chown webuser:webgroup $WEBHOME
 fi
 
-if [ -f /usr/share/zoneinfo/$TZ ]; then
-    ln -sf /usr/share/zoneinfo/$TZ /etc/localtime
-fi
-
 if [ -f /etc/welcome.txt ]; then
     echo
     cat /etc/welcome.txt
 fi
 
+if [ ! -z "$TZ" ] && [ -e /usr/share/zoneinfo/$TZ ]; then
+    ln -sf /usr/share/zoneinfo/$TZ /etc/localtime
+fi
+
 echo "
 
 ------------------------------
+  Timezone: $(date +'%Z %z')
   User UID: $(id -u webuser)
   User GID: $(id -g webuser)
 ------------------------------
