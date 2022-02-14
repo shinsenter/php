@@ -15,7 +15,7 @@ ADD php${PHP_VERSION}.txt /usr/src/php${PHP_VERSION}.txt
 
 RUN apt-update && apt-install gnupg \
     \
-    # adds ondrej repos for Ubuntu
+    # adds ondrej repos for PHP
     && echo "deb $PHP_PPA_URL ${OS_VERSION:-focal} main" >$PHP_SOURCES \
     && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $PHP_PPA_KEY 2>/dev/null \
     \
