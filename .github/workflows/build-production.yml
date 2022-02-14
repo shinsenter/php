@@ -20,7 +20,7 @@ jobs:
   base_image:
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 4
+      max-parallel: 1
       matrix:
         base:
           - ubuntu
@@ -87,13 +87,9 @@ jobs:
           - "7.4"
           - "8.0"
           - "8.1"
-        base:
-          - shinsenter/s6-ubuntu:20.04
-          - shinsenter/s6-ubuntu:focal
-          - shinsenter/s6-ubuntu:latest
     env:
       PHP_VERSION: ${{ matrix.php_version }}
-      IMAGE_BASE: ${{ matrix.base }}
+      IMAGE_BASE: shinsenter/s6-ubuntu:latest
       IMAGE_NAME: shinsenter/php
     steps:
       - uses: actions/checkout@v2
