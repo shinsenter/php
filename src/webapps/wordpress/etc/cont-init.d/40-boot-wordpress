@@ -1,0 +1,18 @@
+#!/command/with-contenv bash
+
+WORDPRESS_ROOT=$APACHE_DOCUMENT_ROOT
+WORDPRESS_CHECK=$WORDPRESS_ROOT/wp-content
+
+webuser-mkdir $WORDPRESS_ROOT
+
+if [ ! -d "$WORDPRESS_CHECK" ]; then
+    dirty
+    rm -f $WORDPRESS_ROOT/*.html
+
+    echo "🤖 Installing Wordpress from scratch..."
+    wp-cli --allow-root \
+        core download \
+        --path=$WORDPRESS_ROOT/ \
+        --locale=${WORDPRESS_LOCALE:-en_US} \
+        --force
+fi

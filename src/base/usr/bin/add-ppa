@@ -1,0 +1,11 @@
+#!/bin/bash
+source="$1"
+target="$2"
+pubkey="$3"
+os_ver=$(bash -c '. /etc/os-release 2>/dev/null;echo $VERSION_CODENAME')
+
+echo "deb $source $os_ver main" >$target
+
+if [ ! -z "$pubkey" ]; then
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $pubkey 2>/dev/null
+fi

@@ -1,0 +1,9 @@
+version: '3'
+services:
+
+  s6-ubuntu:
+    image: shinsenter/s6-ubuntu:latest
+    build:
+      context: ../src/base
+      args:
+        BASE_IMAGE: ubuntu:focal

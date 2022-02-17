@@ -1,23 +1,26 @@
-# This pipeline will keep image size as small as possible.
+# This file is the work of https://github.com/shinsenter/php
 ################################################################################
 
-# base image and platform
-FROM ${BASE_IMAGE:-shinsenter/s6-ubuntu:focal} as base
+ARG BASE_IMAGE=shinsenter/s6-ubuntu:latest
 
+# base image and platform
+FROM ${BASE_IMAGE} as base
+
+ARG PHP_VERSION=8.1
+ARG PHP_PPA_KEY="4F4EA0AAE5267A6C"
 ARG PHP_PPA_URL="http://ppa.launchpad.net/ondrej/php/ubuntu"
-ARG PHP_PPA_KEY="14AA40EC0831756756D7F66C4F4EA0AAE5267A6C"
 ARG PHP_SOURCES="/etc/apt/sources.list.d/ondrej-php.list"
 ARG PHP_BUILD_DEP="ca-certificates unzip"
 
 # php version
-ENV PHP_VERSION=${PHP_VERSION:-7.4}
+ENV PHP_VERSION=${PHP_VERSION}
 ADD php${PHP_VERSION}.txt /usr/src/php${PHP_VERSION}.txt
 
-RUN apt-update && apt-install gnupg \
+RUN echo "Installing PHP ${PHP_VERSION}..." \
+    && apt-update && apt-install sudo less gnupg \
     \
     # adds ondrej repos for PHP
-    && echo "deb $PHP_PPA_URL ${OS_VERSION:-focal} main" >$PHP_SOURCES \
-    && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $PHP_PPA_KEY 2>/dev/null \
+    && add-ppa $PHP_PPA_URL $PHP_SOURCES $PHP_PPA_KEY \
     \
     # installs php
     && apt-update \

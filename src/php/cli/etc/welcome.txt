@@ -8,4 +8,4 @@
  Github:     https://github.com/shinsenter/php/
  Docker Hub: https://hub.docker.com/r/shinsenter/php/
 
- (To edit this welcome message, add a text file to /etc/welcome.txt)
+ (To edit this welcome message, add your text to /etc/welcome.txt)

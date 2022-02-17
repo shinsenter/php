@@ -1,6 +1,5 @@
 #!/command/with-contenv bash
 
 if [ ! -z "$APACHE_DOCUMENT_ROOT" ] && [ ! -e "$APACHE_DOCUMENT_ROOT" ]; then
-    mkdir -p $APACHE_DOCUMENT_ROOT
-    chown webuser:webgroup $APACHE_DOCUMENT_ROOT
+    webuser-mkdir $APACHE_DOCUMENT_ROOT
 fi

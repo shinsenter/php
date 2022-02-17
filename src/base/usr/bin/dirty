@@ -1,0 +1,3 @@
+#!/bin/bash
+# notices that the webroot needs to be fixed permission
+touch /tmp/cleanup 2>/dev/null

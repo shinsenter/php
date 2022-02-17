@@ -4,7 +4,7 @@ Docker images for PHP applications, from CLI to standalone web server.
 
 https://hub.docker.com/r/shinsenter/php/
 
-[![Publish Docker (shinsenter/php)](https://github.com/shinsenter/php/actions/workflows/build-production.yml/badge.svg?branch=main)](https://github.com/shinsenter/php/actions/workflows/build-production.yml)
+[![Publish Docker (shinsenter/php)](https://github.com/shinsenter/php/actions/workflows/production.yml/badge.svg?branch=main)](https://github.com/shinsenter/php/actions/workflows/production.yml)
 [![Docker Pulls shinsenter/php](https://img.shields.io/docker/pulls/shinsenter/php)](https://hub.docker.com/r/shinsenter/php/)
 
 
@@ -25,38 +25,54 @@ I really appreciate your love and supports.
 
 ## Thank you [@serversideup](https://github.com/serversideup)
 
-This project is inspired by the [serversideup/docker-php](https://github.com/serversideup/docker-php) project, I love it. However the owners seem to be quite busy updating their projects, so I created this project.
+This project is inspired by the [serversideup/docker-php](https://github.com/serversideup/docker-php) project, I love it. However the owners seem to be quite busy updating their projects, so I made my own version.
 
-I thought I could make it more maintainable and stable with the latest middleware.
+I think I can make it more maintainable and stable with the latest version of its middlewares.
 
 ---
 
-
 ## OS version
-- Ubuntu 20.04 (Focal)
+
+- Ubuntu 20.04 (Focal) with S6 Overlay v3
+
+View more: [shinsenter/s6-ubuntu](https://hub.docker.com/r/shinsenter/s6-ubuntu/tags)
 
 
 ## Usage
 
 (I will gradually update the content in this section.)
 
+[View all available image tags.](https://hub.docker.com/r/shinsenter/php/tags)
+
 ### PHP version
 
-- 7.4
-- 8.0
-- 8.1
+- [`shinsenter/php:7.4`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=7.4) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/7.4)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=7.4)
+- [`shinsenter/php:8.0`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=8.0) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/8.0)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=8.0)
+- [`shinsenter/php:8.1`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=8.1) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/8.1)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=8.1)
 
 
 ### Image variations
 
-- `shinsenter/php:${PHP_VERSION}-cli`
-- `shinsenter/php:${PHP_VERSION}-fpm`
-- `shinsenter/php:${PHP_VERSION}-fpm-apache`
-- `shinsenter/php:${PHP_VERSION}-fpm-nginx`
+- [`shinsenter/php:${PHP_VERSION}-cli`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=cli) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/cli)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=cli)
+- [`shinsenter/php:${PHP_VERSION}-fpm`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/fpm)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm)
+- [`shinsenter/php:${PHP_VERSION}-fpm-apache`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm-apache) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/fpm-apache)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm-apache)
+- [`shinsenter/php:${PHP_VERSION}-fpm-nginx`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm-nginx) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/fpm-nginx)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm-nginx)
 
-### Create your own Dockerfile
 
-You can continue to install more of your favorite modules from my built-in base images. Create your own Dockerfile. For example:
+### Popular PHP webapps
+
+- [`shinsenter/laravel`](https://hub.docker.com/r/shinsenter/laravel/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/laravel)](https://hub.docker.com/r/shinsenter/laravel/tags)
+- [`shinsenter/wordpress`](https://hub.docker.com/r/shinsenter/wordpress/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/wordpress)](https://hub.docker.com/r/shinsenter/wordpress/tags)
+- [`shinsenter/phpmyadmin`](https://hub.docker.com/r/shinsenter/phpmyadmin/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/phpmyadmin)](https://hub.docker.com/r/shinsenter/phpmyadmin/tags)
+
+---
+
+## Create your own Dockerfile
+
+You can install other favorite modules to your image extending my built-in base images.
+
+For example:
+
 
 ```Dockerfile
 FROM shinsenter/php:8.1-fpm-apache
@@ -92,6 +108,9 @@ ENV PGID="9999"
 # You can change the home of the web user if needed
 ENV WEBHOME="/var/www/html"
 
+# Set to "true" to fix permission for whole $WEBHOME
+ENV FIX_WEBHOME_PERMISSION="false"
+
 ################################################################################
 
 # Sets the directory from which Nginx will serve files
@@ -114,12 +133,6 @@ ENV APACHE_MAX_SPARE_THREADS="75"
 
 # Minimum number of idle threads to handle request spikes
 ENV APACHE_MIN_SPARE_THREADS="10"
-
-# Set the username of what Apache should run as
-ENV APACHE_RUN_GROUP="webgroup"
-
-# Set the username of what Apache should run as
-ENV APACHE_RUN_USER="webuser"
 
 # Sets the number of child server processes created on startup
 ENV APACHE_START_SERVERS="2"
@@ -147,7 +160,7 @@ ENV PHP_MAX_EXECUTION_TIME="99"
 ENV PHP_MEMORY_LIMIT="256M"
 
 # Choose how the process manager will control the number of child processes
-ENV PHP_PM_CONTROL="dynamic"
+ENV PHP_PM_CONTROL="ondemand"
 
 # The number of child processes to be created when pm is set to static
 # and the maximum number of child processes to be created when pm is set to dynamic
@@ -185,6 +198,8 @@ ENV MSMTP_RELAY_SERVER_PORT="1025"
 
 * * *
 
-If you like this project, please [support my works](#support-my-activities) 😉.
+If you like this project, please support my works.
+
+[![Donate via PayPal](https://img.shields.io/badge/Donate-Paypal-blue)](https://www.paypal.me/shinsenter) [![Become a sponsor](https://img.shields.io/badge/Donate-Patreon-orange)](https://www.patreon.com/appseeds) [![Become a stargazer](https://img.shields.io/badge/Support-Stargazer-yellow)](https://github.com/shinsenter/docker-imgproxy/stargazers) [![Report an issue](https://img.shields.io/badge/Support-Issues-green)](https://github.com/shinsenter/docker-imgproxy/discussions/new)
 
 From Vietnam 🇻🇳 with love.

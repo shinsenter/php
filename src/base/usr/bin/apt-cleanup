@@ -1,5 +1,5 @@
 #!/bin/bash
-apt-get -y autoremove && apt-get -y clean
+apt-get purge -y --auto-remove $@ && apt-get -y clean
 rm -rf  /var/lib/apt/lists/* \
-        /tmp/* /var/tmp/* \
-        /usr/share/doc/*
+        /usr/share/doc/* \
+        /tmp/* /var/tmp/*

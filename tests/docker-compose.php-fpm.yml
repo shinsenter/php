@@ -1,0 +1,22 @@
+version: '3'
+services:
+
+  fpm-apache:
+    image: shinsenter/php:${PHP_VERSION:-8.1}-fpm-apache
+    build:
+      context: ../src/php/fpm-apache
+      args:
+        BASE_IMAGE: shinsenter/php
+        PHP_VERSION: ${PHP_VERSION:-8.1}
+    ports:
+      - 8881:80
+
+  fpm-nginx:
+    image: shinsenter/php:${PHP_VERSION:-8.1}-fpm-nginx
+    build:
+      context: ../src/php/fpm-nginx
+      args:
+        BASE_IMAGE: shinsenter/php
+        PHP_VERSION: ${PHP_VERSION:-8.1}
+    ports:
+      - 8882:80

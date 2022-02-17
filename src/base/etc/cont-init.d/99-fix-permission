@@ -1,0 +1,26 @@
+#!/command/with-contenv bash
+
+if [ "$FIX_WEBHOME_PERMISSION" == "true" ] || [ -e /tmp/cleanup ]; then
+    echo
+    echo "🗂 Fixing permission for whole webroot..."
+    webuser-mkdir $WEBHOME recursive
+    rm -f /tmp/cleanup 2>/dev/null
+fi
+
+if [ -f /etc/welcome.txt ]; then
+    echo
+    cat /etc/welcome.txt
+fi
+
+echo "
+
+------------------------------
+  Timezone: $(date +'%Z %z')
+  User UID: $(id -u webuser)
+  User GID: $(id -g webuser)
+------------------------------
+
+To get support from the project owner, please contact:
+    admin@appseeds.net
+
+"

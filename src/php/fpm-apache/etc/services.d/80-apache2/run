@@ -1,4 +1,8 @@
 #!/command/with-contenv bash
 
-/usr/sbin/apache2 -v
-/usr/sbin/apache2ctl -DFOREGROUND
+echo
+/usr/sbin/apache2ctl -v
+/usr/sbin/apache2ctl configtest
+
+echo
+exec /usr/sbin/apache2ctl -DFOREGROUND

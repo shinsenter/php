@@ -1,0 +1,12 @@
+#!/bin/bash
+
+dir="$1"
+recursive=$2
+
+mkdir -p $dir/ 2>/dev/null
+if [ "$2" == "recursive" ]; then
+    chown -R webuser:webgroup $dir/ 2>/dev/null
+else
+    chown webuser:webgroup $dir/ 2>/dev/null
+fi
+chmod +s $dir/ 2>/dev/null

@@ -1,0 +1,44 @@
+#!/command/with-contenv bash
+
+APACHE_CONFIG=$APACHE_DOCUMENT_ROOT/user-config
+
+if [ ! -d "$APACHE_DOCUMENT_ROOT/user-config" ]; then
+    dirty
+    rm -f $APACHE_DOCUMENT_ROOT/*.html
+
+    echo "🤖 Installing PHPMyAdmin from scratch..."
+    composer create-project \
+        phpmyadmin/phpmyadmin $APACHE_DOCUMENT_ROOT \
+        --no-cache \
+        --no-dev \
+        --no-interaction \
+        --no-plugins \
+        --no-scripts \
+        --no-install \
+        --repository-url='https://www.phpmyadmin.net/packages.json'
+
+    rm -rf \
+        $APACHE_DOCUMENT_ROOT/babel.config.json \
+        $APACHE_DOCUMENT_ROOT/CONTRIBUTING.md \
+        $APACHE_DOCUMENT_ROOT/doc/html/_sources/ \
+        $APACHE_DOCUMENT_ROOT/examples/ \
+        $APACHE_DOCUMENT_ROOT/js/src/ \
+        $APACHE_DOCUMENT_ROOT/README.md \
+        $APACHE_DOCUMENT_ROOT/RELEASE-DATE-* \
+        $APACHE_DOCUMENT_ROOT/setup/ \
+        $APACHE_DOCUMENT_ROOT/templates/test/ \
+        $APACHE_DOCUMENT_ROOT/composer.lock \
+        $APACHE_DOCUMENT_ROOT/vendor
+
+    webuser-mkdir $APACHE_DOCUMENT_ROOT/tmp/upload
+    webuser-mkdir $APACHE_DOCUMENT_ROOT/tmp/save
+    webuser-mkdir $APACHE_CONFIG
+
+    if [ ! -f $APACHE_CONFIG/config.inc.php ]; then
+        cp -p /etc/phpmyadmin/config.inc.php $APACHE_CONFIG/config.inc.php
+        chmod 0600 $APACHE_CONFIG/*
+    fi
+
+    sed -i "s@define('CONFIG_DIR'.*@define('CONFIG_DIR', '${APACHE_CONFIG}/');@" \
+        $APACHE_DOCUMENT_ROOT/libraries/vendor_config.php
+fi

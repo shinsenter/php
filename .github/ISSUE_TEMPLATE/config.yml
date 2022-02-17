@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: ✨ Request a feature
-    url: https://github.com/shinsenter/php/issues/new/choose
-    about: Suggest a request for a feature.
+    url: https://github.com/shinsenter/php/discussions/new?category=ideas
+    about: Suggest an idea for a feature.
 
   - name: 🤵 Get Professional Support & Customizations
     url: mailto:admin@appseeds.net?subject=I%20need%20professional%20support%20for%20docker-phpfpm&body=I%20am%20looking%20for%20professional%20support%20for%20docker-phpfpm.%0D%0Ahttps%3A%2F%2Fgithub.com%2Fshinsenter%2Fdocker-phpfpm

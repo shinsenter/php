@@ -1,7 +1,7 @@
 #!/command/with-contenv bash
 
-# Switch to web user
-su webuser
+echo
+/usr/sbin/php-fpm -v
 
-#Bring up PHP FPM
-/usr/sbin/php-fpm${PHP_VERSION} --nodaemonize
+su webuser
+exec /usr/sbin/php-fpm --nodaemonize

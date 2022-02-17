@@ -1,0 +1,32 @@
+version: '3'
+services:
+
+  laravel:
+    image: shinsenter/laravel:php${PHP_VERSION:-8.1}
+    build:
+      context: ../src/webapps/laravel
+      args:
+        BASE_IMAGE: shinsenter/php
+        PHP_VERSION: ${PHP_VERSION:-8.1}
+    ports:
+      - 9991:80
+
+  wordpress:
+    image: shinsenter/wordpress:php${PHP_VERSION:-8.1}
+    build:
+      context: ../src/webapps/wordpress
+      args:
+        BASE_IMAGE: shinsenter/php
+        PHP_VERSION: ${PHP_VERSION:-8.1}
+    ports:
+      - 9992:80
+
+  phpmyadmin:
+    image: shinsenter/phpmyadmin:php${PHP_VERSION:-8.1}
+    build:
+      context: ../src/webapps/phpmyadmin
+      args:
+        BASE_IMAGE: shinsenter/php
+        PHP_VERSION: ${PHP_VERSION:-8.1}
+    ports:
+      - 9993:80
