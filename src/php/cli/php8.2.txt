@@ -1,3 +1,4 @@
+php8.2-bcmath
 php8.2-cli
 php8.2-common
 php8.2-curl

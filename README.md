@@ -89,6 +89,9 @@ FROM shinsenter/php:8.1-fpm-nginx
 
 ## ENV variables
 
+
+### Common variables
+
 You can also customize your Docker container by update these ENV variables.
 
 ```Dockerfile
@@ -110,39 +113,6 @@ ENV WEBHOME="/var/www/html"
 
 # Set to "true" to fix permission for whole $WEBHOME
 ENV FIX_WEBHOME_PERMISSION="false"
-
-################################################################################
-
-# Sets the directory from which Nginx will serve files
-ENV NGINX_DOCUMENT_ROOT="$WEBHOME"
-
-################################################################################
-
-# Sets the directory from which Apache will serve files
-ENV APACHE_DOCUMENT_ROOT="$WEBHOME"
-
-# Sets the limit on the number of connections
-# that an individual child server process will handle
-ENV APACHE_MAX_CONNECTIONS_PER_CHILD="0"
-
-# Sets the limit on the number of simultaneous requests that will be served
-ENV APACHE_MAX_REQUEST_WORKERS="150"
-
-# Maximum number of idle threads
-ENV APACHE_MAX_SPARE_THREADS="75"
-
-# Minimum number of idle threads to handle request spikes
-ENV APACHE_MIN_SPARE_THREADS="10"
-
-# Sets the number of child server processes created on startup
-ENV APACHE_START_SERVERS="2"
-
-# Set the maximum configured value for ThreadsPerChild
-# for the lifetime of the Apache httpd process
-ENV APACHE_THREAD_LIMIT="64"
-
-# This directive sets the number of threads created by each child process
-ENV APACHE_THREADS_PER_CHILD="25"
 
 ################################################################################
 
@@ -195,6 +165,125 @@ ENV MSMTP_RELAY_SERVER_PORT="1025"
 
 ################################################################################
 ```
+
+
+### shinsenter/php:fpm-apache
+
+```Dockerfile
+################################################################################
+
+# Set to "true" to fix permission for whole $WEBHOME
+ENV FIX_WEBHOME_PERMISSION="false"
+
+# Sets the directory from which Apache will serve files
+ENV APACHE_DOCUMENT_ROOT="$WEBHOME"
+
+# Sets the limit on the number of connections
+# that an individual child server process will handle
+ENV APACHE_MAX_CONNECTIONS_PER_CHILD="0"
+
+# Sets the limit on the number of simultaneous requests that will be served
+ENV APACHE_MAX_REQUEST_WORKERS="150"
+
+# Maximum number of idle threads
+ENV APACHE_MAX_SPARE_THREADS="75"
+
+# Minimum number of idle threads to handle request spikes
+ENV APACHE_MIN_SPARE_THREADS="10"
+
+# Sets the number of child server processes created on startup
+ENV APACHE_START_SERVERS="2"
+
+# Set the maximum configured value for ThreadsPerChild
+# for the lifetime of the Apache httpd process
+ENV APACHE_THREAD_LIMIT="64"
+
+# This directive sets the number of threads created by each child process
+ENV APACHE_THREADS_PER_CHILD="25"
+
+################################################################################
+```
+
+
+### shinsenter/php:fpm-nginx
+
+```Dockerfile
+################################################################################
+
+# Set to "true" to fix permission for whole $WEBHOME
+ENV FIX_WEBHOME_PERMISSION="false"
+
+# Sets the directory from which Nginx will serve files
+ENV NGINX_DOCUMENT_ROOT="$WEBHOME"
+
+################################################################################
+```
+
+
+### shinsenter/laravel
+
+```Dockerfile
+################################################################################
+
+# Optimize and cache all config, views, routes
+ENV LARAVEL_AUTO_OPTIMIZE=true
+
+# Create symlinks to the storage folder
+ENV LARAVEL_LINK_STORAGE=true
+
+# Run Laravel migrations (for development purposese)
+ENV LARAVEL_AUTO_MIGRATION=false
+
+################################################################################
+```
+
+
+### shinsenter/wordpress
+
+```Dockerfile
+################################################################################
+
+# The locale for a fresh Wordpress
+ENV WORDPRESS_LOCALE="en_US"
+
+################################################################################
+```
+
+
+### shinsenter/phpmyadmin
+
+```Dockerfile
+################################################################################
+
+ENV PMA_HOST=mysql
+ENV PMA_USER=
+ENV PMA_PASSWORD=
+
+################################################################################
+
+# ENV PMA_ARBITRARY=1
+# ENV PMA_HOSTS=
+# ENV PMA_VERBOSE=
+# ENV PMA_VERBOSES=
+# ENV PMA_PORT=
+# ENV PMA_PORTS=
+# ENV PMA_SOCKET=
+# ENV PMA_SOCKETS=
+
+################################################################################
+
+# ENV PMA_ABSOLUTE_URI=
+# ENV PMA_CONTROLHOST=
+# ENV PMA_CONTROLPORT=
+# ENV PMA_PMADB=
+# ENV PMA_CONTROLUSER=
+# ENV PMA_CONTROLPASS=
+# ENV PMA_QUERYHISTORYDB=
+# ENV PMA_QUERYHISTORYMAX=
+
+################################################################################
+```
+
 
 * * *
 

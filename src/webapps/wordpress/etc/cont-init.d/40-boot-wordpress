@@ -6,10 +6,10 @@ WORDPRESS_CHECK=$WORDPRESS_ROOT/wp-content
 webuser-mkdir $WORDPRESS_ROOT
 
 if [ ! -d "$WORDPRESS_CHECK" ]; then
-    dirty
     rm -f $WORDPRESS_ROOT/*.html
 
     echo "🤖 Installing Wordpress from scratch..."
+    dirty
     wp-cli --allow-root \
         core download \
         --path=$WORDPRESS_ROOT/ \

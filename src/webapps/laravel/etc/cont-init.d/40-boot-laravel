@@ -6,10 +6,10 @@ LARAVEL_ARTISAN=$LARAVEL_ROOT/artisan
 webuser-mkdir $LARAVEL_ROOT
 
 if [ ! -f "$LARAVEL_ARTISAN" ]; then
-    dirty
     rm -f $LARAVEL_ROOT/*.html
 
     echo "🤖 Installing Laravel from scratch..."
+    dirty
     composer create-project \
         laravel/laravel $LARAVEL_ROOT/ \
         --no-dev \

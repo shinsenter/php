@@ -3,10 +3,10 @@
 APACHE_CONFIG=$APACHE_DOCUMENT_ROOT/user-config
 
 if [ ! -d "$APACHE_DOCUMENT_ROOT/user-config" ]; then
-    dirty
     rm -f $APACHE_DOCUMENT_ROOT/*.html
 
     echo "🤖 Installing PHPMyAdmin from scratch..."
+    dirty
     composer create-project \
         phpmyadmin/phpmyadmin $APACHE_DOCUMENT_ROOT \
         --no-cache \

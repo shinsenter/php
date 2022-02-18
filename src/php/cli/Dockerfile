@@ -12,10 +12,11 @@ ARG PHP_PPA_URL="http://ppa.launchpad.net/ondrej/php/ubuntu"
 ARG PHP_SOURCES="/etc/apt/sources.list.d/ondrej-php.list"
 ARG PHP_BUILD_DEP="ca-certificates unzip"
 
-# php version
+# adds variables for PHP and Composer
 ENV PHP_VERSION=${PHP_VERSION}
 ADD php${PHP_VERSION}.txt /usr/src/php${PHP_VERSION}.txt
 
+# installs PHP and Composer
 RUN echo "Installing PHP ${PHP_VERSION}..." \
     && apt-update && apt-install sudo less gnupg \
     \
@@ -32,6 +33,11 @@ RUN echo "Installing PHP ${PHP_VERSION}..." \
 
 # adds composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# adds composer settings
+ENV COMPOSER_HOME=/tmp
+ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV COMPOSER_MAX_PARALLEL_HTTP=32
 
 ################################################################################
 

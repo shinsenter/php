@@ -18,6 +18,9 @@ ENV LANG=C.UTF-8
 ENV LANGUAGE=C.UTF-8
 ENV TZ=UTC
 
+# update middlewares
+# RUN apt-update && apt-get upgrade -y && apt-cleanup
+
 # common methods
 ADD usr/ /usr/
 
