@@ -5,15 +5,23 @@ HASH_DIR="$BASE_DIR/.checksums"
 WORKFLOW=.github/workflows/production.yml
 
 curlhash () {
-    local output=${HASH_DIR}/${1:-checksums.txt}
-    local url=$2
+    local output
+    local url
+
+    output=${HASH_DIR}/${1:-checksums.txt}
+    url=$2
+
     echo "$(curl -sL "$url" | shasum -a 256 | cut -c1-40) $url" >$output
 }
 
 treehash() {
-    local output=${HASH_DIR}/${1:-checksums.txt};shift
-    local location=$@
-    >$output
+    local output
+    local location
+
+    output=${HASH_DIR}/${1:-checksums.txt};shift
+    location=$@
+
+    echo >$output
     for path in $location; do
         if [ -f ${HASH_DIR}/$path ]; then
             cat ${HASH_DIR}/$path >>$output

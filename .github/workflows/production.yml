@@ -17,6 +17,7 @@ on:
     branches:
       - main
     paths:
+      - '.checksums.sh'
       - '.github/workflows/production.yml'
       - 'src/**'
   schedule:
@@ -30,7 +31,7 @@ jobs:
   # Base Ubuntu with S6 Overlay
   ##############################################################################
 
-  base_image:
+  base:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 2
@@ -88,7 +89,7 @@ jobs:
   ##############################################################################
 
   php-cli:
-    needs: base_image
+    needs: base
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 2
@@ -115,7 +116,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: /tmp/buildx
-          key: ${{ runner.os }}-buildx-${{ hashFiles('.checksums/cli.txt') }}
+          key: ${{ runner.os }}-buildx-${{ matrix.version }}-${{ matrix.variation }}-${{ hashFiles('.checksums/cli.txt') }}
           restore-keys: |
             ${{ runner.os }}-buildx-
       - uses: docker/login-action@v1
@@ -174,7 +175,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: /tmp/buildx
-          key: ${{ runner.os }}-buildx-${{ hashFiles('.checksums/fpm.txt') }}
+          key: ${{ runner.os }}-buildx-${{ matrix.version }}-${{ matrix.variation }}-${{ hashFiles('.checksums/fpm.txt') }}
           restore-keys: |
             ${{ runner.os }}-buildx-
       - uses: docker/login-action@v1
@@ -232,7 +233,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: /tmp/buildx
-          key: ${{ runner.os }}-buildx-${{ hashFiles('.checksums/servers.txt') }}
+          key: ${{ runner.os }}-buildx-${{ matrix.version }}-${{ matrix.variation }}-${{ hashFiles('.checksums/servers.txt') }}
           restore-keys: |
             ${{ runner.os }}-buildx-
       - uses: docker/login-action@v1
@@ -290,7 +291,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: /tmp/buildx
-          key: ${{ runner.os }}-buildx-${{ hashFiles('.checksums/webapps.txt') }}
+          key: ${{ runner.os }}-buildx-${{ matrix.app }}-${{ matrix.version }}-${{ hashFiles('.checksums/webapps.txt') }}
           restore-keys: |
             ${{ runner.os }}-buildx-
       - uses: docker/login-action@v1
