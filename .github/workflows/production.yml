@@ -1,0 +1,319 @@
+name: Publish Docker (shinsenter/php)
+
+################################################################################
+################################################################################
+
+on:
+  # pull_request:
+  #   types:
+  #     - opened
+  #     - reopened
+  #   branches:
+  #     - main
+  #   paths:
+  #     - '.github/workflows/production.yml'
+  #     - 'src/**'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/production.yml'
+      - 'src/**'
+  schedule:
+    - cron: "0 0 * * 0,3"
+
+################################################################################
+################################################################################
+
+jobs:
+  ##############################################################################
+  # Base Ubuntu with S6 Overlay
+  ##############################################################################
+
+  base_image:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 2
+      matrix:
+        base:
+          - ubuntu
+        s6:
+          - 3.0.0.2-2
+        version:
+          - 20.04
+          - focal
+        image:
+          - shinsenter/s6-ubuntu
+    env:
+      DOCKER_BUILDKIT: "1"
+    steps:
+      - id: date
+        run: echo "::set-output name=date::$(date +'%Y%m%d')"
+      - uses: actions/checkout@v2
+      - uses: docker/setup-qemu-action@v1
+      - uses: docker/setup-buildx-action@v1
+      - run: |
+          ./.checksums.sh
+          cat .checksums/base.txt
+      - uses: actions/cache@v2
+        with:
+          path: /tmp/buildx
+          key: ${{ runner.os }}-buildx-${{ hashFiles('.checksums/base.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      - uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      - uses: docker/build-push-action@v2
+        with:
+          push: true
+          cache-from: type=local,src=/tmp/buildx
+          cache-to: type=local,dest=/tmp/buildx-new,mode=max
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          context: "{{defaultContext}}:src/base/"
+          build-args: |
+            BUILD_NUMBER=${{ steps.date.outputs.date }}-${{ hashFiles('.checksums/base.txt') }}
+            BASE_IMAGE=${{ matrix.base }}:${{ matrix.version }}
+            S6_VERSION=${{ matrix.s6 }}
+          tags: |
+            ${{ matrix.image }}:${{ matrix.version }}
+            ${{ matrix.image }}:latest
+      - run: |
+          rm -rf /tmp/buildx
+          mv /tmp/buildx-new /tmp/buildx
+
+  ##############################################################################
+  # Base PHP-CLI
+  ##############################################################################
+
+  php-cli:
+    needs: base_image
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 2
+      matrix:
+        version:
+          - "7.4"
+          - "8.0"
+          - "8.1"
+        variation:
+          - cli
+        image:
+          - shinsenter/php
+    env:
+      DOCKER_BUILDKIT: "1"
+    steps:
+      - id: date
+        run: echo "::set-output name=date::$(date +'%Y%m%d')"
+      - uses: actions/checkout@v2
+      - uses: docker/setup-qemu-action@v1
+      - uses: docker/setup-buildx-action@v1
+      - run: |
+          ./.checksums.sh
+          cat .checksums/cli.txt
+      - uses: actions/cache@v2
+        with:
+          path: /tmp/buildx
+          key: ${{ runner.os }}-buildx-${{ hashFiles('.checksums/cli.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      - uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      - uses: docker/build-push-action@v2
+        with:
+          push: true
+          cache-from: type=local,src=/tmp/buildx
+          cache-to: type=local,dest=/tmp/buildx-new,mode=max
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          context: "{{defaultContext}}:src/php/${{ matrix.variation }}/"
+          build-args: |
+            BUILD_NUMBER=${{ steps.date.outputs.date }}-${{ hashFiles('.checksums/cli.txt') }}
+            BASE_IMAGE=shinsenter/s6-ubuntu:focal
+            PHP_VERSION=${{ matrix.version }}
+          tags: |
+            ${{ matrix.image }}:${{ matrix.version }}-${{ matrix.variation }}
+            ${{ matrix.image }}:${{ matrix.version }}
+            ${{ matrix.image }}:${{ matrix.variation }}
+            ${{ matrix.image }}:latest
+      - run: |
+          rm -rf /tmp/buildx
+          mv /tmp/buildx-new /tmp/buildx
+
+  ##############################################################################
+  # Base PHP-FPM
+  ##############################################################################
+
+  php-fpm:
+    needs: php-cli
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 2
+      matrix:
+        version:
+          - "7.4"
+          - "8.0"
+          - "8.1"
+        variation:
+          - fpm
+        image:
+          - shinsenter/php
+    env:
+      DOCKER_BUILDKIT: "1"
+    steps:
+      - id: date
+        run: echo "::set-output name=date::$(date +'%Y%m%d')"
+      - uses: actions/checkout@v2
+      - uses: docker/setup-qemu-action@v1
+      - uses: docker/setup-buildx-action@v1
+      - run: |
+          ./.checksums.sh
+          cat .checksums/fpm.txt
+      - uses: actions/cache@v2
+        with:
+          path: /tmp/buildx
+          key: ${{ runner.os }}-buildx-${{ hashFiles('.checksums/fpm.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      - uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      - uses: docker/build-push-action@v2
+        with:
+          push: true
+          cache-from: type=local,src=/tmp/buildx
+          cache-to: type=local,dest=/tmp/buildx-new,mode=max
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          context: "{{defaultContext}}:src/php/${{ matrix.variation }}/"
+          build-args: |
+            BUILD_NUMBER=${{ steps.date.outputs.date }}-${{ hashFiles('.checksums/fpm.txt') }}
+            BASE_IMAGE=${{ matrix.image }}
+            PHP_VERSION=${{ matrix.version }}
+          tags: |
+            ${{ matrix.image }}:${{ matrix.version }}-${{ matrix.variation }}
+            ${{ matrix.image }}:${{ matrix.variation }}
+      - run: |
+          rm -rf /tmp/buildx
+          mv /tmp/buildx-new /tmp/buildx
+
+  ##############################################################################
+  # Base PHP Web Servers (Apache or Nginx)
+  ##############################################################################
+
+  php-servers:
+    needs: php-fpm
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        version:
+          - "7.4"
+          - "8.0"
+          - "8.1"
+        variation:
+          - fpm-apache
+          - fpm-nginx
+        image:
+          - shinsenter/php
+    env:
+      DOCKER_BUILDKIT: "1"
+    steps:
+      - id: date
+        run: echo "::set-output name=date::$(date +'%Y%m%d')"
+      - uses: actions/checkout@v2
+      - uses: docker/setup-qemu-action@v1
+      - uses: docker/setup-buildx-action@v1
+      - run: |
+          ./.checksums.sh
+          cat .checksums/servers.txt
+      - uses: actions/cache@v2
+        with:
+          path: /tmp/buildx
+          key: ${{ runner.os }}-buildx-${{ hashFiles('.checksums/servers.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      - uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      - uses: docker/build-push-action@v2
+        with:
+          push: true
+          cache-from: type=local,src=/tmp/buildx
+          cache-to: type=local,dest=/tmp/buildx-new,mode=max
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          context: "{{defaultContext}}:src/servers/${{ matrix.variation }}/"
+          build-args: |
+            BUILD_NUMBER=${{ steps.date.outputs.date }}-${{ hashFiles('.checksums/servers.txt') }}
+            BASE_IMAGE=${{ matrix.image }}
+            PHP_VERSION=${{ matrix.version }}
+          tags: |
+            ${{ matrix.image }}:${{ matrix.version }}-${{ matrix.variation }}
+            ${{ matrix.image }}:${{ matrix.variation }}
+      - run: |
+          rm -rf /tmp/buildx
+          mv /tmp/buildx-new /tmp/buildx
+
+  ##############################################################################
+  # PHP-Based Popular Web Applications
+  ##############################################################################
+
+  php-webapps:
+    needs: php-servers
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 8
+      matrix:
+        version:
+          - "7.4"
+          - "8.0"
+          - "8.1"
+        app:
+          - wordpress
+          - phpmyadmin
+          - laravel
+          - codeigniter4
+    env:
+      DOCKER_BUILDKIT: "1"
+    steps:
+      - id: date
+        run: echo "::set-output name=date::$(date +'%Y%m%d')"
+      - uses: actions/checkout@v2
+      - uses: docker/setup-qemu-action@v1
+      - uses: docker/setup-buildx-action@v1
+      - run: |
+          ./.checksums.sh
+          cat .checksums/webapps.txt
+      - uses: actions/cache@v2
+        with:
+          path: /tmp/buildx
+          key: ${{ runner.os }}-buildx-${{ hashFiles('.checksums/webapps.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      - uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      - uses: docker/build-push-action@v2
+        with:
+          push: true
+          cache-from: type=local,src=/tmp/buildx
+          cache-to: type=local,dest=/tmp/buildx-new,mode=max
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          context: "{{defaultContext}}:src/webapps/${{ matrix.app }}/"
+          build-args: |
+            BUILD_NUMBER=${{ steps.date.outputs.date }}-${{ hashFiles('.checksums/webapps.txt') }}
+            BASE_IMAGE=shinsenter/php
+            PHP_VERSION=${{ matrix.version }}
+          tags: |
+            shinsenter/${{ matrix.app }}:php${{ matrix.version }}
+            shinsenter/${{ matrix.app }}:latest
+      - run: |
+          rm -rf /tmp/buildx
+          mv /tmp/buildx-new /tmp/buildx
+
+################################################################################
+################################################################################

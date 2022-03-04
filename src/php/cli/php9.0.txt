@@ -1,0 +1,15 @@
+php9.0-bcmath
+php9.0-cli
+php9.0-common
+php9.0-curl
+php9.0-gd
+php9.0-gmp
+php9.0-igbinary
+php9.0-intl
+php9.0-mbstring
+php9.0-mysql
+php9.0-redis
+php9.0-soap
+php9.0-sqlite3
+php9.0-xml
+php9.0-zip

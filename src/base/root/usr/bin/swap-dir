@@ -1,0 +1,4 @@
+#!/bin/bash
+SOURCE="$1"
+TARGET="$2"
+rm -rf $TARGET && mv -f $SOURCE $TARGET && ln -sf $TARGET $SOURCE
