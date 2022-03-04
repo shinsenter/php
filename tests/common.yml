@@ -1,0 +1,19 @@
+version: '3'
+services:
+
+  ##############################################################################
+
+  common:
+    platform: ${BUILD_PLATFORM:-linux/arm/v7}
+    environment:
+      - PUID=1234
+      - PGID=1234
+
+  common-php:
+    extends: common
+    build:
+      args:
+        BASE_IMAGE: shinsenter/php
+        PHP_VERSION: ${PHP_VERSION:-8.1}
+
+################################################################################

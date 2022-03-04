@@ -1,0 +1,16 @@
+#!/command/with-contenv bash
+
+if [ ! -z "$PHP_POST_MAX_SIZE" ]; then
+    echo "client_max_body_size ${PHP_POST_MAX_SIZE};" >/etc/nginx/extra.d/body-size.conf
+fi
+
+if [ ! -z "$PHP_MAX_EXECUTION_TIME" ]; then
+    echo "client_body_timeout ${PHP_MAX_EXECUTION_TIME};" >/etc/nginx/extra.d/body-timeout.conf
+fi
+
+echo
+/usr/sbin/nginx -v
+/usr/sbin/nginx -t
+
+echo
+/usr/sbin/nginx
