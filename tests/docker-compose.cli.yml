@@ -1,0 +1,16 @@
+version: '3'
+services:
+
+  ##############################################################################
+
+  cli:
+    extends:
+      file: common.yml
+      service: common-php
+    image: shinsenter/php:${PHP_VERSION:-8.1}-cli
+    build:
+      context: ../src/php/cli
+      args:
+        - BASE_IMAGE=shinsenter/s6-ubuntu:latest
+
+################################################################################
