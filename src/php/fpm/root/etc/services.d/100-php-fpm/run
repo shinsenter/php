@@ -1,0 +1,8 @@
+#!/command/with-contenv bash
+
+echo
+/usr/sbin/php-fpm -v
+
+echo
+su webuser
+/usr/sbin/php-fpm --nodaemonize

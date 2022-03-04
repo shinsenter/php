@@ -1,0 +1,45 @@
+#!/command/with-contenv bash
+
+PMA_CONFIG=$NGINX_DOCUMENT_ROOT/user-config
+
+if [ ! -d "$NGINX_DOCUMENT_ROOT/user-config" ]; then
+    rm -f $NGINX_DOCUMENT_ROOT/*.html
+
+    echo "🤖 Installing PHPMyAdmin from scratch..."
+    dirty
+    composer create-project \
+        phpmyadmin/phpmyadmin $NGINX_DOCUMENT_ROOT \
+        --ansi \
+        --no-cache \
+        --no-dev \
+        --no-interaction \
+        --no-plugins \
+        --no-scripts \
+        --no-install \
+        --repository-url='https://www.phpmyadmin.net/packages.json'
+
+    rm -rf \
+        $NGINX_DOCUMENT_ROOT/babel.config.json \
+        $NGINX_DOCUMENT_ROOT/CONTRIBUTING.md \
+        $NGINX_DOCUMENT_ROOT/doc/html/_sources/ \
+        $NGINX_DOCUMENT_ROOT/examples/ \
+        $NGINX_DOCUMENT_ROOT/js/src/ \
+        $NGINX_DOCUMENT_ROOT/README.md \
+        $NGINX_DOCUMENT_ROOT/RELEASE-DATE-* \
+        $NGINX_DOCUMENT_ROOT/setup/ \
+        $NGINX_DOCUMENT_ROOT/templates/test/ \
+        $NGINX_DOCUMENT_ROOT/composer.lock \
+        $NGINX_DOCUMENT_ROOT/vendor
+
+    webuser-mkdir $NGINX_DOCUMENT_ROOT/tmp/upload
+    webuser-mkdir $NGINX_DOCUMENT_ROOT/tmp/save
+    webuser-mkdir $PMA_CONFIG
+
+    if [ ! -f $PMA_CONFIG/config.inc.php ]; then
+        cp -p /etc/phpmyadmin/config.inc.php $PMA_CONFIG/config.inc.php
+        chmod 0600 $PMA_CONFIG/*
+    fi
+
+    sed -i "s@define('CONFIG_DIR'.*@define('CONFIG_DIR', '${PMA_CONFIG}/');@" \
+        $NGINX_DOCUMENT_ROOT/libraries/vendor_config.php
+fi

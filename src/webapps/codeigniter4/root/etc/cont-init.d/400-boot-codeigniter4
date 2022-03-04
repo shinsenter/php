@@ -1,0 +1,19 @@
+#!/command/with-contenv bash
+
+CI4_ROOT=$(cd $(dirname $APACHE_DOCUMENT_ROOT) && pwd)
+CI4_CHECK=$CI4_ROOT/vendor/codeigniter4
+
+webuser-mkdir $CI4_ROOT
+
+if [ ! -d "$CI4_CHECK" ]; then
+    rm -f $CI4_ROOT/*.html
+
+    echo "🤖 Installing CodeIgniter 4 from scratch..."
+    dirty
+    composer create-project \
+        codeigniter4/appstarter $CI4_ROOT/ \
+        --ansi \
+        --no-cache \
+        --no-dev \
+        --no-interaction
+fi

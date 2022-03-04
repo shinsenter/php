@@ -1,0 +1,10 @@
+#!/command/with-contenv bash
+
+if [ -f $WEBHOME/composer.json ] && [ ! -e $WEBHOME/vendor/ ]; then
+    dirty
+    composer install -d $WEBHOME/ \
+        --ansi \
+        --no-dev \
+        --no-interaction \
+        --optimize-autoloader
+fi

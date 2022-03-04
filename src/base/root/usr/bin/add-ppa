@@ -1,0 +1,13 @@
+#!/bin/bash
+SOURCE="$1"
+TARGET="$2"
+PUBKEY="$3"
+
+if [ ! -z "$SOURCE" ] && [ ! -z "$TARGET" ]; then
+    OS_VER=$(bash -c '. /etc/os-release 2>/dev/null;echo $VERSION_CODENAME')
+    echo "deb $SOURCE $OS_VER main" >$TARGET
+
+    if [ ! -z "$PUBKEY" ]; then
+        apt-key adv --keyserver keyserver.ubuntu.com --recv-keys "$PUBKEY" 2>/dev/null
+    fi
+fi

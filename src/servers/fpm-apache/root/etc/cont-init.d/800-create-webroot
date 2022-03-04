@@ -1,0 +1,5 @@
+#!/command/with-contenv bash
+
+if [ ! -z "$APACHE_DOCUMENT_ROOT" ] && [ ! -e "$APACHE_DOCUMENT_ROOT" ]; then
+    webuser-mkdir $APACHE_DOCUMENT_ROOT
+fi

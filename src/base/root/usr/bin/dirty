@@ -1,0 +1,2 @@
+#!/bin/bash
+touch /tmp/cleanup 2>/dev/null

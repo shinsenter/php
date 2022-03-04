@@ -1,0 +1,37 @@
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+
+    server_name _;
+    root /var/www/html;
+    index index.html index.htm index.php;
+
+    # SSL
+    ssl_certificate /etc/ssl/web/server.crt;
+    ssl_certificate_key /etc/ssl/web/server.key;
+
+    # additional config
+    include extra.d/*.conf;
+
+    # health check
+    location /ping {
+        access_log off;
+        include snippets/fastcgi-php.conf;
+        fastcgi_read_timeout 5s;
+        fastcgi_pass unix:/var/run/php/php-fpm.sock;
+    }
+
+    # handle .php
+    location ~ \.php$ {
+        fastcgi_pass  unix:/var/run/php/php-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include snippets/fastcgi-php.conf;
+    }
+
+    # index.php fallback
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+}

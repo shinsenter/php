@@ -1,0 +1,41 @@
+#!/command/with-contenv bash
+
+LARAVEL_ROOT=$(cd $(dirname $NGINX_DOCUMENT_ROOT) && pwd)
+LARAVEL_ARTISAN=$LARAVEL_ROOT/artisan
+
+webuser-mkdir $LARAVEL_ROOT
+
+if [ ! -f "$LARAVEL_ARTISAN" ]; then
+    rm -f $LARAVEL_ROOT/*.html
+
+    echo "🤖 Installing Laravel from scratch..."
+    dirty
+    composer create-project \
+        laravel/laravel $LARAVEL_ROOT/ \
+        --ansi \
+        --no-cache \
+        --no-dev \
+        --no-interaction
+fi
+
+silent_artisan () {
+    php $LARAVEL_ARTISAN --ansi $@ 2>/dev/null
+}
+
+if [ -f "$LARAVEL_ARTISAN" ]; then
+    if [ "$LARAVEL_AUTO_OPTIMIZE" == "true" ]; then
+        dirty
+        silent_artisan optimize:clear
+        silent_artisan optimize
+    fi
+
+    if [ "$LARAVEL_LINK_STORAGE" == "true" ]; then
+        dirty
+        silent_artisan storage:link
+    fi
+
+    if [ "$LARAVEL_AUTO_MIGRATION" == "true" ]; then
+        dirty
+        silent_artisan migrate:refresh --seed --force
+    fi
+fi

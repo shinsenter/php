@@ -1,0 +1,60 @@
+version: '3'
+services:
+
+  ##############################################################################
+
+  wordpress:
+    extends:
+      file: common.yml
+      service: common-php
+    image: shinsenter/wordpress:php${PHP_VERSION:-8.1}
+    build:
+      context: ../src/webapps/wordpress
+    volumes:
+      - ./data/wordpress:/var/www/html
+    ports:
+      - 9991:80
+
+  ##############################################################################
+
+  phpmyadmin:
+    extends:
+      file: common.yml
+      service: common-php
+    image: shinsenter/phpmyadmin:php${PHP_VERSION:-8.1}
+    build:
+      context: ../src/webapps/phpmyadmin
+    volumes:
+      - ./data/phpmyadmin:/var/www/html
+    ports:
+      - 9992:80
+
+  ##############################################################################
+
+  laravel:
+    extends:
+      file: common.yml
+      service: common-php
+    image: shinsenter/laravel:php${PHP_VERSION:-8.1}
+    build:
+      context: ../src/webapps/laravel
+    volumes:
+      - ./data/laravel:/var/www/html
+    ports:
+      - 9993:80
+
+  ##############################################################################
+
+  codeigniter4:
+    extends:
+      file: common.yml
+      service: common-php
+    image: shinsenter/codeigniter4:php${PHP_VERSION:-8.1}
+    build:
+      context: ../src/webapps/codeigniter4
+    volumes:
+      - ./data/codeigniter4:/var/www/html
+    ports:
+      - 9994:80
+
+################################################################################
