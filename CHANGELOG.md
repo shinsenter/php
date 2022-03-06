@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0 - 2022-03-04
+
+## The very first release
+
+Docker images for PHP applications, from CLI to standalone web server.
+
+https://hub.docker.com/r/shinsenter/php/tags
+
+[![Docker Pulls shinsenter/php](https://img.shields.io/docker/pulls/shinsenter/php)](https://hub.docker.com/r/shinsenter/php/tags)
+
 ## Support my activities
 
 If you like this repository, please hit the star button to follow further updates, or buy me a coffee 😉.

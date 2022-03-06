@@ -1,15 +1,19 @@
 #!/command/with-contenv bash
 
-PUID=${PUID:-9999}
-PGID=${PGID:-9999}
+PUID="${PUID:-9999}"
+PGID="${PGID:-9999}"
+TZ="${TZ:-UTC}"
+WEBHOME="${WEBHOME:-/var/www/html}"
 
 if [ ! -z "$TZ" ] && [ -e /usr/share/zoneinfo/$TZ ]; then
     ln -sf /usr/share/zoneinfo/$TZ /etc/localtime
 fi
 
 if [[ $PUID != 9999 || $PGID != 9999 ]]; then
-    /usr/sbin/groupmod -o -g "$PGID" webgroup
-    /usr/sbin/usermod  -o -u "$PUID" webuser
+    /usr/sbin/groupmod -o -g $PGID webgroup
+    /usr/sbin/usermod  -o -u $PUID webuser
 fi
 
-webuser-mkdir ${WEBHOME:-"/var/www/html"}
+if [ ! -z "$WEBHOME" ] && [ ! -e "$WEBHOME" ]; then
+    webuser-mkdir $WEBHOME
+fi

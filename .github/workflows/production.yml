@@ -48,12 +48,13 @@ jobs:
     env:
       DOCKER_BUILDKIT: "1"
     steps:
-      - id: date
+      - id: config
         run: echo "::set-output name=date::$(date +'%Y%m%d')"
       - uses: actions/checkout@v2
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - run: |
+          mkdir -p /tmp/buildx
           ./.checksums.sh
           cat .checksums/base.txt
       - uses: actions/cache@v2
@@ -74,7 +75,7 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           context: "{{defaultContext}}:src/base/"
           build-args: |
-            BUILD_NUMBER=${{ steps.date.outputs.date }}-${{ hashFiles('.checksums/base.txt') }}
+            BUILD_NUMBER=${{ steps.config.outputs.date }}-${{ hashFiles('.checksums/base.txt') }}
             BASE_IMAGE=${{ matrix.base }}:${{ matrix.version }}
             S6_VERSION=${{ matrix.s6 }}
           tags: |
@@ -105,12 +106,13 @@ jobs:
     env:
       DOCKER_BUILDKIT: "1"
     steps:
-      - id: date
+      - id: config
         run: echo "::set-output name=date::$(date +'%Y%m%d')"
       - uses: actions/checkout@v2
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - run: |
+          mkdir -p /tmp/buildx
           ./.checksums.sh
           cat .checksums/cli.txt
       - uses: actions/cache@v2
@@ -118,7 +120,7 @@ jobs:
           path: /tmp/buildx
           key: ${{ runner.os }}-buildx-${{ matrix.version }}-${{ matrix.variation }}-${{ hashFiles('.checksums/cli.txt') }}
           restore-keys: |
-            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-buildx-${{ matrix.version }}-
       - uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
@@ -131,7 +133,7 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           context: "{{defaultContext}}:src/php/${{ matrix.variation }}/"
           build-args: |
-            BUILD_NUMBER=${{ steps.date.outputs.date }}-${{ hashFiles('.checksums/cli.txt') }}
+            BUILD_NUMBER=${{ steps.config.outputs.date }}-${{ hashFiles('.checksums/cli.txt') }}
             BASE_IMAGE=shinsenter/s6-ubuntu:focal
             PHP_VERSION=${{ matrix.version }}
           tags: |
@@ -164,12 +166,13 @@ jobs:
     env:
       DOCKER_BUILDKIT: "1"
     steps:
-      - id: date
+      - id: config
         run: echo "::set-output name=date::$(date +'%Y%m%d')"
       - uses: actions/checkout@v2
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - run: |
+          mkdir -p /tmp/buildx
           ./.checksums.sh
           cat .checksums/fpm.txt
       - uses: actions/cache@v2
@@ -177,7 +180,7 @@ jobs:
           path: /tmp/buildx
           key: ${{ runner.os }}-buildx-${{ matrix.version }}-${{ matrix.variation }}-${{ hashFiles('.checksums/fpm.txt') }}
           restore-keys: |
-            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-buildx-${{ matrix.version }}-
       - uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
@@ -190,7 +193,7 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           context: "{{defaultContext}}:src/php/${{ matrix.variation }}/"
           build-args: |
-            BUILD_NUMBER=${{ steps.date.outputs.date }}-${{ hashFiles('.checksums/fpm.txt') }}
+            BUILD_NUMBER=${{ steps.config.outputs.date }}-${{ hashFiles('.checksums/fpm.txt') }}
             BASE_IMAGE=${{ matrix.image }}
             PHP_VERSION=${{ matrix.version }}
           tags: |
@@ -222,12 +225,13 @@ jobs:
     env:
       DOCKER_BUILDKIT: "1"
     steps:
-      - id: date
+      - id: config
         run: echo "::set-output name=date::$(date +'%Y%m%d')"
       - uses: actions/checkout@v2
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - run: |
+          mkdir -p /tmp/buildx
           ./.checksums.sh
           cat .checksums/servers.txt
       - uses: actions/cache@v2
@@ -235,7 +239,7 @@ jobs:
           path: /tmp/buildx
           key: ${{ runner.os }}-buildx-${{ matrix.version }}-${{ matrix.variation }}-${{ hashFiles('.checksums/servers.txt') }}
           restore-keys: |
-            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-buildx-${{ matrix.version }}-
       - uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
@@ -248,7 +252,7 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           context: "{{defaultContext}}:src/servers/${{ matrix.variation }}/"
           build-args: |
-            BUILD_NUMBER=${{ steps.date.outputs.date }}-${{ hashFiles('.checksums/servers.txt') }}
+            BUILD_NUMBER=${{ steps.config.outputs.date }}-${{ hashFiles('.checksums/servers.txt') }}
             BASE_IMAGE=${{ matrix.image }}
             PHP_VERSION=${{ matrix.version }}
           tags: |
@@ -277,15 +281,17 @@ jobs:
           - phpmyadmin
           - laravel
           - codeigniter4
+          - monica
     env:
       DOCKER_BUILDKIT: "1"
     steps:
-      - id: date
+      - id: config
         run: echo "::set-output name=date::$(date +'%Y%m%d')"
       - uses: actions/checkout@v2
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - run: |
+          mkdir -p /tmp/buildx
           ./.checksums.sh
           cat .checksums/webapps.txt
       - uses: actions/cache@v2
@@ -293,7 +299,7 @@ jobs:
           path: /tmp/buildx
           key: ${{ runner.os }}-buildx-${{ matrix.app }}-${{ matrix.version }}-${{ hashFiles('.checksums/webapps.txt') }}
           restore-keys: |
-            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-buildx-${{ matrix.version }}-
       - uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
@@ -306,7 +312,7 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           context: "{{defaultContext}}:src/webapps/${{ matrix.app }}/"
           build-args: |
-            BUILD_NUMBER=${{ steps.date.outputs.date }}-${{ hashFiles('.checksums/webapps.txt') }}
+            BUILD_NUMBER=${{ steps.config.outputs.date }}-${{ hashFiles('.checksums/webapps.txt') }}
             BASE_IMAGE=shinsenter/php
             PHP_VERSION=${{ matrix.version }}
           tags: |

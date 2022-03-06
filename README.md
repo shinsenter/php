@@ -156,6 +156,20 @@ ENV PHP_POST_MAX_SIZE="100M"
 # The maximum size of an uploaded file
 ENV PHP_UPLOAD_MAX_FILE_SIZE="100M"
 
+# Other Opcache settings
+ENV PHP_OPCACHE_ENABLE_CLI=0
+ENV PHP_OPCACHE_ENABLE=1
+ENV PHP_OPCACHE_FAST_SHUTDOWN=1
+ENV PHP_OPCACHE_INTERNED_STRINGS_BUFFER=8
+ENV PHP_OPCACHE_MAX_ACCELERATED_FILES=1048793
+ENV PHP_OPCACHE_MEMORY_CONSUMPTION=128
+ENV PHP_OPCACHE_PRELOAD_USER=webuser
+ENV PHP_OPCACHE_PRELOAD=
+ENV PHP_OPCACHE_REVALIDATE_FREQ=2
+ENV PHP_OPCACHE_REVALIDATE_PATH=0
+ENV PHP_OPCACHE_SAVE_COMMENTS=1
+ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS=1
+
 ################################################################################
 
 # Server that should relay emails for MSMTP
@@ -173,11 +187,15 @@ ENV MSMTP_RELAY_SERVER_PORT="1025"
 ```Dockerfile
 ################################################################################
 
+# Sets the directory from which Apache will serve files
+ENV WEBHOME="/var/www/html"
+
+# Set Apache root folder within $WEBHOME
+# E.g: APACHE_DOCUMENT_ROOT="/public"
+ENV APACHE_DOCUMENT_ROOT=""
+
 # Set to "true" to fix permission for whole $WEBHOME
 ENV FIX_WEBHOME_PERMISSION="false"
-
-# Sets the directory from which Apache will serve files
-ENV APACHE_DOCUMENT_ROOT="$WEBHOME"
 
 # Sets the limit on the number of connections
 # that an individual child server process will handle
@@ -211,29 +229,15 @@ ENV APACHE_THREADS_PER_CHILD="25"
 ```Dockerfile
 ################################################################################
 
+# Sets the directory from which Nginx will serve files
+ENV WEBHOME="/var/www/html"
+
+# Set Nginx root folder within $WEBHOME
+# E.g: NGINX_DOCUMENT_ROOT="/public"
+ENV NGINX_DOCUMENT_ROOT=""
+
 # Set to "true" to fix permission for whole $WEBHOME
 ENV FIX_WEBHOME_PERMISSION="false"
-
-# Sets the directory from which Nginx will serve files
-ENV NGINX_DOCUMENT_ROOT="$WEBHOME"
-
-################################################################################
-```
-
-
-### shinsenter/laravel
-
-```Dockerfile
-################################################################################
-
-# Optimize and cache all config, views, routes
-ENV LARAVEL_AUTO_OPTIMIZE=true
-
-# Create symlinks to the storage folder
-ENV LARAVEL_LINK_STORAGE=true
-
-# Run Laravel migrations (for development purposese)
-ENV LARAVEL_AUTO_MIGRATION=false
 
 ################################################################################
 ```
@@ -281,6 +285,50 @@ ENV PMA_PASSWORD=
 # ENV PMA_CONTROLPASS=
 # ENV PMA_QUERYHISTORYDB=
 # ENV PMA_QUERYHISTORYMAX=
+
+################################################################################
+```
+
+
+### shinsenter/laravel
+
+```Dockerfile
+################################################################################
+
+# Sets the directory from which Nginx will serve files
+ENV WEBHOME="/var/www/html"
+ENV NGINX_DOCUMENT_ROOT="/public"
+
+# Optimize and cache all config, views, routes
+ENV LARAVEL_AUTO_OPTIMIZE=true
+
+# Create symlinks to the storage folder
+ENV LARAVEL_LINK_STORAGE=true
+
+# Run Laravel migrations (for development purposese)
+ENV LARAVEL_AUTO_MIGRATION=false
+
+################################################################################
+```
+
+
+### shinsenter/monica
+
+```Dockerfile
+################################################################################
+
+# Sets the directory from which Nginx will serve files
+ENV WEBHOME="/var/www/html"
+ENV NGINX_DOCUMENT_ROOT="/public"
+
+# Optimize and cache all config, views, routes
+ENV LARAVEL_AUTO_OPTIMIZE=true
+
+# Create symlinks to the storage folder
+ENV LARAVEL_LINK_STORAGE=true
+
+# Run Laravel migrations (for development purposese)
+ENV LARAVEL_AUTO_MIGRATION=false
 
 ################################################################################
 ```
