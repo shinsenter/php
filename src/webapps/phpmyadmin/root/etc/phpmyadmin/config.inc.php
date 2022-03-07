@@ -2,7 +2,6 @@
 
 /* Ensure we got the environment */
 $vars = array(
-    'NGINX_DOCUMENT_ROOT',
     'PMA_ARBITRARY',
     'PMA_HOST',
     'PMA_HOSTS',
@@ -26,6 +25,7 @@ $vars = array(
     'PHP_MEMORY_LIMIT',
     'MAX_EXECUTION_TIME',
     'MEMORY_LIMIT',
+    'WEBHOME',
 );
 foreach ($vars as $var) {
     $env = getenv($var);
@@ -34,7 +34,7 @@ foreach ($vars as $var) {
     }
 }
 
-$root_dir = $_ENV['NGINX_DOCUMENT_ROOT'] ?: '/var/www/html';
+$root_dir = $_ENV['WEBHOME'] ?: '/var/www/html';
 $config_dir = $root_dir . '/user-config';
 
 /* Include User Defined Settings Hook */

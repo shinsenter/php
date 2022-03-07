@@ -96,11 +96,6 @@ ENTRYPOINT ["/init"]
 
 ################################################################################
 
-# sets environment variables for user
-ENV PUID=9999
-ENV PGID=9999
-ENV WEBHOME="/var/www/html"
-
 # OS variables
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
@@ -109,11 +104,16 @@ ENV LC_ALL=C
 ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ENV TERM=xterm
 
+# sets environment variables for user
+ENV PUID=9999
+ENV PGID=9999
+ENV WEBHOME="/var/www/html"
+
 # S6 variables
 ARG S6_VERSION
 ENV S6_VERSION=$S6_VERSION
 ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2
-ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=60000
+ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=600000
 ENV S6_GLOBAL_PATH=/command:$PATH
 ENV S6_KILL_FINISH_MAXTIME=3000
 ENV S6_KILL_GRACETIME=3000
