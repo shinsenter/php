@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.0 - 2022-03-07
+
+Added Symfony images.
+
 ## 1.1.0 - 2022-03-07
 
 Unify the WEBHOME environment variable for all Docker images.
@@ -11,6 +15,7 @@ Unify the WEBHOME environment variable for all Docker images.
 ENV WEBHOME="/var/www/html"
 
 ################################################################################
+
 
 ```
 For Apache and Nginx base images, there are additional environment variables to specify to the root directory within this WEBHOME directory.
@@ -29,6 +34,7 @@ ENV APACHE_DOCUMENT_ROOT=""
 
 ################################################################################
 
+
 ```
 ### shinsenter/php:fpm-nginx
 
@@ -43,6 +49,7 @@ ENV WEBHOME="/var/www/html"
 ENV NGINX_DOCUMENT_ROOT=""
 
 ################################################################################
+
 
 ```
 ## 1.0.0 - 2022-03-04
