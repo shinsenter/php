@@ -60,16 +60,14 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: /tmp/buildx
-          key: "${{ runner.os }}-buildx-\
-            base-${{ matrix.version }}-\
+          key: "${{ runner.os }}-buildx-base-\
             ${{ hashFiles('.checksums/base.txt') }}"
-          restore-keys: "${{ runner.os }}-buildx-\
-            base-${{ matrix.version }}-"
+          restore-keys: "${{ runner.os }}-buildx-base-"
       - uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-      -
+      - name: Building ${{ matrix.image }}:${{ matrix.version }}
         uses: docker/build-push-action@v2
         with:
           push: true
@@ -120,16 +118,14 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: /tmp/buildx
-          key: "${{ runner.os }}-buildx-\
-            php-${{ matrix.version }}-\
+          key: "${{ runner.os }}-buildx-php-${{ matrix.version }}-\
             ${{ hashFiles('.checksums/cli.txt') }}"
-          restore-keys: "${{ runner.os }}-buildx-\
-            php-${{ matrix.version }}-"
+          restore-keys: "${{ runner.os }}-buildx-php-${{ matrix.version }}-"
       - uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-      -
+      - name: Building ${{ matrix.image }}:cli
         uses: docker/build-push-action@v2
         with:
           push: true
@@ -146,7 +142,7 @@ jobs:
             ${{ matrix.image }}:${{ matrix.version }}
             ${{ matrix.image }}:${{ matrix.version }}-cli
             ${{ matrix.image }}:latest
-      -
+      - name: Building ${{ matrix.image }}:fpm
         uses: docker/build-push-action@v2
         with:
           push: true
@@ -199,16 +195,14 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: /tmp/buildx
-          key: "${{ runner.os }}-buildx-\
-            php-${{ matrix.version }}-${{ matrix.variation }}-\
+          key: "${{ runner.os }}-buildx-php-${{ matrix.version }}-${{ matrix.variation }}-\
             ${{ hashFiles('.checksums/servers.txt') }}"
-          restore-keys: "${{ runner.os }}-buildx-\
-            php-${{ matrix.version }}-"
+          restore-keys: "${{ runner.os }}-buildx-php-${{ matrix.version }}-"
       - uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-      -
+      - name: Building ${{ matrix.image }}:${{ matrix.variation }}
         uses: docker/build-push-action@v2
         with:
           push: true
@@ -235,7 +229,7 @@ jobs:
     needs: php-servers
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 8
+      max-parallel: 10
       matrix:
         version:
           - "7.4"
@@ -246,6 +240,7 @@ jobs:
           - phpmyadmin
           - laravel
           - codeigniter4
+          - symfony
     env:
       DOCKER_BUILDKIT: "1"
     steps:
@@ -261,16 +256,14 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: /tmp/buildx
-          key: "${{ runner.os }}-buildx-\
-            php-${{ matrix.version }}-${{ matrix.app }}-\
+          key: "${{ runner.os }}-buildx-php-${{ matrix.version }}-${{ matrix.app }}-\
             ${{ hashFiles('.checksums/webapps.txt') }}"
-          restore-keys: "${{ runner.os }}-buildx-\
-            php-${{ matrix.version }}-"
+          restore-keys: "${{ runner.os }}-buildx-php-${{ matrix.version }}-"
       - uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-      -
+      - name: Building shinsenter/${{ matrix.app }}
         uses: docker/build-push-action@v2
         with:
           push: true
