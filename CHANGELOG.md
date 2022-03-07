@@ -1,50 +1,5 @@
 # Changelog
 
-## 1.1.0 - 2022-03-06
-
-Unify the WEBHOME environment variable for all Docker images.
-
-```Dockerfile
-################################################################################
-
-# You can change the home of the web user if needed
-ENV WEBHOME="/var/www/html"
-
-################################################################################
-
-```
-For Apache and Nginx base images, there are additional environment variables to specify to the root directory within this WEBHOME directory.
-
-### shinsenter/php:fpm-apache
-
-```Dockerfile
-################################################################################
-
-# Sets the directory from which Apache will serve files
-ENV WEBHOME="/var/www/html"
-
-# Set Apache root folder within $WEBHOME
-# E.g: APACHE_DOCUMENT_ROOT="/public"
-ENV APACHE_DOCUMENT_ROOT=""
-
-################################################################################
-
-```
-### shinsenter/php:fpm-nginx
-
-```Dockerfile
-################################################################################
-
-# Sets the directory from which Nginx will serve files
-ENV WEBHOME="/var/www/html"
-
-# Set Nginx root folder within $WEBHOME
-# E.g: NGINX_DOCUMENT_ROOT="/public"
-ENV NGINX_DOCUMENT_ROOT=""
-
-################################################################################
-
-```
 ## 1.0.0 - 2022-03-04
 
 ## The very first release
