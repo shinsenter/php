@@ -8,16 +8,36 @@ ARG BASE_IMAGE=ubuntu:latest
 # prepares base image
 FROM ${BASE_IMAGE} as base
 
-# adds binaries
+# adds OS variables
 ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=C.UTF-8
+ENV LANGUAGE=C.UTF-8
+ENV LC_ALL=C
+ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV TERM=xterm
+
+# sets environment variables for user
+ENV PUID=9999
+ENV PGID=9999
+ENV WEBHOME="/var/www/html"
+
+# adds binaries
 ADD root/ /
 
-# updates packages
 RUN set -eux \
+    \
+    # adds user and group
+    && echo "🤖 Creating webuser and webgroup..." \
+    && groupadd -r -g $PGID webgroup \
+    && useradd  -r -g $PGID -u $PUID -d $WEBHOME -s /usr/bin/bash --no-log-init webuser \
+    \
+    # updates packages
     && echo "🤖 Updating packages..." \
     && apt-update \
-    && apt-install less ca-certificates \
-    && apt-get upgrade -y
+    && apt-install ca-certificates \
+    \
+    # cleanup
+    && apt-cleanup
 
 ################################################################################
 
@@ -35,7 +55,7 @@ RUN if [ -z "$S6_VERSION" ]; then \
     fi
 
 # adds build dependencies
-RUN apt-install $S6_SRC_DEP
+RUN apt-update && apt-install $S6_SRC_DEP
 RUN touch /etc/wgetrc \
     && echo 'ca_certificate=/etc/ssl/certs/ca-certificates.crt' >>/etc/wgetrc
 
@@ -67,47 +87,13 @@ RUN SYS_ARCH=$(uname -m); \
 ################################################################################
 
 # the build stage
-FROM base as build
-
-# sets environment variables for user
-ENV PUID=9999
-ENV PGID=9999
-ENV WEBHOME="/var/www/html"
-
-# adds user and group
-RUN echo "🤖 Creating webuser and webgroup..." \
-    && groupadd -r -g $PGID webgroup \
-    && useradd  -r -g $PGID -u $PUID -d $WEBHOME -s /usr/bin/bash --no-log-init webuser
+FROM base
 
 # copies s6-overlay from source
 COPY --from=source /usr/src/s6/ /
-
-# cleanup
-RUN apt-cleanup
-
-################################################################################
-
-# builds image from scratch to omit original footprints
-FROM scratch
-
-# copies files from build stage
-COPY --from=build / /
 ENTRYPOINT ["/init"]
 
 ################################################################################
-
-# OS variables
-ENV DEBIAN_FRONTEND=noninteractive
-ENV LANG=C.UTF-8
-ENV LANGUAGE=C.UTF-8
-ENV LC_ALL=C
-ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-ENV TERM=xterm
-
-# sets environment variables for user
-ENV PUID=9999
-ENV PGID=9999
-ENV WEBHOME="/var/www/html"
 
 # S6 variables
 ARG S6_VERSION

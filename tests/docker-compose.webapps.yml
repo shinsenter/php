@@ -58,3 +58,19 @@ services:
       - 9994:80
 
 ################################################################################
+
+  symfony:
+    extends:
+      file: common.yml
+      service: common-php
+    image: shinsenter/symfony:php${PHP_VERSION:-8.1}
+    build:
+      context: ../src/webapps/symfony
+    volumes:
+      - ./data/symfony:/var/www/html
+    ports:
+      - 9995:80
+    environment:
+      - SYMFONY_INSTALL_DEVKIT=true
+
+################################################################################

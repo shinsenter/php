@@ -1,3 +1,4 @@
+php7.4-apcu
 php7.4-bcmath
 php7.4-cli
 php7.4-common

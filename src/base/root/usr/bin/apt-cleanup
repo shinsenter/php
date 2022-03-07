@@ -1,7 +1,8 @@
 #!/bin/bash
-apt-get purge -y --auto-remove $@ && apt-get -y clean
+apt-get purge -y --auto-remove $@ 2>/dev/null
+apt-get -y clean 2>/dev/null
+
 find /var/cache -type f -name '*-old' -delete 2>/dev/null
-find /var/log -type f -name '*.xz' -delete 2>/dev/null
 find /var/log -type f | xargs -I {}  bash -c '>{}' 2>/dev/null
 rm -rf  /etc/*- \
         /var/lib/apt/lists/* \

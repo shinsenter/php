@@ -38,6 +38,29 @@ I think I can make it more maintainable and stable with the latest version of it
 View more: [shinsenter/s6-ubuntu](https://hub.docker.com/r/shinsenter/s6-ubuntu/tags)
 
 
+## Pre-built PHP modules
+
+```
+apcu bcmath calendar ctype curl dom exif ffi fileinfo ftp gd gettext gmp iconv igbinary intl mbstring mysqli mysqlnd opcache pdo pdo_mysql pdo_sqlite phar posix readline redis shmop simplexml soap sockets sqlite3 sysvmsg sysvsem sysvshm tokenizer xml xmlreader xmlwriter xsl zip
+```
+
+
+## Install more packages
+
+Just open a terminal in your container:
+
+```bash
+docker exec -it <container> /bin/bash
+```
+
+Then type these command:
+
+```bash
+apt-update -y
+apt-instal <package_name>
+```
+
+
 ## Usage
 
 (I will gradually update the content in this section.)
@@ -65,6 +88,7 @@ View more: [shinsenter/s6-ubuntu](https://hub.docker.com/r/shinsenter/s6-ubuntu/
 - [`shinsenter/phpmyadmin`](https://hub.docker.com/r/shinsenter/phpmyadmin/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/phpmyadmin?label=shinsenter%2Fphpmyadmin)](https://hub.docker.com/r/shinsenter/phpmyadmin/tags)
 - [`shinsenter/laravel`](https://hub.docker.com/r/shinsenter/laravel/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/laravel?label=shinsenter%2Flaravel)](https://hub.docker.com/r/shinsenter/laravel/tags)
 - [`shinsenter/codeigniter4`](https://hub.docker.com/r/shinsenter/codeigniter4/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/codeigniter4?label=shinsenter%2Fcodeigniter4)](https://hub.docker.com/r/shinsenter/codeigniter4/tags)
+- [`shinsenter/symfony`](https://hub.docker.com/r/shinsenter/symfony/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/symfony?label=shinsenter%2Fsymfony)](https://hub.docker.com/r/shinsenter/symfony/tags)
 
 ---
 
@@ -331,23 +355,14 @@ ENV LARAVEL_AUTO_MIGRATION=false
 ```
 
 
-### shinsenter/monica
+### shinsenter/symfony
 
 ```Dockerfile
 ################################################################################
 
-# Sets the directory from which Nginx will serve files
-ENV WEBHOME="/var/www/html"
-ENV NGINX_DOCUMENT_ROOT="/public"
-
-# Optimize and cache all config, views, routes
-ENV LARAVEL_AUTO_OPTIMIZE=true
-
-# Create symlinks to the storage folder
-ENV LARAVEL_LINK_STORAGE=true
-
-# Run Laravel migrations (for development purposese)
-ENV LARAVEL_AUTO_MIGRATION=false
+# Set to "true" to install Symfony packages
+# that you usually need to build web applications
+ENV SYMFONY_INSTALL_DEVKIT=false
 
 ################################################################################
 ```
