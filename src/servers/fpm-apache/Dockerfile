@@ -15,8 +15,6 @@ ARG APACHE_SOURCES="/etc/apt/sources.list.d/ondrej-apache.list"
 
 ARG APACHE_RUN_GROUP=webgroup
 ARG APACHE_RUN_USER=webuser
-ENV WEBHOME=${WEBHOME:-/var/www/html}
-ENV APACHE_DOCUMENT_ROOT=${APACHE_DOCUMENT_ROOT:-}
 
 RUN echo "Installing Apache..." \
     \
@@ -28,15 +26,19 @@ RUN echo "Installing Apache..." \
     && apt-install msmtp msmtp-mta \
     && apt-install apache2 \
     && service apache2 stop && update-rc.d apache2 disable \
-    && rm -f ${WEBHOME}/*.html \
-    && a2enmod \
-        actions autoindex brotli cache deflate expires headers http2 \
-        mpm_event proxy proxy_fcgi remoteip rewrite setenvif ssl unique_id \
     && echo "ServerName localhost" >>/etc/apache2/apache2.conf \
     && sed -i 's/LogFormat "%h %l %u %t \\\"%r\\\" %>s %O \\\"/LogFormat "%a %l %u %t \\\"%r\\\" %>s %O \\\"/' /etc/apache2/apache2.conf \
     && echo >>/etc/apache2/envvars \
     && echo "export APACHE_RUN_USER=${APACHE_RUN_USER}" >>/etc/apache2/envvars \
     && echo "export APACHE_RUN_GROUP=${APACHE_RUN_GROUP}" >>/etc/apache2/envvars \
+    && rm -f ${WEBHOME}/*.html \
+    \
+    # modifies Apache modules
+    && a2dismod \
+        mpm_prefork mpm_worker \
+    && a2enmod \
+        actions autoindex brotli cache deflate expires headers http2 \
+        mpm_event proxy proxy_fcgi remoteip rewrite setenvif ssl unique_id \
     \
     # makes log files
     && webuser-mkdir /var/log/apache2 \
