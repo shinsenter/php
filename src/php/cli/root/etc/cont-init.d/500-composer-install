@@ -1,5 +1,7 @@
 #!/command/with-contenv bash
 
+WEBHOME=${WEBHOME:-/var/www/html}
+
 if [ -f $WEBHOME/composer.json ] && [ ! -e $WEBHOME/vendor/ ]; then
     dirty
     composer install -d $WEBHOME/ \

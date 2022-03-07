@@ -13,10 +13,11 @@ FROM ${BASE_IMAGE}:${PHP_VERSION}-fpm-apache
 ADD root/ /
 
 # updates document root path
-ENV APACHE_DOCUMENT_ROOT=$WEBHOME/public
+ENV WEBHOME=/var/www/html
+ENV APACHE_DOCUMENT_ROOT=/public
 
 # sets the working directory
-WORKDIR $WEBHOME
+WORKDIR /var/www/html/
 
 ################################################################################
 

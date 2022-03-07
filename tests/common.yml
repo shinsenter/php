@@ -4,7 +4,6 @@ services:
   ##############################################################################
 
   common:
-    platform: ${BUILD_PLATFORM:-linux/arm/v7}
     environment:
       - PUID=1234
       - PGID=1234
@@ -15,5 +14,7 @@ services:
       args:
         BASE_IMAGE: shinsenter/php
         PHP_VERSION: ${PHP_VERSION:-8.1}
+    environment:
+      - S6_CMD_WAIT_FOR_SERVICES_MAXTIME=600000
 
 ################################################################################

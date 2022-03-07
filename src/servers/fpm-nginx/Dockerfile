@@ -12,7 +12,8 @@ FROM ${BASE_IMAGE}:${PHP_VERSION}-fpm
 ARG NGINX_PPA_KEY="4F4EA0AAE5267A6C"
 ARG NGINX_PPA_URL="http://ppa.launchpadcontent.net/ondrej/nginx-mainline/ubuntu"
 ARG NGINX_SOURCES="/etc/apt/sources.list.d/ondrej-nginx.list"
-ENV NGINX_DOCUMENT_ROOT=${NGINX_DOCUMENT_ROOT:-$WEBHOME}
+ENV WEBHOME=${WEBHOME:-/var/www/html}
+ENV NGINX_DOCUMENT_ROOT=${NGINX_DOCUMENT_ROOT:-}
 
 RUN echo "Installing Nginx..." \
     \
@@ -24,7 +25,7 @@ RUN echo "Installing Nginx..." \
     && apt-install msmtp msmtp-mta \
     && apt-install nginx \
     && service nginx stop && update-rc.d nginx disable \
-    && rm -f ${NGINX_DOCUMENT_ROOT}/*.html \
+    && rm -f ${WEBHOME}/*.html \
     \
     # makes log files
     && webuser-mkdir /var/log/nginx \
@@ -39,10 +40,9 @@ RUN echo "Installing Nginx..." \
 
 # adds config files
 ADD root/ /
-ADD index.html ${NGINX_DOCUMENT_ROOT}/index.html
 
 # sets the working directory
-WORKDIR $NGINX_DOCUMENT_ROOT
+WORKDIR $WEBHOME
 
 # exposes ports
 EXPOSE 80

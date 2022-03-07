@@ -1,12 +1,12 @@
 #!/command/with-contenv bash
 
-LARAVEL_ROOT=$(cd $(dirname $NGINX_DOCUMENT_ROOT) && pwd)
-LARAVEL_ARTISAN=$LARAVEL_ROOT/artisan
+LARAVEL_ROOT="${WEBHOME:-/var/www/html}"
+LARAVEL_ARTISAN="$LARAVEL_ROOT/artisan"
 
 webuser-mkdir $LARAVEL_ROOT
 
 if [ ! -f "$LARAVEL_ARTISAN" ]; then
-    rm -f $LARAVEL_ROOT/*.html
+    rm -rf $LARAVEL_ROOT/public $LARAVEL_ROOT/index.*
 
     echo "🤖 Installing Laravel from scratch..."
     dirty

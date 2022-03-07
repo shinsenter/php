@@ -1,11 +1,20 @@
 #!/command/with-contenv bash
 
+WEBROOT="${WEBHOME:-/var/www/html}${NGINX_DOCUMENT_ROOT}"
+
 if [ ! -z "$PHP_POST_MAX_SIZE" ]; then
     echo "client_max_body_size ${PHP_POST_MAX_SIZE};" >/etc/nginx/extra.d/body-size.conf
 fi
 
 if [ ! -z "$PHP_MAX_EXECUTION_TIME" ]; then
     echo "client_body_timeout ${PHP_MAX_EXECUTION_TIME};" >/etc/nginx/extra.d/body-timeout.conf
+fi
+
+find /etc/nginx/sites-available -type f | \
+    xargs -I {} sed -i "s#root \/var\/www\/html;#root ${WEBROOT};#g" {}
+
+if [ ! -z "$(ls -1 /web/ | grep 'index\.\(ht?ml\|php\)')" ] && [ -z "$(ls -1 $WEBROOT/ | grep 'index\.\(ht?ml\|php\)')" ]; then
+    cp -prf /web/index.* $WEBROOT/
 fi
 
 echo

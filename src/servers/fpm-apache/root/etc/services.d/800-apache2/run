@@ -1,5 +1,11 @@
 #!/command/with-contenv bash
 
+WEBROOT="${WEBHOME:-/var/www/html}${APACHE_DOCUMENT_ROOT}"
+
+if [ ! -z "$(ls -1 /web/ | grep 'index\.\(ht?ml\|php\)')" ] && [ -z "$(ls -1 $WEBROOT/ | grep 'index\.\(ht?ml\|php\)')" ]; then
+    cp -prf /web/index.* $WEBROOT/
+fi
+
 echo
 /usr/sbin/apache2ctl -v
 /usr/sbin/apache2ctl configtest

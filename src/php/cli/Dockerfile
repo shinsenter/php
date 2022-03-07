@@ -37,7 +37,7 @@ RUN echo "Installing PHP ${PHP_VERSION}..." \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # creates folder for composer
-RUN webuser-mkdir /composer
+RUN webuser-mkdir /composer 2>/dev/null
 
 ################################################################################
 

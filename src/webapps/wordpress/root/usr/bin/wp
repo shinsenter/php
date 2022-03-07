@@ -1,5 +1,2 @@
 #!/bin/bash
-
-WORDPRESS_ROOT=$APACHE_DOCUMENT_ROOT
-
-sudo -u webuser -i -- /usr/bin/wp-cli --path=$WORDPRESS_ROOT/ $@
+sudo -u webuser -i -- /usr/bin/wp-cli --path="${WEBHOME:-/var/www/html}/" $@
