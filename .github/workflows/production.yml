@@ -62,7 +62,7 @@ jobs:
           path: /tmp/buildx
           key: "${{ runner.os }}-buildx-base-\
             ${{ hashFiles('.checksums/base.txt') }}"
-          restore-keys: "${{ runner.os }}-buildx-base-"
+          restore-keys: "${{ runner.os }}-buildx-"
       - uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
@@ -120,7 +120,7 @@ jobs:
           path: /tmp/buildx
           key: "${{ runner.os }}-buildx-php-${{ matrix.version }}-\
             ${{ hashFiles('.checksums/cli.txt') }}"
-          restore-keys: "${{ runner.os }}-buildx-php-${{ matrix.version }}-"
+          restore-keys: "${{ runner.os }}-buildx-"
       - uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
