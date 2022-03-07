@@ -15,7 +15,8 @@ ARG APACHE_SOURCES="/etc/apt/sources.list.d/ondrej-apache.list"
 
 ARG APACHE_RUN_GROUP=webgroup
 ARG APACHE_RUN_USER=webuser
-ENV APACHE_DOCUMENT_ROOT=${APACHE_DOCUMENT_ROOT:-$WEBHOME}
+ENV WEBHOME=${WEBHOME:-/var/www/html}
+ENV APACHE_DOCUMENT_ROOT=${APACHE_DOCUMENT_ROOT:-}
 
 RUN echo "Installing Apache..." \
     \
@@ -27,10 +28,10 @@ RUN echo "Installing Apache..." \
     && apt-install msmtp msmtp-mta \
     && apt-install apache2 \
     && service apache2 stop && update-rc.d apache2 disable \
-    && rm -f ${APACHE_DOCUMENT_ROOT}/*.html \
+    && rm -f ${WEBHOME}/*.html \
     && a2enmod \
-        actions autoindex brotli cache deflate headers http2 proxy proxy_fcgi \
-        remoteip rewrite setenvif ssl unique_id \
+        actions autoindex brotli cache deflate expires headers http2 \
+        mpm_event proxy proxy_fcgi remoteip rewrite setenvif ssl unique_id \
     && echo "ServerName localhost" >>/etc/apache2/apache2.conf \
     && sed -i 's/LogFormat "%h %l %u %t \\\"%r\\\" %>s %O \\\"/LogFormat "%a %l %u %t \\\"%r\\\" %>s %O \\\"/' /etc/apache2/apache2.conf \
     && echo >>/etc/apache2/envvars \
@@ -51,10 +52,9 @@ RUN echo "Installing Apache..." \
 
 # adds config files
 ADD root/ /
-ADD index.html ${APACHE_DOCUMENT_ROOT}/index.html
 
 # sets the working directory
-WORKDIR $APACHE_DOCUMENT_ROOT
+WORKDIR $WEBHOME
 
 # exposes ports
 EXPOSE 80

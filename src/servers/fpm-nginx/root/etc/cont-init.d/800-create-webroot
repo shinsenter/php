@@ -1,8 +1,0 @@
-#!/command/with-contenv bash
-
-find /etc/nginx/sites-available -type f | \
-    xargs -I {} sed -i "s#root \/var\/www\/html;#root ${NGINX_DOCUMENT_ROOT:-/var/www/html/public};#g" {}
-
-if [ ! -z "$NGINX_DOCUMENT_ROOT" ] && [ ! -e "$NGINX_DOCUMENT_ROOT" ]; then
-    webuser-mkdir $NGINX_DOCUMENT_ROOT
-fi

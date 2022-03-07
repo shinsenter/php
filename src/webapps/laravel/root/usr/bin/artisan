@@ -1,7 +1,7 @@
 #!/bin/bash
 
-LARAVEL_ROOT=$(cd $(dirname $NGINX_DOCUMENT_ROOT) && pwd)
-LARAVEL_ARTISAN=$LARAVEL_ROOT/artisan
+LARAVEL_ROOT="${WEBHOME:-/var/www/html}"
+LARAVEL_ARTISAN="$LARAVEL_ROOT/artisan"
 
 if [ -f "$LARAVEL_ARTISAN" ]; then
     sudo -u webuser -i -- /usr/bin/php $LARAVEL_ARTISAN $@

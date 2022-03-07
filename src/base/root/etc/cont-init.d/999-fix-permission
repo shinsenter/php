@@ -1,10 +1,12 @@
 #!/command/with-contenv bash
 
+WEBHOME="${WEBHOME:-/var/www/html}"
+
 if [ "$FIX_WEBHOME_PERMISSION" == "true" ] || [ -e /tmp/cleanup ]; then
     echo
-    echo "🗂 Fixing permission for whole webroot..."
+    echo "🗂 Fixing permission for ${WEBHOME}..."
     webuser-mkdir $WEBHOME recursive
-    rm -f /tmp/cleanup 2>/dev/null
+    rm -f /tmp/cleanup
 fi
 
 if [ -f /welcome.txt ]; then
