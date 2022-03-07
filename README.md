@@ -46,25 +46,25 @@ View more: [shinsenter/s6-ubuntu](https://hub.docker.com/r/shinsenter/s6-ubuntu/
 
 ### PHP version
 
-- [`shinsenter/php:7.4`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=7.4) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/7.4)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=7.4)
-- [`shinsenter/php:8.0`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=8.0) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/8.0)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=8.0)
-- [`shinsenter/php:8.1`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=8.1) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/8.1)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=8.1)
+- [`shinsenter/php:7.4`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=7.4) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/7.4?label=shinsenter%2Fphp%3A7.4)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=7.4)
+- [`shinsenter/php:8.0`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=8.0) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/8.0?label=shinsenter%2Fphp%3A8.0)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=8.0)
+- [`shinsenter/php:8.1`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=8.1) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/8.1?label=shinsenter%2Fphp%3A8.1)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=8.1)
 
 
 ### Image variations
 
-- [`shinsenter/php:${PHP_VERSION}-cli`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=cli) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/cli)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=cli)
-- [`shinsenter/php:${PHP_VERSION}-fpm`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/fpm)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm)
-- [`shinsenter/php:${PHP_VERSION}-fpm-apache`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm-apache) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/servers/fpm-apache)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm-apache)
-- [`shinsenter/php:${PHP_VERSION}-fpm-nginx`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm-nginx) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/servers/fpm-nginx)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm-nginx)
+- [`shinsenter/php:${PHP_VERSION}-cli`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=cli) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/cli?label=shinsenter%2Fphp%3Acli)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=cli)
+- [`shinsenter/php:${PHP_VERSION}-fpm`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/fpm?label=shinsenter%2Fphp%3Afpm)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm)
+- [`shinsenter/php:${PHP_VERSION}-fpm-apache`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm-apache) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/fpm-apache?label=shinsenter%2Fphp%3Afpm-apache)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm-apache)
+- [`shinsenter/php:${PHP_VERSION}-fpm-nginx`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm-nginx) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/fpm-nginx?label=shinsenter%2Fphp%3Afpm-nginx)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm-nginx)
 
 
 ### Popular PHP projects
 
-- [`shinsenter/wordpress`](https://hub.docker.com/r/shinsenter/wordpress/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/wordpress)](https://hub.docker.com/r/shinsenter/wordpress/tags)
-- [`shinsenter/phpmyadmin`](https://hub.docker.com/r/shinsenter/phpmyadmin/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/phpmyadmin)](https://hub.docker.com/r/shinsenter/phpmyadmin/tags)
-- [`shinsenter/laravel`](https://hub.docker.com/r/shinsenter/laravel/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/laravel)](https://hub.docker.com/r/shinsenter/laravel/tags)
-- [`shinsenter/codeigniter4`](https://hub.docker.com/r/shinsenter/codeigniter4/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/codeigniter4)](https://hub.docker.com/r/shinsenter/codeigniter4/tags)
+- [`shinsenter/wordpress`](https://hub.docker.com/r/shinsenter/wordpress/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/wordpress?label=shinsenter%2Fwordpress)](https://hub.docker.com/r/shinsenter/wordpress/tags)
+- [`shinsenter/phpmyadmin`](https://hub.docker.com/r/shinsenter/phpmyadmin/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/phpmyadmin?label=shinsenter%2Fphpmyadmin)](https://hub.docker.com/r/shinsenter/phpmyadmin/tags)
+- [`shinsenter/laravel`](https://hub.docker.com/r/shinsenter/laravel/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/laravel?label=shinsenter%2Flaravel)](https://hub.docker.com/r/shinsenter/laravel/tags)
+- [`shinsenter/codeigniter4`](https://hub.docker.com/r/shinsenter/codeigniter4/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/codeigniter4?label=shinsenter%2Fcodeigniter4)](https://hub.docker.com/r/shinsenter/codeigniter4/tags)
 
 ---
 
@@ -130,6 +130,18 @@ ENV PHP_MAX_EXECUTION_TIME="99"
 # Set the maximum amount of memory in bytes that a script is allowed to allocate
 ENV PHP_MEMORY_LIMIT="256M"
 
+# Sets max size of post data allowed
+ENV PHP_POST_MAX_SIZE="100M"
+
+# The maximum size of an uploaded file
+ENV PHP_UPLOAD_MAX_FILE_SIZE="100M"
+
+# Set the name of your PHP-FPM pool
+# (helpful when running multiple sites on a single server)
+ENV PHP_POOL_NAME="www"
+
+################################################################################
+
 # Choose how the process manager will control the number of child processes
 ENV PHP_PM_CONTROL="ondemand"
 
@@ -146,15 +158,36 @@ ENV PHP_PM_MIN_SPARE_SERVERS="1"
 # The number of child processes created on startup
 ENV PHP_PM_START_SERVERS="2"
 
-# Set the name of your PHP-FPM pool
-# (helpful when running multiple sites on a single server)
-ENV PHP_POOL_NAME="www"
+################################################################################
 
-# Sets max size of post data allowed
-ENV PHP_POST_MAX_SIZE="100M"
+# The amount of memory used to store interned strings, in megabytes.
+ENV PHP_OPCACHE_INTERNED_STRINGS_BUFFER=8
 
-# The maximum size of an uploaded file
-ENV PHP_UPLOAD_MAX_FILE_SIZE="100M"
+# The maximum number of keys (and therefore scripts) in the OPcache hash table
+ENV PHP_OPCACHE_MAX_ACCELERATED_FILES=1048793
+
+# The size of the shared memory storage used by OPcache, in megabytes
+ENV PHP_OPCACHE_MEMORY_CONSUMPTION=128
+
+# This directive facilitates to let the preloading to be run as another user
+ENV PHP_OPCACHE_PRELOAD_USER=webuser
+
+# Specifies a PHP script that is going to be compiled and executed at server start-up
+ENV PHP_OPCACHE_PRELOAD=
+
+# How often to check script timestamps for updates, in seconds
+ENV PHP_OPCACHE_REVALIDATE_FREQ=2
+
+# If disabled, existing cached files using the same include_path will be reused
+ENV PHP_OPCACHE_REVALIDATE_PATH=0
+
+# If disabled, all documentation comments will be discarded
+# from the opcode cache to reduce the size of the optimised code
+ENV PHP_OPCACHE_SAVE_COMMENTS=1
+
+# If enabled, OPcache will check for updated scripts
+# every opcache.revalidate_freq seconds
+ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS=1
 
 ################################################################################
 
@@ -173,11 +206,15 @@ ENV MSMTP_RELAY_SERVER_PORT="1025"
 ```Dockerfile
 ################################################################################
 
+# Sets the directory from which Apache will serve files
+ENV WEBHOME="/var/www/html"
+
+# Set Apache root folder within $WEBHOME
+# E.g: APACHE_DOCUMENT_ROOT="/public"
+ENV APACHE_DOCUMENT_ROOT=""
+
 # Set to "true" to fix permission for whole $WEBHOME
 ENV FIX_WEBHOME_PERMISSION="false"
-
-# Sets the directory from which Apache will serve files
-ENV APACHE_DOCUMENT_ROOT="$WEBHOME"
 
 # Sets the limit on the number of connections
 # that an individual child server process will handle
@@ -211,29 +248,15 @@ ENV APACHE_THREADS_PER_CHILD="25"
 ```Dockerfile
 ################################################################################
 
+# Sets the directory from which Nginx will serve files
+ENV WEBHOME="/var/www/html"
+
+# Set Nginx root folder within $WEBHOME
+# E.g: NGINX_DOCUMENT_ROOT="/public"
+ENV NGINX_DOCUMENT_ROOT=""
+
 # Set to "true" to fix permission for whole $WEBHOME
 ENV FIX_WEBHOME_PERMISSION="false"
-
-# Sets the directory from which Nginx will serve files
-ENV NGINX_DOCUMENT_ROOT="$WEBHOME"
-
-################################################################################
-```
-
-
-### shinsenter/laravel
-
-```Dockerfile
-################################################################################
-
-# Optimize and cache all config, views, routes
-ENV LARAVEL_AUTO_OPTIMIZE=true
-
-# Create symlinks to the storage folder
-ENV LARAVEL_LINK_STORAGE=true
-
-# Run Laravel migrations (for development purposese)
-ENV LARAVEL_AUTO_MIGRATION=false
 
 ################################################################################
 ```
@@ -281,6 +304,50 @@ ENV PMA_PASSWORD=
 # ENV PMA_CONTROLPASS=
 # ENV PMA_QUERYHISTORYDB=
 # ENV PMA_QUERYHISTORYMAX=
+
+################################################################################
+```
+
+
+### shinsenter/laravel
+
+```Dockerfile
+################################################################################
+
+# Sets the directory from which Nginx will serve files
+ENV WEBHOME="/var/www/html"
+ENV NGINX_DOCUMENT_ROOT="/public"
+
+# Optimize and cache all config, views, routes
+ENV LARAVEL_AUTO_OPTIMIZE=true
+
+# Create symlinks to the storage folder
+ENV LARAVEL_LINK_STORAGE=true
+
+# Run Laravel migrations (for development purposese)
+ENV LARAVEL_AUTO_MIGRATION=false
+
+################################################################################
+```
+
+
+### shinsenter/monica
+
+```Dockerfile
+################################################################################
+
+# Sets the directory from which Nginx will serve files
+ENV WEBHOME="/var/www/html"
+ENV NGINX_DOCUMENT_ROOT="/public"
+
+# Optimize and cache all config, views, routes
+ENV LARAVEL_AUTO_OPTIMIZE=true
+
+# Create symlinks to the storage folder
+ENV LARAVEL_LINK_STORAGE=true
+
+# Run Laravel migrations (for development purposese)
+ENV LARAVEL_AUTO_MIGRATION=false
 
 ################################################################################
 ```

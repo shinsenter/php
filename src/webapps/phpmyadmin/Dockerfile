@@ -13,10 +13,11 @@ FROM ${BASE_IMAGE}:${PHP_VERSION}-fpm-nginx
 ADD root/ /
 
 # updates document root path
-ENV NGINX_DOCUMENT_ROOT=$WEBHOME
+ENV WEBHOME=/var/www/html
+ENV NGINX_DOCUMENT_ROOT=
 
 # sets the working directory
-WORKDIR $NGINX_DOCUMENT_ROOT
+WORKDIR $WEBHOME
 
 ################################################################################
 

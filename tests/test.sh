@@ -7,6 +7,7 @@ BASE_DIR="$(git rev-parse --show-toplevel)/tests"
 
 clear \
 && bash $BASE_DIR/../.git-config/hooks/pre-commit \
+&& echo "Starting building php:${PHP_VERSION} images for platform ${BUILD_PLATFORM}..." \
 && docker-compose -f $BASE_DIR/docker-compose.base.yml build \
 && docker-compose -f $BASE_DIR/docker-compose.cli.yml build \
 && docker-compose -f $BASE_DIR/docker-compose.fpm.yml build \
