@@ -31,6 +31,7 @@ RUN echo "Installing Nginx..." \
     && ln -sf /dev/stderr /var/log/nginx/error.log \
     \
     # cleanup
+    && apt-get upgrade -y \
     && rm -f $NGINX_SOURCES \
     && apt-cleanup
 

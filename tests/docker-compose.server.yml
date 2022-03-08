@@ -4,10 +4,10 @@ services:
   ##############################################################################
 
   fpm-apache:
+    image: shinsenter/php:${PHP_VERSION:-8.1}-fpm-apache
     extends:
       file: common.yml
       service: common-php
-    image: shinsenter/php:${PHP_VERSION:-8.1}-fpm-apache
     build:
       context: ../src/servers/fpm-apache
     ports:
@@ -16,10 +16,10 @@ services:
   ##############################################################################
 
   fpm-nginx:
+    image: shinsenter/php:${PHP_VERSION:-8.1}-fpm-nginx
     extends:
       file: common.yml
       service: common-php
-    image: shinsenter/php:${PHP_VERSION:-8.1}-fpm-nginx
     build:
       context: ../src/servers/fpm-nginx
     ports:

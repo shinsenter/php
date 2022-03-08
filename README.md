@@ -171,47 +171,47 @@ ENV PHP_PM_CONTROL="ondemand"
 
 # The number of child processes to be created when pm is set to static
 # and the maximum number of child processes to be created when pm is set to dynamic
-ENV PHP_PM_MAX_CHILDREN="20"
+ENV PHP_PM_MAX_CHILDREN="28"
 
 # The desired maximum number of idle server processes
-ENV PHP_PM_MAX_SPARE_SERVERS="3"
+ENV PHP_PM_MAX_SPARE_SERVERS="21"
 
 # The desired minimum number of idle server processes
-ENV PHP_PM_MIN_SPARE_SERVERS="1"
+ENV PHP_PM_MIN_SPARE_SERVERS="7"
 
 # The number of child processes created on startup
-ENV PHP_PM_START_SERVERS="2"
+ENV PHP_PM_START_SERVERS="7"
 
 ################################################################################
 
 # The amount of memory used to store interned strings, in megabytes.
-ENV PHP_OPCACHE_INTERNED_STRINGS_BUFFER=8
+ENV PHP_OPCACHE_INTERNED_STRINGS_BUFFER="8"
 
 # The maximum number of keys (and therefore scripts) in the OPcache hash table
-ENV PHP_OPCACHE_MAX_ACCELERATED_FILES=1048793
+ENV PHP_OPCACHE_MAX_ACCELERATED_FILES="1048793"
 
 # The size of the shared memory storage used by OPcache, in megabytes
-ENV PHP_OPCACHE_MEMORY_CONSUMPTION=128
+ENV PHP_OPCACHE_MEMORY_CONSUMPTION="128"
 
 # This directive facilitates to let the preloading to be run as another user
-ENV PHP_OPCACHE_PRELOAD_USER=webuser
+ENV PHP_OPCACHE_PRELOAD_USER="webuser"
 
-# Specifies a PHP script that is going to be compiled and executed at server start-up
+# Specifies a PHP script that is going to be compiled and executed at start-up
 ENV PHP_OPCACHE_PRELOAD=
 
 # How often to check script timestamps for updates, in seconds
-ENV PHP_OPCACHE_REVALIDATE_FREQ=2
+ENV PHP_OPCACHE_REVALIDATE_FREQ="2"
 
 # If disabled, existing cached files using the same include_path will be reused
-ENV PHP_OPCACHE_REVALIDATE_PATH=0
+ENV PHP_OPCACHE_REVALIDATE_PATH="0"
 
 # If disabled, all documentation comments will be discarded
 # from the opcode cache to reduce the size of the optimised code
-ENV PHP_OPCACHE_SAVE_COMMENTS=1
+ENV PHP_OPCACHE_SAVE_COMMENTS="1"
 
 # If enabled, OPcache will check for updated scripts
 # every opcache.revalidate_freq seconds
-ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS=1
+ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS="1"
 
 ################################################################################
 

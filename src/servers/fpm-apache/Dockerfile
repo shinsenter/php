@@ -47,6 +47,7 @@ RUN echo "Installing Apache..." \
     && ln -sf /dev/stderr /var/log/apache2/error.log \
     \
     # cleanup
+    && apt-get upgrade -y \
     && rm -f $APACHE_SOURCES \
     && apt-cleanup
 

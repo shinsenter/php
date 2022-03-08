@@ -2,10 +2,11 @@
 
 BASE="$(git rev-parse --show-toplevel)"
 
-echo "Fixing permission for ${BASE}..."
+echo
+echo "🗂 Fixing permission for ${BASE}/..."
 find $BASE -type d | xargs -I {} chmod 755 {}
 find $BASE -type f | xargs -I {} chmod 644 {}
 find $BASE -type f | grep '\/bin\|git-config\/hooks\|cont-init\|services\.d\|\.sh' | xargs -I {} chmod +x {}
 
-echo "Generating checksums for workflow..."
-$BASE/.checksums.sh
+echo "🤖 Generating checksums for workflow..."
+exec $BASE/checksum.sh
