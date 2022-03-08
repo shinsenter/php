@@ -3,9 +3,11 @@
 WEBHOME="${WEBHOME:-/var/www/html}"
 
 if [ "$FIX_WEBHOME_PERMISSION" == "true" ] || [ -e /tmp/cleanup ]; then
-    echo
-    echo "🗂 Fixing permission for ${WEBHOME}..."
-    webuser-mkdir $WEBHOME recursive
+    if [ ! -z "$WEBHOME" ]; then
+        echo
+        echo "🗂 Fixing permission for ${WEBHOME}..."
+        webuser-mkdir $WEBHOME recursive
+    fi
     rm -f /tmp/cleanup
 fi
 
