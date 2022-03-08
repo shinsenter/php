@@ -4,6 +4,7 @@ services:
   ##############################################################################
 
   common:
+    platform: ${BUILD_PLATFORM:-linux/arm/v6}
     environment:
       - PUID=1234
       - PGID=1234

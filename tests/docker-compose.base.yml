@@ -4,14 +4,14 @@ services:
   ##############################################################################
 
   s6-ubuntu:
+    image: shinsenter/s6-ubuntu:latest
     extends:
       file: common.yml
       service: common
-    image: shinsenter/s6-ubuntu:latest
     build:
       context: ../src/base
       args:
         BASE_IMAGE: ubuntu:focal
-        S6_VERSION: "3.0.0.2-2"
+        S6_VERSION: ${S6_VERSION:-v3.1.0.1}
 
 ################################################################################
