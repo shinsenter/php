@@ -46,14 +46,13 @@ jobs:
     env:
       DOCKER_BUILDKIT: "1"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - id: config
         run: |
           ./.git-config/hooks/pre-commit
           mkdir -p /tmp/buildx
-          ls -lah ./src/base/*
           cat versions/base.txt
           echo "::set-output name=s6_version::$(cat S6_VERSION.txt)"
           echo "::set-output name=date::$(date +'%Y%m%d')"
@@ -73,7 +72,7 @@ jobs:
           push: true
           cache-from: type=local,src=/tmp/buildx
           cache-to: type=local,dest=/tmp/buildx-new,mode=max
-          context: "{{defaultContext}}:src/base/"
+          context: ./src/base/
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           build-args: |
             BUILD_NUMBER=${{ steps.config.outputs.date }}-${{ hashFiles('versions/base.txt') }}
@@ -105,16 +104,14 @@ jobs:
     env:
       DOCKER_BUILDKIT: "1"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - id: config
         run: |
           ./.git-config/hooks/pre-commit
           mkdir -p /tmp/buildx
-          ls -lah ./src/php/cli/*
           cat versions/cli.txt
-          ls -lah ./src/php/fpm/*
           cat versions/fpm.txt
           echo "::set-output name=date::$(date +'%Y%m%d')"
       - uses: actions/cache@v2
@@ -133,7 +130,7 @@ jobs:
           push: true
           cache-from: type=local,src=/tmp/buildx
           cache-to: type=local,dest=/tmp/buildx,mode=max
-          context: "{{defaultContext}}:src/php/cli/"
+          context: ./src/php/cli/
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           build-args: |
             BUILD_NUMBER=${{ steps.config.outputs.date }}-${{ hashFiles('versions/cli.txt') }}
@@ -150,7 +147,7 @@ jobs:
           push: true
           cache-from: type=local,src=/tmp/buildx
           cache-to: type=local,dest=/tmp/buildx-new,mode=max
-          context: "{{defaultContext}}:src/php/fpm/"
+          context: ./src/php/fpm/
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           build-args: |
             BUILD_NUMBER=${{ steps.config.outputs.date }}-${{ hashFiles('versions/fpm.txt') }}
@@ -185,13 +182,12 @@ jobs:
     env:
       DOCKER_BUILDKIT: "1"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - id: config
         run: |
           ./.git-config/hooks/pre-commit
-          ls -lah ./src/servers/${{ matrix.variation }}/*
           mkdir -p /tmp/buildx
           cat versions/servers.txt
           echo "::set-output name=date::$(date +'%Y%m%d')"
@@ -211,7 +207,7 @@ jobs:
           push: true
           cache-from: type=local,src=/tmp/buildx
           cache-to: type=local,dest=/tmp/buildx-new,mode=max
-          context: "{{defaultContext}}:src/servers/${{ matrix.variation }}/"
+          context: ./src/servers/${{ matrix.variation }}/
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           build-args: |
             BUILD_NUMBER=${{ steps.config.outputs.date }}-${{ hashFiles('versions/servers.txt') }}
@@ -247,13 +243,12 @@ jobs:
     env:
       DOCKER_BUILDKIT: "1"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - id: config
         run: |
           ./.git-config/hooks/pre-commit
-          ls -lah ./src/webapps/${{ matrix.app }}/*
           mkdir -p /tmp/buildx
           cat versions/webapps.txt
           echo "::set-output name=date::$(date +'%Y%m%d')"
@@ -273,7 +268,7 @@ jobs:
           push: true
           cache-from: type=local,src=/tmp/buildx
           cache-to: type=local,dest=/tmp/buildx-new,mode=max
-          context: "{{defaultContext}}:src/webapps/${{ matrix.app }}/"
+          context: ./src/webapps/${{ matrix.app }}/
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           build-args: |
             BUILD_NUMBER=${{ steps.config.outputs.date }}-${{ hashFiles('versions/webapps.txt') }}
