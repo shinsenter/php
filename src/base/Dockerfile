@@ -108,5 +108,5 @@ ENV S6_SERVICES_GRACETIME=3000
 
 ARG   BUILD_NUMBER
 LABEL build_number="$BUILD_NUMBER"
-LABEL publisher="https://hub.docker.com/u/shinsenter"
 LABEL maintainer="shin@shin.company"
+LABEL publisher="https://hub.docker.com/u/shinsenter"

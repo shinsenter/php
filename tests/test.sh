@@ -5,7 +5,7 @@ TEST_DIR="$BASE_DIR/tests"
 export DOCKER_BUILDKIT=1
 export S6_VERSION="$(cat $BASE_DIR/S6_VERSION.txt)"
 export PHP_VERSION="${1:-8.1}"
-export BUILD_PLATFORM="${2:-linux/arm/v6}"
+export BUILD_PLATFORM="${2:-linux/arm64/v8}"
 
 clear
 $BASE_DIR/.git-config/hooks/pre-commit

@@ -2,7 +2,13 @@
 
 WEBHOME="${WEBHOME:-/var/www/html}"
 
+echo
+/usr/sbin/php-fpm -v
+
+su webuser
+
 if [ -f $WEBHOME/composer.json ] && [ ! -e $WEBHOME/vendor/ ]; then
+    echo
     echo "🤖 Installing packages from $WEBHOME/composer.json..."
     dirty
     /usr/bin/composer install -d $WEBHOME/ \
@@ -13,8 +19,4 @@ if [ -f $WEBHOME/composer.json ] && [ ! -e $WEBHOME/vendor/ ]; then
 fi
 
 echo
-/usr/sbin/php-fpm -v
-
-echo
-su webuser
 /usr/sbin/php-fpm --nodaemonize

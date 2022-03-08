@@ -13,6 +13,9 @@ ARG NGINX_PPA_KEY="4F4EA0AAE5267A6C"
 ARG NGINX_PPA_URL="http://ppa.launchpadcontent.net/ondrej/nginx-mainline/ubuntu"
 ARG NGINX_SOURCES="/etc/apt/sources.list.d/ondrej-nginx.list"
 
+ENV WEBHOME="/var/www/html"
+ENV NGINX_DOCUMENT_ROOT=""
+
 RUN echo "Installing Nginx..." \
     \
     # adds ondrej repos for Nginx
