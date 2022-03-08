@@ -79,9 +79,8 @@ RUN SYS_ARCH=$(uname -m); \
         echo "  ⏬ Downloading $1"; \
         wget -O- $1 | tar Jxp -C ${2:-"$S6_DIR"}; \
     } \
-    && S6_SRC_URL=${S6_SRC_URL}/v${S6_VERSION} \
-    && untar ${S6_SRC_URL}/s6-overlay-noarch-${S6_VERSION}.tar.xz \
-    && untar ${S6_SRC_URL}/s6-overlay-${S6_ARCH}-${S6_VERSION}.tar.xz \
+    && untar ${S6_SRC_URL}/${S6_VERSION}/s6-overlay-noarch.tar.xz \
+    && untar ${S6_SRC_URL}/${S6_VERSION}/s6-overlay-${S6_ARCH}.tar.xz \
     && du -sh $S6_DIR
 
 ################################################################################

@@ -4,10 +4,10 @@ services:
   ##############################################################################
 
   wordpress:
+    image: shinsenter/wordpress:php${PHP_VERSION:-8.1}
     extends:
       file: common.yml
       service: common-php
-    image: shinsenter/wordpress:php${PHP_VERSION:-8.1}
     build:
       context: ../src/webapps/wordpress
     volumes:
@@ -18,10 +18,10 @@ services:
   ##############################################################################
 
   phpmyadmin:
+    image: shinsenter/phpmyadmin:php${PHP_VERSION:-8.1}
     extends:
       file: common.yml
       service: common-php
-    image: shinsenter/phpmyadmin:php${PHP_VERSION:-8.1}
     build:
       context: ../src/webapps/phpmyadmin
     volumes:
@@ -32,10 +32,10 @@ services:
   ##############################################################################
 
   laravel:
+    image: shinsenter/laravel:php${PHP_VERSION:-8.1}
     extends:
       file: common.yml
       service: common-php
-    image: shinsenter/laravel:php${PHP_VERSION:-8.1}
     build:
       context: ../src/webapps/laravel
     volumes:
@@ -46,10 +46,10 @@ services:
   ##############################################################################
 
   codeigniter4:
+    image: shinsenter/codeigniter4:php${PHP_VERSION:-8.1}
     extends:
       file: common.yml
       service: common-php
-    image: shinsenter/codeigniter4:php${PHP_VERSION:-8.1}
     build:
       context: ../src/webapps/codeigniter4
     volumes:
@@ -60,10 +60,10 @@ services:
 ################################################################################
 
   symfony:
+    image: shinsenter/symfony:php${PHP_VERSION:-8.1}
     extends:
       file: common.yml
       service: common-php
-    image: shinsenter/symfony:php${PHP_VERSION:-8.1}
     build:
       context: ../src/webapps/symfony
     volumes:
