@@ -13,8 +13,10 @@ ARG APACHE_PPA_KEY="4F4EA0AAE5267A6C"
 ARG APACHE_PPA_URL="http://ppa.launchpadcontent.net/ondrej/apache2/ubuntu"
 ARG APACHE_SOURCES="/etc/apt/sources.list.d/ondrej-apache.list"
 
-ARG APACHE_RUN_GROUP=webgroup
-ARG APACHE_RUN_USER=webuser
+ARG APACHE_RUN_GROUP="webgroup"
+ARG APACHE_RUN_USER="webuser"
+ENV WEBHOME="/var/www/html"
+ENV APACHE_DOCUMENT_ROOT=""
 
 RUN echo "Installing Apache..." \
     \
@@ -29,6 +31,7 @@ RUN echo "Installing Apache..." \
     && echo "ServerName localhost" >>/etc/apache2/apache2.conf \
     && sed -i 's/LogFormat "%h %l %u %t \\\"%r\\\" %>s %O \\\"/LogFormat "%a %l %u %t \\\"%r\\\" %>s %O \\\"/' /etc/apache2/apache2.conf \
     && echo >>/etc/apache2/envvars \
+    && echo "export DOCUMENT_ROOT=\"${WEBHOME}\${APACHE_DOCUMENT_ROOT}\"" >>/etc/apache2/envvars \
     && echo "export APACHE_RUN_USER=${APACHE_RUN_USER}" >>/etc/apache2/envvars \
     && echo "export APACHE_RUN_GROUP=${APACHE_RUN_GROUP}" >>/etc/apache2/envvars \
     && rm -f ${WEBHOME}/*.html \

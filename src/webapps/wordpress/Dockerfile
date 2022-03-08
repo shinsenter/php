@@ -27,8 +27,8 @@ COPY --from=source /usr/bin/wp-cli /usr/bin/wp-cli
 ADD  root/ /
 
 # updates document root path
-ENV WEBHOME=/var/www/html
-ENV APACHE_DOCUMENT_ROOT=
+ENV WEBHOME="/var/www/html"
+ENV APACHE_DOCUMENT_ROOT=""
 
 # sets the working directory
 WORKDIR $WEBHOME

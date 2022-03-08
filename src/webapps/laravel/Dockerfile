@@ -17,11 +17,11 @@ RUN apt-update && apt-install php${PHP_VERSION}-swoole \
 ADD root/ /
 
 # updates document root path
-ENV WEBHOME=/var/www/html
-ENV NGINX_DOCUMENT_ROOT=/public
+ENV WEBHOME="/var/www/html"
+ENV NGINX_DOCUMENT_ROOT="/public"
 
 # sets the working directory
-WORKDIR /var/www/html/
+WORKDIR $WEBHOME
 
 ################################################################################
 
