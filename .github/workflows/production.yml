@@ -53,7 +53,7 @@ jobs:
         run: |
           ./.git-config/hooks/pre-commit
           mkdir -p /tmp/buildx
-          ls -lah ./src/base/
+          ls -lah ./src/base/*
           cat versions/base.txt
           echo "::set-output name=s6_version::$(cat S6_VERSION.txt)"
           echo "::set-output name=date::$(date +'%Y%m%d')"
@@ -112,9 +112,9 @@ jobs:
         run: |
           ./.git-config/hooks/pre-commit
           mkdir -p /tmp/buildx
-          ls -lah ./src/php/cli/
+          ls -lah ./src/php/cli/*
           cat versions/cli.txt
-          ls -lah ./src/php/fpm/
+          ls -lah ./src/php/fpm/*
           cat versions/fpm.txt
           echo "::set-output name=date::$(date +'%Y%m%d')"
       - uses: actions/cache@v2
@@ -191,7 +191,7 @@ jobs:
       - id: config
         run: |
           ./.git-config/hooks/pre-commit
-          ls -lah ./src/servers/${{ matrix.variation }}/
+          ls -lah ./src/servers/${{ matrix.variation }}/*
           mkdir -p /tmp/buildx
           cat versions/servers.txt
           echo "::set-output name=date::$(date +'%Y%m%d')"
@@ -253,7 +253,7 @@ jobs:
       - id: config
         run: |
           ./.git-config/hooks/pre-commit
-          ls -lah ./src/webapps/${{ matrix.app }}/
+          ls -lah ./src/webapps/${{ matrix.app }}/*
           mkdir -p /tmp/buildx
           cat versions/webapps.txt
           echo "::set-output name=date::$(date +'%Y%m%d')"
