@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.0 - 2022-03-08
+
+- Use S6 Overlay v3.1.0.1
+- Small bug fixes
+
 ## 1.2.0 - 2022-03-07
 
 Added Symfony images.
@@ -15,6 +20,7 @@ Unify the WEBHOME environment variable for all Docker images.
 ENV WEBHOME="/var/www/html"
 
 ################################################################################
+
 
 
 ```
@@ -35,6 +41,7 @@ ENV APACHE_DOCUMENT_ROOT=""
 ################################################################################
 
 
+
 ```
 ### shinsenter/php:fpm-nginx
 
@@ -49,6 +56,7 @@ ENV WEBHOME="/var/www/html"
 ENV NGINX_DOCUMENT_ROOT=""
 
 ################################################################################
+
 
 
 ```
