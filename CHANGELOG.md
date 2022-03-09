@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.0 - 2022-03-09
+
+All files and folders in previous images that were granted 777 permissions have been modified with default permissions (755 for folders and 644 for files).
+
 ## 1.3.0 - 2022-03-08
 
 - Use S6 Overlay v3.1.0.1
@@ -23,6 +27,7 @@ ENV WEBHOME="/var/www/html"
 
 
 
+
 ```
 For Apache and Nginx base images, there are additional environment variables to specify to the root directory within this WEBHOME directory.
 
@@ -42,6 +47,7 @@ ENV APACHE_DOCUMENT_ROOT=""
 
 
 
+
 ```
 ### shinsenter/php:fpm-nginx
 
@@ -56,6 +62,7 @@ ENV WEBHOME="/var/www/html"
 ENV NGINX_DOCUMENT_ROOT=""
 
 ################################################################################
+
 
 
 
