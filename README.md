@@ -1,78 +1,115 @@
 # shinsenter/php
 
-Docker images for PHP applications, from CLI to standalone web server.
+🧭 Production-ready Docker images for PHP applications, support CLI and standalone web servers.
 
-https://hub.docker.com/r/shinsenter/php/
+https://hub.docker.com/r/shinsenter/php
 
-[![Publish Docker (shinsenter/php)](https://github.com/shinsenter/php/actions/workflows/production.yml/badge.svg?branch=main)](https://github.com/shinsenter/php/actions/workflows/production.yml)
-[![Docker Pulls shinsenter/php](https://img.shields.io/docker/pulls/shinsenter/php)](https://hub.docker.com/r/shinsenter/php/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/php)](https://hub.docker.com/r/shinsenter/php) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/php?label=shinsenter%2Fphp)](https://hub.docker.com/r/shinsenter/php/tags) [![Publish Images (shinsenter/php)](https://github.com/shinsenter/php/actions/workflows/publish-images.yml/badge.svg?branch=main)](https://github.com/shinsenter/php/actions/workflows/publish-images.yml)
 
+* * *
 
----
+## About this project
 
+- Tired of waiting around for Docker images to build before you can start your website?
+- Tired of customizing modules from official docker php images, or your docker image after installing more modules becomes too big?
+- Tired of installing web sevrers like Apache or Nginx to run your PHP applications in the browser?
 
-## Support my activities
+Not only you, but I also had those concerns when building environments for PHP applications. These jobs are quite boring and time consuming.
 
-If you like this repository, please hit the star button to follow further updates, or buy me a coffee 😉.
+Therefore, based on my many years of experience, I created this project to help you quickly build an environment to run your PHP applications (regardless of whether it is a production or development environment).
 
-[![Donate via PayPal](https://img.shields.io/badge/Donate-Paypal-blue)](https://www.paypal.me/shinsenter) [![Become a sponsor](https://img.shields.io/badge/Donate-Patreon-orange)](https://www.patreon.com/appseeds) [![Become a stargazer](https://img.shields.io/badge/Support-Stargazer-yellow)](https://github.com/shinsenter/docker-imgproxy/stargazers) [![Report an issue](https://img.shields.io/badge/Support-Issues-green)](https://github.com/shinsenter/docker-imgproxy/discussions/new) [![Join the chat at https://gitter.im/shinsenter/php](https://badges.gitter.im/shinsenter/php.svg)](https://gitter.im/shinsenter/php?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+Let's check it out!!
 
-I really appreciate your love and supports.
+## Container OS
 
+This project is built on top of my Docker base image, which is Ubuntu 20.04 (Focal) with s6-overlay v3 and OpenSSL included. Learn more at: [shinsenter/s6-ubuntu](https://hub.docker.com/r/shinsenter/s6-ubuntu).
 
----
-
-
-## Thank you [@serversideup](https://github.com/serversideup)
-
-This project is inspired by the [serversideup/docker-php](https://github.com/serversideup/docker-php) project, I love it. However the owners seem to be quite busy updating their projects, so I made my own version.
-
-I think I can make it more maintainable and stable with the latest version of its middlewares.
-
----
-
-## OS version
-
-- Ubuntu 20.04 (Focal) with [S6 Overlay v3](https://github.com/just-containers/s6-overlay/tree/v3) and OpenSSL included.
-
-View more: [shinsenter/s6-ubuntu](https://hub.docker.com/r/shinsenter/s6-ubuntu/tags)
-
-
-## Pre-built PHP modules
+## Available PHP modules
 
 ```
-apcu bcmath calendar ctype curl dom exif ffi fileinfo ftp gd gettext gmp iconv igbinary intl mbstring mysqli mysqlnd opcache pdo pdo_mysql pdo_sqlite phar posix readline redis shmop simplexml soap sockets sqlite3 sysvmsg sysvsem sysvshm tokenizer xml xmlreader xmlwriter xsl zip
+apcu
+bcmath
+calendar
+ctype
+curl
+dom
+exif
+ffi
+fileinfo
+ftp
+gd
+gettext
+gmp
+iconv
+igbinary
+intl
+mbstring
+mysqli
+mysqlnd
+opcache
+pdo
+pdo_mysql
+pdo_sqlite
+phar
+posix
+readline
+redis
+shmop
+simplexml
+soap
+sockets
+sqlite3
+sysvmsg
+sysvsem
+sysvshm
+tokenizer
+xml
+xmlreader
+xmlwriter
+xsl
+zip
 ```
 
+### Install more packages
 
-## Install more packages
-
-Just open a terminal in your container:
+Just open a terminal within your container:
 
 ```bash
-docker exec -it <container> /bin/bash
+docker exec -it <container_id> /bin/bash
 ```
 
 Then type these command:
 
 ```bash
-apt-update -y
-apt-instal <package_name>
+apt-update && apt-install <package_name>
 ```
-
 
 ## Usage
 
-(I will gradually update the content in this section.)
+### Docker Pull command
 
-[View all available image tags.](https://hub.docker.com/r/shinsenter/php/tags)
+```bash
+docker pull shinsenter/php:${PHP_VERSION}-${PHP_VARIATION}
+```
+
+### Docker Compose example
+
+```yml
+version: '3'
+services:
+  my-container:
+    image: shinsenter/php:${PHP_VERSION}-${PHP_VARIATION}
+```
+
+View more image tags at [shinsenter/php/tags](https://hub.docker.com/r/shinsenter/php/tags).
+
+## Available images
 
 ### PHP version
 
 - [`shinsenter/php:7.4`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=7.4) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/7.4?label=shinsenter%2Fphp%3A7.4)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=7.4)
 - [`shinsenter/php:8.0`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=8.0) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/8.0?label=shinsenter%2Fphp%3A8.0)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=8.0)
 - [`shinsenter/php:8.1`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=8.1) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/8.1?label=shinsenter%2Fphp%3A8.1)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=8.1)
-
 
 ### Image variations
 
@@ -81,8 +118,7 @@ apt-instal <package_name>
 - [`shinsenter/php:${PHP_VERSION}-fpm-apache`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm-apache) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/fpm-apache?label=shinsenter%2Fphp%3Afpm-apache)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm-apache)
 - [`shinsenter/php:${PHP_VERSION}-fpm-nginx`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm-nginx) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/fpm-nginx?label=shinsenter%2Fphp%3Afpm-nginx)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm-nginx)
 
-
-### Popular PHP projects
+### Images for popular PHP projects
 
 - [`shinsenter/wordpress`](https://hub.docker.com/r/shinsenter/wordpress/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/wordpress?label=shinsenter%2Fwordpress)](https://hub.docker.com/r/shinsenter/wordpress/tags)
 - [`shinsenter/phpmyadmin`](https://hub.docker.com/r/shinsenter/phpmyadmin/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/phpmyadmin?label=shinsenter%2Fphpmyadmin)](https://hub.docker.com/r/shinsenter/phpmyadmin/tags)
@@ -90,56 +126,50 @@ apt-instal <package_name>
 - [`shinsenter/codeigniter4`](https://hub.docker.com/r/shinsenter/codeigniter4/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/codeigniter4?label=shinsenter%2Fcodeigniter4)](https://hub.docker.com/r/shinsenter/codeigniter4/tags)
 - [`shinsenter/symfony`](https://hub.docker.com/r/shinsenter/symfony/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/symfony?label=shinsenter%2Fsymfony)](https://hub.docker.com/r/shinsenter/symfony/tags)
 
----
+## Customize your own image
 
-## Create your own Dockerfile
-
-You can install other favorite modules to your image extending my built-in base images.
-
-For example:
-
+Dockerfile example for building your own Docker image extending one of those images.
 
 ```Dockerfile
-FROM shinsenter/php:8.1-fpm-apache
-```
+# change the PHP_VERSION and PHP_VARIATION as your need
+ARG PHP_VERSION=8.1
+ARG PHP_VARIATION=fpm-nginx
 
-or
-
-```Dockerfile
-FROM shinsenter/php:8.1-fpm-nginx
-```
-
----
-
-
-## ENV variables
-
-
-### Common variables
-
-You can also customize your Docker container by update these ENV variables.
-
-```Dockerfile
-################################################################################
+# extends from base image
+FROM shinsenter/php:${PHP_VERSION}-${PHP_VARIATION}
 
 # Control your timezone
 ENV TZ="UTC"
 
-################################################################################
+# sets GID and UID
+ENV PUID=9999
+ENV PGID=9999
 
-# User ID the webserver and PHP should run as
-ENV PUID="9999"
-
-# Group ID the webserver and PHP should run as
-ENV PGID="9999"
-
-# You can change the home of the web user if needed
+# sets web server root path
 ENV WEBHOME="/var/www/html"
 
-# Set to "true" to fix permission for whole $WEBHOME
-ENV FIX_WEBHOME_PERMISSION="false"
+# sets the working directory
+WORKDIR $WEBHOME
 
-################################################################################
+# ==========================================================
+
+# you may want to install some PHP modules
+# e.g: this block will install sorl and swoole modules
+RUN apt-update \
+    && apt-install \
+        php${PHP_VERSION}-solr \
+        php${PHP_VERSION}-swoole \
+    && apt-cleanup
+
+# ==========================================================
+
+# Server that should relay emails for MSMTP
+ENV MSMTP_RELAY_SERVER_HOSTNAME="mailhog"
+
+# Port the SMTP server is listening on
+ENV MSMTP_RELAY_SERVER_PORT="1025"
+
+# ==========================================================
 
 # Show PHP errors on screen
 ENV PHP_DISPLAY_ERRORS="On"
@@ -164,7 +194,7 @@ ENV PHP_UPLOAD_MAX_FILE_SIZE="100M"
 # (helpful when running multiple sites on a single server)
 ENV PHP_POOL_NAME="www"
 
-################################################################################
+# ==========================================================
 
 # Choose how the process manager will control the number of child processes
 ENV PHP_PM_CONTROL="ondemand"
@@ -182,7 +212,7 @@ ENV PHP_PM_MIN_SPARE_SERVERS="7"
 # The number of child processes created on startup
 ENV PHP_PM_START_SERVERS="7"
 
-################################################################################
+# ==========================================================
 
 # The amount of memory used to store interned strings, in megabytes.
 ENV PHP_OPCACHE_INTERNED_STRINGS_BUFFER="8"
@@ -212,166 +242,10 @@ ENV PHP_OPCACHE_SAVE_COMMENTS="1"
 # If enabled, OPcache will check for updated scripts
 # every opcache.revalidate_freq seconds
 ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS="1"
-
-################################################################################
-
-# Server that should relay emails for MSMTP
-ENV MSMTP_RELAY_SERVER_HOSTNAME="mailhog"
-
-# Port the SMTP server is listening on
-ENV MSMTP_RELAY_SERVER_PORT="1025"
-
-################################################################################
 ```
 
+## Thank you [@serversideup](https://github.com/serversideup)
 
-### shinsenter/php:fpm-apache
+This project is inspired by the [serversideup/docker-php](https://github.com/serversideup/docker-php) project, I love it.
 
-```Dockerfile
-################################################################################
-
-# Sets the directory from which Apache will serve files
-ENV WEBHOME="/var/www/html"
-
-# Set Apache root folder within $WEBHOME
-# E.g: APACHE_DOCUMENT_ROOT="/public"
-ENV APACHE_DOCUMENT_ROOT=""
-
-# Set to "true" to fix permission for whole $WEBHOME
-ENV FIX_WEBHOME_PERMISSION="false"
-
-# Sets the limit on the number of connections
-# that an individual child server process will handle
-ENV APACHE_MAX_CONNECTIONS_PER_CHILD="0"
-
-# Sets the limit on the number of simultaneous requests that will be served
-ENV APACHE_MAX_REQUEST_WORKERS="150"
-
-# Maximum number of idle threads
-ENV APACHE_MAX_SPARE_THREADS="75"
-
-# Minimum number of idle threads to handle request spikes
-ENV APACHE_MIN_SPARE_THREADS="10"
-
-# Sets the number of child server processes created on startup
-ENV APACHE_START_SERVERS="2"
-
-# Set the maximum configured value for ThreadsPerChild
-# for the lifetime of the Apache httpd process
-ENV APACHE_THREAD_LIMIT="64"
-
-# This directive sets the number of threads created by each child process
-ENV APACHE_THREADS_PER_CHILD="25"
-
-################################################################################
-```
-
-
-### shinsenter/php:fpm-nginx
-
-```Dockerfile
-################################################################################
-
-# Sets the directory from which Nginx will serve files
-ENV WEBHOME="/var/www/html"
-
-# Set Nginx root folder within $WEBHOME
-# E.g: NGINX_DOCUMENT_ROOT="/public"
-ENV NGINX_DOCUMENT_ROOT=""
-
-# Set to "true" to fix permission for whole $WEBHOME
-ENV FIX_WEBHOME_PERMISSION="false"
-
-################################################################################
-```
-
-
-### shinsenter/wordpress
-
-```Dockerfile
-################################################################################
-
-# The locale for a fresh Wordpress
-ENV WORDPRESS_LOCALE="en_US"
-
-################################################################################
-```
-
-
-### shinsenter/phpmyadmin
-
-```Dockerfile
-################################################################################
-
-ENV PMA_HOST=mysql
-ENV PMA_USER=
-ENV PMA_PASSWORD=
-
-################################################################################
-
-# ENV PMA_ARBITRARY=1
-# ENV PMA_HOSTS=
-# ENV PMA_VERBOSE=
-# ENV PMA_VERBOSES=
-# ENV PMA_PORT=
-# ENV PMA_PORTS=
-# ENV PMA_SOCKET=
-# ENV PMA_SOCKETS=
-
-################################################################################
-
-# ENV PMA_ABSOLUTE_URI=
-# ENV PMA_CONTROLHOST=
-# ENV PMA_CONTROLPORT=
-# ENV PMA_PMADB=
-# ENV PMA_CONTROLUSER=
-# ENV PMA_CONTROLPASS=
-# ENV PMA_QUERYHISTORYDB=
-# ENV PMA_QUERYHISTORYMAX=
-
-################################################################################
-```
-
-
-### shinsenter/laravel
-
-```Dockerfile
-################################################################################
-
-# Sets the directory from which Nginx will serve files
-ENV WEBHOME="/var/www/html"
-ENV NGINX_DOCUMENT_ROOT="/public"
-
-# Optimize and cache all config, views, routes
-ENV LARAVEL_AUTO_OPTIMIZE=true
-
-# Create symlinks to the storage folder
-ENV LARAVEL_LINK_STORAGE=true
-
-# Run Laravel migrations (for development purposese)
-ENV LARAVEL_AUTO_MIGRATION=false
-
-################################################################################
-```
-
-
-### shinsenter/symfony
-
-```Dockerfile
-################################################################################
-
-# Set to "true" to install Symfony packages
-# that you usually need to build web applications
-ENV SYMFONY_INSTALL_DEVKIT=false
-
-################################################################################
-```
-
-
-* * *
-
-If you like this project, please support my works.
-
-[![Donate via PayPal](https://img.shields.io/badge/Donate-Paypal-blue)](https://www.paypal.me/shinsenter) [![Become a sponsor](https://img.shields.io/badge/Donate-Patreon-orange)](https://www.patreon.com/appseeds) [![Become a stargazer](https://img.shields.io/badge/Support-Stargazer-yellow)](https://github.com/shinsenter/docker-imgproxy/stargazers) [![Report an issue](https://img.shields.io/badge/Support-Issues-green)](https://github.com/shinsenter/docker-imgproxy/discussions/new) [![Join the chat at https://gitter.im/shinsenter/php](https://badges.gitter.im/shinsenter/php.svg)](https://gitter.im/shinsenter/php?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
-From Vietnam 🇻🇳 with love.
+However the owners seem to be quite busy updating their projects, so I made my own version.

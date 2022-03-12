@@ -1,0 +1,6 @@
+#!/command/with-contenv bash
+
+if [[ $DEBUG_MODE && $DEBUG_MODE == true ]]; then
+    sed -i 's/^;log_level.*/log_level = debug/' /etc/php/fpm/php-fpm.conf
+    echo "🔥 PHP-FPM is in DEBUG MODE 🔥"
+fi

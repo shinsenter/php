@@ -3,7 +3,7 @@
 if [ ! -f /etc/ssl/web/server.key ]; then
     echo "🔐 Generating a self-signed SSL certificate..."
     webuser-mkdir /etc/ssl/web/
-    openssl req -x509 -subj "/C=VN/ST=Vietnam/L=Vietnam/O=AppSeeds/CN=localhost" \
+    openssl req -x509 -subj "/C=VN/ST=Vietnam/L=Vietnam/O=SHIN Company/CN=localhost" \
                 -nodes -newkey rsa:2048 -keyout /etc/ssl/web/server.key \
                 -out /etc/ssl/web/server.crt -days 365
 fi
