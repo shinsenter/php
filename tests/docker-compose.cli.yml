@@ -11,6 +11,6 @@ services:
     build:
       context: ../src/php/cli
       args:
-        - BASE_IMAGE=shinsenter/s6-ubuntu:latest
+        BASE_IMAGE: shinsenter/s6-ubuntu:latest
 
 ################################################################################

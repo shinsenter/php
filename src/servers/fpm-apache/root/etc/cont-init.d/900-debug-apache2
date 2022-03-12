@@ -1,8 +1,6 @@
 #!/command/with-contenv bash
 
 if [[ $DEBUG_MODE && $DEBUG_MODE == true ]]; then
-    # Set Apache and PHP-FPM to debug mode
     sed -i 's/^LogLevel.*/LogLevel debug/' /etc/apache2/apache2.conf
-    sed -i 's/^;log_level.*/log_level = debug/' /etc/php/fpm/php-fpm.conf
-    echo "🔥 APACHE and PHP-FPM are in DEBUG MODE 🔥"
+    echo "🔥 APACHE is in DEBUG MODE 🔥"
 fi
