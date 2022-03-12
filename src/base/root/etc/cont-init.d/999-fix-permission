@@ -22,6 +22,7 @@ echo "
   Timezone: $(date +'%Z %z')
   User UID: $(id -u webuser)
   User GID: $(id -g webuser)
+  Web Root: $WEBHOME
 ------------------------------
 
 To get support from the project owner, please contact:

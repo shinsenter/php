@@ -1,2 +1,5 @@
 #!/bin/bash
-apt-get install --no-install-recommends --no-install-suggests -y $@
+apt-get install $@ -y \
+--no-install-recommends \
+--no-install-suggests \
+--auto-remove

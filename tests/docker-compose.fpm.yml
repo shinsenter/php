@@ -10,5 +10,7 @@ services:
       service: common-php
     build:
       context: ../src/php/fpm
+      args:
+        BASE_IMAGE: shinsenter/php
 
 ################################################################################

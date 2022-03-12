@@ -13,7 +13,9 @@ FROM ${BASE_IMAGE}:${PHP_VERSION}-cli
 ENV PHP_POOL_NAME=www
 
 # installs php-fpm
-RUN apt-update && apt-install php${PHP_VERSION}-fpm \
+RUN apt-update \
+    && apt-install msmtp msmtp-mta \
+    && apt-install php${PHP_VERSION}-fpm \
     && service php${PHP_VERSION}-fpm stop && update-rc.d php${PHP_VERSION}-fpm disable \
     && swap-dir /etc/php/${PHP_VERSION}/fpm /etc/php/fpm \
     && sed -i -e 's/\[www\]/\[$\{PHP_POOL_NAME\}]/g' /etc/php/fpm/pool.d/www.conf \
@@ -38,8 +40,12 @@ EXPOSE 9000
 
 ################################################################################
 
+# adds MSMTP settings
+ENV DEBUG_MODE=false
+ENV MSMTP_RELAY_SERVER_HOSTNAME=mailhog
+ENV MSMTP_RELAY_SERVER_PORT=1025
+
 # adds more PHP variables for php-fpm
-ENV PHP_DATE_TIMEZONE=${TZ:-UTC}
 ENV PHP_DISPLAY_ERRORS=On
 ENV PHP_ERROR_REPORTING="E_ALL & ~E_DEPRECATED & ~E_STRICT"
 ENV PHP_MAX_EXECUTION_TIME=99

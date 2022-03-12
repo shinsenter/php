@@ -1,13 +1,13 @@
 # This file is the work of https://github.com/shinsenter/php
 ################################################################################
 
-ARG BASE_IMAGE=shinsenter/php
+ARG BASE_IMAGE=shinsenter/phpfpm-apache
 ARG PHP_VERSION=8.1
 
 ################################################################################
 
 # base image and platform
-FROM ${BASE_IMAGE}:${PHP_VERSION}-fpm-apache as base
+FROM ${BASE_IMAGE}:php${PHP_VERSION} as base
 
 ################################################################################
 
@@ -26,7 +26,7 @@ FROM base
 COPY --from=source /usr/bin/wp-cli /usr/bin/wp-cli
 ADD  root/ /
 
-# updates document root path
+# sets web server root path
 ENV WEBHOME="/var/www/html"
 ENV APACHE_DOCUMENT_ROOT=""
 

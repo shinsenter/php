@@ -8,36 +8,17 @@ ARG BASE_IMAGE=ubuntu:latest
 # prepares base image
 FROM ${BASE_IMAGE} as base
 
-# adds OS variables
+# disable frontend
 ENV DEBIAN_FRONTEND=noninteractive
-ENV LANG=C.UTF-8
-ENV LANGUAGE=C.UTF-8
-ENV LC_ALL=C
-ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ENV TERM=xterm
-
-# sets environment variables for user
-ENV PUID=9999
-ENV PGID=9999
-ENV WEBHOME="/var/www/html"
 
 # adds binaries
 ADD root/ /
 
-RUN set -eux \
-    \
-    # adds user and group
-    && echo "🤖 Creating webuser and webgroup..." \
-    && groupadd -r -g $PGID webgroup \
-    && useradd  -r -g $PGID -u $PUID -d $WEBHOME -s /usr/bin/bash --no-log-init webuser \
-    \
-    # updates packages
-    && echo "🤖 Updating packages..." \
-    && apt-update \
-    && apt-install ca-certificates \
-    \
-    # cleanup
-    && apt-cleanup
+# updates packages
+RUN echo "🤖 Updating packages..."
+RUN apt-update
+RUN apt-install ca-certificates
 
 ################################################################################
 
@@ -86,13 +67,47 @@ RUN SYS_ARCH=$(uname -m); \
 ################################################################################
 
 # the build stage
-FROM base
+FROM base as build
 
 # copies s6-overlay from source
 COPY --from=source /usr/src/s6/ /
+
+# sets GID and UID
+ENV PUID=9999
+ENV PGID=9999
+ENV WEBHOME="/var/www/html"
+
+# adds user and group
+RUN echo "🤖 Creating webuser and webgroup..."
+RUN groupadd -r -g $PGID webgroup
+RUN useradd  -r -g $PGID -u $PUID -d $WEBHOME -s /usr/bin/bash --no-log-init webuser
+
+# cleanup
+RUN apt-cleanup
+
+################################################################################
+
+# the main image
+FROM scratch
+
+# copies from from build stage
+COPY --from=build / /
 ENTRYPOINT ["/init"]
 
 ################################################################################
+
+# sets GID and UID
+ENV PUID=9999
+ENV PGID=9999
+ENV WEBHOME="/var/www/html"
+
+# adds OS variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=C.UTF-8
+ENV LANGUAGE=C.UTF-8
+ENV LC_ALL=C
+ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV TERM=xterm
 
 # S6 variables
 ARG S6_VERSION

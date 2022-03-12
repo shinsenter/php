@@ -1,6 +1,7 @@
 #!/command/with-contenv bash
 
 WEBHOME="${WEBHOME:-/var/www/html}"
+TZ=${TZ:-UTC}
 
 echo
 /usr/sbin/php-fpm -v
@@ -19,4 +20,7 @@ if [ -f $WEBHOME/composer.json ] && [ ! -e $WEBHOME/vendor/ ]; then
 fi
 
 echo
+export PHP_DATE_TIMEZONE="${PHP_DATE_TIMEZONE:-$TZ}"
+export PHP_OPEN_BASEDIR="${PHP_OPEN_BASEDIR:-$WEBHOME}"
+echo "⚠️ Limit the files that can be accessed by PHP to $PHP_OPEN_BASEDIR"
 /usr/sbin/php-fpm --nodaemonize

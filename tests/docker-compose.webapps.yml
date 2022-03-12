@@ -11,7 +11,7 @@ services:
     build:
       context: ../src/webapps/wordpress
     volumes:
-      - ./data/wordpress:/var/www/html
+      - ./data/wordpress:/opt/www
     ports:
       - 9991:80
 
@@ -25,7 +25,7 @@ services:
     build:
       context: ../src/webapps/phpmyadmin
     volumes:
-      - ./data/phpmyadmin:/var/www/html
+      - ./data/phpmyadmin:/opt/www
     ports:
       - 9992:80
 
@@ -39,7 +39,7 @@ services:
     build:
       context: ../src/webapps/laravel
     volumes:
-      - ./data/laravel:/var/www/html
+      - ./data/laravel:/opt/www
     ports:
       - 9993:80
 
@@ -53,7 +53,7 @@ services:
     build:
       context: ../src/webapps/codeigniter4
     volumes:
-      - ./data/codeigniter4:/var/www/html
+      - ./data/codeigniter4:/opt/www
     ports:
       - 9994:80
 
@@ -67,7 +67,7 @@ services:
     build:
       context: ../src/webapps/symfony
     volumes:
-      - ./data/symfony:/var/www/html
+      - ./data/symfony:/opt/www
     ports:
       - 9995:80
     environment:

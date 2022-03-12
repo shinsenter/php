@@ -25,13 +25,12 @@ RUN echo "Installing Apache..." \
     \
     # installs apache, msmtp
     && apt-update \
-    && apt-install msmtp msmtp-mta \
     && apt-install apache2 \
     && service apache2 stop && update-rc.d apache2 disable \
     && echo "ServerName localhost" >>/etc/apache2/apache2.conf \
     && sed -i 's/LogFormat "%h %l %u %t \\\"%r\\\" %>s %O \\\"/LogFormat "%a %l %u %t \\\"%r\\\" %>s %O \\\"/' /etc/apache2/apache2.conf \
     && echo >>/etc/apache2/envvars \
-    && echo "export DOCUMENT_ROOT=\"${WEBHOME}\${APACHE_DOCUMENT_ROOT}\"" >>/etc/apache2/envvars \
+    && echo "export DOCUMENT_ROOT=\"\${WEBHOME}\${APACHE_DOCUMENT_ROOT}\"" >>/etc/apache2/envvars \
     && echo "export APACHE_RUN_USER=${APACHE_RUN_USER}" >>/etc/apache2/envvars \
     && echo "export APACHE_RUN_GROUP=${APACHE_RUN_GROUP}" >>/etc/apache2/envvars \
     && rm -f ${WEBHOME}/*.html \
@@ -50,7 +49,6 @@ RUN echo "Installing Apache..." \
     && ln -sf /dev/stderr /var/log/apache2/error.log \
     \
     # cleanup
-    && apt-get upgrade -y \
     && rm -f $APACHE_SOURCES \
     && apt-cleanup
 
@@ -70,9 +68,6 @@ EXPOSE 443/udp
 ################################################################################
 
 # sets env variables
-ENV DEBUG_MODE=false
-ENV MSMTP_RELAY_SERVER_HOSTNAME=mailhog
-ENV MSMTP_RELAY_SERVER_PORT=1025
 ENV APACHE_MAX_CONNECTIONS_PER_CHILD=0
 ENV APACHE_MAX_REQUEST_WORKERS=150
 ENV APACHE_MAX_SPARE_THREADS=75

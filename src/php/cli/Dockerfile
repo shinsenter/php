@@ -31,6 +31,7 @@ RUN echo "Installing PHP ${PHP_VERSION}..." \
     && swap-dir /etc/php/${PHP_VERSION}/cli /etc/php/cli \
     \
     # cleanup
+    && apt-get upgrade -y \
     && apt-cleanup
 
 # adds composer
