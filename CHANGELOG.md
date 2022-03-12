@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.0 - 2022-03-12
+
+- Small bug fixes.
+- Added README.md for each image page.
+
 ## 1.4.0 - 2022-03-09
 
 All files and folders in previous images that were granted 777 permissions have been modified with default permissions (755 for folders and 644 for files).
@@ -24,8 +29,8 @@ Unify the WEBHOME environment variable for all Docker images.
 ENV WEBHOME="/var/www/html"
 
 ################################################################################
-```
 
+```
 For Apache and Nginx base images, there are additional environment variables to specify to the root directory within this WEBHOME directory.
 
 ### shinsenter/php:fpm-apache
@@ -41,8 +46,8 @@ ENV WEBHOME="/var/www/html"
 ENV APACHE_DOCUMENT_ROOT=""
 
 ################################################################################
-```
 
+```
 ### shinsenter/php:fpm-nginx
 
 ```Dockerfile
@@ -56,8 +61,8 @@ ENV WEBHOME="/var/www/html"
 ENV NGINX_DOCUMENT_ROOT=""
 
 ################################################################################
-```
 
+```
 ## 1.0.0 - 2022-03-04
 
 ## The very first release
@@ -69,7 +74,7 @@ https://hub.docker.com/r/shinsenter/php/tags
 [![Docker Pulls shinsenter/php](https://img.shields.io/docker/pulls/shinsenter/php)](https://hub.docker.com/r/shinsenter/php/tags)
 
 
-* * *
+---
 
 ## Support my activities
 
@@ -79,6 +84,7 @@ If you like this repository, please [hit the star button](https://github.com/shi
 
 I really appreciate your love and supports.
 
-* * *
+
+---
 
 From Vietnam 🇻🇳 with love.
