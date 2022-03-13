@@ -9,7 +9,7 @@ services:
       file: common.yml
       service: common
     build:
-      context: ../src/base
+      context: ../src/base-ubuntu
       args:
         BASE_IMAGE: ubuntu:focal
         S6_VERSION: ${S6_VERSION:-v3.1.0.1}

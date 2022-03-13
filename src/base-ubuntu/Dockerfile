@@ -2,6 +2,12 @@
 ################################################################################
 
 ARG BASE_IMAGE=ubuntu:latest
+ARG S6_BASE_IMAGE=shinsenter/s6-overlay
+ARG S6_VERSION=latest
+
+################################################################################
+
+FROM ${S6_BASE_IMAGE}:latest as source
 
 ################################################################################
 
@@ -19,58 +25,6 @@ ADD root/ /
 RUN echo "🤖 Updating packages..."
 RUN apt-update
 RUN apt-install ca-certificates
-
-################################################################################
-
-# extracts s6-overlay bundles into a temporary image
-FROM base as source
-
-# sets version for s6 overlay
-ARG S6_VERSION
-ARG S6_SRC_DEP="wget xz-utils"
-ARG S6_SRC_URL="https://github.com/just-containers/s6-overlay/releases/download"
-
-# checks build argument
-RUN if [ -z "$S6_VERSION" ]; then \
-        echo "Please set S6_VERSION build argument."; exit 1; \
-    fi
-
-# adds build dependencies
-RUN apt-update && apt-install $S6_SRC_DEP
-RUN touch /etc/wgetrc \
-    && echo 'ca_certificate=/etc/ssl/certs/ca-certificates.crt' >>/etc/wgetrc
-
-# detect system arch then select the right version of s6
-RUN SYS_ARCH=$(uname -m); \
-    case "$SYS_ARCH" in \
-        aarch64 ) export S6_ARCH='aarch64' ;; \
-        arm*    ) export S6_ARCH='armhf'   ;; \
-        i4+     ) export S6_ARCH='i486'    ;; \
-        i6+     ) export S6_ARCH='i686'    ;; \
-        riscv64 ) export S6_ARCH='riscv64' ;; \
-        s390*   ) export S6_ARCH='s390x'   ;; \
-        *       ) export S6_ARCH='x86_64'  ;; \
-    esac; \
-    \
-    # adds s6 overlay
-    echo "⬇️ Downloading s6 overlay:${S6_ARCH}-${S6_VERSION} for ${SYS_ARCH}..." \
-    && S6_DIR=/usr/src/s6/ \
-    && mkdir -p $S6_DIR \
-    && untar (){ \
-        echo "  ⏬ Downloading $1"; \
-        wget -O- $1 | tar Jxp -C ${2:-"$S6_DIR"}; \
-    } \
-    && untar ${S6_SRC_URL}/${S6_VERSION}/s6-overlay-noarch.tar.xz \
-    && untar ${S6_SRC_URL}/${S6_VERSION}/s6-overlay-${S6_ARCH}.tar.xz \
-    && du -sh $S6_DIR
-
-################################################################################
-
-# the build stage
-FROM base as build
-
-# copies s6-overlay from source
-COPY --from=source /usr/src/s6/ /
 
 # sets GID and UID
 ENV PUID=9999
@@ -91,7 +45,10 @@ RUN apt-cleanup
 FROM scratch
 
 # copies from from build stage
-COPY --from=build / /
+COPY --from=base / /
+
+# copies s6-overlay from source
+COPY --from=source / /
 ENTRYPOINT ["/init"]
 
 ################################################################################
