@@ -36,7 +36,7 @@ curlhash .dep-ondrej-php.txt    'http://ppa.launchpad.net/ondrej/php/ubuntu/dist
 curlhash .dep-ondrej-apache.txt 'http://ppa.launchpadcontent.net/ondrej/apache2/ubuntu/dists/?C=M;O=D'
 curlhash .dep-ondrej-nginx.txt  'http://ppa.launchpadcontent.net/ondrej/nginx-mainline/ubuntu/dists/?C=M;O=D'
 
-treehash base.txt    S6_VERSION.txt src/base/
+treehash base.txt    S6_VERSION.txt src/base-ubuntu/
 treehash cli.txt     base.txt .dep-ondrej-php.txt src/php/cli/
 treehash fpm.txt     cli.txt src/php/fpm/
 treehash servers.txt fpm.txt .dep-ondrej-apache.txt .dep-ondrej-nginx.txt src/servers/

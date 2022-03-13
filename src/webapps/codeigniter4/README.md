@@ -4,7 +4,7 @@ Start creating beautiful CodeIgniter 4 websites with ease. Powered by shinsenter
 
 https://hub.docker.com/r/shinsenter/codeigniter4
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/codeigniter4)](https://hub.docker.com/r/shinsenter/codeigniter4) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/codeigniter4?label=shinsenter%2Fcodeigniter4)](https://hub.docker.com/r/shinsenter/codeigniter4/tags)
+[![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/codeigniter4)](https://hub.docker.com/r/shinsenter/codeigniter4) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/codeigniter4/latest?label=shinsenter%2Fcodeigniter4)](https://hub.docker.com/r/shinsenter/codeigniter4/tags)
 
 * * *
 

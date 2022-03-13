@@ -4,7 +4,7 @@ Ubuntu 20.04 (Focal) Docker base image with s6-overlay v3 and OpenSSL included.
 
 https://hub.docker.com/r/shinsenter/s6-ubuntu
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/s6-ubuntu)](https://hub.docker.com/r/shinsenter/s6-ubuntu) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/s6-ubuntu?label=shinsenter%2Fs6-ubuntu)](https://hub.docker.com/r/shinsenter/s6-ubuntu/tags)
+[![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/s6-ubuntu)](https://hub.docker.com/r/shinsenter/s6-ubuntu) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/s6-ubuntu/latest?label=shinsenter%2Fs6-ubuntu)](https://hub.docker.com/r/shinsenter/s6-ubuntu/tags)
 
 * * *
 

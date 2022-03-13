@@ -4,7 +4,7 @@ The World's smallest Ubuntu-based Docker image for phpMyAdmin. Powered by shinse
 
 https://hub.docker.com/r/shinsenter/phpmyadmin
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/phpmyadmin)](https://hub.docker.com/r/shinsenter/phpmyadmin) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/phpmyadmin?label=shinsenter%2Fphpmyadmin)](https://hub.docker.com/r/shinsenter/phpmyadmin/tags)
+[![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/phpmyadmin)](https://hub.docker.com/r/shinsenter/phpmyadmin) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/phpmyadmin/latest?label=shinsenter%2Fphpmyadmin)](https://hub.docker.com/r/shinsenter/phpmyadmin/tags)
 
 * * *
 

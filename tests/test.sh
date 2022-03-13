@@ -15,7 +15,8 @@ echo "🤖 Starting building S6 ${S6_VERSION} and \
 php:${PHP_VERSION} images for platform ${BUILD_PLATFORM}..."
 
 echo && date \
-&& docker-compose -f $TEST_DIR/docker-compose.base.yml build \
+&& docker-compose -f $TEST_DIR/docker-compose.base-s6.yml build \
+&& docker-compose -f $TEST_DIR/docker-compose.base-ubuntu.yml build \
 && docker-compose -f $TEST_DIR/docker-compose.cli.yml build \
 && docker-compose -f $TEST_DIR/docker-compose.fpm.yml build \
 && docker-compose -f $TEST_DIR/docker-compose.server.yml build \

@@ -4,7 +4,7 @@ Start creating beautiful Wordpress websites with ease. Powered by shinsenter/php
 
 https://hub.docker.com/r/shinsenter/wordpress
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/wordpress)](https://hub.docker.com/r/shinsenter/wordpress) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/wordpress?label=shinsenter%2Fwordpress)](https://hub.docker.com/r/shinsenter/wordpress/tags)
+[![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/wordpress)](https://hub.docker.com/r/shinsenter/wordpress) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/wordpress/latest?label=shinsenter%2Fwordpress)](https://hub.docker.com/r/shinsenter/wordpress/tags)
 
 * * *
 

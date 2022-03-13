@@ -4,7 +4,7 @@ Start creating beautiful Symfony websites with ease. Powered by shinsenter/php.
 
 https://hub.docker.com/r/shinsenter/symfony
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/symfony)](https://hub.docker.com/r/shinsenter/symfony) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/symfony?label=shinsenter%2Fsymfony)](https://hub.docker.com/r/shinsenter/symfony/tags)
+[![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/symfony)](https://hub.docker.com/r/shinsenter/symfony) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/symfony/latest?label=shinsenter%2Fsymfony)](https://hub.docker.com/r/shinsenter/symfony/tags)
 
 * * *
 

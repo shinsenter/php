@@ -4,7 +4,7 @@
 
 https://hub.docker.com/r/shinsenter/phpfpm-nginx
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/phpfpm-nginx)](https://hub.docker.com/r/shinsenter/phpfpm-nginx) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/phpfpm-nginx?label=shinsenter%2Fphpfpm-nginx)](https://hub.docker.com/r/shinsenter/phpfpm-nginx/tags)
+[![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/phpfpm-nginx)](https://hub.docker.com/r/shinsenter/phpfpm-nginx) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/phpfpm-nginx/latest?label=shinsenter%2Fphpfpm-nginx)](https://hub.docker.com/r/shinsenter/phpfpm-nginx/tags)
 
 * * *
 

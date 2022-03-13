@@ -4,7 +4,7 @@
 
 https://hub.docker.com/r/shinsenter/phpfpm-apache
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/phpfpm-apache)](https://hub.docker.com/r/shinsenter/phpfpm-apache) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/phpfpm-apache?label=shinsenter%2Fphpfpm-apache)](https://hub.docker.com/r/shinsenter/phpfpm-apache/tags)
+[![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/phpfpm-apache)](https://hub.docker.com/r/shinsenter/phpfpm-apache) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/phpfpm-apache/latest?label=shinsenter%2Fphpfpm-apache)](https://hub.docker.com/r/shinsenter/phpfpm-apache/tags)
 
 * * *
 
