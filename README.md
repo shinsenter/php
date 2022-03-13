@@ -1,10 +1,12 @@
 # shinsenter/php
 
-🧭 Production-ready Docker images for PHP applications, support CLI and standalone web servers.
+🧭 Production-ready Docker images for PHP, support PHP CLI and many types of PHP web applications.
 
 https://hub.docker.com/r/shinsenter/php
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/php)](https://hub.docker.com/r/shinsenter/php) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/php/latest?label=shinsenter%2Fphp)](https://hub.docker.com/r/shinsenter/php/tags) [![Publish Images (shinsenter/php)](https://github.com/shinsenter/php/actions/workflows/publish-images.yml/badge.svg?branch=main)](https://github.com/shinsenter/php/actions/workflows/publish-images.yml)
+
+[![shinsenter/php](https://repository-images.githubusercontent.com/458053748/656fbcf4-7b70-4d98-aa17-2b562dc270b2)](https://hub.docker.com/r/shinsenter/php)
 
 * * *
 
