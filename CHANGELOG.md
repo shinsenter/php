@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.6.0 - 2022-03-13
+
+Added images which contain only the unpacked s6-overlay as a multi-platform build stage.
+
+https://hub.docker.com/r/shinsenter/s6-overlay
+
+[![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/s6-overlay)](https://hub.docker.com/r/shinsenter/s6-overlay) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/s6-overlay/latest?label=shinsenter%2Fs6-overlay)](https://hub.docker.com/r/shinsenter/s6-overlay/tags)
+
+### Usage
+
+The `shinsenter/s6-overlay` image is not intended to be used directly, but rather consumed in other Dockerfiles as a multi-platform and reusable build stage.
+
+```Dockerfile
+FROM ubuntu
+
+# adds file from the shinsenter/s6-overlay image
+COPY --from=shinsenter/s6-overlay / /
+ENTRYPOINT ["/init"]
+
+# runs other commands
+RUN ...
+
+```
 ## 1.5.0 - 2022-03-12
 
 - Small bug fixes.
@@ -30,6 +53,7 @@ ENV WEBHOME="/var/www/html"
 
 ################################################################################
 
+
 ```
 For Apache and Nginx base images, there are additional environment variables to specify to the root directory within this WEBHOME directory.
 
@@ -47,6 +71,7 @@ ENV APACHE_DOCUMENT_ROOT=""
 
 ################################################################################
 
+
 ```
 ### shinsenter/php:fpm-nginx
 
@@ -61,6 +86,7 @@ ENV WEBHOME="/var/www/html"
 ENV NGINX_DOCUMENT_ROOT=""
 
 ################################################################################
+
 
 ```
 ## 1.0.0 - 2022-03-04
