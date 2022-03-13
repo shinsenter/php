@@ -4,7 +4,7 @@
 
 https://hub.docker.com/r/shinsenter/php
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/php)](https://hub.docker.com/r/shinsenter/php) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/php?label=shinsenter%2Fphp)](https://hub.docker.com/r/shinsenter/php/tags) [![Publish Images (shinsenter/php)](https://github.com/shinsenter/php/actions/workflows/publish-images.yml/badge.svg?branch=main)](https://github.com/shinsenter/php/actions/workflows/publish-images.yml)
+[![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/php)](https://hub.docker.com/r/shinsenter/php) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/php/latest?label=shinsenter%2Fphp)](https://hub.docker.com/r/shinsenter/php/tags) [![Publish Images (shinsenter/php)](https://github.com/shinsenter/php/actions/workflows/publish-images.yml/badge.svg?branch=main)](https://github.com/shinsenter/php/actions/workflows/publish-images.yml)
 
 * * *
 
@@ -24,7 +24,26 @@ Let's check it out!!
 
 This project is built on top of my Docker base image, which is Ubuntu 20.04 (Focal) with s6-overlay v3 and OpenSSL included. Learn more at: [shinsenter/s6-ubuntu](https://hub.docker.com/r/shinsenter/s6-ubuntu).
 
-## Available PHP modules
+## Usage
+
+### Docker Pull command
+
+```bash
+docker pull shinsenter/php:${PHP_VERSION}-${PHP_VARIATION}
+```
+
+### Docker Compose example
+
+```yml
+version: '3'
+services:
+  my-container:
+    image: shinsenter/php:${PHP_VERSION}-${PHP_VARIATION}
+```
+
+View more image tags at [shinsenter/php/tags](https://hub.docker.com/r/shinsenter/php/tags).
+
+### Available PHP modules
 
 ```
 apcu
@@ -84,25 +103,6 @@ Then type these command:
 apt-update && apt-install <package_name>
 ```
 
-## Usage
-
-### Docker Pull command
-
-```bash
-docker pull shinsenter/php:${PHP_VERSION}-${PHP_VARIATION}
-```
-
-### Docker Compose example
-
-```yml
-version: '3'
-services:
-  my-container:
-    image: shinsenter/php:${PHP_VERSION}-${PHP_VARIATION}
-```
-
-View more image tags at [shinsenter/php/tags](https://hub.docker.com/r/shinsenter/php/tags).
-
 ## Available images
 
 ### PHP version
@@ -115,16 +115,18 @@ View more image tags at [shinsenter/php/tags](https://hub.docker.com/r/shinsente
 
 - [`shinsenter/php:${PHP_VERSION}-cli`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=cli) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/cli?label=shinsenter%2Fphp%3Acli)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=cli)
 - [`shinsenter/php:${PHP_VERSION}-fpm`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/fpm?label=shinsenter%2Fphp%3Afpm)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm)
-- [`shinsenter/php:${PHP_VERSION}-fpm-apache`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm-apache) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/fpm-apache?label=shinsenter%2Fphp%3Afpm-apache)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm-apache)
-- [`shinsenter/php:${PHP_VERSION}-fpm-nginx`](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm-nginx) <br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/php/fpm-nginx?label=shinsenter%2Fphp%3Afpm-nginx)](https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm-nginx)
+
+### Images for Web applications
+- [`shinsenter/phpfpm-apache`](https://hub.docker.com/r/shinsenter/phpfpm-apache/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/phpfpm-apache/latest?label=shinsenter%2Fphpfpm-apache)](https://hub.docker.com/r/shinsenter/phpfpm-apache/tags)
+- [`shinsenter/phpfpm-nginx`](https://hub.docker.com/r/shinsenter/phpfpm-nginx/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/phpfpm-nginx/latest?label=shinsenter%2Fphpfpm-nginx)](https://hub.docker.com/r/shinsenter/phpfpm-nginx/tags)
 
 ### Images for popular PHP projects
 
-- [`shinsenter/wordpress`](https://hub.docker.com/r/shinsenter/wordpress/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/wordpress?label=shinsenter%2Fwordpress)](https://hub.docker.com/r/shinsenter/wordpress/tags)
-- [`shinsenter/phpmyadmin`](https://hub.docker.com/r/shinsenter/phpmyadmin/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/phpmyadmin?label=shinsenter%2Fphpmyadmin)](https://hub.docker.com/r/shinsenter/phpmyadmin/tags)
-- [`shinsenter/laravel`](https://hub.docker.com/r/shinsenter/laravel/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/laravel?label=shinsenter%2Flaravel)](https://hub.docker.com/r/shinsenter/laravel/tags)
-- [`shinsenter/codeigniter4`](https://hub.docker.com/r/shinsenter/codeigniter4/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/codeigniter4?label=shinsenter%2Fcodeigniter4)](https://hub.docker.com/r/shinsenter/codeigniter4/tags)
-- [`shinsenter/symfony`](https://hub.docker.com/r/shinsenter/symfony/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/symfony?label=shinsenter%2Fsymfony)](https://hub.docker.com/r/shinsenter/symfony/tags)
+- [`shinsenter/wordpress`](https://hub.docker.com/r/shinsenter/wordpress/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/wordpress/latest?label=shinsenter%2Fwordpress)](https://hub.docker.com/r/shinsenter/wordpress/tags)
+- [`shinsenter/phpmyadmin`](https://hub.docker.com/r/shinsenter/phpmyadmin/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/phpmyadmin/latest?label=shinsenter%2Fphpmyadmin)](https://hub.docker.com/r/shinsenter/phpmyadmin/tags)
+- [`shinsenter/laravel`](https://hub.docker.com/r/shinsenter/laravel/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/laravel/latest?label=shinsenter%2Flaravel)](https://hub.docker.com/r/shinsenter/laravel/tags)
+- [`shinsenter/codeigniter4`](https://hub.docker.com/r/shinsenter/codeigniter4/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/codeigniter4/latest?label=shinsenter%2Fcodeigniter4)](https://hub.docker.com/r/shinsenter/codeigniter4/tags)
+- [`shinsenter/symfony`](https://hub.docker.com/r/shinsenter/symfony/tags)<br/> [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/shinsenter/symfony/latest?label=shinsenter%2Fsymfony)](https://hub.docker.com/r/shinsenter/symfony/tags)
 
 ## Customize your own image
 

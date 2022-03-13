@@ -4,7 +4,7 @@ Start creating beautiful Laravel websites with ease. Powered by shinsenter/php.
 
 https://hub.docker.com/r/shinsenter/laravel
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/laravel)](https://hub.docker.com/r/shinsenter/laravel) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/laravel?label=shinsenter%2Flaravel)](https://hub.docker.com/r/shinsenter/laravel/tags)
+[![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/laravel)](https://hub.docker.com/r/shinsenter/laravel) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/laravel/latest?label=shinsenter%2Flaravel)](https://hub.docker.com/r/shinsenter/laravel/tags)
 
 * * *
 
