@@ -58,6 +58,3 @@ ENV PATH /composer/vendor/bin:$PATH
 ENV PHP_CONF_DIR=/etc/php/cli/conf.d
 
 ################################################################################
-
-ARG   BUILD_NUMBER
-LABEL build_number="$BUILD_NUMBER"

@@ -25,6 +25,3 @@ WORKDIR $WEBHOME
 ENV SYMFONY_INSTALL_DEVKIT=false
 
 ################################################################################
-
-ARG   BUILD_NUMBER
-LABEL build_number="$BUILD_NUMBER"

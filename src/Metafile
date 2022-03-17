@@ -1,0 +1,21 @@
+################################################################################
+
+ARG BUILD_DATE
+ARG BUILD_DESC
+ARG BUILD_NAME
+ARG BUILD_VERSION
+ARG VCS_REF
+
+LABEL org.label-schema.schema-version="1.0"
+LABEL org.label-schema.name="$BUILD_NAME"
+LABEL org.label-schema.build-date="$BUILD_DATE"
+LABEL org.label-schema.version="$BUILD_VERSION"
+LABEL org.label-schema.description="$BUILD_DESC"
+LABEL org.label-schema.vcs-ref="$VCS_REF"
+LABEL org.label-schema.url="https://hub.docker.com/r/$BUILD_NAME"
+LABEL org.label-schema.vcs-url="https://github.com/shinsenter/php"
+LABEL org.label-schema.vendor="SHIN Company"
+LABEL maintainer="shin@shin.company"
+LABEL publisher="https://hub.docker.com/u/shinsenter"
+
+################################################################################

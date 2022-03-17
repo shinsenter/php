@@ -49,6 +49,3 @@ ENV PMA_HOST=mysql
 # ENV PMA_QUERYHISTORYMAX=
 
 ################################################################################
-
-ARG   BUILD_NUMBER
-LABEL build_number="$BUILD_NUMBER"

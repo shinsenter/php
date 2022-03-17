@@ -57,6 +57,3 @@ ENV MSMTP_RELAY_SERVER_HOSTNAME=mailhog
 ENV MSMTP_RELAY_SERVER_PORT=1025
 
 ################################################################################
-
-ARG   BUILD_NUMBER
-LABEL build_number="$BUILD_NUMBER"

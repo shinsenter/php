@@ -55,3 +55,16 @@ ENV WEBHOME="/var/www/html"
 # sets the working directory
 WORKDIR $WEBHOME
 ```
+
+## Supported platforms
+
+Currently, the supported architectures are:
+
+- linux/amd64
+- linux/arm/v7
+- linux/arm64
+- linux/ppc64le
+- linux/riscv64
+- linux/s390x
+
+You do not need to use a platform-specific tag (although you can), Docker will automatically choose the appropriate architecture.

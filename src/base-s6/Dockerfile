@@ -61,8 +61,3 @@ COPY --from=build /usr/src/s6/ /
 ENTRYPOINT ["/init"]
 
 ################################################################################
-
-ARG   BUILD_NUMBER
-LABEL build_number="$BUILD_NUMBER"
-LABEL maintainer="shin@shin.company"
-LABEL publisher="https://hub.docker.com/u/shinsenter"

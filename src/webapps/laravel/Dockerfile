@@ -31,6 +31,3 @@ ENV LARAVEL_LINK_STORAGE=true
 ENV LARAVEL_AUTO_MIGRATION=false
 
 ################################################################################
-
-ARG   BUILD_NUMBER
-LABEL build_number="$BUILD_NUMBER"

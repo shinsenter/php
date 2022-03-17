@@ -20,6 +20,3 @@ ENV APACHE_DOCUMENT_ROOT="/public"
 WORKDIR $WEBHOME
 
 ################################################################################
-
-ARG   BUILD_NUMBER
-LABEL build_number="$BUILD_NUMBER"

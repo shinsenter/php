@@ -56,7 +56,6 @@ ENV PGID=9999
 
 # sets web server root path
 ENV WEBHOME="/var/www/html"
-ENV APACHE_DOCUMENT_ROOT="/public"
 
 # sets the working directory
 WORKDIR $WEBHOME
@@ -65,4 +64,18 @@ WORKDIR $WEBHOME
 
 # Please check https://hub.docker.com/r/shinsenter/php
 # for more details of PHP environment variables.
+
+# Please check https://hub.docker.com/r/shinsenter/phpfpm-apache
+# for more details of Apache environment variables.
 ```
+
+## Supported platforms
+
+Currently, the supported architectures are:
+
+- linux/amd64
+- linux/arm/v7
+- linux/arm64
+- linux/ppc64le
+
+You do not need to use a platform-specific tag (although you can), Docker will automatically choose the appropriate architecture.

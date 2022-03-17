@@ -188,6 +188,9 @@ ENV PHP_MAX_EXECUTION_TIME="99"
 # Set the maximum amount of memory in bytes that a script is allowed to allocate
 ENV PHP_MEMORY_LIMIT="256M"
 
+# Limit the files that can be accessed by PHP to the specified directory-tree
+ENV PHP_OPEN_BASEDIR="/var/www/html"
+
 # Sets max size of post data allowed
 ENV PHP_POST_MAX_SIZE="100M"
 
@@ -247,6 +250,17 @@ ENV PHP_OPCACHE_SAVE_COMMENTS="1"
 # every opcache.revalidate_freq seconds
 ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS="1"
 ```
+
+## Supported platforms
+
+Currently, the supported architectures are:
+
+- linux/amd64
+- linux/arm/v7
+- linux/arm64
+- linux/ppc64le
+
+You do not need to use a platform-specific tag (although you can), Docker will automatically choose the appropriate architecture.
 
 ## Thank you [@serversideup](https://github.com/serversideup)
 

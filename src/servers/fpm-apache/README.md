@@ -97,3 +97,14 @@ ENV APACHE_THREADS_PER_CHILD="25"
 # Please check https://hub.docker.com/r/shinsenter/php
 # for more details of PHP environment variables.
 ```
+
+## Supported platforms
+
+Currently, the supported architectures are:
+
+- linux/amd64
+- linux/arm/v7
+- linux/arm64
+- linux/ppc64le
+
+You do not need to use a platform-specific tag (although you can), Docker will automatically choose the appropriate architecture.

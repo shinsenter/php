@@ -77,6 +77,3 @@ ENV APACHE_THREAD_LIMIT=64
 ENV APACHE_THREADS_PER_CHILD=25
 
 ################################################################################
-
-ARG   BUILD_NUMBER
-LABEL build_number="$BUILD_NUMBER"
