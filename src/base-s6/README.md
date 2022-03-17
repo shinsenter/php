@@ -31,7 +31,7 @@ RUN ...
 
 ## Supported platforms
 
-This repository uses multi-platform images via Docker manifests. You do not need to use a platform-specific tag (although you can); Docker will automatically choose the appropriate architecture. Currently, the supported architectures are:
+This repository uses multi-platform images via Docker manifests. Currently, the supported architectures are:
 
 - linux/amd64
 - linux/arm/v7
@@ -39,3 +39,5 @@ This repository uses multi-platform images via Docker manifests. You do not need
 - linux/ppc64le
 - linux/riscv64
 - linux/s390x
+
+You do not need to use a platform-specific tag (although you can), Docker will automatically choose the appropriate architecture.

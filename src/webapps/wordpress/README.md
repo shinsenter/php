@@ -56,18 +56,37 @@ ENV PGID=9999
 
 # sets web server root path
 ENV WEBHOME="/var/www/html"
-ENV APACHE_DOCUMENT_ROOT=""
 
 # sets the working directory
 WORKDIR $WEBHOME
 
 # ==========================================================
 
-# The locale for a fresh Wordpress
+# the locale for a fresh Wordpress
 ENV WORDPRESS_LOCALE="en_US"
 
 # ==========================================================
 
+# recommended settings
+ENV PHP_ERROR_REPORTING="E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_WARNING"
+ENV PHP_MAX_EXECUTION_TIME=300
+ENV PHP_POST_MAX_SIZE=100M
+ENV PHP_UPLOAD_MAX_FILE_SIZE=10M
+
 # Please check https://hub.docker.com/r/shinsenter/php
 # for more details of PHP environment variables.
+
+# Please check https://hub.docker.com/r/shinsenter/phpfpm-apache
+# for more details of Apache environment variables.
 ```
+
+## Supported platforms
+
+Currently, the supported architectures are:
+
+- linux/amd64
+- linux/arm/v7
+- linux/arm64
+- linux/ppc64le
+
+You do not need to use a platform-specific tag (although you can), Docker will automatically choose the appropriate architecture.

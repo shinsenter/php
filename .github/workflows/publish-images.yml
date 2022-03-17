@@ -47,15 +47,16 @@ jobs:
       -
         id: config
         run: |
-          echo -e "\n\n$(cat ./SPONSOR.md)" >>./src/base-s6/README.md
-          echo "::set-output name=date::$(date +'%Y%m%d')"
-          echo "::set-output name=description::$(sed '3q;d' ./src/base-s6/README.md)"
-          echo "::set-output name=s6_version::$(cat ./S6_VERSION.txt)"
+          ./.git-config/hooks/pre-commit
+          ./.git-config/hooks/pre-build src/base-s6
+          echo "::set-output name=BUILD_NAME::${{ matrix.image }}"
+          echo "::set-output name=BUILD_VERSION::$(cat ./S6_VERSION.txt)"
+          echo "::set-output name=S6_VERSION::$(cat ./S6_VERSION.txt)"
       -
         uses: actions/cache@v2
         with:
           path: /tmp/buildx
-          key: ${{ runner.os }}-buildx-${{ steps.config.outputs.s6_version }}
+          key: ${{ runner.os }}-buildx-${{ steps.config.outputs.S6_VERSION }}
           restore-keys: "${{ runner.os }}-buildx-"
       -
         uses: docker/login-action@v1
@@ -63,7 +64,7 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       -
-        name: Building ${{ matrix.image }}:${{ steps.config.outputs.s6_version }}
+        name: Building ${{ steps.config.outputs.BUILD_NAME }}:${{ steps.config.outputs.BUILD_VERSION }}
         uses: docker/build-push-action@v2
         with:
           push: true
@@ -72,19 +73,23 @@ jobs:
           context: ./src/base-s6/
           platforms: linux/amd64,linux/arm/v7,linux/arm64,linux/ppc64le,linux/riscv64,linux/s390x
           build-args: |
-            BUILD_NUMBER=${{ steps.config.outputs.date }}-${{ steps.config.outputs.s6_version }}
-            S6_VERSION=${{ steps.config.outputs.s6_version }}
+            BUILD_NAME=${{ steps.config.outputs.BUILD_NAME }}
+            BUILD_VERSION=${{ steps.config.outputs.BUILD_VERSION }}
+            BUILD_DESC=${{ steps.config.outputs.BUILD_DESC }}
+            BUILD_DATE=${{ steps.config.outputs.BUILD_DATE }}
+            VCS_REF=${{ steps.config.outputs.VCS_REF }}
+            S6_VERSION=${{ steps.config.outputs.S6_VERSION }}
           tags: |
-            ${{ matrix.image }}:${{ steps.config.outputs.s6_version }}
-            ${{ matrix.image }}:latest
+            ${{ steps.config.outputs.BUILD_NAME }}:${{ steps.config.outputs.S6_VERSION }}
+            ${{ steps.config.outputs.BUILD_NAME }}:latest
       -
-        name: Updating ${{ matrix.image }}/README.md
+        name: Updating ${{ steps.config.outputs.BUILD_NAME }}/README.md
         uses: peter-evans/dockerhub-description@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-          repository: ${{ matrix.image }}
-          short-description: '${{ steps.config.outputs.description }}'
+          repository: ${{ steps.config.outputs.BUILD_NAME }}
+          short-description: '${{ steps.config.outputs.BUILD_DESC }}'
           readme-filepath: ./src/base-s6/README.md
 
   ##############################################################################
@@ -114,12 +119,11 @@ jobs:
         id: config
         run: |
           ./.git-config/hooks/pre-commit
-          mkdir -p /tmp/buildx
+          ./.git-config/hooks/pre-build src/base-ubuntu
           cat versions/base.txt
-          echo -e "\n\n$(cat ./SPONSOR.md)" >>./src/base-ubuntu/README.md
-          echo "::set-output name=date::$(date +'%Y%m%d')"
-          echo "::set-output name=description::$(sed '3q;d' ./src/base-ubuntu/README.md)"
-          echo "::set-output name=s6_version::$(cat ./S6_VERSION.txt)"
+          echo "::set-output name=BUILD_NAME::${{ matrix.image }}"
+          echo "::set-output name=BUILD_VERSION::${{ matrix.version }}-s6-$(cat ./S6_VERSION.txt)"
+          echo "::set-output name=S6_VERSION::$(cat ./S6_VERSION.txt)"
       -
         uses: actions/cache@v2
         with:
@@ -133,31 +137,35 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       -
-        name: Building ${{ matrix.image }}:${{ matrix.version }}
+        name: Building ${{ steps.config.outputs.BUILD_NAME }}:${{ steps.config.outputs.BUILD_VERSION }}
         uses: docker/build-push-action@v2
         with:
           push: true
           cache-from: type=local,src=/tmp/buildx
           cache-to: type=local,dest=/tmp/buildx-new,mode=max
           context: ./src/base-ubuntu/
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm/v7,linux/arm64,linux/ppc64le,linux/riscv64,linux/s390x
           build-args: |
-            BUILD_NUMBER=${{ steps.config.outputs.date }}-${{ hashFiles('versions/base.txt') }}
+            BUILD_NAME=${{ steps.config.outputs.BUILD_NAME }}
+            BUILD_VERSION=${{ steps.config.outputs.BUILD_VERSION }}
+            BUILD_DESC=${{ steps.config.outputs.BUILD_DESC }}
+            BUILD_DATE=${{ steps.config.outputs.BUILD_DATE }}
+            VCS_REF=${{ steps.config.outputs.VCS_REF }}
             BASE_IMAGE=${{ matrix.base }}:${{ matrix.version }}
-            S6_VERSION=${{ steps.config.outputs.s6_version }}
+            S6_VERSION=${{ steps.config.outputs.S6_VERSION }}
           tags: |
-            ${{ matrix.image }}:${{ matrix.version }}-s6-${{ steps.config.outputs.s6_version }}
-            ${{ matrix.image }}:${{ matrix.version }}
-            ${{ matrix.image }}:s6-${{ steps.config.outputs.s6_version }}
-            ${{ matrix.image }}:latest
+            ${{ steps.config.outputs.BUILD_NAME }}:${{ steps.config.outputs.BUILD_VERSION }}
+            ${{ steps.config.outputs.BUILD_NAME }}:${{ matrix.version }}
+            ${{ steps.config.outputs.BUILD_NAME }}:s6-${{ steps.config.outputs.S6_VERSION }}
+            ${{ steps.config.outputs.BUILD_NAME }}:latest
       -
-        name: Updating ${{ matrix.image }}/README.md
+        name: Updating ${{ steps.config.outputs.BUILD_NAME }}/README.md
         uses: peter-evans/dockerhub-description@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-          repository: ${{ matrix.image }}
-          short-description: '${{ steps.config.outputs.description }}'
+          repository: ${{ steps.config.outputs.BUILD_NAME }}
+          short-description: '${{ steps.config.outputs.BUILD_DESC }}'
           readme-filepath: ./src/base-ubuntu/README.md
       -
         run: |
@@ -190,11 +198,10 @@ jobs:
         id: config
         run: |
           ./.git-config/hooks/pre-commit
-          mkdir -p /tmp/buildx
-          cat versions/cli.txt
+          ./.git-config/hooks/pre-build src/php/fpm
           cat versions/fpm.txt
-          echo "::set-output name=date::$(date +'%Y%m%d')"
-          echo "::set-output name=description::$(sed '3q;d' ./README.md)"
+          echo "::set-output name=BUILD_NAME::${{ matrix.image }}"
+          echo "::set-output name=BUILD_VERSION::${{ matrix.version }}"
       -
         uses: actions/cache@v2
         with:
@@ -208,39 +215,46 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       -
-        name: Building ${{ matrix.image }}:cli
+        name: Building ${{ steps.config.outputs.BUILD_NAME }}:${{ steps.config.outputs.BUILD_VERSION }}-cli
         uses: docker/build-push-action@v2
         with:
           push: true
           cache-from: type=local,src=/tmp/buildx
           cache-to: type=local,dest=/tmp/buildx,mode=max
           context: ./src/php/cli/
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm/v7,linux/arm64,linux/ppc64le
           build-args: |
-            BUILD_NUMBER=${{ steps.config.outputs.date }}-${{ hashFiles('versions/cli.txt') }}
-            BASE_IMAGE=shinsenter/s6-ubuntu:focal
+            BUILD_NAME=${{ steps.config.outputs.BUILD_NAME }}
+            BUILD_VERSION=${{ steps.config.outputs.BUILD_VERSION }}-cli
+            BUILD_DESC=${{ steps.config.outputs.BUILD_DESC }}
+            BUILD_DATE=${{ steps.config.outputs.BUILD_DATE }}
+            VCS_REF=${{ steps.config.outputs.VCS_REF }}
+            BASE_IMAGE=shinsenter/s6-ubuntu:latest
             PHP_VERSION=${{ matrix.version }}
           tags: |
-            ${{ matrix.image }}:cli
-            ${{ matrix.image }}:${{ matrix.version }}
-            ${{ matrix.image }}:${{ matrix.version }}-cli
-            ${{ matrix.image }}:latest
+            ${{ steps.config.outputs.BUILD_NAME }}:cli
+            ${{ steps.config.outputs.BUILD_NAME }}:${{ steps.config.outputs.BUILD_VERSION }}
+            ${{ steps.config.outputs.BUILD_NAME }}:${{ steps.config.outputs.BUILD_VERSION }}-cli
+            ${{ steps.config.outputs.BUILD_NAME }}:latest
       -
-        name: Building ${{ matrix.image }}:fpm
+        name: Building ${{ steps.config.outputs.BUILD_NAME }}:${{ steps.config.outputs.BUILD_VERSION }}-fpm
         uses: docker/build-push-action@v2
         with:
           push: true
           cache-from: type=local,src=/tmp/buildx
           cache-to: type=local,dest=/tmp/buildx-new,mode=max
           context: ./src/php/fpm/
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm/v7,linux/arm64,linux/ppc64le
           build-args: |
-            BUILD_NUMBER=${{ steps.config.outputs.date }}-${{ hashFiles('versions/fpm.txt') }}
-            BASE_IMAGE=${{ matrix.image }}
+            BUILD_NAME=${{ steps.config.outputs.BUILD_NAME }}
+            BUILD_VERSION=${{ steps.config.outputs.BUILD_VERSION }}-fpm
+            BUILD_DESC=${{ steps.config.outputs.BUILD_DESC }}
+            BUILD_DATE=${{ steps.config.outputs.BUILD_DATE }}
+            VCS_REF=${{ steps.config.outputs.VCS_REF }}
             PHP_VERSION=${{ matrix.version }}
           tags: |
-            ${{ matrix.image }}:fpm
-            ${{ matrix.image }}:${{ matrix.version }}-fpm
+            ${{ steps.config.outputs.BUILD_NAME }}:fpm
+            ${{ steps.config.outputs.BUILD_NAME }}:${{ steps.config.outputs.BUILD_VERSION }}-fpm
       -
         run: |
           rm -rf /tmp/buildx
@@ -264,7 +278,7 @@ jobs:
         id: config
         run: |
           echo -e "\n\n$(cat ./SPONSOR.md)" >>./README.md
-          echo "::set-output name=description::$(sed '3q;d' ./README.md)"
+          echo "::set-output name=BUILD_DESC::$(sed '3q;d' ./README.md)"
       -
         name: Updating ${{ matrix.image }}/README.md
         uses: peter-evans/dockerhub-description@v2
@@ -272,7 +286,7 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
           repository: ${{ matrix.image }}
-          short-description: '${{ steps.config.outputs.description }}'
+          short-description: '${{ steps.config.outputs.BUILD_DESC }}'
           readme-filepath: ./README.md
 
   ##############################################################################
@@ -304,12 +318,10 @@ jobs:
         id: config
         run: |
           ./.git-config/hooks/pre-commit
-          mkdir -p /tmp/buildx
+          ./.git-config/hooks/pre-build src/servers/${{ matrix.variation }}
           cat versions/servers.txt
-          echo -e "\n\n$(cat ./SPONSOR.md)" >>./src/servers/${{ matrix.variation }}/README.md
-          echo "::set-output name=date::$(date +'%Y%m%d')"
-          echo "::set-output name=description::$(sed '3q;d' ./src/servers/${{ matrix.variation }}/README.md)"
-          echo "::set-output name=image_name::shinsenter/php${{ matrix.variation }}"
+          echo "::set-output name=BUILD_NAME::shinsenter/php${{ matrix.variation }}"
+          echo "::set-output name=BUILD_VERSION::php${{ matrix.version }}"
       -
         uses: actions/cache@v2
         with:
@@ -323,31 +335,35 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       -
-        name: Building ${{ steps.config.outputs.image_name }}:${{ matrix.variation }}
+        name: Building ${{ steps.config.outputs.BUILD_NAME }}:${{ steps.config.outputs.BUILD_VERSION }}
         uses: docker/build-push-action@v2
         with:
           push: true
           cache-from: type=local,src=/tmp/buildx
           cache-to: type=local,dest=/tmp/buildx-new,mode=max
           context: ./src/servers/${{ matrix.variation }}/
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm/v7,linux/arm64,linux/ppc64le
           build-args: |
-            BUILD_NUMBER=${{ steps.config.outputs.date }}-${{ hashFiles('versions/servers.txt') }}
+            BUILD_NAME=${{ steps.config.outputs.BUILD_NAME }}
+            BUILD_VERSION=${{ steps.config.outputs.BUILD_VERSION }}
+            BUILD_DESC=${{ steps.config.outputs.BUILD_DESC }}
+            BUILD_DATE=${{ steps.config.outputs.BUILD_DATE }}
+            VCS_REF=${{ steps.config.outputs.VCS_REF }}
             BASE_IMAGE=${{ matrix.image }}
             PHP_VERSION=${{ matrix.version }}
           tags: |
+            ${{ steps.config.outputs.BUILD_NAME }}:${{ steps.config.outputs.BUILD_VERSION }}
+            ${{ steps.config.outputs.BUILD_NAME }}:latest
             ${{ matrix.image }}:${{ matrix.version }}-${{ matrix.variation }}
             ${{ matrix.image }}:${{ matrix.variation }}
-            ${{ steps.config.outputs.image_name }}:php${{ matrix.version }}
-            ${{ steps.config.outputs.image_name }}:latest
       -
-        name: Updating ${{ steps.config.outputs.image_name }}/README.md
+        name: Updating ${{ steps.config.outputs.BUILD_NAME }}/README.md
         uses: peter-evans/dockerhub-description@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-          repository: ${{ steps.config.outputs.image_name }}
-          short-description: '${{ steps.config.outputs.description }}'
+          repository: ${{ steps.config.outputs.BUILD_NAME }}
+          short-description: '${{ steps.config.outputs.BUILD_DESC }}'
           readme-filepath: ./src/servers/${{ matrix.variation }}/README.md
       -
         run: |
@@ -384,12 +400,10 @@ jobs:
         id: config
         run: |
           ./.git-config/hooks/pre-commit
-          mkdir -p /tmp/buildx
+          ./.git-config/hooks/pre-build src/webapps/${{ matrix.app }}
           cat versions/webapps.txt
-          echo -e "\n\n$(cat ./SPONSOR.md)" >>./src/webapps/${{ matrix.app }}/README.md
-          echo "::set-output name=date::$(date +'%Y%m%d')"
-          echo "::set-output name=description::$(sed '3q;d' ./src/webapps/${{ matrix.app }}/README.md)"
-          echo "::set-output name=image_name::shinsenter/${{ matrix.app }}"
+          echo "::set-output name=BUILD_NAME::shinsenter/${{ matrix.app }}"
+          echo "::set-output name=BUILD_VERSION::php${{ matrix.version }}"
       -
         uses: actions/cache@v2
         with:
@@ -403,28 +417,32 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       -
-        name: Building ${{ steps.config.outputs.image_name }}
+        name: Building ${{ steps.config.outputs.BUILD_NAME }}:${{ steps.config.outputs.BUILD_VERSION }}
         uses: docker/build-push-action@v2
         with:
           push: true
           cache-from: type=local,src=/tmp/buildx
           cache-to: type=local,dest=/tmp/buildx-new,mode=max
           context: ./src/webapps/${{ matrix.app }}/
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm/v7,linux/arm64,linux/ppc64le
           build-args: |
-            BUILD_NUMBER=${{ steps.config.outputs.date }}-${{ hashFiles('versions/webapps.txt') }}
+            BUILD_NAME=${{ steps.config.outputs.BUILD_NAME }}
+            BUILD_VERSION=${{ steps.config.outputs.BUILD_VERSION }}
+            BUILD_DESC=${{ steps.config.outputs.BUILD_DESC }}
+            BUILD_DATE=${{ steps.config.outputs.BUILD_DATE }}
+            VCS_REF=${{ steps.config.outputs.VCS_REF }}
             PHP_VERSION=${{ matrix.version }}
           tags: |
-            ${{ steps.config.outputs.image_name }}:php${{ matrix.version }}
-            ${{ steps.config.outputs.image_name }}:latest
+            ${{ steps.config.outputs.BUILD_NAME }}:${{ steps.config.outputs.BUILD_VERSION }}
+            ${{ steps.config.outputs.BUILD_NAME }}:latest
       -
-        name: Updating ${{ steps.config.outputs.image_name }}/README.md
+        name: Updating ${{ steps.config.outputs.BUILD_NAME }}/README.md
         uses: peter-evans/dockerhub-description@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-          repository: ${{ steps.config.outputs.image_name }}
-          short-description: '${{ steps.config.outputs.description }}'
+          repository: ${{ steps.config.outputs.BUILD_NAME }}
+          short-description: '${{ steps.config.outputs.BUILD_DESC }}'
           readme-filepath: ./src/webapps/${{ matrix.app }}/README.md
       -
         run: |
