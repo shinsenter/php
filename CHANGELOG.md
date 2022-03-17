@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.7.0 - 2022-03-17
+
+Upgraded Apache2 to v2.4.53 to fix these vulnerabilities.
+
+- [CVE-2022-22720](http://people.ubuntu.com/~ubuntu-security/cve/CVE-2022-22720)
+- [CVE-2022-22719](http://people.ubuntu.com/~ubuntu-security/cve/CVE-2022-22719)
+- [CVE-2022-23943](http://people.ubuntu.com/~ubuntu-security/cve/CVE-2022-23943)
+
+Improved the docker build workflow.
+
 ## 1.6.0 - 2022-03-13
 
 Added images which contain only the unpacked s6-overlay as a multi-platform build stage.
@@ -21,6 +31,7 @@ ENTRYPOINT ["/init"]
 
 # runs other commands
 RUN ...
+
 
 ```
 ## 1.5.0 - 2022-03-12
@@ -54,6 +65,7 @@ ENV WEBHOME="/var/www/html"
 ################################################################################
 
 
+
 ```
 For Apache and Nginx base images, there are additional environment variables to specify to the root directory within this WEBHOME directory.
 
@@ -72,6 +84,7 @@ ENV APACHE_DOCUMENT_ROOT=""
 ################################################################################
 
 
+
 ```
 ### shinsenter/php:fpm-nginx
 
@@ -86,6 +99,7 @@ ENV WEBHOME="/var/www/html"
 ENV NGINX_DOCUMENT_ROOT=""
 
 ################################################################################
+
 
 
 ```
