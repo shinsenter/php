@@ -35,10 +35,13 @@ WORKDIR $WEBHOME
 
 ################################################################################
 
+# overrides parents env variables
+ENV PHP_ERROR_REPORTING="E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_WARNING"
+ENV PHP_MAX_EXECUTION_TIME=300
+ENV PHP_POST_MAX_SIZE=100M
+ENV PHP_UPLOAD_MAX_FILE_SIZE=10M
+
 # set more env variables
 ENV WORDPRESS_LOCALE="en_US"
 
 ################################################################################
-
-ARG   BUILD_NUMBER
-LABEL build_number="$BUILD_NUMBER"

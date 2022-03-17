@@ -56,7 +56,6 @@ ENV PGID=9999
 
 # sets web server root path
 ENV WEBHOME="/var/www/html"
-ENV NGINX_DOCUMENT_ROOT=""
 
 # sets the working directory
 WORKDIR $WEBHOME
@@ -87,6 +86,26 @@ ENV PMA_PASSWORD=
 
 # ==========================================================
 
+# recommended settings
+ENV PHP_MAX_EXECUTION_TIME=600
+ENV PHP_MEMORY_LIMIT=512M
+ENV PHP_POST_MAX_SIZE=2G
+ENV PHP_UPLOAD_MAX_FILE_SIZE=2G
+
 # Please check https://hub.docker.com/r/shinsenter/php
 # for more details of PHP environment variables.
+
+# Please check https://hub.docker.com/r/shinsenter/phpfpm-nginx
+# for more details of Nginx environment variables.
 ```
+
+## Supported platforms
+
+Currently, the supported architectures are:
+
+- linux/amd64
+- linux/arm/v7
+- linux/arm64
+- linux/ppc64le
+
+You do not need to use a platform-specific tag (although you can), Docker will automatically choose the appropriate architecture.
