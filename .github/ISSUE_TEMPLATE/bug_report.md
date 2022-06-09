@@ -10,7 +10,7 @@ assignees:
 <!--
 ================================================
   🔰 Looking for professional support?
-  Please contact: admin@appseeds.net
+  Please contact: shin@shin.company
   Guaranteed response times next business day.
 ================================================
 -->

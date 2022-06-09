@@ -1,0 +1,15 @@
+#!/command/with-contenv bash
+HYPERF_PROJECT="${HYPERF_PROJECT:-hyperf/hyperf-skeleton}"
+HYPERF_ROOT="$(webhome)"
+HYPERF_BIN="$HYPERF_ROOT/bin/hyperf.php"
+
+if [ ! -f "$HYPERF_BIN" ]; then
+    echo; echo "🤖 Installing $HYPERF_PROJECT from scratch"
+    rm -rf $HYPERF_ROOT/public $HYPERF_ROOT/index.*
+    wdo composer-create -d $HYPERF_ROOT/ $HYPERF_PROJECT $HYPERF_ROOT/
+    if [ "$(php -r 'echo PHP_VERSION_ID;')" -lt "70400" ]; then
+        composer-require -d $HYPERF_ROOT/ hyperf/signal symfony/serializer
+        restart-svc 300-hyperf
+    fi
+    wmd $HYPERF_ROOT -R
+fi

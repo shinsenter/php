@@ -1,0 +1,36 @@
+#!/command/with-contenv bash
+WEBROOT="$(webhome)${NGINX_DOCUMENT_ROOT}"
+
+if [ ! -z "$PHP_POST_MAX_SIZE" ]; then
+    echo "client_max_body_size ${PHP_POST_MAX_SIZE};" >/etc/nginx/extra.d/body-size.conf
+fi
+
+if [ ! -z "$PHP_MAX_EXECUTION_TIME" ]; then
+    echo "client_body_timeout ${PHP_MAX_EXECUTION_TIME};" >/etc/nginx/extra.d/body-timeout.conf
+fi
+
+find /etc/nginx/sites-available -type f | \
+    xargs -I {} sed -i "s#root \/var\/www\/html;#root ${WEBROOT};#g" {}
+
+wmd $WEBROOT
+if [ ! -z "$(ls -1 /web/ | grep 'index\.\(ht?ml\|php\)')" ] && [ -z "$(ls -1 $WEBROOT/ | grep 'index\.\(ht?ml\|php\)')" ]; then
+    echo; echo "📄 Copying temporary index page to ${WEBROOT}"
+    wdo cp -prf /web/index.* $WEBROOT/
+fi
+
+if [ ! -d /var/log/nginx ]; then
+    wmd /var/log/nginx
+    wdo ln -sf /proc/1/fd/1 /var/log/nginx/access.log
+    wdo ln -sf /proc/1/fd/2 /var/log/nginx/error.log
+fi
+
+echo
+/usr/sbin/nginx -v
+/usr/sbin/nginx -t
+
+if [ "$DEBUG_MODE" == "true" ]; then
+    sed -i 's/^\terror_log.*/\terror_log \/proc\/self\/fd\/2 debug;/' /etc/nginx/nginx.conf
+    echo "🔥 NGINX is in DEBUG MODE 🔥"
+fi
+
+echo

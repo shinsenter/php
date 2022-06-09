@@ -1,0 +1,12 @@
+#!/command/with-contenv bash
+CERT_DIR=/etc/ssl/web
+if [ ! -f $CERT_DIR/server.key ]; then
+    echo; echo "🔐 Generating a self-signed SSL certificate"
+    wmd $CERT_DIR
+    openssl req -x509 \
+            -subj "/C=VN/ST=Vietnam/L=Vietnam/O=SHIN Company/CN=localhost" \
+            -nodes -newkey rsa:2048 -keyout $CERT_DIR/server.key \
+            -out $CERT_DIR/server.crt -days 365
+    cp -p $CERT_DIR/server.crt /usr/local/share/ca-certificates/
+    update-ca-certificates
+fi

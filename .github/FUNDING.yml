@@ -1,4 +1,7 @@
-# These are supported funding model platforms
+# This file belongs to the project https://code.shin.company/php
+# Author:  Shin <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
 
 github: shinsenter
 custom: ['https://www.paypal.me/shinsenter']

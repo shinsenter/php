@@ -1,8 +1,7 @@
 #!/bin/bash
-
-LARAVEL_ROOT="${WEBHOME:-/var/www/html}"
+LARAVEL_ROOT="$(webhome)"
 LARAVEL_ARTISAN="$LARAVEL_ROOT/artisan"
-
 if [ -f "$LARAVEL_ARTISAN" ]; then
-    sudo -u webuser -i -- /usr/bin/php $LARAVEL_ARTISAN $@
+    cd $LARAVEL_ROOT
+    exec php $LARAVEL_ARTISAN --ansi "$@"
 fi

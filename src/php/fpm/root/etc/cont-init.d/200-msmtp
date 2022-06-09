@@ -1,0 +1,6 @@
+#!/command/with-contenv bash
+cat > /etc/msmtprc <<EOL
+host ${MSMTP_RELAY_SERVER_HOSTNAME:-"mailhog"}
+port ${MSMTP_RELAY_SERVER_PORT:-"1025"}
+logfile -
+EOL

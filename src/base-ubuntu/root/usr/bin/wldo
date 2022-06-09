@@ -1,0 +1,8 @@
+#!/bin/bash
+export HOME=/root
+cmd="${@/exec /}"
+if [ -x "$(command -v sudo)" ]; then
+    exec sudo -u webuser -g webgroup -i -- $cmd
+else
+    exec su   -  webuser -g webgroup -c -- $cmd
+fi

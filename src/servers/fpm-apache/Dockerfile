@@ -1,4 +1,6 @@
-# This file is the work of https://github.com/shinsenter/php
+# This file belongs to the project https://code.shin.company/php
+# Author:  Shin <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
 ARG BASE_IMAGE=shinsenter/php
@@ -6,34 +8,29 @@ ARG PHP_VERSION=8.1
 
 ################################################################################
 
-# base image and platform
+# base image
 FROM ${BASE_IMAGE}:${PHP_VERSION}-fpm
 
+ARG APACHE_BUILD_DEPS="gnupg2 apt-utils"
 ARG APACHE_PPA_KEY="4F4EA0AAE5267A6C"
 ARG APACHE_PPA_URL="http://ppa.launchpadcontent.net/ondrej/apache2/ubuntu"
-ARG APACHE_SOURCES="/etc/apt/sources.list.d/ondrej-apache.list"
-
 ARG APACHE_RUN_GROUP="webgroup"
 ARG APACHE_RUN_USER="webuser"
-ENV WEBHOME="/var/www/html"
-ENV APACHE_DOCUMENT_ROOT=""
 
-RUN echo "Installing Apache..." \
-    \
-    # adds ondrej repos for Apache2
-    && add-ppa $APACHE_PPA_URL $APACHE_SOURCES $APACHE_PPA_KEY \
-    \
-    # installs apache, msmtp
+################################################################################
+
+# installs apache
+RUN echo "Installing Apache" \
     && apt-update \
-    && apt-install apache2 \
-    && service apache2 stop && update-rc.d apache2 disable \
+    && apt-install $APACHE_BUILD_DEPS \
+    && apt-deb ppa-apache ${APACHE_PPA_URL} ${APACHE_PPA_KEY} \
+    && apt-install apache2 && disable apache2 \
     && echo "ServerName localhost" >>/etc/apache2/apache2.conf \
     && sed -i 's/LogFormat "%h %l %u %t \\\"%r\\\" %>s %O \\\"/LogFormat "%a %l %u %t \\\"%r\\\" %>s %O \\\"/' /etc/apache2/apache2.conf \
     && echo >>/etc/apache2/envvars \
     && echo "export DOCUMENT_ROOT=\"\${WEBHOME}\${APACHE_DOCUMENT_ROOT}\"" >>/etc/apache2/envvars \
     && echo "export APACHE_RUN_USER=${APACHE_RUN_USER}" >>/etc/apache2/envvars \
     && echo "export APACHE_RUN_GROUP=${APACHE_RUN_GROUP}" >>/etc/apache2/envvars \
-    && rm -f ${WEBHOME}/*.html \
     \
     # modifies Apache modules
     && a2dismod \
@@ -42,32 +39,29 @@ RUN echo "Installing Apache..." \
         actions autoindex brotli cache deflate expires headers http2 \
         mpm_event proxy proxy_fcgi remoteip rewrite setenvif ssl unique_id \
     \
-    # makes log files
-    && webuser-mkdir /var/log/apache2 \
-    && ln -sf /dev/stdout /var/log/apache2/access.log \
-    && ln -sf /dev/stdout /var/log/apache2/other_vhosts_access.log \
-    && ln -sf /dev/stderr /var/log/apache2/error.log \
-    \
     # cleanup
-    && rm -f $APACHE_SOURCES \
-    && apt-cleanup
-
-################################################################################
+    && rm -rf /var/log/apache2 ${WEBHOME}/*.html \
+    && apt-upgrade -uq \
+    && cleanup $APACHE_BUILD_DEPS
 
 # adds config files
 ADD root/ /
 
 # sets the working directory
-WORKDIR $WEBHOME
+# WORKDIR $WEBHOME
 
 # exposes ports
 EXPOSE 80
 EXPOSE 443
 EXPOSE 443/udp
 
+# sets default entrypoint
+ENTRYPOINT ["/init"]
+
 ################################################################################
 
 # sets env variables
+ENV APACHE_DOCUMENT_ROOT=""
 ENV APACHE_MAX_CONNECTIONS_PER_CHILD=0
 ENV APACHE_MAX_REQUEST_WORKERS=150
 ENV APACHE_MAX_SPARE_THREADS=75
@@ -77,3 +71,5 @@ ENV APACHE_THREAD_LIMIT=64
 ENV APACHE_THREADS_PER_CHILD=25
 
 ################################################################################
+
+LABEL traefik.enable=true

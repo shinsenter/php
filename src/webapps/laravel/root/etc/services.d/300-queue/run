@@ -1,0 +1,8 @@
+#!/command/with-contenv bash
+if [ "$LARAVEL_QUEUE_ENABLED" == "true" ]; then
+    composer-wait
+    echo; echo "🤖 Starting Laravel queue:work $LARAVEL_QUEUE_OPTIONS"
+    exec wdo artisan queue:work $LARAVEL_QUEUE_OPTIONS
+else
+    exec s6-svc -Od .
+fi

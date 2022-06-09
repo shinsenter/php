@@ -1,0 +1,44 @@
+#!/command/with-contenv bash
+CRATER_PROJECT="${CRATER_PROJECT:-bytefury/crater}"
+CRATER_ROOT="$(webhome)"
+CRATER_ARTISAN="$CRATER_ROOT/artisan"
+
+if [ ! -f "$CRATER_ARTISAN" ]; then
+    echo; echo "🤖 Installing $CRATER_PROJECT from scratch"
+    rm -rf $CRATER_ROOT/public $CRATER_ROOT/index.*
+    wdo composer-create -d $CRATER_ROOT/ $CRATER_PROJECT $CRATER_ROOT/ 2>&1
+    sed -i '/Barryvdh/d' $CRATER_ROOT/config/app.php
+    if [ "$(php -r 'echo PHP_VERSION_ID;')" -lt "70400" ]; then
+        wdo composer-require -d $CRATER_ROOT/ spatie/laravel-medialibrary
+    fi
+    wdo composer-install -d $CRATER_ROOT/
+    wmd $CRATER_ROOT -R
+fi
+
+if [ -f "$CRATER_ARTISAN" ]; then
+    composer-wait
+    las() { echo; wdo php $CRATER_ARTISAN --ansi "$@" 2>/dev/null; }
+
+    if [ ! -f "$CRATER_ROOT/.env" ] && [ ! -f "$CRATER_ROOT/.env.${APP_ENV}" ]; then
+        wdo cp -rpf "$CRATER_ROOT/.env.example" "$CRATER_ROOT/.env"
+        las key:generate
+    fi
+
+    if [ "$CRATER_AUTO_OPTIMIZE" == "true" ]; then
+        las optimize:clear
+        las optimize
+        las vendor:publish --all
+        wmd $CRATER_ROOT/bootstrap/cache -R
+        wmd $CRATER_ROOT/storage -R
+    fi
+
+    if [ "$CRATER_LINK_STORAGE" == "true" ]; then
+        las storage:link
+        wmd $CRATER_ROOT/storage/app/public -R
+        wmd $CRATER_ROOT/public -R
+    fi
+
+    if [ "$CRATER_AUTO_MIGRATION" == "true" ]; then
+        las migrate:refresh --seed --force
+    fi
+fi

@@ -1,4 +1,6 @@
-# This file is the work of https://github.com/shinsenter/php
+# This file belongs to the project https://code.shin.company/php
+# Author:  Shin <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
 ARG BASE_IMAGE=shinsenter/php
@@ -6,42 +8,50 @@ ARG PHP_VERSION=8.1
 
 ################################################################################
 
-# base image and platform
+# base image
 FROM ${BASE_IMAGE}:${PHP_VERSION}-cli
 
 # adds PHP configs
 ENV PHP_POOL_NAME=www
 
+################################################################################
+
 # installs php-fpm
 RUN apt-update \
-    && apt-install msmtp msmtp-mta \
-    && apt-install php${PHP_VERSION}-fpm \
-    && service php${PHP_VERSION}-fpm stop && update-rc.d php${PHP_VERSION}-fpm disable \
+    && apt-install php${PHP_VERSION}-fpm msmtp msmtp-mta \
+    && disable php${PHP_VERSION}-fpm \
     && swap-dir /etc/php/${PHP_VERSION}/fpm /etc/php/fpm \
     && sed -i -e 's/\[www\]/\[$\{PHP_POOL_NAME\}]/g' /etc/php/fpm/pool.d/www.conf \
+    && ln -sf /etc/php/fpm /usr/local/etc/php-fpm \
     && ln -sf /usr/sbin/php-fpm${PHP_VERSION} /usr/sbin/php-fpm \
     \
-    # makes log files
-    && webuser-mkdir /var/log/php-fpm \
-    && ln -sf /dev/stdout /var/log/php-fpm/access.log \
-    && ln -sf /dev/stderr /var/log/php-fpm/error.log \
-    \
     # cleanup
-    && apt-cleanup
+    && rm -rf /var/log/php-fpm \
+    && apt-upgrade -uq \
+    && cleanup
 
-################################################################################
+# opcache preload
+RUN if [ "$(php -r 'echo PHP_VERSION_ID;')" -ge "70400" ]; then \
+    echo '' >>/etc/php/fpm/pool.d/x-override-php-defaults.conf; \
+    echo 'php_value[opcache.preload] = ${PHP_OPCACHE_PRELOAD}' >>/etc/php/fpm/pool.d/x-override-php-defaults.conf; \
+    echo 'php_value[opcache.preload_user] = ${PHP_OPCACHE_PRELOAD_USER}' >>/etc/php/fpm/pool.d/x-override-php-defaults.conf; \
+fi
 
 # adds config files
 ADD root/ /
 
-# resets the entrypoint
-ENTRYPOINT ["/init"]
+# sets the working directory
+# WORKDIR $WEBHOME
+
+# exposes port
 EXPOSE 9000
+
+# sets default entrypoint
+ENTRYPOINT ["/init"]
 
 ################################################################################
 
 # adds MSMTP settings
-ENV DEBUG_MODE=false
 ENV MSMTP_RELAY_SERVER_HOSTNAME=mailhog
 ENV MSMTP_RELAY_SERVER_PORT=1025
 
@@ -62,12 +72,13 @@ ENV PHP_PM_MIN_SPARE_SERVERS=7
 ENV PHP_PM_START_SERVERS=7
 
 # adds other Opcache settings
-ENV PHP_OPCACHE_INTERNED_STRINGS_BUFFER=8
-ENV PHP_OPCACHE_MAX_ACCELERATED_FILES=1048793
-ENV PHP_OPCACHE_MEMORY_CONSUMPTION=128
+ENV PHP_OPCACHE_INTERNED_STRINGS_BUFFER=64
+ENV PHP_OPCACHE_MAX_ACCELERATED_FILES=130987
+ENV PHP_OPCACHE_MAX_WASTED_PERCENTAGE=15
+ENV PHP_OPCACHE_MEMORY_CONSUMPTION=256
 ENV PHP_OPCACHE_PRELOAD_USER=webuser
 ENV PHP_OPCACHE_PRELOAD=
-ENV PHP_OPCACHE_REVALIDATE_FREQ=2
+ENV PHP_OPCACHE_REVALIDATE_FREQ=5
 ENV PHP_OPCACHE_REVALIDATE_PATH=0
 ENV PHP_OPCACHE_SAVE_COMMENTS=1
 ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS=1

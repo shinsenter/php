@@ -1,0 +1,14 @@
+#!/command/with-contenv bash
+GRAV_PROJECT="${GRAV_PROJECT:-getgrav/grav}"
+GRAV_ROOT="$(webhome)"
+GRAV_CHECK="$GRAV_ROOT/bin/grav"
+
+if [ ! -f "$GRAV_CHECK" ]; then
+    echo; echo "🤖 Installing $GRAV_PROJECT from scratch"
+    rm -rf $GRAV_ROOT/web $GRAV_ROOT/index.*
+    [ -x "$(command -v git)" ] || apt-oneshot git
+    git config --global --add safe.directory $GRAV_ROOT
+    wdo composer-create -d $GRAV_ROOT/ $GRAV_PROJECT $GRAV_ROOT/
+    $GRAV_CHECK install $GRAV_ROOT/ 2>/dev/null
+    wmd $GRAV_ROOT -R
+fi

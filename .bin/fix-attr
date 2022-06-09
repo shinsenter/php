@@ -1,0 +1,13 @@
+#!/bin/bash
+# This file belongs to the project https://code.shin.company/php
+# Author:  Shin <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+BASE_DIR="$(git rev-parse --show-toplevel)"
+TARGET=${1:-$BASE_DIR}
+
+echo -e "\n🗂 Fixing permission for ${TARGET/$BASE_DIR/.}/"
+find $TARGET -type d | grep -v 'tests\?' | xargs -I {} chmod 755 {}
+find $TARGET -type f | grep -v 'tests\?' | xargs -I {} chmod 644 {}
+find $TARGET -type f | grep -v 'tests\?' | grep '\/\.\?bin\|\/command\/\|git-config\/hooks\|root\/startup\|s6-overlay\|cont-init\|services\.d\|\.sh' | xargs -I {} chmod +xr {}
