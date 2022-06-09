@@ -1,0 +1,8 @@
+#!/command/with-contenv bash
+if [ "$CRATER_QUEUE_ENABLED" == "true" ]; then
+    composer-wait
+    echo; echo "🤖 Starting Crater queue:work $CRATER_QUEUE_OPTIONS"
+    exec wdo artisan queue:work $CRATER_QUEUE_OPTIONS
+else
+    exec s6-svc -Od .
+fi

@@ -1,2 +1,0 @@
-#!/bin/bash
-echp $@ >/tmp/cleanup 2>/dev/null

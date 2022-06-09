@@ -1,2 +1,2 @@
 #!/bin/bash
-sudo -u webuser -i -- /usr/bin/wp-cli --path="${WEBHOME:-/var/www/html}/" $@
+exec wldo wp-cli --path="$(webhome)/" "$@"

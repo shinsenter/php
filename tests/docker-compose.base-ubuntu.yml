@@ -1,3 +1,8 @@
+# This file belongs to the project https://code.shin.company/php
+# Author:  Shin <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
 version: '3'
 services:
 
@@ -11,7 +16,7 @@ services:
     build:
       context: ../src/base-ubuntu
       args:
-        BASE_IMAGE: ubuntu:focal
-        S6_VERSION: ${S6_VERSION:-v3.1.0.1}
+        BASE_OS_IMAGE: ${BASE_OS_IMAGE:-ubuntu:latest}
+        S6_VERSION: ${S6_VERSION}
 
 ################################################################################

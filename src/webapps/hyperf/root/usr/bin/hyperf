@@ -1,0 +1,7 @@
+#!/bin/bash
+HYPERF_ROOT="$(webhome)"
+HYPERF_BIN="$HYPERF_ROOT/bin/hyperf.php"
+if [ -f "$HYPERF_BIN" ]; then
+    cd $HYPERF_ROOT
+    exec php $HYPERF_BIN "$@"
+fi

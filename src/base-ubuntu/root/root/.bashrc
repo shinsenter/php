@@ -1,4 +1,4 @@
-# If not running interactively, don't do anything
+# if not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
 HISTCONTROL=ignoredups:ignorespace
@@ -18,14 +18,14 @@ fi
 
 # set a fancy prompt (non-color, unless we know we "want" color)
 case "$TERM" in
-    xterm-color) color_prompt=yes;;
+    xterm-color) color_prompt=yes ;;
 esac
 
 if [ -n "$force_color_prompt" ]; then
     if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-	color_prompt=yes
+        color_prompt=yes
     else
-	color_prompt=
+        color_prompt=
     fi
 fi
 
@@ -36,13 +36,10 @@ else
 fi
 unset color_prompt force_color_prompt
 
-# If this is an xterm set the title to user@host:dir
+# if this is an xterm set the title to user@host:dir
 case "$TERM" in
-xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-    ;;
-*)
-    ;;
+    xterm* | rxvt*) PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1" ;;
+    *) ;;
 esac
 
 # enable color support of ls and also add handy aliases
@@ -57,15 +54,21 @@ if [ -x /usr/bin/dircolors ]; then
 fi
 
 # some more ls aliases
-alias ll='ls -alF'
-alias la='ls -A'
+alias clean='/usr/bin/cleanup'
+alias home='cd "$(webhome)"'
 alias l='ls -CF'
+alias la='ls -A'
+alias ll='ls -alF'
 
-# Alias definitions.
+# alias definitions
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
 if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
-   . /etc/bash_completion
+    . /etc/bash_completion
 fi
+
+WEBHOME="$(webhome)"
+[ ! -z "$WEBHOME" ] && wmd $WEBHOME
+cd $WEBHOME

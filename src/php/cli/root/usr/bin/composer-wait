@@ -1,0 +1,3 @@
+#!/bin/bash
+AUTOLOAD="$(webhome)/vendor/autoload.php"
+while [ ! -f "$AUTOLOAD" ]; do sleep 1; done

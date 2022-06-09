@@ -1,0 +1,15 @@
+# This file belongs to the project https://code.shin.company/php
+# Author:  Shin <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+version: '3'
+services:
+
+  ##############################################################################
+
+  s6-overlay:
+    image: shinsenter/scratch:latest
+    build: ../src/base
+
+################################################################################

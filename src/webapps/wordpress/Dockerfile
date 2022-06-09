@@ -1,41 +1,36 @@
-# This file is the work of https://github.com/shinsenter/php
+# This file belongs to the project https://code.shin.company/php
+# Author:  Shin <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
 ARG BASE_IMAGE=shinsenter/phpfpm-apache
+ARG IMAGE_SUFFIX="-tidy"
 ARG PHP_VERSION=8.1
 
 ################################################################################
 
-# base image and platform
-FROM ${BASE_IMAGE}:php${PHP_VERSION} as base
-
-################################################################################
-
-FROM base as source
-
-ARG WPCLI_URL=https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-ADD $WPCLI_URL /usr/bin/wp-cli
-RUN chmod +x /usr/bin/wp-cli
-
-################################################################################
-
-# main image
-FROM base
-
-# adds config files
-COPY --from=source /usr/bin/wp-cli /usr/bin/wp-cli
-ADD  root/ /
+# base image
+FROM ${BASE_IMAGE}:php${PHP_VERSION}${IMAGE_SUFFIX}
 
 # sets web server root path
-ENV WEBHOME="/var/www/html"
 ENV APACHE_DOCUMENT_ROOT=""
 
+################################################################################
+
+# adds config files
+ADD root/ /
+
+# installs wp-cli
+ARG WPCLI_URL=https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+RUN php -r "copy('$WPCLI_URL', '/usr/bin/wp-cli');" && chmod +xr /usr/bin/wp-cli
+
 # sets the working directory
-WORKDIR $WEBHOME
+# WORKDIR $WEBHOME
 
 ################################################################################
 
 # overrides parents env variables
+ENV ENABLE_CRONTAB=true
 ENV PHP_ERROR_REPORTING="E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_WARNING"
 ENV PHP_MAX_EXECUTION_TIME=300
 ENV PHP_POST_MAX_SIZE=100M

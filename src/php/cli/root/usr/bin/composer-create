@@ -1,0 +1,10 @@
+#!/bin/bash
+echo; echo "  ⏬ Running composer create-project $@"
+exec composer create-project --ansi \
+--no-cache \
+--no-interaction \
+--no-progress \
+--no-secure-http \
+--prefer-dist \
+$COMPOSER_CREATE_OPTIONS \
+"$@"

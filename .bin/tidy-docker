@@ -1,0 +1,169 @@
+#!/bin/bash
+# This file belongs to the project https://code.shin.company/php
+# Author:  Shin <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+[ ! -x "$(command -v docker)" ] && echo "Missing Docker." && exit 1
+
+################################################################################
+
+PARSE_CACHE=
+
+# extracts docker repository name and tag
+d_name_id () {
+    docker images --format "{{.Repository}}:{{.Tag}}\t{{.ID}}" \
+    | grep -F $1 \
+    | head -n1
+}
+
+# parses instruction from image
+d_local_history () {
+    docker history --no-trunc --format "{{.CreatedBy}}" $1 \
+        | awk '{arr[i++]=$0}END{while(i>0)print arr[--i]}'
+}
+
+# parses instruction from docker hub
+d_net_history () {
+    repo="$1"
+    tag="$2"
+    curl -skL 'https://hub.docker.com/v2/repositories/$repo/tags/$tag/images' \
+        | jq '.[1].layers' \
+        | jq '.[].instruction' -r
+}
+
+# parses instruction and replace all '/bin/sh -c #(nop)'
+d_parse () {
+    if [ -z "$PARSE_CACHE" ]; then
+        PARSE_CACHE="$(d_local_history $1 \
+            | sed 's/^\/[^ ]* *-c */RUN /' \
+            | sed 's/^|[0-9]* */RUN /' \
+            | sed 's/^RUN \#[^ ]* *//' \
+            | sed 's#EXPOSE map\[\(.*\):.*\]#EXPOSE \1#g' \
+            | awk '
+            {
+                if($1=="SHELL"){
+                    gsub("\\\[","[\"",$0); gsub("\\\]","\"]",$0)
+                    i=1; printf("%s ",$i)
+                    while(i++<NF){
+                        if(i>2){printf("\", \"%s",$i)}else{printf("%s",$i)}
+                    }
+                    printf "\n"
+                } else print $0
+            }' 2>/dev/null \
+            | awk '
+            {
+                if(($1=="WORKDIR")||($1=="ENTRYPOINT")||($1=="CMD")||($1=="STOPSIGNAL"))
+                    {cmd[$1]=$0;if($1=="ENTRYPOINT")delete cmd["CMD"]}
+                else print $0
+            } END {
+                if(cmd["WORKDIR"])    print cmd["WORKDIR"]
+                if(cmd["ENTRYPOINT"]) print cmd["ENTRYPOINT"]
+                if(cmd["CMD"])        print cmd["CMD"]
+                if(cmd["STOPSIGNAL"]) print cmd["STOPSIGNAL"]
+            }'
+        )"
+    fi
+    echo "$PARSE_CACHE"
+}
+
+# extracts given unique key-value instruction list
+d_attr () {
+    d_parse $1 \
+        | grep "^${2:-ENV}" \
+        | awk -F= '
+            {p=index($0,"=");v=substr($0,p+1);a[$1]=v}
+            END{for(k in a)printf("%s=\"%s\"\n",k,a[k])}
+        ' \
+        | sort
+}
+
+# extracts other instructions
+ins_cmd () {
+    d_parse $1 | grep -v '^\(ADD\|ARG\|COPY\|ENV\|HEALTHCHECK\|LABEL\|ONBUILD\|RUN\)'
+}
+
+# aliases
+ins_name () { d_name_id $1 | awk '{printf $1}'; }
+ins_id   () { d_name_id $1 | awk '{printf $2}'; }
+
+# command aliases
+ins_env    () { d_attr  $1 ENV; }
+ins_labels () { d_attr  $1 LABEL; }
+ins_shell  () { ins_cmd $1 | grep    '^SHELL'; }
+ins_others () { ins_cmd $1 | grep -v '^SHELL'; }
+
+# builds minified image
+# @param $output Output new Dockerfile (optional, must be a valid file path)
+# @param $base   The original image (ID or name:tag)
+# @param $save   Target image name
+minify() {
+    PARSE_CACHE=
+    local output="$1" ; [ ! -z "$output" ] && [ -f "$output" ] && shift || output=""
+    local base="$1"   ; [ ! -z "$base"   ] && shift || return 1
+    local save="$1"   ; [ ! -z "$save"   ] && shift || save="${base}-tidy"
+    local repo="$(ins_name $base)" ; [ -z "$output" ] && [ -z "$repo" ] && echo "Invalid image ID $base" && return 1
+    local temp="$([ ! -z "$output" ]    && echo "$base" || echo "tidy-docker:build-$(ins_id $base)")"
+    local command="$([ ! -z "$output" ] && echo "tee $output" || echo "docker build $@ --rm -t $save -")"
+
+    # make temporary tag name for building image
+    [ -z "$output" ] && docker tag $base $temp 2>/dev/null
+
+    # build the tidy
+    echo "🗜 Start minifying image '$repo'"
+    echo "  Build arguments: $@"
+    DOCKER_BUILDKIT=${DOCKER_BUILDKIT:-1} $command <<Dockerfile
+# Input Image: "${base}"
+#        (aka: "${repo}")
+# Final Image: "${save}"
+################################################################################
+# CLEANING UP THE SOURCE IMAGE. ################################################
+FROM shinsenter/scratch as scratch
+FROM ${temp} as tidy
+USER root
+RUN [ -x "\$(command -v cleanup)" ]  && cleanup                         || true
+RUN [ -x "\$(command -v apt-get)" ]  && apt-get -yq autoremove --purge  || true
+RUN [ -x "\$(command -v composer)" ] && composer clearcache -q --ansi   || true
+RUN [ -x "\$(command -v docker)" ]   && docker system prune -af         || true
+RUN [ -x "\$(command -v npm)" ]      && npm cache clean --force         || true
+RUN [ -x "\$(command -v yum)" ]      && yum clean all -y                || true
+RUN [ -x "\$(command -v rm)" ]       && rm -rf \\
+    ~/.wp-cli/ ~/.git/ ~/.composer/ ~/.npm/ ~/.cache/ ~/.log/ ~/.tmp/ \\
+    /usr/share/doc/* /tmp/* /var/tmp/* \\
+    /var/cache/apk /var/cache/yum /var/lib/apt/lists/* \\
+    /var/cache/apt/archives/*.deb \\
+    /var/cache/apt/archives/partial/*.deb \\
+    /var/cache/apt/*.bin \\
+    || true
+RUN [ -x "\$(command -v find)" ]     && find / \( \\
+    -name "._*" -or -name "*~" -or -name "*.swp" \\
+    -or -name ".git" -or -name ".svn" \\
+    -or -name ".DS_Store" \\
+    -or -name "Thumbs.db" -or -name "thumbs.db" \\
+    -or -name "*.pyc" -or -name "*.pyo" \\
+    -or -name "*pip*" -or -name "*__pycache__*" \\
+    -or -name "*easy_install*" -or -name "*dist-info*" \\
+    \) ! -path "/sys/*" ! -path "/proc/*" \\
+    -exec rm -rf {} + || true
+################################################################################
+# BUILDING OPTIMIZED IMAGE FROM SCRATCH. #####################################
+FROM  scratch
+COPY  --from=tidy / /
+$(ins_shell $base)
+$(ins_env $base)
+$(ins_others $base)
+LABEL org.opencontainers.image.title="$save"
+LABEL org.opencontainers.image.description="A tidied image of $repo"
+$(ins_labels $base)
+# FINISH. ######################################################################
+################################################################################
+Dockerfile
+
+    # cleanup
+    if [ $? -eq 0 ] && [ -z "$output" ]; then docker rmi "$temp" >/dev/null; fi
+}
+
+################################################################################
+
+echo ; date
+minify $@ && echo "Done." || echo "Failed."

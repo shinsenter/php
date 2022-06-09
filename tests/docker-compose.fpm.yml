@@ -1,3 +1,8 @@
+# This file belongs to the project https://code.shin.company/php
+# Author:  Shin <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
 version: '3'
 services:
 
@@ -10,7 +15,5 @@ services:
       service: common-php
     build:
       context: ../src/php/fpm
-      args:
-        BASE_IMAGE: shinsenter/php
 
 ################################################################################

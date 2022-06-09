@@ -1,0 +1,9 @@
+#!/bin/bash
+GPGKEY="$1"
+NAME="${2:-$GPGKEY}"
+OUTKEY="/usr/share/keyrings/${NAME}.gpg"
+if [ ! -z "$GPGKEY" ] && [ ! -f "$OUTKEY" ] && [ -x "$(command -v gpg)" ]; then
+    echo -e "\n  🔑 Adding GNUPG KEY $GPGKEY to $OUTKEY"
+    gpg --keyserver keyserver.ubuntu.com --recv-keys "$GPGKEY"
+    gpg --output $OUTKEY --export "$GPGKEY"
+fi

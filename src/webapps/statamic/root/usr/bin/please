@@ -1,0 +1,7 @@
+#!/bin/bash
+STATAMIC_ROOT="$(webhome)"
+STATAMIC_BINARY="$STATAMIC_ROOT/please"
+if [ -f "$STATAMIC_BINARY" ]; then
+    cd $STATAMIC_ROOT
+    exec php $STATAMIC_BINARY --ansi "$@"
+fi

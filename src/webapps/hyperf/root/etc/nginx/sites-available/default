@@ -1,0 +1,30 @@
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+
+    server_name _;
+    root /var/www/html;
+
+    # SSL
+    ssl_certificate /etc/ssl/web/server.crt;
+    ssl_certificate_key /etc/ssl/web/server.key;
+
+    # additional config
+    include extra.d/*.conf;
+
+    # health check
+    location /ping {
+        access_log off;
+        include snippets/fastcgi-php.conf;
+        fastcgi_read_timeout 5s;
+        fastcgi_pass unix:/var/run/php/php-fpm.sock;
+    }
+
+    # forward requests
+    location / {
+        proxy_pass http://127.0.0.1:9501;
+        include proxy_params;
+    }
+}

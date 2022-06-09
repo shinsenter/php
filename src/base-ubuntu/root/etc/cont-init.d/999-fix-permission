@@ -1,31 +1,42 @@
 #!/command/with-contenv bash
-
-WEBHOME="${WEBHOME:-/var/www/html}"
-
-if [ "$FIX_WEBHOME_PERMISSION" == "true" ] || [ -e /tmp/cleanup ]; then
-    if [ ! -z "$WEBHOME" ]; then
-        echo
-        echo "🗂 Fixing permission for ${WEBHOME}..."
-        webuser-mkdir $WEBHOME recursive
-    fi
-    rm -f /tmp/cleanup
-fi
-
-if [ -f /welcome.txt ]; then
-    echo
-    cat /welcome.txt
-fi
+COPY=/welcome.txt
+LICENSE=/license.txt
+EMAIL="${MAINTAINER:-shin@shin.company}"
+NAME="${IMAGE_NAME:-shinsenter/s6-ubuntu}"
+WEBHOME="$(webhome)"
 
 echo "
 
-------------------------------
-  Timezone: $(date +'%Z %z')
-  User UID: $(id -u webuser)
-  User GID: $(id -g webuser)
-  Web Root: $WEBHOME
-------------------------------
+$([ -f $COPY ] && cat $COPY | sed -u "s#%PATH%#$COPY#g")
 
-To get support from the project owner, please contact:
-    admin@appseeds.net
+----------------------------------------
+  Container : $NAME
+  Distro    : $(bash -c '. /etc/os-release;echo ${PRETTY_NAME:-Unknown}')
+  Timezone  : $(date +'%Z') (GMT$(date +'%z'))
+  UID / GID : $(id -u webuser) / $(id -g webuser)
+  Web Root  : $WEBHOME
+----------------------------------------
+
+$([ -f $LICENSE ] && cat $LICENSE | sed -u "s#%EMAIL%#$EMAIL#g")
 
 "
+
+if [ "$FIX_WEBHOME_PERMISSION" == "true" ] || [ -e /tmp/owner-changed ]; then
+    rm -f /tmp/owner-changed
+    if [ ! -z "$WEBHOME" ]; then
+        echo "🗂 Fixing permission for ${WEBHOME}"
+        wmd /root    -R 2>/dev/null &
+        wmd $WEBHOME -R 2>/dev/null &
+    fi
+fi
+
+if [ -d /startup ]; then
+    echo "🗂 Looking for startup scripts"
+    for script in /startup/* ; do
+        if [ -x $script ]; then
+            echo "  📜 Started $script in the background."
+            bash -c "sleep 0.5; . $script | sed -u 's@^@${script}: @g'" &
+        fi
+    done
+    echo
+fi

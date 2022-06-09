@@ -1,84 +1,100 @@
-# This file is the work of https://github.com/shinsenter/php
+# This file belongs to the project https://code.shin.company/php
+# Author:  Shin <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-ARG BASE_IMAGE=ubuntu:latest
-ARG S6_BASE_IMAGE=shinsenter/s6-overlay
+ARG SCRATCH_IMAGE=shinsenter/scratch
+ARG BASE_S6_IMAGE=shinsenter/s6-overlay
+ARG BASE_OS_IMAGE=ubuntu:latest
 ARG S6_VERSION=latest
 
 ################################################################################
 
-FROM ${S6_BASE_IMAGE}:latest as source
+# override scratch image
+FROM ${SCRATCH_IMAGE} as scratch
 
 ################################################################################
 
-# prepares base image
-FROM ${BASE_IMAGE} as base
+# s6 source image
+FROM ${BASE_S6_IMAGE}:${S6_VERSION} as s6
 
-# disable frontend
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TERM=xterm
+################################################################################
+
+# base image
+FROM ${BASE_OS_IMAGE} as base
+
+# sets defaults
+ARG PUID=9999
+ARG PGID=9999
+ARG DEBIAN_FRONTEND=noninteractive
+ARG BUILD_DEPS="apt-utils"
+
+################################################################################
 
 # adds binaries
 ADD root/ /
 
-# updates packages
-RUN echo "🤖 Updating packages..."
-RUN apt-update
-RUN apt-install ca-certificates
-
-# sets GID and UID
-ENV PUID=9999
-ENV PGID=9999
-ENV WEBHOME="/var/www/html"
+# copies s6-overlay from source
+COPY --from=s6 / /
 
 # adds user and group
-RUN echo "🤖 Creating webuser and webgroup..."
+RUN echo "🤖 Creating webuser and webgroup"
 RUN groupadd -r -g $PGID webgroup
-RUN useradd  -r -g $PGID -u $PUID -d $WEBHOME -s /usr/bin/bash --no-log-init webuser
+RUN useradd  -r -g $PGID -G root,www-data --no-log-init \
+    -d /root -s /usr/bin/bash -u $PUID webuser
+RUN wmd /root -R
 
-# cleanup
-RUN apt-cleanup
+# updates packages
+RUN echo "🤖 Updating packages"
+RUN apt-update
+RUN apt-install $BUILD_DEPS ca-certificates cron openssl
+RUN disable cron
+RUN ln -sf /etc/ssl/certs/ca-certificates.crt /usr/lib/ssl/cert.pem
+RUN apt-upgrade -uq
+RUN cleanup $BUILD_DEPS
 
 ################################################################################
 
 # the main image
-FROM scratch
+FROM  scratch
+SHELL ["/bin/bash", "-c"]
 
 # copies from from build stage
 COPY --from=base / /
 
-# copies s6-overlay from source
-COPY --from=source / /
-ENTRYPOINT ["/init"]
+# sets the working directory
+# WORKDIR /root
+
+# sets default command
+CMD ["/bin/bash"]
 
 ################################################################################
-
-# sets GID and UID
-ENV PUID=9999
-ENV PGID=9999
-ENV WEBHOME="/var/www/html"
-
-# adds OS variables
-ENV DEBIAN_FRONTEND=noninteractive
-ENV LANG=C.UTF-8
-ENV LANGUAGE=C.UTF-8
-ENV LC_ALL=C
-ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-ENV TERM=xterm
 
 # S6 variables
 ARG S6_VERSION
-ENV S6_VERSION=$S6_VERSION
 ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2
 ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=600000
-ENV S6_GLOBAL_PATH=/command:$PATH
+ENV S6_KEEP_ENV=1
 ENV S6_KILL_FINISH_MAXTIME=3000
 ENV S6_KILL_GRACETIME=3000
+ENV S6_LOGGING=1
 ENV S6_SERVICES_GRACETIME=3000
+ENV S6_VERSION=$S6_VERSION
 
-################################################################################
+# sets GID and UID
+ENV PGID=9999
+ENV PUID=9999
+ENV WEBHOME="/var/www/html"
 
-LABEL category="os"
-LABEL category="base"
+# adds OS variables
+ENV DEBUG_MODE=false
+ENV ENABLE_CRONTAB=false
+ENV HOME=/root
+ENV LANG=C.UTF-8
+ENV LANGUAGE=C.UTF-8
+ENV LC_ALL=C
+ENV PATH=/command:/bin:/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin
+ENV SHELL=/bin/bash
+ENV TERM=xterm
 
 ################################################################################

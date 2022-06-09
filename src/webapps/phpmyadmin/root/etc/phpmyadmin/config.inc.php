@@ -1,30 +1,41 @@
 <?php
 
-/* Ensure we got the environment */
+declare(strict_types=1);
+
 $vars = array(
-    'PMA_ARBITRARY',
-    'PMA_HOST',
-    'PMA_HOSTS',
-    'PMA_VERBOSE',
-    'PMA_VERBOSES',
-    'PMA_PORT',
-    'PMA_PORTS',
-    'PMA_SOCKET',
-    'PMA_SOCKETS',
-    'PMA_USER',
-    'PMA_PASSWORD',
-    'PMA_ABSOLUTE_URI',
-    'PMA_CONTROLHOST',
-    'PMA_CONTROLPORT',
-    'PMA_PMADB',
-    'PMA_CONTROLUSER',
-    'PMA_CONTROLPASS',
-    'PMA_QUERYHISTORYDB',
-    'PMA_QUERYHISTORYMAX',
-    'PHP_MAX_EXECUTION_TIME',
-    'PHP_MEMORY_LIMIT',
     'MAX_EXECUTION_TIME',
     'MEMORY_LIMIT',
+    'PHP_MAX_EXECUTION_TIME',
+    'PHP_MEMORY_LIMIT',
+    'PMA_ABSOLUTE_URI',
+    'PMA_ARBITRARY',
+    'PMA_BLOWFISH_SECRET',
+    'PMA_CONTROLHOST',
+    'PMA_CONTROLPASS',
+    'PMA_CONTROLPORT',
+    'PMA_CONTROLUSER',
+    'PMA_DEFAULTLANG',
+    'PMA_HOST',
+    'PMA_HOSTS',
+    'PMA_MAXROWS',
+    'PMA_PASSWORD',
+    'PMA_PMADB',
+    'PMA_PORT',
+    'PMA_PORTS',
+    'PMA_PROPERTIESNUMCOLUMNS',
+    'PMA_PROTECTBINARY',
+    'PMA_QUERYHISTORYDB',
+    'PMA_QUERYHISTORYMAX',
+    'PMA_ROWACTIONTYPE',
+    'PMA_SENDERRORREPORTS',
+    'PMA_SHOWALL',
+    'PMA_SOCKET',
+    'PMA_SOCKETS',
+    'PMA_URLQUERYENCRYPTION',
+    'PMA_URLQUERYENCRYPTIONSECRETKEY',
+    'PMA_USER',
+    'PMA_VERBOSE',
+    'PMA_VERBOSES',
     'WEBHOME',
 );
 foreach ($vars as $var) {
@@ -34,30 +45,36 @@ foreach ($vars as $var) {
     }
 }
 
+$cfg      = [];
 $root_dir = $_ENV['WEBHOME'] ?: '/var/www/html';
-$config_dir = $root_dir . '/user-config';
 
-/* Include User Defined Settings Hook */
-if (file_exists($config_dir . '/config.secret.inc.php')) {
-    require($config_dir . '/config.secret.inc.php');
+$cfg['UploadDir']                   = $root_dir . '/tmp/upload';
+$cfg['SaveDir']                     = $root_dir . '/tmp/save';
+$cfg['AllowArbitraryServer']        = (bool) ($_ENV['PMA_ARBITRARY'] ?? false);
+$cfg['blowfish_secret']             = ($_ENV['PMA_BLOWFISH_SECRET'] ?? 'random_string_with_32_chars_long');
+$cfg['DefaultLang']                 = ($_ENV['PMA_DEFAULTLANG'] ?? 'en');
+$cfg['MaxRows']                     = (int) ($_ENV['PMA_MAXROWS'] ?? '100');
+$cfg['PmaAbsoluteUri']              = ($_ENV['PMA_ABSOLUTE_URI'] ?? '');
+$cfg['PropertiesNumColumns']        = (int) ($_ENV['PMA_PROPERTIESNUMCOLUMNS'] ?? '2');
+$cfg['ProtectBinary']               = (bool) ($_ENV['PMA_PROTECTBINARY'] ?? true);
+$cfg['QueryHistoryDB']              = (bool) ($_ENV['PMA_QUERYHISTORYDB'] ?? true);
+$cfg['QueryHistoryMax']             = (int) ($_ENV['PMA_QUERYHISTORYMAX'] ?? '100');
+$cfg['RowActionType']               = ($_ENV['PMA_ROWACTIONTYPE'] ?? 'both');
+$cfg['SendErrorReports']            = ($_ENV['PMA_SENDERRORREPORTS'] ?? 'never');
+$cfg['ShowAll']                     = (bool) ($_ENV['PMA_SHOWALL'] ?? false);
+$cfg['URLQueryEncryption']          = (bool) ($_ENV['PMA_URLQUERYENCRYPTION'] ?? false);
+$cfg['URLQueryEncryptionSecretKey'] = ($_ENV['PMA_URLQUERYENCRYPTIONSECRETKEY'] ?? '');
+
+if (isset($_ENV['PHP_MAX_EXECUTION_TIME'])) {
+    $cfg['ExecTimeLimit'] = $_ENV['PHP_MAX_EXECUTION_TIME'];
+} else if (isset($_ENV['MAX_EXECUTION_TIME'])) {
+    $cfg['ExecTimeLimit'] = $_ENV['MAX_EXECUTION_TIME'];
 }
 
-if (isset($_ENV['PMA_QUERYHISTORYDB'])) {
-    $cfg['QueryHistoryDB'] = boolval($_ENV['PMA_QUERYHISTORYDB']);
-}
-
-if (isset($_ENV['PMA_QUERYHISTORYMAX'])) {
-    $cfg['QueryHistoryMax'] = intval($_ENV['PMA_QUERYHISTORYMAX']);
-}
-
-/* Arbitrary server connection */
-if (isset($_ENV['PMA_ARBITRARY']) && $_ENV['PMA_ARBITRARY'] === '1') {
-    $cfg['AllowArbitraryServer'] = true;
-}
-
-/* Play nice behind reverse proxys */
-if (isset($_ENV['PMA_ABSOLUTE_URI'])) {
-    $cfg['PmaAbsoluteUri'] = trim($_ENV['PMA_ABSOLUTE_URI']);
+if (isset($_ENV['PHP_MEMORY_LIMIT'])) {
+    $cfg['MemoryLimit'] = $_ENV['PHP_MEMORY_LIMIT'];
+} else if (isset($_ENV['MEMORY_LIMIT'])) {
+    $cfg['MemoryLimit'] = $_ENV['MEMORY_LIMIT'];
 }
 
 /* Fallback to default linked */
@@ -97,18 +114,18 @@ for ($i = 1; isset($hosts[$i - 1]); $i++) {
     }
     if (isset($_ENV['PMA_PMADB'])) {
         $cfg['Servers'][$i]['pmadb'] = $_ENV['PMA_PMADB'];
+        $cfg['Servers'][$i]['bookmarktable'] = 'pma__bookmark';
         $cfg['Servers'][$i]['relation'] = 'pma__relation';
         $cfg['Servers'][$i]['table_info'] = 'pma__table_info';
         $cfg['Servers'][$i]['table_coords'] = 'pma__table_coords';
         $cfg['Servers'][$i]['pdf_pages'] = 'pma__pdf_pages';
         $cfg['Servers'][$i]['column_info'] = 'pma__column_info';
-        $cfg['Servers'][$i]['bookmarktable'] = 'pma__bookmark';
         $cfg['Servers'][$i]['history'] = 'pma__history';
-        $cfg['Servers'][$i]['recent'] = 'pma__recent';
-        $cfg['Servers'][$i]['favorite'] = 'pma__favorite';
         $cfg['Servers'][$i]['table_uiprefs'] = 'pma__table_uiprefs';
         $cfg['Servers'][$i]['tracking'] = 'pma__tracking';
         $cfg['Servers'][$i]['userconfig'] = 'pma__userconfig';
+        $cfg['Servers'][$i]['recent'] = 'pma__recent';
+        $cfg['Servers'][$i]['favorite'] = 'pma__favorite';
         $cfg['Servers'][$i]['users'] = 'pma__users';
         $cfg['Servers'][$i]['usergroups'] = 'pma__usergroups';
         $cfg['Servers'][$i]['navigationhiding'] = 'pma__navigationhiding';
@@ -137,29 +154,6 @@ for ($i = 1; isset($sockets[$i - 1]); $i++) {
     $cfg['Servers'][$i]['host'] = 'localhost';
 }
 
-/*
- * Revert back to last configured server to make
- * it easier in config.user.inc.php
- */
 $i--;
 
-/* Uploads setup */
-$cfg['UploadDir'] = $root_dir . '/tmp/upload';
-$cfg['SaveDir'] = $root_dir . '/tmp/save';
-
-if (isset($_ENV['PHP_MAX_EXECUTION_TIME'])) {
-    $cfg['ExecTimeLimit'] = $_ENV['PHP_MAX_EXECUTION_TIME'];
-} else if (isset($_ENV['MAX_EXECUTION_TIME'])) {
-    $cfg['ExecTimeLimit'] = $_ENV['MAX_EXECUTION_TIME'];
-}
-
-if (isset($_ENV['PHP_MEMORY_LIMIT'])) {
-    $cfg['MemoryLimit'] = $_ENV['PHP_MEMORY_LIMIT'];
-} else if (isset($_ENV['MEMORY_LIMIT'])) {
-    $cfg['MemoryLimit'] = $_ENV['MEMORY_LIMIT'];
-}
-
-/* Include User Defined Settings Hook */
-if (file_exists($config_dir . '/config.user.inc.php')) {
-    include($config_dir . '/config.user.inc.php');
-}
+@file_exists($root_dir . '/config.user.inc.php') && include($root_dir . '/config.user.inc.php');

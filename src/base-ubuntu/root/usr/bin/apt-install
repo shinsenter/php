@@ -1,5 +1,3 @@
 #!/bin/bash
-apt-get install $@ -y \
---no-install-recommends \
---no-install-suggests \
---auto-remove
+export DEBIAN_FRONTEND=noninteractive
+exec apt-get install -y --no-install-recommends --no-install-suggests "$@"

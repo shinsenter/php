@@ -1,0 +1,3 @@
+#!/bin/bash -e
+shopt -s dotglob
+exec mv "$@"

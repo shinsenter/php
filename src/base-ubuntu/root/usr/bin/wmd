@@ -1,0 +1,6 @@
+#!/bin/bash
+if [ ! -z "$1" ]; then
+    DIR="$1"
+    CHOWN="chown$([ "$2" == "recursive" ] || [ "$2" == "-R" ] && echo ' -R')"
+    mkdir -p $DIR && $CHOWN webuser:webgroup $DIR/ && chmod +s $DIR/
+fi

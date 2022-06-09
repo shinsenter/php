@@ -1,0 +1,7 @@
+.checksum
+.dockerignore
+.source
+docker-compose.yml
+Dockerfile
+Dockerfile.tidy
+README.md

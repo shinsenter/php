@@ -1,0 +1,11 @@
+#!/command/with-contenv bash
+ZEND_PROJECT="${ZEND_PROJECT:-laminas/laminas-mvc-skeleton}"
+ZEND_ROOT="$(webhome)"
+ZEND_CHECK="$ZEND_ROOT/module/Application"
+
+if [ ! -d "$ZEND_CHECK" ]; then
+    echo; echo "🤖 Installing $ZEND_PROJECT from scratch"
+    rm -rf $ZEND_ROOT/public $ZEND_ROOT/index.*
+    wdo composer-create -s dev -d $ZEND_ROOT/ $ZEND_PROJECT $ZEND_ROOT/
+    wmd $ZEND_ROOT -R
+fi

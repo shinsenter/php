@@ -1,15 +1,13 @@
-# Contribution guide
+# Contributions
 
-Thanks for your interest in contributing to this project!
-As stated in the README, there are a lot of dependencies on these images, so please understand that it can make it complicated on merging your pull request.
-We'd love to have your help, but it might be best to explain your intentions first before contributing.
+## Interested in contributing?
 
-## Support my activities
+As an open source project, we'd appreciate any help and contributions!
 
-If you like this repository, please hit the star button to follow further updates, or buy me a coffee 😉.
+We follow the standard [github pull request process](https://help.github.com/articles/about-pull-requests). We'll try to review your contributions as soon as possible.
 
-[![Donate via PayPal](https://img.shields.io/badge/Donate-Paypal-blue)](https://www.paypal.me/shinsenter) [![Become a sponsor](https://img.shields.io/badge/Donate-Patreon-orange)](https://www.patreon.com/appseeds) [![Become a stargazer](https://img.shields.io/badge/Support-Stargazer-yellow)](https://github.com/shinsenter/php/stargazers) [![Report an issue](https://img.shields.io/badge/Support-Issues-green)](https://github.com/shinsenter/php/discussions/new) [![Join the chat at https://gitter.im/shinsenter/php](https://badges.gitter.im/shinsenter/php.svg)](https://gitter.im/shinsenter/php?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+## File an Issue
 
-I really appreciate your love and supports.
+Not ready to contribute code, but see something that needs work? While we encourage everyone to contribute code, it is also appreciated when someone reports an issue. We use [github issues](https://github.com/shinsenter/php/issues) for this.
 
-From Vietnam 🇻🇳 with love.
+From contributing to source code to improving readability of the documentation, all suggestions are welcome!

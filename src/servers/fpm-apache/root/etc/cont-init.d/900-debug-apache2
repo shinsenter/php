@@ -1,6 +1,0 @@
-#!/command/with-contenv bash
-
-if [[ $DEBUG_MODE && $DEBUG_MODE == true ]]; then
-    sed -i 's/^LogLevel.*/LogLevel debug/' /etc/apache2/apache2.conf
-    echo "🔥 APACHE is in DEBUG MODE 🔥"
-fi

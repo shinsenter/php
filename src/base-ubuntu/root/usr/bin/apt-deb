@@ -1,0 +1,12 @@
+#!/bin/bash
+DEBNAME="$1"
+LISTURL="$2"
+if [ ! -z "$LISTURL" ] && [ ! -z "$DEBNAME" ]; then
+    GPGKEY="$3" ; [ ! -z "$GPGKEY" ] && gnu-key $GPGKEY $GPGKEY
+    OUTKEY="/usr/share/keyrings/${GPGKEY}.gpg"
+    [ -f "$OUTKEY" ] && LISTURL="[signed-by=$OUTKEY] $LISTURL"
+    SOURCE="deb $LISTURL $(bash -c '. /etc/os-release;echo $VERSION_CODENAME') main"
+    echo -e "\n  📦 Added: $SOURCE"
+    echo $SOURCE >"/etc/apt/sources.list.d/${DEBNAME}.list"
+    exec apt-update
+fi

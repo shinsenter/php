@@ -1,0 +1,22 @@
+#!/command/with-contenv bash
+WEBHOME="$(webhome)"
+PHP_OPEN_BASEDIR="${PHP_OPEN_BASEDIR:-$WEBHOME}"
+TZ="${TZ:-UTC}"
+
+if [ ! -d /var/log/php-fpm ]; then
+    wmd /var/log/php-fpm
+    wdo ln -sf /proc/1/fd/1 /var/log/php-fpm/access.log
+    wdo ln -sf /proc/1/fd/2 /var/log/php-fpm/error.log
+fi
+
+echo
+/usr/sbin/php-fpm -v
+echo "⚠️ Limit the files that can be accessed by PHP to $PHP_OPEN_BASEDIR"
+
+if [ "$DEBUG_MODE" == "true" ]; then
+    sed -i 's/^;log_level.*/log_level = notice/' /etc/php/fpm/php-fpm.conf
+    [ -z "$(php -m | grep debug)" ] && phpaddmod xdebug &
+    echo "🔥 PHP-FPM is in DEBUG MODE 🔥"
+fi
+
+echo

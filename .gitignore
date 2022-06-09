@@ -1,4 +1,8 @@
+.checksum
+.Dockerfile.tidy
 .DS_Store
+.source
 *.log
+builds/
+scratch/
 tests/data/
-versions/

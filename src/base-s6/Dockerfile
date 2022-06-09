@@ -1,22 +1,29 @@
-# This file is the work of https://github.com/shinsenter/php
+# This file belongs to the project https://code.shin.company/php
+# Author:  Shin <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-ARG BASE_IMAGE=ubuntu:latest
+ARG BASE_OS_IMAGE=ubuntu:latest
+ARG SCRATCH_IMAGE=shinsenter/scratch
 
 ################################################################################
 
-# prepares base image
-FROM ${BASE_IMAGE} as build
+# override scratch image
+FROM ${SCRATCH_IMAGE} as scratch
+
+################################################################################
+
+# base image
+FROM ${BASE_OS_IMAGE} as build
+
+# changes the behavior of apt-get
+ARG DEBIAN_FRONTEND=noninteractive
 
 # sets version for s6 overlay
-ARG S6_DIR=/usr/src/s6/
+ARG S6_DIR=/opt/s6/
 ARG S6_SRC_DEP="xz-utils wget"
 ARG S6_SRC_URL="https://github.com/just-containers/s6-overlay/releases/download"
 ARG S6_VERSION
-
-# disable frontend
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TERM=xterm
 
 # checks build argument
 RUN if [ -z "$S6_VERSION" ]; then \
@@ -24,32 +31,33 @@ RUN if [ -z "$S6_VERSION" ]; then \
     fi
 
 # adds build dependencies
-RUN apt-get update -y
-RUN apt-get install -y $S6_SRC_DEP --no-install-recommends --no-install-suggests
+RUN mkdir -p $S6_DIR
+RUN apt-get update  -yqq
+RUN apt-get install -yq $S6_SRC_DEP --no-install-recommends --no-install-suggests
 
 # detect system arch then select the right version of s6
 RUN export SYS_ARCH=$(uname -m); \
     case "$SYS_ARCH" in \
         aarch64 ) export S6_ARCH='aarch64' ;; \
-        arm     ) export S6_ARCH='arm'     ;; \
-        arm*    ) export S6_ARCH='armhf'   ;; \
-        i4+     ) export S6_ARCH='i486'    ;; \
-        i6+     ) export S6_ARCH='i686'    ;; \
+        arm64   ) export S6_ARCH='aarch64' ;; \
+        armhf   ) export S6_ARCH='armhf'   ;; \
+        arm*    ) export S6_ARCH='arm'     ;; \
+        i4*     ) export S6_ARCH='i486'    ;; \
+        i6*     ) export S6_ARCH='i686'    ;; \
         riscv64 ) export S6_ARCH='riscv64' ;; \
         s390*   ) export S6_ARCH='s390x'   ;; \
         *       ) export S6_ARCH='x86_64'  ;; \
     esac; \
-    \
-    # adds s6 overlay
-    echo "⬇️ Downloading s6 overlay:${S6_ARCH}-${S6_VERSION} for ${SYS_ARCH}..." \
-    && mkdir -p $S6_DIR \
-    && untar (){ \
+    untar (){ \
         echo "  ⏬ Downloading $1"; \
-        wget --no-check-certificate -O- $1 | tar Jxp -C ${2:-"$S6_DIR"}; \
-    } \
-    && untar ${S6_SRC_URL}/${S6_VERSION}/s6-overlay-noarch.tar.xz \
-    && untar ${S6_SRC_URL}/${S6_VERSION}/s6-overlay-${S6_ARCH}.tar.xz \
-    && du -sh $S6_DIR
+        wget --no-check-certificate -O- $1 | tar Jxp -C "${2:-$S6_DIR}"; \
+    }; \
+    \
+    echo "⬇️ Downloading s6 overlay:${S6_ARCH}-${S6_VERSION} for ${SYS_ARCH}" \
+        && untar ${S6_SRC_URL}/${S6_VERSION}/s6-overlay-noarch.tar.xz \
+        && untar ${S6_SRC_URL}/${S6_VERSION}/s6-overlay-${S6_ARCH}.tar.xz \
+        && untar ${S6_SRC_URL}/${S6_VERSION}/syslogd-overlay-noarch.tar.xz \
+        && du -sh $S6_DIR
 
 ################################################################################
 
@@ -57,7 +65,6 @@ RUN export SYS_ARCH=$(uname -m); \
 FROM scratch
 
 # copies from from build stage
-COPY --from=build /usr/src/s6/ /
-ENTRYPOINT ["/init"]
+COPY --from=build /opt/s6/ /
 
 ################################################################################

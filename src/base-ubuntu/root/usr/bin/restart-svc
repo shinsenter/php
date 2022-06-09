@@ -1,0 +1,12 @@
+#!/bin/bash
+SVC_DIR=/var/run/s6/legacy-services/
+if [ -x "$(command -v s6-svc)" ] && [ -d $SVC_DIR ]; then
+    if [ -z "$@" ]; then
+        find $SVC_DIR -maxdepth 1 -mindepth 1 -type d \
+            | xargs -I {} s6-svc -r {} 2>/dev/null
+    else
+        for svc in "$@"; do
+            s6-svc -r $SVC_DIR/$svc 2>/dev/null
+        done
+    fi
+fi

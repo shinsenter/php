@@ -1,21 +1,24 @@
+# Metafile
+# This file belongs to the project https://code.shin.company/php
+# Author:  Shin <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
+ARG BUILD_CONTEXT
 ARG BUILD_DATE
 ARG BUILD_DESC
 ARG BUILD_NAME
-ARG BUILD_VERSION
-ARG VCS_REF
+ARG BUILD_REVISION
+ENV IMAGE_NAME="$BUILD_NAME"
 
-LABEL org.label-schema.schema-version="1.0"
-LABEL org.label-schema.name="$BUILD_NAME"
-LABEL org.label-schema.build-date="$BUILD_DATE"
-LABEL org.label-schema.version="$BUILD_VERSION"
-LABEL org.label-schema.description="$BUILD_DESC"
-LABEL org.label-schema.vcs-ref="$VCS_REF"
-LABEL org.label-schema.url="https://hub.docker.com/r/$BUILD_NAME"
-LABEL org.label-schema.vcs-url="https://github.com/shinsenter/php"
-LABEL org.label-schema.vendor="SHIN Company"
-LABEL maintainer="shin@shin.company"
-LABEL publisher="https://hub.docker.com/u/shinsenter"
+LABEL org.opencontainers.image.authors="shin@shin.company"
+LABEL org.opencontainers.image.created="$BUILD_DATE"
+LABEL org.opencontainers.image.description="$BUILD_DESC"
+LABEL org.opencontainers.image.documentation="https://hub.docker.com/r/${BUILD_NAME}"
+LABEL org.opencontainers.image.licenses="GPL-3.0"
+LABEL org.opencontainers.image.revision="$BUILD_REVISION"
+LABEL org.opencontainers.image.source="https://code.shin.company/php/blob/main/${BUILD_CONTEXT}/Dockerfile"
+LABEL org.opencontainers.image.title="$BUILD_NAME"
+LABEL org.opencontainers.image.url="https://hub.docker.com/r/${BUILD_NAME}/tags"
 
 ################################################################################

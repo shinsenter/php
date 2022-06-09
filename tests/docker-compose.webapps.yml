@@ -1,33 +1,181 @@
+# This file belongs to the project https://code.shin.company/php
+# Author:  Shin <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
 version: '3'
 services:
 
   ##############################################################################
 
-  wordpress:
-    image: shinsenter/wordpress:php${PHP_VERSION:-8.1}
-    extends:
-      file: common.yml
-      service: common-php
-    build:
-      context: ../src/webapps/wordpress
-    volumes:
-      - ./data/wordpress:/opt/www
-    ports:
-      - 9991:80
+  database:
+    container_name: database
+    image: mariadb:latest
+    environment:
+      TZ: UTC
+      MYSQL_ROOT_PASSWORD: localhost
+      MYSQL_DATABASE: test
+
+  redis:
+    container_name: redis
+    image: redis:latest
 
   ##############################################################################
 
-  phpmyadmin:
-    image: shinsenter/phpmyadmin:php${PHP_VERSION:-8.1}
+  phpinfo:
+    image: shinsenter/phpfpm-nginx:php${PHP_VERSION:-8.1}
+    extends:
+      file: common.yml
+      service: common-php
+    volumes:
+      - ./data/phpinfo:/opt/www
+    ports:
+      - 9100:80
+
+  ##############################################################################
+
+  cakephp4:
+    image: shinsenter/cakephp4:php${PHP_VERSION:-8.1}
     extends:
       file: common.yml
       service: common-php
     build:
-      context: ../src/webapps/phpmyadmin
+      context: ../src/webapps/cakephp4
     volumes:
-      - ./data/phpmyadmin:/opt/www
+      - ./data/cakephp4:/opt/www
     ports:
-      - 9992:80
+      - 9101:80
+    environment:
+      - CAKE4_PROJECT=cakephp/app
+
+################################################################################
+
+  codeigniter4:
+    image: shinsenter/codeigniter4:php${PHP_VERSION:-8.1}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../src/webapps/codeigniter4
+    volumes:
+      - ./data/codeigniter4:/opt/www
+    ports:
+      - 9102:80
+    environment:
+      - CI4_PROJECT=codeigniter4/appstarter
+
+  ##############################################################################
+
+  crater:
+    image: shinsenter/crater:php${PHP_VERSION:-8.1}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../src/webapps/crater
+    volumes:
+      - ./data/crater:/opt/www
+    ports:
+      - 9103:80
+    environment:
+      - REDIS_HOST=redis
+      - LARAVEL_SCHEDULE_ENABLED=true
+
+################################################################################
+
+  flarum:
+    image: shinsenter/flarum:php${PHP_VERSION:-8.1}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../src/webapps/flarum
+    volumes:
+      - ./data/flarum:/opt/www
+    ports:
+      - 9104:80
+    environment:
+      - FLARUM_PROJECT=flarum/flarum
+
+################################################################################
+
+  fuelphp:
+    image: shinsenter/fuelphp:php${PHP_VERSION:-8.1}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../src/webapps/fuelphp
+    volumes:
+      - ./data/fuelphp:/opt/www
+    ports:
+      - 9105:80
+    environment:
+      - FUEL_PROJECT=fuel/fuel
+
+################################################################################
+
+  grav:
+    image: shinsenter/grav:php${PHP_VERSION:-8.1}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../src/webapps/grav
+    volumes:
+      - ./data/grav:/opt/www
+    ports:
+      - 9106:80
+    environment:
+      - GRAV_PROJECT=getgrav/grav
+
+################################################################################
+
+  hyperf:
+    image: shinsenter/hyperf:php${PHP_VERSION:-8.1}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../src/webapps/hyperf
+    volumes:
+      - ./data/hyperf:/opt/www
+    ports:
+      - 9107:80
+    environment:
+      - HYPERF_PROJECT=hyperf/hyperf-skeleton
+
+  ##############################################################################
+
+  kirby:
+    image: shinsenter/kirby:php${PHP_VERSION:-8.1}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../src/webapps/kirby
+    volumes:
+      - ./data/kirby:/opt/www
+    ports:
+      - 9108:80
+    environment:
+      - KIRBY_PROJECT=getkirby/starterkit
+
+################################################################################
+
+  laminas:
+    image: shinsenter/laminas:php${PHP_VERSION:-8.1}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../src/webapps/laminas
+    volumes:
+      - ./data/laminas:/opt/www
+    ports:
+      - 9109:80
+    environment:
+      - ZEND_PROJECT=laminas/laminas-mvc-skeleton
 
   ##############################################################################
 
@@ -41,23 +189,67 @@ services:
     volumes:
       - ./data/laravel:/opt/www
     ports:
-      - 9993:80
+      - 9110:80
+    environment:
+      - REDIS_HOST=redis
+      - LARAVEL_PROJECT=laravel/laravel
+      - LARAVEL_QUEUE_ENABLED=true
+      - LARAVEL_QUEUE_OPTIONS=--timeout=10 --tries=3 redis
+      - LARAVEL_SCHEDULE_ENABLED=true
 
   ##############################################################################
 
-  codeigniter4:
-    image: shinsenter/codeigniter4:php${PHP_VERSION:-8.1}
+  phpmyadmin:
+    image: shinsenter/phpmyadmin:php${PHP_VERSION:-8.1}
     extends:
       file: common.yml
       service: common-php
     build:
-      context: ../src/webapps/codeigniter4
+      context: ../src/webapps/phpmyadmin
     volumes:
-      - ./data/codeigniter4:/opt/www
+      - ./data/phpmyadmin:/opt/www
     ports:
-      - 9994:80
+      - 9111:80
+    environment:
+      - PMA_PROJECT=phpmyadmin/phpmyadmin
+      - PMA_HOST=database
+      - PMA_PASSWORD=localhost
+      - PMA_USER=root
 
-################################################################################
+  ##############################################################################
+
+  slim:
+    image: shinsenter/slim:php${PHP_VERSION:-8.1}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../src/webapps/slim
+    volumes:
+      - ./data/slim:/opt/www
+    ports:
+      - 9112:80
+    environment:
+      - SLIM_PROJECT=slim/slim-skeleton
+
+  ##############################################################################
+
+  statamic:
+    image: shinsenter/statamic:php${PHP_VERSION:-8.1}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../src/webapps/statamic
+    volumes:
+      - ./data/statamic:/opt/www
+    ports:
+      - 9113:80
+    environment:
+      - REDIS_HOST=redis
+      - STATAMIC_PROJECT=statamic/statamic
+
+  ##############################################################################
 
   symfony:
     image: shinsenter/symfony:php${PHP_VERSION:-8.1}
@@ -69,8 +261,39 @@ services:
     volumes:
       - ./data/symfony:/opt/www
     ports:
-      - 9995:80
+      - 9114:80
     environment:
+      - SYMFONY_PROJECT=symfony/skeleton
       - SYMFONY_INSTALL_DEVKIT=true
 
 ################################################################################
+
+  wordpress:
+    image: shinsenter/wordpress:php${PHP_VERSION:-8.1}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../src/webapps/wordpress
+    volumes:
+      - ./data/wordpress:/opt/www
+    ports:
+      - 9115:80
+
+  ##############################################################################
+
+  yii:
+    image: shinsenter/yii:php${PHP_VERSION:-8.1}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../src/webapps/yii
+    volumes:
+      - ./data/yii:/opt/www
+    ports:
+      - 9116:80
+    environment:
+      - YII_PROJECT=yiisoft/yii2-app-basic
+
+  ##############################################################################
