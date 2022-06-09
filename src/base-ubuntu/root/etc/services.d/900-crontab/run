@@ -1,0 +1,12 @@
+#!/command/with-contenv bash
+if [ "$ENABLE_CRONTAB" == "true" ]; then
+    if [ -d /etc/cron.d ]; then
+        chown -R root:root /etc/cron.d
+        find /etc/cron.d -type f | xargs -I {} chmod 0644 {}
+        bash -c 'sleep 5;find /etc/cron.d -type f 2>/dev/null | xargs -I {} touch {} 2>/dev/null' &
+    fi
+    echo "⚙️ Starting crontab..."
+    MAILTO="" exec cron -flnL15
+else
+    exec s6-svc -Od .
+fi

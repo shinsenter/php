@@ -1,0 +1,7 @@
+#!/bin/bash
+CRATER_ROOT="$(webhome)"
+CRATER_ARTISAN="$CRATER_ROOT/artisan"
+if [ -f "$CRATER_ARTISAN" ]; then
+    cd $CRATER_ROOT
+    exec php $CRATER_ARTISAN --ansi "$@"
+fi

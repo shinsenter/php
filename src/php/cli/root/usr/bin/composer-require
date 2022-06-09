@@ -1,0 +1,11 @@
+#!/bin/bash
+echo; echo "  ⏬ Running composer require $@"
+exec composer require --ansi \
+--no-cache \
+--no-interaction \
+--no-progress \
+--optimize-autoloader \
+--prefer-dist \
+--sort-packages \
+$COMPOSER_REQUIRE_OPTIONS \
+"$@"

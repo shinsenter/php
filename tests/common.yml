@@ -1,3 +1,8 @@
+# This file belongs to the project https://code.shin.company/php
+# Author:  Shin <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
 version: '3'
 services:
 
@@ -7,15 +12,20 @@ services:
     platform: ${BUILD_PLATFORM:-linux/arm64/v8}
     environment:
       - TZ=Asia/Ho_Chi_Minh
-      - PUID=1234
-      - PGID=1234
+      - PUID=${UID:-1234}
+      - PGID=${GID:-1234}
       - WEBHOME=/opt/www
-      - S6_CMD_WAIT_FOR_SERVICES_MAXTIME=600000
+      - S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
 
   common-php:
     extends: common
     build:
       args:
-        PHP_VERSION: ${PHP_VERSION:-8.1}
+        - IMAGE_SUFFIX=
+        - PHP_VERSION=${PHP_VERSION:-8.1}
+    environment:
+      - DEBUG_MODE=false
+    volumes:
+      - ./data/_ssl:/etc/ssl/web
 
 ################################################################################

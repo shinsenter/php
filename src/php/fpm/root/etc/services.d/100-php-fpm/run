@@ -1,0 +1,4 @@
+#!/command/with-contenv bash
+export PHP_DATE_TIMEZONE="${PHP_DATE_TIMEZONE:-$TZ}"
+export PHP_OPEN_BASEDIR="${PHP_OPEN_BASEDIR:-$WEBHOME}"
+exec php-fpm --nodaemonize

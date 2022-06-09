@@ -1,0 +1,3 @@
+MAILTO=""
+SHELL=/bin/bash
+*/10 * * * * webuser wp cron event run --due-now >/proc/1/fd/1 2>/proc/1/fd/2

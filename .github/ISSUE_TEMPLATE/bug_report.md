@@ -7,10 +7,10 @@ assignees:
   - shinsenter
 
 ---
-<!-- 
+<!--
 ================================================
   🔰 Looking for professional support?
-  Please contact: admin@appseeds.net
+  Please contact: shin@shin.company
   Guaranteed response times next business day.
 ================================================
 -->
@@ -25,9 +25,9 @@ assignees:
 
 ## Steps to reproduce the issue
 
-1.  
-2.  
-3.  
+1.
+2.
+3.
 
 ## What is expected?
 <!-- Give us an explanation of what should be happening -->

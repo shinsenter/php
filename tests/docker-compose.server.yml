@@ -1,3 +1,8 @@
+# This file belongs to the project https://code.shin.company/php
+# Author:  Shin <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
 version: '3'
 services:
 
@@ -11,7 +16,7 @@ services:
     build:
       context: ../src/servers/fpm-apache
     ports:
-      - 8881:80
+      - 9001:80
 
   ##############################################################################
 
@@ -23,6 +28,6 @@ services:
     build:
       context: ../src/servers/fpm-nginx
     ports:
-      - 8882:80
+      - 9002:80
 
 ################################################################################

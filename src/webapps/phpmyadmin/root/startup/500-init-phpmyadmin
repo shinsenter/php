@@ -1,0 +1,25 @@
+#!/command/with-contenv bash
+PMA_PROJECT="${PMA_PROJECT:-phpmyadmin/phpmyadmin}"
+PMA_ROOT="$(webhome)"
+PMA_CONFIG="$PMA_ROOT/config.inc.php"
+
+if [ ! -f "$PMA_CONFIG" ]; then
+    echo; echo "🤖 Installing $PMA_PROJECT from scratch"
+    rm -f $PMA_ROOT/index.*
+    wdo composer-create -d $PMA_ROOT/ $PMA_PROJECT $PMA_ROOT/ \
+        --repository-url='https://www.phpmyadmin.net/packages.json'
+
+    wdo cp -p /etc/phpmyadmin/config.inc.php $PMA_CONFIG
+    sed -i "s/random_string_with_32_chars_long/$(echo $RANDOM | shasum | cut -c1-32)/g" $PMA_CONFIG
+    chmod 0644 $PMA_CONFIG
+
+    wmd $PMA_ROOT/tmp
+    wmd $PMA_ROOT/tmp/save
+    wmd $PMA_ROOT/tmp/upload
+    wmd $PMA_ROOT -R
+
+    if [ -f $PMA_ROOT/libraries/vendor_config.php ]; then
+        sed -i "s@'configFile'.*@'configFile' => '${PMA_CONFIG}',@" \
+            $PMA_ROOT/libraries/vendor_config.php
+    fi
+fi

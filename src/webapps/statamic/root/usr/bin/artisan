@@ -1,0 +1,7 @@
+#!/bin/bash
+STATAMIC_ROOT="$(webhome)"
+STATAMIC_ARTISAN="$STATAMIC_ROOT/artisan"
+if [ -f "$STATAMIC_ARTISAN" ]; then
+    cd $STATAMIC_ROOT
+    exec php $STATAMIC_ARTISAN --ansi "$@"
+fi

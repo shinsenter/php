@@ -5,7 +5,7 @@
  |___/_| |_|_|_| |_|___/\___|_| |_|\__\___|_|/_/ | .__/|_| |_| .__/
                                                  |_|         |_|
 
- Github:     https://github.com/shinsenter/php/
- Docker Hub: https://hub.docker.com/r/shinsenter/php/
+ Github:    https://code.shin.company/php
+ DockerHub: https://docker.shin.company/php
 
- (To edit this welcome message, add your text to /welcome.txt)
+ (To edit this welcome message, add your text to %PATH%)

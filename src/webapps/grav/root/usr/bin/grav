@@ -1,0 +1,7 @@
+#!/bin/bash
+GRAV_ROOT="$(webhome)"
+GRAV_BIN="$GRAV_ROOT/bin/grav"
+if [ -f "$GRAV_BIN" ]; then
+    cd $GRAV_ROOT
+    exec $GRAV_BIN "$@"
+fi

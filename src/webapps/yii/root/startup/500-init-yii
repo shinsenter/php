@@ -1,0 +1,11 @@
+#!/command/with-contenv bash
+YII_PROJECT="${YII_PROJECT:-yiisoft/yii2-app-basic}"
+YII_ROOT="$(webhome)"
+YII_CHECK="$YII_ROOT/yii"
+
+if [ ! -f "$YII_CHECK" ]; then
+    echo; echo "🤖 Installing $YII_PROJECT from scratch"
+    rm -rf $YII_ROOT/web $YII_ROOT/index.*
+    wdo composer-create -d $YII_ROOT/ $YII_PROJECT $YII_ROOT/
+    wmd $YII_ROOT -R
+fi

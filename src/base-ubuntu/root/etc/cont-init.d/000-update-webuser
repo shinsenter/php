@@ -1,19 +1,24 @@
 #!/command/with-contenv bash
-
 PUID="${PUID:-9999}"
 PGID="${PGID:-9999}"
 TZ="${TZ:-UTC}"
-WEBHOME="${WEBHOME:-/var/www/html}"
+WEBHOME="$(webhome)"
+
+[ ! -z "$WEBHOME" ] && wmd $WEBHOME
 
 if [ ! -z "$TZ" ] && [ -e /usr/share/zoneinfo/$TZ ]; then
     ln -sf /usr/share/zoneinfo/$TZ /etc/localtime
 fi
 
-if [[ $PUID != 9999 || $PGID != 9999 ]]; then
+if [[ "$PUID" != "9999" || "$PGID" != "9999" ]]; then
+    echo "🔥 New PUID and PGID for $WEBHOME will be updated. 🔥"
     /usr/sbin/groupmod -o -g $PGID webgroup
     /usr/sbin/usermod  -o -u $PUID webuser
+    touch /tmp/owner-changed
 fi
 
-if [ ! -z "$WEBHOME" ]; then
-    webuser-mkdir $WEBHOME
+if [ -d /source/ ]; then
+    echo "  🗂 Source folder detected. Moving files to $WEBHOME..."
+    move -bf /source/* $WEBHOME/ && rm -rf /source/ || true
+    touch /tmp/owner-changed
 fi

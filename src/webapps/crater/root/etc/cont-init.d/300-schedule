@@ -1,0 +1,4 @@
+#!/command/with-contenv bash
+if [ "$CRATER_SCHEDULE_ENABLED" != "true" ]; then
+    rm -rf /etc/cron.d/*-schedule
+fi

@@ -1,0 +1,41 @@
+#!/command/with-contenv bash
+STATAMIC_PROJECT="${STATAMIC_PROJECT:-statamic/statamic}"
+STATAMIC_ROOT="$(webhome)"
+STATAMIC_BINARY="$STATAMIC_ROOT/please"
+STATAMIC_ARTISAN="$STATAMIC_ROOT/artisan"
+
+if [ ! -f "$STATAMIC_BINARY" ]; then
+    echo; echo "🤖 Installing $STATAMIC_PROJECT from scratch"
+    rm -rf $STATAMIC_ROOT/public $STATAMIC_ROOT/index.*
+    wdo composer-create -d $STATAMIC_ROOT/ $STATAMIC_PROJECT $STATAMIC_ROOT/
+    wdo please install
+    wmd $STATAMIC_ROOT -R
+fi
+
+if [ -f "$STATAMIC_ARTISAN" ]; then
+    composer-wait
+    las() { echo; wdo php $STATAMIC_ARTISAN --ansi "$@" 2>/dev/null; }
+
+    if [ ! -f "$STATAMIC_ROOT/.env" ] && [ ! -f "$STATAMIC_ROOT/.env.${APP_ENV}" ]; then
+        wdo cp -rpf "$STATAMIC_ROOT/.env.example" "$STATAMIC_ROOT/.env"
+        las key:generate
+    fi
+
+    if [ "$STATAMIC_AUTO_OPTIMIZE" == "true" ]; then
+        las optimize:clear
+        las optimize
+        las vendor:publish --all
+        wmd $STATAMIC_ROOT/bootstrap/cache -R
+        wmd $STATAMIC_ROOT/storage -R
+    fi
+
+    if [ "$STATAMIC_LINK_STORAGE" == "true" ]; then
+        las storage:link
+        wmd $STATAMIC_ROOT/storage/app/public -R
+        wmd $STATAMIC_ROOT/public -R
+    fi
+
+    if [ "$STATAMIC_AUTO_MIGRATION" == "true" ]; then
+        las migrate:refresh --seed --force
+    fi
+fi

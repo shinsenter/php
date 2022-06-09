@@ -1,0 +1,26 @@
+#!/command/with-contenv bash
+WEBROOT="$(webhome)${APACHE_DOCUMENT_ROOT}"
+
+wmd $WEBROOT
+if [ ! -z "$(ls -1 /web/ | grep 'index\.\(ht?ml\|php\)')" ] && [ -z "$(ls -1 $WEBROOT/ | grep 'index\.\(ht?ml\|php\)')" ]; then
+    echo; echo "📄 Copying temporary index page to ${WEBROOT}"
+    wdo cp -prf /web/index.* $WEBROOT/
+fi
+
+if [ ! -d /var/log/apache2 ]; then
+    wmd /var/log/apache2
+    wdo ln -sf /proc/1/fd/1 /var/log/apache2/access.log
+    wdo ln -sf /proc/1/fd/1 /var/log/apache2/other_vhosts_access.log
+    wdo ln -sf /proc/1/fd/2 /var/log/apache2/error.log
+fi
+
+echo
+/usr/sbin/apache2ctl -v
+/usr/sbin/apache2ctl configtest
+
+if [ "$DEBUG_MODE" == "true" ]; then
+    sed -i 's/^LogLevel.*/LogLevel debug/' /etc/apache2/apache2.conf
+    echo "🔥 APACHE is in DEBUG MODE 🔥"
+fi
+
+echo

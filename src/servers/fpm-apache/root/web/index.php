@@ -9,7 +9,7 @@
 </head>
 <body>
     <h1>Hello world!</h1>
-    <p>Hi there! You are using <a href="https://hub.docker.com/r/shinsenter/php/tags?page=1&name=fpm-apache">shinsenter/php:fpm-apache</a> docker image.</p>
+    <p>Hi there! You are using <a href="https://docker.shin.company/php/tags?page=1&name=fpm-apache">shinsenter/php:fpm-apache</a> Docker image.</p>
     <hr>
     <?php phpinfo(); ?>
 </body>
