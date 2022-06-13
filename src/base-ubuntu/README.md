@@ -76,6 +76,9 @@ You can easily change container configurations by using pre-defined Docker's env
 ```Dockerfile
 FROM shinsenter/s6-ubuntu
 
+# sets s6-overlay entrypoint
+ENTRYPOINT ["/init"]
+
 # Control your timezone
 ENV TZ="UTC"
 
