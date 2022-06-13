@@ -11,6 +11,7 @@ ARG BUILD_NAME
 ARG BUILD_REVISION
 ENV IMAGE_NAME="$BUILD_NAME"
 
+LABEL maintainer="SHIN (@shinsenter)"
 LABEL org.opencontainers.image.authors="shin@shin.company"
 LABEL org.opencontainers.image.created="$BUILD_DATE"
 LABEL org.opencontainers.image.description="$BUILD_DESC"
