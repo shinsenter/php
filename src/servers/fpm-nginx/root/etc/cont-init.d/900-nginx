@@ -7,6 +7,7 @@ fi
 
 if [ ! -z "$PHP_MAX_EXECUTION_TIME" ]; then
     echo "client_body_timeout ${PHP_MAX_EXECUTION_TIME};" >/etc/nginx/extra.d/body-timeout.conf
+    echo "proxy_read_timeout ${PHP_MAX_EXECUTION_TIME};"  >/etc/nginx/extra.d/proxy-timeout.conf
 fi
 
 find /etc/nginx/sites-available -type f | \
