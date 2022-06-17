@@ -21,7 +21,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 # sets version for s6 overlay
 ARG S6_DIR=/opt/s6/
-ARG S6_SRC_DEP="xz-utils wget"
+ARG S6_SRC_DEP="ca-certificates xz-utils wget"
 ARG S6_SRC_URL="https://github.com/just-containers/s6-overlay/releases/download"
 ARG S6_VERSION
 
@@ -34,6 +34,7 @@ RUN if [ -z "$S6_VERSION" ]; then \
 RUN mkdir -p $S6_DIR
 RUN apt-get update  -yqq
 RUN apt-get install -yq $S6_SRC_DEP --no-install-recommends --no-install-suggests
+RUN ln -sf /etc/ssl/certs/ca-certificates.crt /usr/lib/ssl/cert.pem
 
 # detect system arch then select the right version of s6
 RUN export SYS_ARCH=$(uname -m); \
@@ -50,7 +51,7 @@ RUN export SYS_ARCH=$(uname -m); \
     esac; \
     untar (){ \
         echo "  ⏬ Downloading $1"; \
-        wget --no-check-certificate -O- $1 | tar Jxp -C "${2:-$S6_DIR}"; \
+        wget -O- $1 | tar Jxp -C "${2:-$S6_DIR}"; \
     }; \
     \
     echo "⬇️ Downloading s6 overlay:${S6_ARCH}-${S6_VERSION} for ${SYS_ARCH}" \

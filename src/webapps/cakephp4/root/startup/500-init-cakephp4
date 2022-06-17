@@ -6,6 +6,6 @@ CAKE4_CHECK="$CAKE4_ROOT/bin/cake"
 if [ ! -f "$CAKE4_CHECK" ]; then
     echo; echo "🤖 Installing $CAKE4_PROJECT from scratch"
     rm -rf $CAKE4_ROOT/webroot $CAKE4_ROOT/index.*
-    wdo composer-create -d $CAKE4_ROOT/ $CAKE4_PROJECT $CAKE4_ROOT/
-    wmd $CAKE4_ROOT -R
+    composer-create -d $CAKE4_ROOT/ $CAKE4_PROJECT $CAKE4_ROOT/
+    wmd $CAKE4_ROOT -R &
 fi

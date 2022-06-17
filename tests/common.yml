@@ -10,12 +10,16 @@ services:
 
   common:
     platform: ${BUILD_PLATFORM:-linux/arm64/v8}
+    volumes:
+      - ./data/_ssl:/etc/ssl/web
     environment:
-      - TZ=Asia/Ho_Chi_Minh
-      - PUID=${UID:-1234}
+      - DEBUG_MODE=false
       - PGID=${GID:-1234}
-      - WEBHOME=/opt/www
+      - PUID=${UID:-1234}
       - S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
+      - TZ=Asia/Tokyo
+      - WEBHOME=/opt/www
+      - PHP_DEFAULT_CHARSET=Shift_JIS
 
   common-php:
     extends: common
@@ -23,9 +27,5 @@ services:
       args:
         - IMAGE_SUFFIX=
         - PHP_VERSION=${PHP_VERSION:-8.1}
-    environment:
-      - DEBUG_MODE=false
-    volumes:
-      - ./data/_ssl:/etc/ssl/web
 
 ################################################################################

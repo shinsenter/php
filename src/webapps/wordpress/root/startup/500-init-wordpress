@@ -8,5 +8,5 @@ if [ ! -d "$WORDPRESS_CHECK" ]; then
     wp core download \
         --locale="${WORDPRESS_LOCALE:-en_US}" \
         --force
-    wmd $WORDPRESS_ROOT -R
+    wmd $WORDPRESS_ROOT -R &
 fi

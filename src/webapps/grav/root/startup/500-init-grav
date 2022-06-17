@@ -8,7 +8,7 @@ if [ ! -f "$GRAV_CHECK" ]; then
     rm -rf $GRAV_ROOT/web $GRAV_ROOT/index.*
     [ -x "$(command -v git)" ] || apt-oneshot git
     git config --global --add safe.directory $GRAV_ROOT
-    wdo composer-create -d $GRAV_ROOT/ $GRAV_PROJECT $GRAV_ROOT/
+    composer-create -d $GRAV_ROOT/ $GRAV_PROJECT $GRAV_ROOT/
     $GRAV_CHECK install $GRAV_ROOT/ 2>/dev/null
-    wmd $GRAV_ROOT -R
+    wmd $GRAV_ROOT -R &
 fi

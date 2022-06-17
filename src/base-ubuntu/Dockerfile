@@ -48,8 +48,8 @@ RUN wmd /root -R
 RUN echo "🤖 Updating packages"
 RUN apt-update
 RUN apt-install $BUILD_DEPS ca-certificates cron openssl
-RUN disable cron
 RUN ln -sf /etc/ssl/certs/ca-certificates.crt /usr/lib/ssl/cert.pem
+RUN disable cron
 RUN apt-upgrade -uq
 RUN cleanup $BUILD_DEPS
 

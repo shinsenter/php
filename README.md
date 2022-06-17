@@ -256,6 +256,9 @@ ENV MSMTP_RELAY_SERVER_PORT="1025"
 
 # ==========================================================
 
+# Default charset
+ENV PHP_DEFAULT_CHARSET="UTF-8"
+
 # Show PHP errors on screen
 ENV PHP_DISPLAY_ERRORS="On"
 
