@@ -6,6 +6,6 @@ KIRBY_CHECK="$KIRBY_ROOT/kirby"
 if [ ! -d "$KIRBY_CHECK" ]; then
     echo; echo "🤖 Installing $KIRBY_PROJECT from scratch"
     rm -rf $KIRBY_ROOT/web $KIRBY_ROOT/index.*
-    wdo composer-create -d $KIRBY_ROOT/ $KIRBY_PROJECT $KIRBY_ROOT/
-    wmd $KIRBY_ROOT -R
+    composer-create -d $KIRBY_ROOT/ $KIRBY_PROJECT $KIRBY_ROOT/
+    wmd $KIRBY_ROOT -R &
 fi

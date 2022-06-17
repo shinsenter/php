@@ -7,13 +7,14 @@ SYMFONY_DEVKIT="$SYMFONY_ROOT/vendor/symfony/debug-bundle"
 if [ ! -f "$SYMFONY_CONSOLE" ]; then
     echo; echo "🤖 Installing $SYMFONY_PROJECT from scratch"
     rm -rf $SYMFONY_ROOT/public $SYMFONY_ROOT/index.*
-    wdo composer-create -d $SYMFONY_ROOT/ $SYMFONY_PROJECT $SYMFONY_ROOT/
+    composer-create -d $SYMFONY_ROOT/ $SYMFONY_PROJECT $SYMFONY_ROOT/
     wmd $SYMFONY_ROOT -R
 fi
 
 if [ "$SYMFONY_INSTALL_DEVKIT" == "true" ] && [ -f "$SYMFONY_CONSOLE" ] && [ ! -d "$SYMFONY_DEVKIT" ]; then
     echo; echo "🤖 Installing packages for development"
-    wdo composer-require -d $SYMFONY_ROOT/ webapp
+    composer-require -d $SYMFONY_ROOT/ webapp
+    wmd $SYMFONY_ROOT -R &
 fi
 
-[ -f "$SYMFONY_CONSOLE" ] && wdo php $SYMFONY_CONSOLE about
+[ -f "$SYMFONY_CONSOLE" ] && php $SYMFONY_CONSOLE about

@@ -6,31 +6,31 @@ LARAVEL_ARTISAN="$LARAVEL_ROOT/artisan"
 if [ ! -f "$LARAVEL_ARTISAN" ]; then
     echo; echo "🤖 Installing $LARAVEL_PROJECT from scratch"
     rm -rf $LARAVEL_ROOT/public $LARAVEL_ROOT/index.*
-    wdo composer-create -d $LARAVEL_ROOT/ $LARAVEL_PROJECT $LARAVEL_ROOT/
-    wmd $LARAVEL_ROOT -R
+    composer-create -d $LARAVEL_ROOT/ $LARAVEL_PROJECT $LARAVEL_ROOT/
+    wmd $LARAVEL_ROOT -R &
 fi
 
 if [ -f "$LARAVEL_ARTISAN" ]; then
     composer-wait
-    las() { echo; wdo php $LARAVEL_ARTISAN --ansi "$@" 2>/dev/null; }
+    las() { echo; php $LARAVEL_ARTISAN --ansi "$@" 2>&1; }
 
     if [ ! -f "$LARAVEL_ROOT/.env" ] && [ ! -f "$LARAVEL_ROOT/.env.${APP_ENV}" ]; then
-        wdo cp -rpf "$LARAVEL_ROOT/.env.example" "$LARAVEL_ROOT/.env"
-        las key:generate
+        cp -rpf "$LARAVEL_ROOT/.env.example" "$LARAVEL_ROOT/.env"
+        las key:generate --force
     fi
 
     if [ "$LARAVEL_AUTO_OPTIMIZE" == "true" ]; then
         las optimize:clear
         las optimize
         las vendor:publish --all
-        wmd $LARAVEL_ROOT/bootstrap/cache -R
-        wmd $LARAVEL_ROOT/storage -R
+        wmd $LARAVEL_ROOT/bootstrap/cache -R &
+        wmd $LARAVEL_ROOT/storage -R &
     fi
 
     if [ "$LARAVEL_LINK_STORAGE" == "true" ]; then
         las storage:link
-        wmd $LARAVEL_ROOT/storage/app/public -R
-        wmd $LARAVEL_ROOT/public -R
+        wmd $LARAVEL_ROOT/storage/app/public -R &
+        wmd $LARAVEL_ROOT/public -R &
     fi
 
     if [ "$LARAVEL_AUTO_MIGRATION" == "true" ]; then

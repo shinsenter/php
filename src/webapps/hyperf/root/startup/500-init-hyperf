@@ -6,10 +6,10 @@ HYPERF_BIN="$HYPERF_ROOT/bin/hyperf.php"
 if [ ! -f "$HYPERF_BIN" ]; then
     echo; echo "🤖 Installing $HYPERF_PROJECT from scratch"
     rm -rf $HYPERF_ROOT/public $HYPERF_ROOT/index.*
-    wdo composer-create -d $HYPERF_ROOT/ $HYPERF_PROJECT $HYPERF_ROOT/
+    composer-create -d $HYPERF_ROOT/ $HYPERF_PROJECT $HYPERF_ROOT/
     if [ "$(php -r 'echo PHP_VERSION_ID;')" -lt "70400" ]; then
         composer-require -d $HYPERF_ROOT/ hyperf/signal symfony/serializer
         restart-svc 300-hyperf
     fi
-    wmd $HYPERF_ROOT -R
+    wmd $HYPERF_ROOT -R &
 fi
