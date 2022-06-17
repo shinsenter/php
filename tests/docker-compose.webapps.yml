@@ -26,7 +26,7 @@ services:
     image: shinsenter/phpfpm-nginx:php${PHP_VERSION:-8.1}
     extends:
       file: common.yml
-      service: common-php
+      service: common
     volumes:
       - ./data/phpinfo:/opt/www
     ports:
