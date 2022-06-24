@@ -10,7 +10,7 @@ TARGET=$1
 BASE_DIR="$(git rev-parse --show-toplevel)"
 SRC_DIR="$BASE_DIR/src"
 CACHE_DIR="/tmp/build-cache"
-S6_VERSION="$(cat ${BASE_DIR}/S6_VERSION     | sort -r | head -n1)"
+LATEST_S6="$(cat ${BASE_DIR}/S6_VERSIONS     | sort -r | head -n1)"
 OS_VERSIONS="$(cat ${BASE_DIR}/OS_VERSIONS   | sort -r )"
 PHP_VERSIONS="$(cat ${BASE_DIR}/PHP_VERSIONS | sort -r )"
 LATEST_OS="$(echo "$OS_VERSIONS"   | head -n1)"
@@ -59,11 +59,11 @@ treehash() {
             checksum="$target/.checksum"
             if [ -f $checksum ]; then cat $checksum; continue; fi
             touch $checksum ; case "$path" in
-                src/base-s6     ) treehash S6_VERSION src/base | tee -a $checksum ;;
-                src/base-ubuntu ) treehash src/base-s6         | tee -a $checksum ;;
-                src/php/cli     ) treehash src/base-ubuntu     | tee -a $checksum ;;
-                src/php/fpm     ) treehash src/php/cli         | tee -a $checksum ;;
-                src/servers/*   ) treehash src/php/fpm         | tee -a $checksum ;;
+                src/base-s6     ) treehash S6_VERSIONS src/base | tee -a $checksum ;;
+                src/base-ubuntu ) treehash src/base-s6          | tee -a $checksum ;;
+                src/php/cli     ) treehash src/base-ubuntu      | tee -a $checksum ;;
+                src/php/fpm     ) treehash src/php/cli          | tee -a $checksum ;;
+                src/servers/*   ) treehash src/php/fpm          | tee -a $checksum ;;
                 src/webapps/*   ) treehash src/servers/fpm-$(grep nginx $target/Dockerfile >/dev/null && echo 'nginx' || echo 'apache') | tee -a $checksum ;;
             esac;
             echo "$(dirhash ${target/$BASE_DIR/.}) - $path/" | tee -a $checksum
@@ -108,7 +108,7 @@ prebuild () {
     echo "::set-output name=CHECKSUM::$checksum"
     echo "::set-output name=LATEST_OS::$LATEST_OS"
     echo "::set-output name=LATEST_PHP::$LATEST_PHP"
-    echo "::set-output name=S6_VERSION::$S6_VERSION"
+    echo "::set-output name=LATEST_S6::$LATEST_S6"
     # echo "::set-output name=OS_VERSIONS::$OS_VERSIONS"
     # echo "::set-output name=PHP_VERSIONS::$PHP_VERSIONS"
 }

@@ -15,9 +15,9 @@ on:
     paths:
       - .bin/prebuild
       - .github/workflows/build-v2.yml
+      - S6_VERSIONS
       - OS_VERSIONS
       - PHP_VERSIONS
-      - S6_VERSION
       - src/**
   pull_request:
     types:
@@ -28,9 +28,9 @@ on:
     paths:
       - .bin/prebuild
       - .github/workflows/build-v2.yml
+      - S6_VERSIONS
       - OS_VERSIONS
       - PHP_VERSIONS
-      - S6_VERSION
       - src/**
   schedule:
     - cron: "0 0 * * *"
@@ -155,10 +155,10 @@ jobs:
           images: ${{ steps.config.outputs.BUILD_NAME }}
           tags: |
             type=raw,value=latest
-            type=raw,value=${{ steps.config.outputs.S6_VERSION }}
+            type=raw,value=${{ steps.config.outputs.LATEST_S6 }}
       -
         if: steps.cache.outputs.cache-hit != 'true'
-        name: Build ${{ steps.config.outputs.BUILD_NAME }}:${{ steps.config.outputs.S6_VERSION }}
+        name: Build ${{ steps.config.outputs.BUILD_NAME }}:${{ steps.config.outputs.LATEST_S6 }}
         uses: docker/build-push-action@v3
         with:
           push: ${{ github.ref_name == 'main' }}
@@ -176,7 +176,7 @@ jobs:
             BUILD_DESC=${{ steps.config.outputs.BUILD_DESC }}
             BUILD_NAME=${{ steps.config.outputs.BUILD_NAME }}
             BUILD_REVISION=${{ steps.config.outputs.BUILD_REVISION }}
-            S6_VERSION=${{ steps.config.outputs.S6_VERSION }}
+            S6_VERSION=${{ steps.config.outputs.LATEST_S6 }}
           tags: ${{ steps.meta.outputs.tags }}
       -
         name: Update ${{ steps.config.outputs.BUILD_NAME }}/README.md
@@ -204,6 +204,10 @@ jobs:
         version:
           - 22.04
           - 20.04
+        s6_version:
+          - v3.1.1.1
+          - v3.1.1.0
+          - v3.1.0.1
     env:
       DOCKER_BUILDKIT: "1"
     steps:
@@ -239,14 +243,14 @@ jobs:
         with:
           images: ${{ steps.config.outputs.BUILD_NAME }}
           tags: |
-            type=raw,value=latest,enable=${{ matrix.version == steps.config.outputs.LATEST_OS }}
-            type=raw,value=s6-${{ steps.config.outputs.S6_VERSION }},enable=${{ matrix.version == steps.config.outputs.LATEST_OS }}
-            type=raw,value=${{ matrix.version }}
-            type=raw,value=${{ matrix.version }}-s6-${{ steps.config.outputs.S6_VERSION }}
-            type=raw,value=focal,enable=${{ matrix.version == '20.04' }}
-            type=raw,value=focal-s6-${{ steps.config.outputs.S6_VERSION }},enable=${{ matrix.version == '20.04' }}
-            type=raw,value=jammy,enable=${{ matrix.version == '22.04' }}
-            type=raw,value=jammy-s6-${{ steps.config.outputs.S6_VERSION }},enable=${{ matrix.version == '22.04' }}
+            type=raw,value=latest,enable=${{ matrix.version == steps.config.outputs.LATEST_OS && matrix.s6_version == steps.config.outputs.LATEST_S6 }}
+            type=raw,value=s6-${{ matrix.s6_version }},enable=${{ matrix.version == steps.config.outputs.LATEST_OS }}
+            type=raw,value=${{ matrix.version }},enable=${{ matrix.s6_version == steps.config.outputs.LATEST_S6 }}
+            type=raw,value=${{ matrix.version }}-s6-${{ matrix.s6_version }}
+            type=raw,value=focal,enable=${{ matrix.version == '20.04' && matrix.s6_version == steps.config.outputs.LATEST_S6}}
+            type=raw,value=focal-s6-${{ matrix.s6_version }},enable=${{ matrix.version == '20.04' }}
+            type=raw,value=jammy,enable=${{ matrix.version == '22.04' && matrix.s6_version == steps.config.outputs.LATEST_S6}}
+            type=raw,value=jammy-s6-${{ matrix.s6_version }},enable=${{ matrix.version == '22.04' }}
       -
         if: steps.cache.outputs.cache-hit != 'true'
         name: Build ${{ steps.config.outputs.BUILD_NAME }}:${{ matrix.version }}
@@ -268,7 +272,7 @@ jobs:
             BUILD_DESC=${{ steps.config.outputs.BUILD_DESC }}
             BUILD_NAME=${{ steps.config.outputs.BUILD_NAME }}
             BUILD_REVISION=${{ steps.config.outputs.BUILD_REVISION }}
-            S6_VERSION=${{ steps.config.outputs.S6_VERSION }}
+            S6_VERSION=${{ steps.config.outputs.LATEST_S6 }}
           tags: ${{ steps.meta.outputs.tags }}
       -
         name: Update ${{ steps.config.outputs.BUILD_NAME }}/README.md

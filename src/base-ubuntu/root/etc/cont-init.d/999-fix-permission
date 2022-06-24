@@ -1,13 +1,12 @@
 #!/command/with-contenv bash
-COPY=/welcome.txt
-LICENSE=/license.txt
+WLC=/welcome.txt
+LCS=/license.txt
 EMAIL="${MAINTAINER:-shin@shin.company}"
 NAME="${IMAGE_NAME:-shinsenter/s6-ubuntu}"
 WEBHOME="$(webhome)"
+GREETING="
 
-echo "
-
-$([ -f $COPY ] && cat $COPY | sed -u "s#%PATH%#$COPY#g")
+$([ -f $WLC ] && cat $WLC | sed -u "s#%PATH%#$WLC#g")
 
 ----------------------------------------
   Container : $NAME
@@ -17,7 +16,7 @@ $([ -f $COPY ] && cat $COPY | sed -u "s#%PATH%#$COPY#g")
   Web Root  : $WEBHOME
 ----------------------------------------
 
-$([ -f $LICENSE ] && cat $LICENSE | sed -u "s#%EMAIL%#$EMAIL#g")
+$([ -f $LCS ] && cat $LCS | sed -u "s#%EMAIL%#$EMAIL#g")
 
 "
 
@@ -40,3 +39,5 @@ if [ -d /startup ]; then
     done
     echo
 fi
+
+exec echo "$GREETING"

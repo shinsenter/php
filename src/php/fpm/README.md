@@ -1,6 +1,6 @@
 # shinsenter/php
 
-📦 (PHP) Production-ready PHP-FPM Docker images for your PHP applications.
+📦 (PHP) Production-ready PHP-FPM Docker images with plenty of common and useful extensions.
 
 > 🔗 https://docker.shin.company/php
 

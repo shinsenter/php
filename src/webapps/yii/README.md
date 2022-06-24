@@ -1,6 +1,6 @@
 # shinsenter/yii
 
-🔰 (PHP) Yii Docker images for development and production.
+🔰 (PHP) Run Yii on Docker (for both production and local development).
 
 > 🔗 https://docker.shin.company/yii
 
@@ -14,17 +14,17 @@
 
 ## About this project
 
-🔰 (PHP) Yii Docker images for development and production. These images are actively maintained.
+🔰 (PHP) Run Yii on Docker easily with a single Docker container.
 
-Creating application using the Yii framework with ease.
+These images are built on top of latest LTS versions of Ubuntu + PHP-FPM and actively maintained.
 
 You can also easily [add more PHP modules](#enabling-or-disabling-php-modules) or [customize your Docker image](#customize-docker-image).
 
 > Yii (Yes, it is!) is a fast, secure, and efficient PHP framework. Flexible yet pragmatic. More information can be found at their [official website](https://www.yiiframework.com).
 
-> 💡 To ensure that the image size is always compact and suitable for many different existing projects, the source code of the framework is not included in the container.
+> 💡 To ensure that the image size is always compact and suitable for many different existing projects, the source code of the framework is not included in the container. The download size is under 100MB.
 
-> ⏬ However, if you want to start a new project, mount an empty directory to the document root path, it will automatically pull the latest version of the framework when you start the container.
+> ⏬ When you start a container mounting an empty directory to the document root path (the default document root is set to `/var/www/html`), the container will automatically pull the latest source code of the framework.
 
 ## Usage
 

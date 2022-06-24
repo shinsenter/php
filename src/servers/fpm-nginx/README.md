@@ -1,6 +1,6 @@
 # shinsenter/phpfpm-nginx
 
-🌏 (PHP) Production-ready Ubuntu + PHP-FPM + Nginx Docker images for PHP web applications.
+🌏 (PHP) Ubuntu + PHP-FPM + Nginx Docker images with plenty of common and useful extensions.
 
 > 🔗 https://docker.shin.company/phpfpm-nginx
 
@@ -14,15 +14,13 @@
 
 ## About this project
 
-🌏 (PHP) Production-ready Ubuntu + PHP-FPM + [Nginx](https://nginx.org/) Docker images for PHP web applications.
+🌏 (PHP) Production-ready Ubuntu + PHP-FPM + [Nginx](https://nginx.org/) Docker images with plenty of common and useful extensions for your PHP applications. These images are actively maintained.
 
 You can also easily [add more PHP modules](#enabling-or-disabling-php-modules) or [customize your Docker image](#customize-docker-image).
 
 > There are many guide about configuring NGINX with PHP-FPM, but many of them are incomplete or contain security issues. More information can be found at their [official website](https://www.nginx.com/resources/wiki/start/topics/examples/phpfcgi).
 
-> 💡 To ensure that the image size is always compact and suitable for many different existing projects, the source code of the framework is not included in the container.
-
-> ⏬ However, if you want to start a new project, mount an empty directory to the document root path, it will automatically pull the latest version of the framework when you start the container.
+> 💡 To ensure that the image size is always compact and suitable for many different existing projects, the source code of the framework is not included in the container. The download size is under 100MB.
 
 ## Usage
 
