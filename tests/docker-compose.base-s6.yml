@@ -9,7 +9,7 @@ services:
   ##############################################################################
 
   s6-overlay:
-    image: shinsenter/s6-overlay:latest
+    image: shinsenter/s6-overlay:${S6_VERSION:-latest}
     extends:
       file: common.yml
       service: common

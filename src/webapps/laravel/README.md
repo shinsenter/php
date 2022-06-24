@@ -1,6 +1,6 @@
 # shinsenter/laravel
 
-🔰 (PHP) Laravel Docker images for development and production.
+🔰 (PHP) Run Laravel on Docker (for both production and local development).
 
 > 🔗 https://docker.shin.company/laravel
 
@@ -14,17 +14,17 @@
 
 ## About this project
 
-🔰 (PHP) Laravel Docker images for development and production. These images are actively maintained.
+🔰 (PHP) Run Laravel on Docker easily with a single Docker container.
 
-Creating application using the Laravel framework with ease.
+These images are built on top of latest LTS versions of Ubuntu + PHP-FPM and actively maintained.
 
 You can also easily [add more PHP modules](#enabling-or-disabling-php-modules) or [customize your Docker image](#customize-docker-image).
 
 > Laravel is a web application framework with expressive, elegant syntax. Laravel takes the pain out of development by easing common tasks used in many web projects. More information can be found at their [official website](https://laravel.com).
 
-> 💡 To ensure that the image size is always compact and suitable for many different existing projects, the source code of the framework is not included in the container.
+> 💡 To ensure that the image size is always compact and suitable for many different existing projects, the source code of the framework is not included in the container. The download size is under 100MB.
 
-> ⏬ However, if you want to start a new project, mount an empty directory to the document root path, it will automatically pull the latest version of the framework when you start the container.
+> ⏬ When you start a container mounting an empty directory to the document root path (the default document root is set to `/var/www/html`), the container will automatically pull the latest source code of the framework.
 
 
 ## Usage

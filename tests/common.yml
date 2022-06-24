@@ -19,7 +19,7 @@ services:
       - S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
       - TZ=Asia/Tokyo
       - WEBHOME=/opt/www
-      - PHP_DEFAULT_CHARSET=Shift_JIS
+      - PHP_DEFAULT_CHARSET=UTF-8
 
   common-php:
     extends: common
