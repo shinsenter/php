@@ -14,5 +14,7 @@ redis
 soap
 sqlite3
 tidy
+uuid
 xml
+yaml
 zip

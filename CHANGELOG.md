@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.1.0 - 2022-06-24
+
+Use [S6 Overlay v3.1.1.1](https://github.com/just-containers/s6-overlay/releases/tag/v3.1.1.1).
+
+
 ## 2.0.0 - 2022-06-10
 
 Hello Ubuntu Jammy (22.04 LTS)!

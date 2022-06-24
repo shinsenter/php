@@ -1,6 +1,6 @@
 # shinsenter/php
 
-📦 (PHP) Production-ready Ubuntu + PHP-FPM + Nginx/Apache Docker images for your PHP applications.
+📦 (PHP) Ubuntu + PHP-FPM + Nginx/Apache2 Docker images with plenty of common and useful extensions.
 
 > 🔗 https://docker.shin.company/php
 
@@ -87,9 +87,11 @@ I also added more popular PHP open source projects:
 
 ## Pre-installed PHP modules
 
+The following PHP extensions are pre-installed in every docker image.
+
 ```
-apcu            json            shmop
-bcmath          libxml          simple_xml
+apcu            json            shmop         zip
+bcmath          libxml          simple_xml    zlib
 calendar        mbstring        simplexml
 core            memcached       soap
 ctype           msgpack         sockets
@@ -102,12 +104,12 @@ fileinfo        pcre            sysvsem
 filter          pdo             sysvshm
 ftp             pdo_mysql       tidy
 gd              pdo_sqlite      tokenizer
-gettext         phar            xml
-gmp             posix           xmlreader
-hash            readline        xmlwriter
-iconv           redis           xsl
-igbinary        reflection      zip
-intl            session         zlib
+gettext         phar            uuid
+gmp             posix           xml
+hash            readline        xmlreader
+iconv           redis           xmlwriter
+igbinary        reflection      xsl
+intl            session         yaml
 ```
 
 You can also easily [add more PHP modules](#enabling-or-disabling-php-modules) or [install Ubuntu packages](#installing-linux-packages) by [customizing your Docker image](#customize-docker-image).
