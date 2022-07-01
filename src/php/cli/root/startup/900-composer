@@ -1,12 +1,5 @@
 #!/command/with-contenv bash
 WEBHOME="$(webhome)"
-COMPOSER_HOME="${COMPOSER_HOME:-/composer}"
-
-wmd $COMPOSER_HOME
-[ -f "${COMPOSER_HOME}/keys.dev.pub" ]  || wdo php -r "copy('https://composer.github.io/snapshots.pub','${COMPOSER_HOME}/keys.dev.pub');"
-[ -f "${COMPOSER_HOME}/keys.tags.pub" ] || wdo php -r "copy('https://composer.github.io/releases.pub','${COMPOSER_HOME}/keys.tags.pub');"
-chmod 0644 $COMPOSER_HOME/*.pub 2>/dev/null
-
 if [ -f $WEBHOME/composer.json ] && [ ! -d $WEBHOME/vendor/ ]; then
     echo; echo "🤖 Installing packages from $WEBHOME/composer.json"
     composer-install -d $WEBHOME/
