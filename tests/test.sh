@@ -21,11 +21,11 @@ fi
 
 ################################################################################
 
-export UID=$(id -u)
-export GID=$(id -g)
-export DOCKER_BUILDKIT=1
+export UID="$(id -u)"
+export GID="$(id -g)"
+export DOCKER_BUILDKIT=${DOCKER_BUILDKIT:1}
 export BASE_OS_IMAGE="ubuntu:latest"
-export S6_VERSION="$(cat ${BASE_DIR}/S6_VERSIONS     | sort -r | head -n1)"
+export S6_VERSION="$(cat ${BASE_DIR}/S6_VERSIONS | sort -r | head -n1)"
 export PHP_VERSION="${1:-8.1}"
 export BUILD_PLATFORM="${2:-linux/arm64/v8}"
 
@@ -79,9 +79,9 @@ CODE="$?"
 
 ### Test
 echo -e "\nTest running docker command"
-command="composer --ansi create-project laravel/laravel"
-docker run --rm -e PUID=$(id -u) -e PGID=$(id -g) shinsenter/php:${PHP_VERSION}-cli $command
-docker run --rm -e PUID=$(id -u) -e PGID=$(id -g) shinsenter/php:${PHP_VERSION}-fpm $command
+command="composer --ansi create-project composer/installers"
+docker run --rm -e PUID=$UID -e PGID=$GID shinsenter/php:${PHP_VERSION}-cli $command
+docker run --rm -e PUID=$UID -e PGID=$GID shinsenter/php:${PHP_VERSION}-fpm $command
 
 ################################################################################
 
