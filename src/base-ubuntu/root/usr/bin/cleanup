@@ -8,5 +8,5 @@ find /var/ -type f -name '*-old' -delete 2>/dev/null
 find /var/log -type f | xargs -I {} bash -c '>{}' 2>/dev/null
 rm -rf \
     ~/.cache ~/.composer* ~/.git* ~/.gnupg ~/.log ~/.npm* \
-    /var/cache/apk /var/cache/yum /var/lib/apt/lists/* \
-    /source /tmp/* /var/tmp/* /usr/share/doc/* || true
+    /source /tmp/* /usr/share/doc/* \
+    /var/cache/* /var/lib/apt/lists/* /var/tmp/* || true

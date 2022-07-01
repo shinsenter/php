@@ -7,6 +7,7 @@ if [ ! -d /var/log/php-fpm ]; then
     wmd /var/log/php-fpm
     wdo ln -sf /proc/1/fd/1 /var/log/php-fpm/access.log
     wdo ln -sf /proc/1/fd/2 /var/log/php-fpm/error.log
+    wdo ln -sf /proc/1/fd/2 /var/log/php-fpm/slow.log
 fi
 
 echo

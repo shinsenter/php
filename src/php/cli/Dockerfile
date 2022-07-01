@@ -15,9 +15,17 @@ ARG PHP_PPA_KEY="4F4EA0AAE5267A6C"
 ARG PHP_PPA_URL="http://ppa.launchpad.net/ondrej/php/ubuntu"
 ARG PHP_MODULES="/usr/src/php${PHP_VERSION}.txt"
 ARG PHP_VERSION="8.1"
+ARG COMPOSER_INSTALLER="https://getcomposer.org/installer"
+ARG COMPOSER_SCRIPT="/tmp/composer-setup.php"
 
 ENV PHP_VERSION=${PHP_VERSION}
 ADD php${PHP_VERSION}.txt $PHP_MODULES
+
+# composer settings
+ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV COMPOSER_HOME=/composer
+ENV COMPOSER_HTACCESS_PROTECT=1
+ENV COMPOSER_MAX_PARALLEL_HTTP=32
 
 ################################################################################
 
@@ -41,9 +49,10 @@ RUN echo "Installing PHP ${PHP_VERSION}" \
     && ln -sf /usr/bin/phpdismod /usr/sbin/docker-php-ext-disable \
     \
     # installs composer
-    && php -r "copy('https://getcomposer.org/installer', '/tmp/composer-setup.php');" \
-    && php /tmp/composer-setup.php --install-dir=/usr/bin --filename=composer \
+    && php -r "copy('${COMPOSER_INSTALLER}', '${COMPOSER_SCRIPT}');" \
+    && php $COMPOSER_SCRIPT --install-dir=/usr/bin --filename=composer \
     && chmod +xr /usr/bin/composer \
+    && /usr/bin/composer global config --no-plugins allow-plugins.composer/installers true \
     \
     # cleanup
     && apt-upgrade -uq \
@@ -58,11 +67,7 @@ CMD ["/usr/bin/php", "-a"]
 
 ################################################################################
 
-# adds composer settings
-ENV COMPOSER_ALLOW_SUPERUSER=1
-ENV COMPOSER_HOME=/composer
-ENV COMPOSER_MAX_PARALLEL_HTTP=32
-ENV PATH=/composer/vendor/bin:$PATH
+ENV PATH=${COMPOSER_HOME}/vendor/bin:$PATH
 ENV PHP_CONF_DIR=/etc/php/cli/conf.d
 ENV PHP_INI_DIR=/etc/php/cli
 

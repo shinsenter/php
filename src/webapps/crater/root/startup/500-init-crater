@@ -11,6 +11,9 @@ if [ ! -f "$CRATER_ARTISAN" ]; then
     if [ "$(php -r 'echo PHP_VERSION_ID;')" -lt "70400" ]; then
         composer-require -d $CRATER_ROOT/ spatie/laravel-medialibrary
     fi
+    if [ "$(php -r 'echo PHP_VERSION_ID;')" -ge "80000" ]; then
+        composer-install -d $CRATER_ROOT/
+    fi
     wmd $CRATER_ROOT -R &
 fi
 
