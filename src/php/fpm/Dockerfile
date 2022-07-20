@@ -30,15 +30,15 @@ RUN apt-update \
     && apt-upgrade -uq \
     && cleanup
 
+# adds config files
+ADD root/ /
+
 # opcache preload
 RUN if [ "$(php -r 'echo PHP_VERSION_ID;')" -ge "70400" ]; then \
     echo '' >>/etc/php/fpm/pool.d/x-override-php-defaults.conf; \
     echo 'php_value[opcache.preload] = ${PHP_OPCACHE_PRELOAD}' >>/etc/php/fpm/pool.d/x-override-php-defaults.conf; \
     echo 'php_value[opcache.preload_user] = ${PHP_OPCACHE_PRELOAD_USER}' >>/etc/php/fpm/pool.d/x-override-php-defaults.conf; \
 fi
-
-# adds config files
-ADD root/ /
 
 # sets the working directory
 # WORKDIR $WEBHOME

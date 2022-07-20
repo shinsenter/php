@@ -161,6 +161,27 @@ ENV WEBHOME="/var/www/html"
 # the locale for a fresh Wordpress
 ENV WORDPRESS_LOCALE="en_US"
 
+# debug mode
+ENV WORDPRESS_WP_DEBUG="0"
+
+# DB connection
+ENV WORDPRESS_DB_HOST="localhost"
+ENV WORDPRESS_DB_USER="username_here"
+ENV WORDPRESS_DB_PASSWORD="password_here"
+ENV WORDPRESS_DB_NAME="database_name_here"
+ENV WORDPRESS_DB_CHARSET="utf8mb4"
+ENV WORDPRESS_DB_COLLATE=""
+
+# security keys
+ENV WORDPRESS_AUTH_KEY=""
+ENV WORDPRESS_SECURE_AUTH_KEY=""
+ENV WORDPRESS_LOGGED_IN_KEY=""
+ENV WORDPRESS_NONCE_KEY=""
+ENV WORDPRESS_AUTH_SALT=""
+ENV WORDPRESS_SECURE_AUTH_SALT=""
+ENV WORDPRESS_LOGGED_IN_SALT=""
+ENV WORDPRESS_NONCE_SALT=""
+
 # ==========================================================
 
 # recommended settings
@@ -200,6 +221,11 @@ services:
       TZ: UTC
       PUID: ${UID:-9999}
       PGID: ${GID:-9999}
+      WORDPRESS_WP_DEBUG: true
+      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: mydb_p@ssw0rd
+      WORDPRESS_DB_NAME: my_database
     ports:
       - "80:80"
       - "443:443"
