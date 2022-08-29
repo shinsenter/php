@@ -50,6 +50,7 @@ These images are actively maintained.
 - [![`shinsenter/php:7.4`](https://img.shields.io/docker/image-size/shinsenter/php/7.4?label=shinsenter%2Fphp%3A7.4)](https://docker.shin.company/php/tags?page=1&name=7.4)
 - [![`shinsenter/php:8.0`](https://img.shields.io/docker/image-size/shinsenter/php/8.0?label=shinsenter%2Fphp%3A8.0)](https://docker.shin.company/php/tags?page=1&name=8.0)
 - [![`shinsenter/php:8.1`](https://img.shields.io/docker/image-size/shinsenter/php/8.1?label=shinsenter%2Fphp%3A8.1)](https://docker.shin.company/php/tags?page=1&name=8.1)
+- [![`shinsenter/php:8.2` (beta)](https://img.shields.io/docker/image-size/shinsenter/php/8.2?label=shinsenter%2Fphp%3A8.2%20%28beta%29)](https://docker.shin.company/php/tags?page=1&name=8.2)
 
 ### PHP-CLI
 

@@ -30,6 +30,9 @@ RUN apt-update \
     && apt-upgrade -uq \
     && cleanup
 
+# adds config files
+ADD root/ /
+
 # opcache preload
 RUN if [ "$(php -r 'echo PHP_VERSION_ID;')" -ge "70400" ]; then \
     echo '' >>/etc/php/fpm/pool.d/x-override-php-defaults.conf; \
@@ -37,8 +40,12 @@ RUN if [ "$(php -r 'echo PHP_VERSION_ID;')" -ge "70400" ]; then \
     echo 'php_value[opcache.preload_user] = ${PHP_OPCACHE_PRELOAD_USER}' >>/etc/php/fpm/pool.d/x-override-php-defaults.conf; \
 fi
 
-# adds config files
-ADD root/ /
+# opcache jit
+RUN if [ "$(php -r 'echo PHP_VERSION_ID;')" -ge "80000" ]; then \
+    echo '' >>/etc/php/fpm/pool.d/x-override-php-defaults.conf; \
+    echo 'php_value[opcache.jit] = ${PHP_OPCACHE_JIT}' >>/etc/php/fpm/pool.d/x-override-php-defaults.conf; \
+    echo 'php_value[opcache.jit_buffer_size] = ${PHP_OPCACHE_BUFFER_SIZE}' >>/etc/php/fpm/pool.d/x-override-php-defaults.conf; \
+fi
 
 # sets the working directory
 # WORKDIR $WEBHOME
@@ -83,5 +90,7 @@ ENV PHP_OPCACHE_REVALIDATE_FREQ=5
 ENV PHP_OPCACHE_REVALIDATE_PATH=0
 ENV PHP_OPCACHE_SAVE_COMMENTS=1
 ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS=1
+ENV PHP_OPCACHE_JIT=tracing
+ENV PHP_OPCACHE_BUFFER_SIZE=128M
 
 ################################################################################
