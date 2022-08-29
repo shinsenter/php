@@ -144,7 +144,7 @@ RUN [ -x "\$(command -v find)" ]     && find / \( \\
     -or -name "*pip*" -or -name "*__pycache__*" \\
     -or -name "*easy_install*" -or -name "*dist-info*" \\
     \) ! -path "/sys/*" ! -path "/proc/*" \\
-    -exec rm -rf {} + || true
+    | xargs rm -rf || true
 ################################################################################
 # BUILDING OPTIMIZED IMAGE FROM SCRATCH. #####################################
 FROM  scratch

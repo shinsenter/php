@@ -6,6 +6,8 @@ YII_CHECK="$YII_ROOT/yii"
 if [ ! -f "$YII_CHECK" ]; then
     echo; echo "🤖 Installing $YII_PROJECT from scratch"
     rm -rf $YII_ROOT/web $YII_ROOT/index.*
-    composer-create -d $YII_ROOT/ $YII_PROJECT $YII_ROOT/
+    composer-create  -d $YII_ROOT/ $YII_PROJECT $YII_ROOT/ --no-install
+    composer config  -d $YII_ROOT/ --no-plugins allow-plugins.yiisoft/yii2-composer true
+    composer-install -d $YII_ROOT/
     wmd $YII_ROOT -R &
 fi
