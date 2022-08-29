@@ -6,6 +6,8 @@ FUEL_CHECK="$FUEL_ROOT/fuel/app"
 if [ ! -d "$FUEL_CHECK" ]; then
     echo; echo "🤖 Installing $FUEL_PROJECT from scratch"
     rm -rf $FUEL_ROOT/public $FUEL_ROOT/index.*
-    composer-create -d $FUEL_ROOT/ $FUEL_PROJECT $FUEL_ROOT/
+    composer-create  -d $FUEL_ROOT/ $FUEL_PROJECT $FUEL_ROOT/ --no-install
+    composer config  -d $FUEL_ROOT/ --no-plugins allow-plugins.composer/installers true
+    composer-install -d $FUEL_ROOT/
     wmd $FUEL_ROOT -R &
 fi

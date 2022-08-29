@@ -205,10 +205,11 @@ jobs:
           - 22.04
           - 20.04
         s6_version:
-          - v3.1.1.2
-          - v3.1.1.1
-          - v3.1.1.0
           - v3.1.0.1
+          - v3.1.1.0
+          - v3.1.1.1
+          - v3.1.1.2
+          - v3.1.2.0
     env:
       DOCKER_BUILDKIT: "1"
     steps:
@@ -301,6 +302,7 @@ jobs:
           - "7.4"
           - "8.0"
           - "8.1"
+          - "8.2"
     env:
       DOCKER_BUILDKIT: "1"
     steps:
@@ -424,6 +426,7 @@ jobs:
           - "7.4"
           - "8.0"
           - "8.1"
+          - "8.2"
         variation:
           - fpm-apache
           - fpm-nginx
@@ -539,6 +542,7 @@ jobs:
           - "7.4"
           - "8.0"
           - "8.1"
+          - "8.2"
         app:
           - cakephp4
           - codeigniter4

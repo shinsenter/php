@@ -6,7 +6,8 @@ KIRBY_CHECK="$KIRBY_ROOT/kirby"
 if [ ! -d "$KIRBY_CHECK" ]; then
     echo; echo "🤖 Installing $KIRBY_PROJECT from scratch"
     rm -rf $KIRBY_ROOT/web $KIRBY_ROOT/index.*
-    composer global config --no-plugins allow-plugins.getkirby/composer-installer true
-    composer-create -d $KIRBY_ROOT/ $KIRBY_PROJECT $KIRBY_ROOT/
+    composer-create  -d $KIRBY_ROOT/ $KIRBY_PROJECT $KIRBY_ROOT/ --no-install
+    composer config  -d $KIRBY_ROOT/ --no-plugins allow-plugins.getkirby/composer-installer true
+    composer-install -d $KIRBY_ROOT/
     wmd $KIRBY_ROOT -R &
 fi

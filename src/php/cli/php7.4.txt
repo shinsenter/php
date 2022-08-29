@@ -11,6 +11,9 @@ json
 mbstring
 memcached
 mysql
+mysqli
+opcache
+pdo
 redis
 soap
 sqlite3

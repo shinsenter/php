@@ -3,8 +3,8 @@
 [ -x "$(command -v composer)" ] && composer clearcache || true
 [ -x "$(command -v npm)" ] && npm cache clean --force  || true
 [ ! -x "$(command -v vim)" ] && rm -rf /usr/share/vim  || true
-find /etc/ -type f -name '*-' -or -name '.placeholder' -delete 2>/dev/null
-find /var/ -type f -name '*-old' -delete 2>/dev/null
+find /etc/ -type f -name '*-' -or -name '.placeholder' | xargs rm -rf 2>/dev/null
+find /var/ -type f -name '*-old' | xargs rm -rf 2>/dev/null
 find /var/log -type f | xargs -I {} bash -c '>{}' 2>/dev/null
 rm -rf \
     ~/.cache ~/.composer* ~/.git* ~/.gnupg ~/.log ~/.npm* \

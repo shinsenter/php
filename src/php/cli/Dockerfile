@@ -52,7 +52,6 @@ RUN echo "Installing PHP ${PHP_VERSION}" \
     && php -r "copy('${COMPOSER_INSTALLER}', '${COMPOSER_SCRIPT}');" \
     && php $COMPOSER_SCRIPT --install-dir=/usr/bin --filename=composer \
     && chmod +xr /usr/bin/composer \
-    && /usr/bin/composer global config --no-plugins allow-plugins.composer/installers true \
     \
     # cleanup
     && apt-upgrade -uq \

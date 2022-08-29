@@ -279,6 +279,12 @@ services:
       - ./data/wordpress:/opt/www
     ports:
       - 9115:80
+    environment:
+      WORDPRESS_WP_DEBUG: true
+      WORDPRESS_DB_HOST: database:3306
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: localhost
+      WORDPRESS_DB_NAME: test
 
   ##############################################################################
 

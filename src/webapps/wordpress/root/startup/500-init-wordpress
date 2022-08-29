@@ -10,3 +10,7 @@ if [ ! -d "$WORDPRESS_CHECK" ]; then
         --force
     wmd $WORDPRESS_ROOT -R &
 fi
+
+if [ -f /etc/docker-wordpress.php ]; then
+    php /etc/docker-wordpress.php
+fi

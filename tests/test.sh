@@ -23,7 +23,7 @@ fi
 
 export UID="$(id -u)"
 export GID="$(id -g)"
-export DOCKER_BUILDKIT=${DOCKER_BUILDKIT:1}
+export DOCKER_BUILDKIT=${DOCKER_BUILDKIT:-1}
 export BASE_OS_IMAGE="ubuntu:latest"
 export S6_VERSION="$(cat ${BASE_DIR}/S6_VERSIONS | sort -r | head -n1)"
 export PHP_VERSION="${1:-8.1}"
