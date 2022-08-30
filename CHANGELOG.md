@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.1 - 2022-08-30
+
+Use [S6 Overlay v3.1.2.1](https://github.com/just-containers/s6-overlay/releases/tag/v3.1.2.1).
+
 ## 2.3.0 - 2022-08-29
 
 Use [S6 Overlay v3.1.2.0](https://github.com/just-containers/s6-overlay/releases/tag/v3.1.2.0).
