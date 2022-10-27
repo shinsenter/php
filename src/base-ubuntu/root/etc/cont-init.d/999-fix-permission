@@ -20,12 +20,14 @@ $([ -f $LCS ] && cat $LCS | sed -u "s#%EMAIL%#$EMAIL#g")
 
 "
 
-if [ "$FIX_WEBHOME_PERMISSION" == "true" ] || [ -e /tmp/owner-changed ]; then
-    rm -f /tmp/owner-changed
-    if [ ! -z "$WEBHOME" ]; then
+if [ ! -z "$WEBHOME" ]; then
+    if [ "$FIX_WEBHOME_PERMISSION" == "true" ] || [ -e /tmp/owner-changed ]; then
+        rm -f /tmp/owner-changed
         echo "🗂 Fixing permission for ${WEBHOME}"
         wmd /root    -R 2>/dev/null &
         wmd $WEBHOME -R 2>/dev/null &
+    else
+        wmd $WEBHOME    2>/dev/null &
     fi
 fi
 
@@ -40,4 +42,5 @@ if [ -d /startup ]; then
     echo
 fi
 
+clear
 exec echo "$GREETING"

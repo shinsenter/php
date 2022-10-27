@@ -17,7 +17,7 @@ if [ -f "$STATAMIC_ARTISAN" ]; then
     las() { echo; php $STATAMIC_ARTISAN --ansi "$@" 2>&1; }
 
     if [ ! -f "$STATAMIC_ROOT/.env" ] && [ ! -f "$STATAMIC_ROOT/.env.${APP_ENV}" ]; then
-        cp -rpf "$STATAMIC_ROOT/.env.example" "$STATAMIC_ROOT/.env"
+        cp -rf "$STATAMIC_ROOT/.env.example" "$STATAMIC_ROOT/.env"
         las key:generate --force
     fi
 
