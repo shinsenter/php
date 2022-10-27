@@ -9,8 +9,8 @@ if [ ! -f "$PMA_CONFIG" ]; then
     composer-create -d $PMA_ROOT/ $PMA_PROJECT $PMA_ROOT/ \
         --repository-url='https://www.phpmyadmin.net/packages.json'
 
-    cp -p /etc/phpmyadmin/config.inc.php $PMA_CONFIG
-    sed -i "s/random_string_with_32_chars_long/$(echo $RANDOM | shasum | cut -c1-32)/g" $PMA_CONFIG
+    cp  -rf /etc/phpmyadmin/config.inc.php $PMA_CONFIG
+    sed -i "s/random_string_with_32_chars_long/$(php -r 'echo md5(uniqid());')/g" $PMA_CONFIG
     chmod 0644 $PMA_CONFIG
 
     if [ -f $PMA_ROOT/libraries/vendor_config.php ]; then

@@ -15,7 +15,7 @@ if [ -f "$LARAVEL_ARTISAN" ]; then
     las() { echo; php $LARAVEL_ARTISAN --ansi "$@" 2>&1; }
 
     if [ ! -f "$LARAVEL_ROOT/.env" ] && [ ! -f "$LARAVEL_ROOT/.env.${APP_ENV}" ]; then
-        cp -rpf "$LARAVEL_ROOT/.env.example" "$LARAVEL_ROOT/.env"
+        cp -rf "$LARAVEL_ROOT/.env.example" "$LARAVEL_ROOT/.env"
         las key:generate --force
     fi
 

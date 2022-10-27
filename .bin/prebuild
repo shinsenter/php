@@ -99,18 +99,18 @@ prebuild () {
     echo "  #️⃣ Checksum: $checksum"
 
     echo -e "\n🖨 Making output for the next steps"
-    echo "::set-output name=BUILD_CACHE_DIR::$CACHE_DIR"
-    echo "::set-output name=BUILD_CACHE::shinsenter/php:build-cache"
-    echo "::set-output name=BUILD_DATE::$BUILD_DATE"
-    echo "::set-output name=BUILD_DESC::$desc"
-    echo "::set-output name=BUILD_PLATFORM::linux/amd64,linux/arm/v7,linux/arm64/v8,linux/ppc64le"
-    echo "::set-output name=BUILD_REVISION::$BUILD_REVISION"
-    echo "::set-output name=CHECKSUM::$checksum"
-    echo "::set-output name=LATEST_OS::$LATEST_OS"
-    echo "::set-output name=LATEST_PHP::$LATEST_PHP"
-    echo "::set-output name=LATEST_S6::$LATEST_S6"
-    # echo "::set-output name=OS_VERSIONS::$OS_VERSIONS"
-    # echo "::set-output name=PHP_VERSIONS::$PHP_VERSIONS"
+    echo "BUILD_CACHE_DIR=$CACHE_DIR" >> $GITHUB_ENV
+    echo "BUILD_CACHE=shinsenter/php:build-cache" >> $GITHUB_ENV
+    echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
+    echo "BUILD_DESC=$desc" >> $GITHUB_ENV
+    echo "BUILD_PLATFORM=linux/amd64,linux/arm/v7,linux/arm64/v8,linux/ppc64le" >> $GITHUB_ENV
+    echo "BUILD_REVISION=$BUILD_REVISION" >> $GITHUB_ENV
+    echo "CHECKSUM=$checksum" >> $GITHUB_ENV
+    echo "LATEST_OS=$LATEST_OS" >> $GITHUB_ENV
+    echo "LATEST_PHP=$LATEST_PHP" >> $GITHUB_ENV
+    echo "LATEST_S6=$LATEST_S6" >> $GITHUB_ENV
+    # echo "OS_VERSIONS=$OS_VERSIONS" >> $GITHUB_ENV
+    # echo "PHP_VERSIONS=$PHP_VERSIONS" >> $GITHUB_ENV
 }
 
 ################################################################################
@@ -119,29 +119,33 @@ prebuild () {
 
 echo -e "\n🤖 Cheking dependencies for $TARGET"
 
+# refresh the scratch images every month
 mkdir -p $SRC_DIR/base/scratch
+tee_or_print $SRC_DIR/base/.source date '+%Y%m'
 
-tee_or_print $SRC_DIR/base-s6/.source \
-    imagehash ubuntu
+# refresh the base images when the ubuntu repo updated
+tee_or_print $SRC_DIR/base-s6/.source imagehash ubuntu
 
+# refresh the php images when the source updated
 tee_or_print $SRC_DIR/php/cli/.source \
     linkhash \
         'http://ppa.launchpad.net/ondrej/php/ubuntu/dists/?C=M;O=D' \
         'https://getcomposer.org/download/latest-stable/composer.phar.sha256sum'
 
+# refresh the php-apache images when the source updated
 tee_or_print $SRC_DIR/servers/fpm-apache/.source \
     linkhash 'http://ppa.launchpadcontent.net/ondrej/apache2/ubuntu/dists/?C=M;O=D'
 
+# refresh the php-nginx images when the source updated
 tee_or_print $SRC_DIR/servers/fpm-nginx/.source \
-    linkhash \
-        'http://ppa.launchpadcontent.net/ondrej/nginx-mainline/ubuntu/dists/?C=M;O=D'
+    linkhash 'http://ppa.launchpadcontent.net/ondrej/nginx-mainline/ubuntu/dists/?C=M;O=D'
 
+# refresh the wordpress images when the WP-CLI updated
 tee_or_print $SRC_DIR/webapps/wordpress/.source \
-    linkhash \
-        'https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar.sha512'
+    linkhash 'https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar.sha512'
 
-echo -e "\n🤖 Preparing $TARGET"
-treehash $TARGET
-prebuild $TARGET $2
+echo -e "\n🤖 Preparing $TARGET" >> $GITHUB_STEP_SUMMARY
+treehash $TARGET >> $GITHUB_STEP_SUMMARY
+prebuild $TARGET $2 >> $GITHUB_STEP_SUMMARY
+echo -e "\nCompleted." >> $GITHUB_STEP_SUMMARY
 mkdir -p $CACHE_DIR
-echo -e "\nCompleted."

@@ -7,6 +7,6 @@ if [ ! -f $CERT_DIR/server.key ]; then
             -subj "/C=VN/ST=Vietnam/L=Vietnam/O=SHIN Company/CN=localhost" \
             -nodes -newkey rsa:2048 -keyout $CERT_DIR/server.key \
             -out $CERT_DIR/server.crt -days 365
-    cp -p $CERT_DIR/server.crt /usr/local/share/ca-certificates/
+    cp -rf $CERT_DIR/server.crt /usr/local/share/ca-certificates/
     update-ca-certificates
 fi

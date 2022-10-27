@@ -6,8 +6,14 @@ SLIM_CHECK="$SLIM_ROOT/src/Application"
 if [ ! -d "$SLIM_CHECK" ]; then
     echo; echo "🤖 Installing $SLIM_PROJECT from scratch"
     rm -rf $SLIM_ROOT/public $SLIM_ROOT/index.*
-    composer-create  -d $SLIM_ROOT/ $SLIM_PROJECT $SLIM_ROOT/ --no-install
-    composer config  -d $SLIM_ROOT/ --no-plugins allow-plugins.phpstan/extension-installer true
-    composer-install -d $SLIM_ROOT/
+
+    # if [ "$(php -r 'echo PHP_VERSION_ID;')" -lt "70400" ]; then
+        composer-create  -d $SLIM_ROOT/ $SLIM_PROJECT $SLIM_ROOT/ --no-install
+        composer config  -d $SLIM_ROOT/ --no-plugins allow-plugins.phpstan/extension-installer true
+        composer-install -d $SLIM_ROOT/
+    # else
+    #     composer-create  -d $SLIM_ROOT/ $SLIM_PROJECT $SLIM_ROOT/
+    # fi
+
     wmd $SLIM_ROOT -R &
 fi

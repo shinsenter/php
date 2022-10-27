@@ -16,7 +16,7 @@ find /etc/nginx/sites-available -type f | \
 wmd $WEBROOT
 if [ ! -z "$(ls -1 /web/ | grep 'index\.\(ht?ml\|php\)')" ] && [ -z "$(ls -1 $WEBROOT/ | grep 'index\.\(ht?ml\|php\)')" ]; then
     echo; echo "📄 Copying temporary index page to ${WEBROOT}"
-    wdo cp -prf /web/index.* $WEBROOT/
+    wdo cp -rf /web/index.* $WEBROOT/
 fi
 
 if [ ! -d /var/log/nginx ]; then

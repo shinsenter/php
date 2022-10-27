@@ -22,7 +22,7 @@ if [ -f "$CRATER_ARTISAN" ]; then
     las() { echo; php $CRATER_ARTISAN --ansi "$@" 2>&1; }
 
     if [ ! -f "$CRATER_ROOT/.env" ] && [ ! -f "$CRATER_ROOT/.env.${APP_ENV}" ]; then
-        cp -rpf "$CRATER_ROOT/.env.example" "$CRATER_ROOT/.env"
+        cp -rf "$CRATER_ROOT/.env.example" "$CRATER_ROOT/.env"
         las key:generate --force
     fi
 
