@@ -60,6 +60,13 @@ ENV WEBHOME="/var/www/html"
 
 > Sometimes you may wish to change the default document root (away from `/var/www/html`), please consider changing the `$WEBHOME` value.
 
+After changing the `$WEBHOME` variable, you also have to change your default working directory by adding these lines to the bottom of your `Dockerfile`:
+
+```
+# sets the working directory
+WORKDIR $WEBHOME
+```
+
 ### Composer
 
 The latest version of Composer is installed and ready to use.

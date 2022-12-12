@@ -9,7 +9,7 @@ services:
   ##############################################################################
 
   fpm-apache:
-    image: shinsenter/phpfpm-apache:php${PHP_VERSION:-8.1}
+    image: shinsenter/phpfpm-apache:php${PHP_VERSION:-8.2}
     extends:
       file: common.yml
       service: common-php
@@ -21,7 +21,7 @@ services:
   ##############################################################################
 
   fpm-nginx:
-    image: shinsenter/phpfpm-nginx:php${PHP_VERSION:-8.1}
+    image: shinsenter/phpfpm-nginx:php${PHP_VERSION:-8.2}
     extends:
       file: common.yml
       service: common-php

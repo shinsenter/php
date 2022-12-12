@@ -14,7 +14,7 @@ ARG PHP_BUILD_DEPS="gnupg2 apt-utils"
 ARG PHP_PPA_KEY="4F4EA0AAE5267A6C"
 ARG PHP_PPA_URL="http://ppa.launchpad.net/ondrej/php/ubuntu"
 ARG PHP_MODULES="/usr/src/php${PHP_VERSION}.txt"
-ARG PHP_VERSION="8.1"
+ARG PHP_VERSION="8.2"
 ARG COMPOSER_INSTALLER="https://getcomposer.org/installer"
 ARG COMPOSER_SCRIPT="/tmp/composer-setup.php"
 
@@ -58,7 +58,7 @@ RUN echo "Installing PHP ${PHP_VERSION}" \
     && cleanup $PHP_BUILD_DEPS
 
 # sets the working directory
-# WORKDIR $WEBHOME
+WORKDIR $WEBHOME
 
 # sets default entrypoint and command
 ENTRYPOINT []
