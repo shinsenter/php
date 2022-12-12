@@ -26,6 +26,6 @@ services:
     build:
       args:
         - IMAGE_SUFFIX=
-        - PHP_VERSION=${PHP_VERSION:-8.1}
+        - PHP_VERSION=${PHP_VERSION:-8.2}
 
 ################################################################################

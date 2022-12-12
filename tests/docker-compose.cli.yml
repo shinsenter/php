@@ -9,7 +9,7 @@ services:
   ##############################################################################
 
   cli:
-    image: shinsenter/php:${PHP_VERSION:-8.1}-cli
+    image: shinsenter/php:${PHP_VERSION:-8.2}-cli
     extends:
       file: common.yml
       service: common-php

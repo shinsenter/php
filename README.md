@@ -50,7 +50,7 @@ These images are actively maintained.
 - [![`shinsenter/php:7.4`](https://img.shields.io/docker/image-size/shinsenter/php/7.4?label=shinsenter%2Fphp%3A7.4)](https://docker.shin.company/php/tags?page=1&name=7.4)
 - [![`shinsenter/php:8.0`](https://img.shields.io/docker/image-size/shinsenter/php/8.0?label=shinsenter%2Fphp%3A8.0)](https://docker.shin.company/php/tags?page=1&name=8.0)
 - [![`shinsenter/php:8.1`](https://img.shields.io/docker/image-size/shinsenter/php/8.1?label=shinsenter%2Fphp%3A8.1)](https://docker.shin.company/php/tags?page=1&name=8.1)
-- [![`shinsenter/php:8.2` (beta)](https://img.shields.io/docker/image-size/shinsenter/php/8.2?label=shinsenter%2Fphp%3A8.2%20%28beta%29)](https://docker.shin.company/php/tags?page=1&name=8.2)
+- [![`shinsenter/php:8.2`](https://img.shields.io/docker/image-size/shinsenter/php/8.2?label=shinsenter%2Fphp%3A8.2)](https://docker.shin.company/php/tags?page=1&name=8.2)
 
 ### PHP-CLI
 
@@ -137,6 +137,13 @@ ENV WEBHOME="/var/www/html"
 
 > Sometimes you may wish to change the default document root (away from `/var/www/html`), please consider changing the `$WEBHOME` value.
 
+After changing the `$WEBHOME` variable, you also have to change your default working directory by adding these lines to the bottom of your `Dockerfile`:
+
+```
+# sets the working directory
+WORKDIR $WEBHOME
+```
+
 ### Composer
 
 The latest version of Composer is installed and ready to use.
@@ -211,7 +218,7 @@ docker run --rm [run options] shinsenter/php:${PHP_VERSION}-${PHP_VARIATION} <yo
 For example:
 
 ```bash
-docker run --rm -v $(pwd):/var/www/html -e PUID=$(id -u) -e PGID=$(id -g) shinsenter/php:8.1-cli composer create-project laravel/laravel my-app
+docker run --rm -v $(pwd):/var/www/html -e PUID=$(id -u) -e PGID=$(id -g) shinsenter/php:8.2-cli composer create-project laravel/laravel /var/www/html
 ```
 
 ## Customize Docker image
@@ -222,7 +229,7 @@ Here below is a sample `Dockerfile` for building your own Docker image extending
 
 ```Dockerfile
 # change the PHP_VERSION and PHP_VARIATION as your need
-ARG PHP_VERSION=8.1
+ARG PHP_VERSION=8.2
 ARG PHP_VARIATION=fpm-nginx
 
 # extends from base image
