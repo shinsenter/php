@@ -26,7 +26,7 @@ export GID="$(id -g)"
 export DOCKER_BUILDKIT=${DOCKER_BUILDKIT:-1}
 export BASE_OS_IMAGE="ubuntu:latest"
 export S6_VERSION="$(cat ${BASE_DIR}/S6_VERSIONS | sort -r | head -n1)"
-export PHP_VERSION="${1:-8.1}"
+export PHP_VERSION="${1:-8.2}"
 export BUILD_PLATFORM="${2:-linux/arm64/v8}"
 
 ################################################################################

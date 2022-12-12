@@ -23,7 +23,7 @@ services:
   ##############################################################################
 
   phpinfo:
-    image: shinsenter/phpfpm-nginx:php${PHP_VERSION:-8.1}
+    image: shinsenter/phpfpm-nginx:php${PHP_VERSION:-8.2}
     extends:
       file: common.yml
       service: common
@@ -35,7 +35,7 @@ services:
   ##############################################################################
 
   cakephp4:
-    image: shinsenter/cakephp4:php${PHP_VERSION:-8.1}
+    image: shinsenter/cakephp4:php${PHP_VERSION:-8.2}
     extends:
       file: common.yml
       service: common-php
@@ -51,7 +51,7 @@ services:
 ################################################################################
 
   codeigniter4:
-    image: shinsenter/codeigniter4:php${PHP_VERSION:-8.1}
+    image: shinsenter/codeigniter4:php${PHP_VERSION:-8.2}
     extends:
       file: common.yml
       service: common-php
@@ -67,7 +67,7 @@ services:
   ##############################################################################
 
   crater:
-    image: shinsenter/crater:php${PHP_VERSION:-8.1}
+    image: shinsenter/crater:php${PHP_VERSION:-8.2}
     extends:
       file: common.yml
       service: common-php
@@ -84,7 +84,7 @@ services:
 ################################################################################
 
   flarum:
-    image: shinsenter/flarum:php${PHP_VERSION:-8.1}
+    image: shinsenter/flarum:php${PHP_VERSION:-8.2}
     extends:
       file: common.yml
       service: common-php
@@ -100,7 +100,7 @@ services:
 ################################################################################
 
   fuelphp:
-    image: shinsenter/fuelphp:php${PHP_VERSION:-8.1}
+    image: shinsenter/fuelphp:php${PHP_VERSION:-8.2}
     extends:
       file: common.yml
       service: common-php
@@ -116,7 +116,7 @@ services:
 ################################################################################
 
   grav:
-    image: shinsenter/grav:php${PHP_VERSION:-8.1}
+    image: shinsenter/grav:php${PHP_VERSION:-8.2}
     extends:
       file: common.yml
       service: common-php
@@ -132,7 +132,7 @@ services:
 ################################################################################
 
   hyperf:
-    image: shinsenter/hyperf:php${PHP_VERSION:-8.1}
+    image: shinsenter/hyperf:php${PHP_VERSION:-8.2}
     extends:
       file: common.yml
       service: common-php
@@ -148,7 +148,7 @@ services:
   ##############################################################################
 
   kirby:
-    image: shinsenter/kirby:php${PHP_VERSION:-8.1}
+    image: shinsenter/kirby:php${PHP_VERSION:-8.2}
     extends:
       file: common.yml
       service: common-php
@@ -164,7 +164,7 @@ services:
 ################################################################################
 
   laminas:
-    image: shinsenter/laminas:php${PHP_VERSION:-8.1}
+    image: shinsenter/laminas:php${PHP_VERSION:-8.2}
     extends:
       file: common.yml
       service: common-php
@@ -180,7 +180,7 @@ services:
   ##############################################################################
 
   laravel:
-    image: shinsenter/laravel:php${PHP_VERSION:-8.1}
+    image: shinsenter/laravel:php${PHP_VERSION:-8.2}
     extends:
       file: common.yml
       service: common-php
@@ -200,7 +200,7 @@ services:
   ##############################################################################
 
   phpmyadmin:
-    image: shinsenter/phpmyadmin:php${PHP_VERSION:-8.1}
+    image: shinsenter/phpmyadmin:php${PHP_VERSION:-8.2}
     extends:
       file: common.yml
       service: common-php
@@ -219,7 +219,7 @@ services:
   ##############################################################################
 
   slim:
-    image: shinsenter/slim:php${PHP_VERSION:-8.1}
+    image: shinsenter/slim:php${PHP_VERSION:-8.2}
     extends:
       file: common.yml
       service: common-php
@@ -235,7 +235,7 @@ services:
   ##############################################################################
 
   statamic:
-    image: shinsenter/statamic:php${PHP_VERSION:-8.1}
+    image: shinsenter/statamic:php${PHP_VERSION:-8.2}
     extends:
       file: common.yml
       service: common-php
@@ -252,7 +252,7 @@ services:
   ##############################################################################
 
   symfony:
-    image: shinsenter/symfony:php${PHP_VERSION:-8.1}
+    image: shinsenter/symfony:php${PHP_VERSION:-8.2}
     extends:
       file: common.yml
       service: common-php
@@ -269,7 +269,7 @@ services:
 ################################################################################
 
   wordpress:
-    image: shinsenter/wordpress:php${PHP_VERSION:-8.1}
+    image: shinsenter/wordpress:php${PHP_VERSION:-8.2}
     extends:
       file: common.yml
       service: common-php
@@ -289,7 +289,7 @@ services:
   ##############################################################################
 
   yii:
-    image: shinsenter/yii:php${PHP_VERSION:-8.1}
+    image: shinsenter/yii:php${PHP_VERSION:-8.2}
     extends:
       file: common.yml
       service: common-php

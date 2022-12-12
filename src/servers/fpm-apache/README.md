@@ -60,6 +60,13 @@ ENV WEBHOME="/var/www/html"
 ENV APACHE_DOCUMENT_ROOT="/public"
 ```
 
+After changing the `$WEBHOME` variable, you also have to change your default working directory by adding these lines to the bottom of your `Dockerfile`:
+
+```
+# sets the working directory
+WORKDIR $WEBHOME
+```
+
 ### Composer
 
 The latest version of Composer is installed and ready to use.
@@ -129,7 +136,7 @@ Here below is a sample `Dockerfile` for building your own Docker image extending
 > Learn more about [Dockerfile](https://docs.docker.com/engine/reference/builder).
 
 ```Dockerfile
-ARG  PHP_VERSION=8.1
+ARG  PHP_VERSION=8.2
 FROM shinsenter/phpfpm-apache:php${PHP_VERSION}
 
 # ==========================================================

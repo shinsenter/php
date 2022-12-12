@@ -63,7 +63,7 @@ SHELL ["/bin/bash", "-c"]
 COPY --from=base / /
 
 # sets the working directory
-# WORKDIR /root
+WORKDIR /root
 
 # sets default command
 CMD ["/bin/bash"]

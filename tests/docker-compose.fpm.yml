@@ -9,7 +9,7 @@ services:
   ##############################################################################
 
   fpm:
-    image: shinsenter/php:${PHP_VERSION:-8.1}-fpm
+    image: shinsenter/php:${PHP_VERSION:-8.2}-fpm
     extends:
       file: common.yml
       service: common-php
