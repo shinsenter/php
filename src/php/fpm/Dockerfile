@@ -12,7 +12,8 @@ ARG PHP_VERSION=8.2
 FROM ${BASE_IMAGE}:${PHP_VERSION}-cli
 
 # adds PHP configs
-ENV PHP_POOL_NAME=www
+ARG PHP_POOL_NAME=www
+ARG PHPFPM_SOCK_PATH=/var/run/php/php-fpm.sock
 
 ################################################################################
 
@@ -70,7 +71,11 @@ ENV PHP_MAX_EXECUTION_TIME=99
 ENV PHP_MEMORY_LIMIT=256M
 ENV PHP_POST_MAX_SIZE=100M
 ENV PHP_UPLOAD_MAX_FILE_SIZE=10M
+
+# adds PHP-FPM settings
+ENV PHP_POOL_NAME="$PHP_POOL_NAME"
 ENV PHPFPM_CONF_DIR=/etc/php/fpm/conf.d
+ENV PHPFPM_SOCK_PATH="$PHPFPM_SOCK_PATH"
 
 # adds PHP PM settings
 ENV PHP_PM_CONTROL=ondemand

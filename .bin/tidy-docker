@@ -4,83 +4,111 @@
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-[ ! -x "$(command -v docker)" ] && echo "Missing Docker." && exit 1
+# Check if Docker is installed
+[ ! -x "$(command -v docker)" ] \
+    && echo "Docker is not installed. Please install it and try again." \
+    && exit 1
 
 ################################################################################
 
+# Variable to store the parsed instructions for an image
 PARSE_CACHE=
 
-# extracts docker repository name and tag
+# Extracts the repository name and tag of a Docker image
 d_name_id () {
+    # Use the docker images command to get a list of images, in a specific format
+    # Then grep for the image specified by the first argument
+    # Finally, take the first result
     docker images --format "{{.Repository}}:{{.Tag}}\t{{.ID}}" \
-    | grep -F $1 \
-    | head -n1
+        | grep -F $1 | head -n1
 }
 
-# parses instruction from image
+# Parses instructions for an image from the local system
 d_local_history () {
+    # Use the docker history command to get the instructions for an image
+    # Then reverse the order of the instructions
+    # Finally, print all instructions
     docker history --no-trunc --format "{{.CreatedBy}}" $1 \
         | awk '{arr[i++]=$0}END{while(i>0)print arr[--i]}'
 }
 
-# parses instruction from docker hub
+# Parses instructions for an image from a remote repository
 d_net_history () {
-    repo="$1"
-    tag="$2"
+    local repo="$1"
+    local tag="$2"
+    # Use curl to get the instructions for an image from the remote repository
+    # Then use jq to extract the instructions from the JSON data
     curl -skL 'https://hub.docker.com/v2/repositories/$repo/tags/$tag/images' \
-        | jq '.[1].layers' \
-        | jq '.[].instruction' -r
+        | jq '.[1].layers' | jq '.[].instruction' -r
 }
 
-# parses instruction and replace all '/bin/sh -c #(nop)'
-d_parse () {
+# Parses instructions for an image, and replaces all occurrences of '/bin/sh -c #(nop)'
+d_parse() {
+    local history
     if [ -z "$PARSE_CACHE" ]; then
-        PARSE_CACHE="$(d_local_history $1 \
-            | sed 's/^\/[^ ]* *-c */RUN /' \
+        # Get the instructions for the image specified by the first argument
+        history=$(d_local_history "$1")
+
+        # Replace all occurrences of '/bin/sh -c' with 'RUN'
+        # Replace all occurrences of '|[number]' with 'RUN'
+        # Remove all occurrences of 'RUN #(nop)'
+        # Modify the format of 'EXPOSE' instructions
+        # Fix formatting of SHELL instructions
+        # Move WORKDIR, ENTRYPOINT, CMD, and STOPSIGNAL instructions to the end
+        PARSE_CACHE=$(echo "$history" | sed 's/^\/[^ ]* *-c */RUN /' \
             | sed 's/^|[0-9]* */RUN /' \
             | sed 's/^RUN \#[^ ]* *//' \
             | sed 's#EXPOSE map\[\(.*\):.*\]#EXPOSE \1#g' \
             | awk '
-            {
-                if($1=="SHELL"){
-                    gsub("\\\[","[\"",$0); gsub("\\\]","\"]",$0)
-                    i=1; printf("%s ",$i)
-                    while(i++<NF){
-                        if(i>2){printf("\", \"%s",$i)}else{printf("%s",$i)}
-                    }
-                    printf "\n"
-                } else print $0
-            }' 2>/dev/null \
+                {
+                    if($1=="SHELL"){
+                        gsub("\\\[","[\"",$0); gsub("\\\]","\"]",$0)
+                        i=1; printf("%s ",$i)
+                        while(i++<NF){
+                            if(i>2){printf("\", \"%s",$i)}else{printf("%s",$i)}
+                        }
+                        printf "\n"
+                    } else print $0
+                }' 2>/dev/null \
             | awk '
-            {
-                if(($1=="WORKDIR")||($1=="ENTRYPOINT")||($1=="CMD")||($1=="STOPSIGNAL"))
-                    {cmd[$1]=$0;if($1=="ENTRYPOINT")delete cmd["CMD"]}
-                else print $0
-            } END {
-                if(cmd["WORKDIR"])    print cmd["WORKDIR"]
-                if(cmd["ENTRYPOINT"]) print cmd["ENTRYPOINT"]
-                if(cmd["CMD"])        print cmd["CMD"]
-                if(cmd["STOPSIGNAL"]) print cmd["STOPSIGNAL"]
-            }'
-        )"
+                {
+                    if(($1=="WORKDIR")||($1=="ENTRYPOINT")||($1=="CMD")||($1=="STOPSIGNAL"))
+                        {cmd[$1]=$0;if($1=="ENTRYPOINT")delete cmd["CMD"]}
+                    else print $0
+                } END {
+                    if(cmd["WORKDIR"])    print cmd["WORKDIR"]
+                    if(cmd["ENTRYPOINT"]) print cmd["ENTRYPOINT"]
+                    if(cmd["CMD"])        print cmd["CMD"]
+                    if(cmd["STOPSIGNAL"]) print cmd["STOPSIGNAL"]
+                }'
+        )
     fi
     echo "$PARSE_CACHE"
 }
 
-# extracts given unique key-value instruction list
+# Filter out the lines starting with the given instruction
+# (default is "ENV") and split the line by "=" character
 d_attr () {
-    d_parse $1 \
+    # Filter the input and only keep the instruction
+    # that matches the given instruction type
+    d_parse "$1" \
         | grep "^${2:-ENV}" \
         | awk -F= '
-            {p=index($0,"=");v=substr($0,p+1);a[$1]=v}
-            END{for(k in a)printf("%s=\"%s\"\n",k,a[k])}
-        ' \
+            # Extracting the key-value pairs from the
+            # instruction and storing it in an associative array
+            {a[$1]=substr($0,index($0,"=")+1)}
+            # Iterating through the associative array
+            # and printing the key-value pairs
+            # in the format key="value"
+            END{for(k in a)printf("%s=\"%s\"\n",k,a[k])}' \
         | sort
 }
 
-# extracts other instructions
-ins_cmd () {
-    d_parse $1 | grep -v '^\(ADD\|ARG\|COPY\|ENV\|HEALTHCHECK\|LABEL\|ONBUILD\|RUN\)'
+# Extract the parsed instruction for the given image
+ins_cmd() {
+    # Filter out the instructions we're not interested in
+    d_parse "$1" \
+        | grep -v '^\(ADD\|ARG\|COPY\|ENV\|HEALTHCHECK\|LABEL\|ONBUILD\|RUN\)'
 }
 
 # aliases
@@ -93,10 +121,10 @@ ins_labels () { d_attr  $1 LABEL; }
 ins_shell  () { ins_cmd $1 | grep    '^SHELL'; }
 ins_others () { ins_cmd $1 | grep -v '^SHELL'; }
 
-# builds minified image
-# @param $output Output new Dockerfile (optional, must be a valid file path)
+# Build minified image
+# @param $output Create a new Dockerfile (must be an existing file path)
 # @param $base   The original image (ID or name:tag)
-# @param $save   Target image name
+# @param $save   The target image name (optional)
 minify() {
     PARSE_CACHE=
     local output="$1" ; [ ! -z "$output" ] && [ -f "$output" ] && shift || output=""
@@ -106,16 +134,17 @@ minify() {
     local temp="$([ ! -z "$output" ]    && echo "$base" || echo "tidy-docker:build-$(ins_id $base)")"
     local command="$([ ! -z "$output" ] && echo "tee $output" || echo "docker build $@ --rm -t $save -")"
 
-    # make temporary tag name for building image
+    # Make a temporary tag name for building image
     [ -z "$output" ] && docker tag $base $temp 2>/dev/null
 
-    # build the tidy
+    # Build or export a Dockerfile
     echo "🗜 Start minifying image '$repo'"
     echo "  Build arguments: $@"
     DOCKER_BUILDKIT=${DOCKER_BUILDKIT:-1} $command <<Dockerfile
 # Input Image: "${base}"
 #        (aka: "${repo}")
 # Final Image: "${save}"
+# Dockerfile : "${output}"
 ################################################################################
 # CLEANING UP THE SOURCE IMAGE. ################################################
 FROM shinsenter/scratch as scratch
@@ -159,7 +188,7 @@ $(ins_labels $base)
 ################################################################################
 Dockerfile
 
-    # cleanup
+    # Cleanup the temporary image
     if [ $? -eq 0 ] && [ -z "$output" ]; then docker rmi "$temp" >/dev/null; fi
 }
 
