@@ -18,6 +18,7 @@ LATEST_PHP="$(echo "$PHP_VERSIONS" | head -n1)"
 
 BUILD_DATE="$(date +%Y-%m-%dT%T%z)"
 BUILD_REVISION="$(git rev-parse HEAD)"
+BUILD_SCRIPT="$BASE_DIR/.github/workflows/build-v2.yml"
 
 ################################################################################
 # Helper methods
@@ -94,6 +95,7 @@ prebuild () {
     fi
 
     $BASE_DIR/.bin/fix-attr $context
+    basehash $BUILD_SCRIPT | tee -a $context/.checksum
     checksum="$(basehash $context/.checksum)"
     echo "  ${desc:-No description}"
     echo "  #️⃣ Checksum: $checksum"
