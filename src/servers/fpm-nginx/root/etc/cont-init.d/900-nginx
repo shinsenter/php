@@ -10,6 +10,10 @@ if [ ! -z "$PHP_MAX_EXECUTION_TIME" ]; then
     echo "proxy_read_timeout ${PHP_MAX_EXECUTION_TIME};"  >/etc/nginx/extra.d/proxy-timeout.conf
 fi
 
+if [ ! -z "$PHPFPM_SOCK_PATH" ]; then
+    sed -i "s# unix:.*;# unix:${PHPFPM_SOCK_PATH};#g" /etc/nginx/sites-available/default
+fi
+
 find /etc/nginx/sites-available -type f | \
     xargs -I {} sed -i "s#root \/var\/www\/html;#root ${WEBROOT};#g" {}
 
