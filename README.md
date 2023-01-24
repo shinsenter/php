@@ -293,6 +293,9 @@ ENV PHP_POST_MAX_SIZE="100M"
 # The maximum size of an uploaded file
 ENV PHP_UPLOAD_MAX_FILE_SIZE="100M"
 
+# The maximum amount of input variables accepted
+ENV PHP_UPLOAD_MAX_INPUT_VARS="1000"
+
 # Set the name of your PHP-FPM pool
 # (helpful when running multiple sites on a single server)
 ENV PHP_POOL_NAME="www"
