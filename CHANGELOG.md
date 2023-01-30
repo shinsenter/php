@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 3.0.0 - 2023-01-30
+
+- Disabled auto-optimize, removed `vendor:publish` in Laravel base project scripts.
+- Improved docs & examples.
+
+
 ## 2.5.0 - 2023-01-19
 
 Use [S6 Overlay v3.1.3.0](https://github.com/just-containers/s6-overlay/releases/tag/v3.1.3.0).

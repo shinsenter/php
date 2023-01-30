@@ -24,7 +24,7 @@ if [ -f "$STATAMIC_ARTISAN" ]; then
     if [ "$STATAMIC_AUTO_OPTIMIZE" == "true" ]; then
         las optimize:clear
         las optimize
-        las vendor:publish --all
+        # las vendor:publish --all
         wmd $STATAMIC_ROOT/bootstrap/cache -R &
         wmd $STATAMIC_ROOT/storage -R &
     fi

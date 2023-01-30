@@ -10,6 +10,22 @@ services:
 
   common:
     platform: ${BUILD_PLATFORM:-linux/arm64/v8}
+    security_opt:
+      - no-new-privileges:true
+    privileged: true
+    cap_add:
+      - SYS_ADMIN
+      - SYS_NICE
+      - SYS_PTRACE
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "32m"
+        max-file: "10"
     volumes:
       - ./data/_ssl:/etc/ssl/web
     environment:

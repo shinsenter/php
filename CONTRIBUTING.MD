@@ -1,13 +1,13 @@
-# Contributions
+# Let's Make a Difference Together!
 
-## Interested in contributing?
+## Ready to Join the Open Source Community?
 
-As an open source project, we'd appreciate any help and contributions!
+As a thriving open source project, we welcome all contributions and support from our community. Let's make this project even better together!
 
-We follow the standard [github pull request process](https://help.github.com/articles/about-pull-requests). We'll try to review your contributions as soon as possible.
+We follow the standard [github pull request process](https://help.github.com/articles/about-pull-requests), and we will review your contributions promptly.
 
-## File an Issue
+## Spot Something that Needs Improvement?
 
-Not ready to contribute code, but see something that needs work? While we encourage everyone to contribute code, it is also appreciated when someone reports an issue. We use [github issues](https://github.com/shinsenter/php/issues) for this.
+Not comfortable contributing code just yet? No problem! We appreciate when someone reports an issue that needs attention. Simply create a [github issue](https://github.com/shinsenter/php/issues) and we'll take it from there.
 
-From contributing to source code to improving readability of the documentation, all suggestions are welcome!
+From source code contributions to enhancing the readability of the documentation, every idea and suggestion counts! Let's build a better project together.

@@ -10,15 +10,15 @@
 
 ## About this project
 
-Latest stable [Ubuntu](https://ubuntu.com) docker base images with [s6-overlay v3](https://github.com/just-containers/s6-overlay/tree/v3) and [OpenSSL](https://github.com/openssl/openssl) included.
+Are you tired of using the same old, basic Docker base images? Look no further than this repository, where you'll find the latest stable versions of [Ubuntu](https://ubuntu.com) with added features for optimal container management. Not only do these images include the powerful [s6-overlay v3](https://github.com/just-containers/s6-overlay/tree/v3), specifically designed for the lifecycle of containers, but they also come with [OpenSSL](https://github.com/openssl/openssl) included.
 
-> The [s6-overlay](https://github.com/just-containers/s6-overlay) was built specifically for the lifecycle of containers, giving you a more accurate way of bringing containers down and monitoring their health. See a great explanation called ["The Docker Way?"](https://github.com/just-containers/s6-overlay#the-docker-way) by the s6-overlay team for an excellent explaination.
+Want to know more about why s6-overlay is the ultimate tool for container management? Check out the [explanation](https://github.com/just-containers/s6-overlay#the-docker-way) by the s6-overlay team.
 
-These images are actively maintained.
+And the best part? These images are actively maintained, ensuring that you're always using the most up-to-date version. Upgrade your Docker containers with ease.
 
 ## Container OS
 
-The following versions of Ubuntu are being actively updated:
+Stay ahead of the game by using the following versions of Ubuntu Docker images that are actively being updated:
 
 - [22.04](https://docker.shin.company/s6-ubuntu/tags?name=22.04) ([Jammy](https://docker.shin.company/s6-ubuntu/tags?name=jammy), [latest](https://docker.shin.company/s6-ubuntu/tags?name=latest))
 - [20.04](https://docker.shin.company/s6-ubuntu/tags?name=20.04) ([Focal](https://docker.shin.company/s6-ubuntu/tags?name=focal))
@@ -65,13 +65,13 @@ For example:
 docker run --rm -v $(pwd):/var/www/html -e PUID=$(id -u) -e PGID=$(id -g) shinsenter/s6-ubuntu env
 ```
 
-## Customize Docker image
+## Customize Your Docker Image
 
-Here below is a sample `Dockerfile` for building your own Docker image extending this image. You also can add more [pre-defined Docker's ENV settings](https://code.shin.company/php#customize-docker-image) to change PHP-FPM behavior without copying configuration files to your containers.
+Easily change container configurations and tailor your image to your specific needs by utilizing pre-defined Docker environment variables.
 
-> Learn more about [Dockerfile](https://docs.docker.com/engine/reference/builder).
+Look no further than this `Dockerfile` sample for building your own custom image by extending the base image provided here.
 
-You can easily change container configurations by using pre-defined Docker's environment variables.
+> Want to learn more about how to create the ultimate custom image? Check out the [Dockerfile documentation](https://docs.docker.com/engine/reference/builder) and start building today.
 
 ```Dockerfile
 FROM shinsenter/s6-ubuntu
@@ -106,7 +106,7 @@ Create an empty directory for a new project and place in the directory a `docker
 ```yml
 version: '3'
 services:
-  my-container:
+  s6-ubuntu-app:
     image: shinsenter/s6-ubuntu:latest
     environment:
       TZ: UTC

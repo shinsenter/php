@@ -16,11 +16,11 @@
 
 🌏 (PHP) Production-ready Ubuntu + PHP-FPM + [Apache2](https://httpd.apache.org) Docker images with plenty of common and useful extensions for your PHP applications. These images are actively maintained.
 
-You can also easily [add more PHP modules](#enabling-or-disabling-php-modules) or [customize your Docker image](#customize-docker-image).
+> With these Docker images, you can easily [add more PHP modules](#enabling-or-disabling-php-modules) or [customize your Docker image](#customize-docker-image) to fit your specific needs.
 
-> There are many guide about configuring Apache2 with PHP-FPM, but many of them are incomplete or contain security issues. More information can be found at their [official website](https://cwiki.apache.org/confluence/display/httpd/PHP-FPM).
+> We also provide an easy and secure way to configure Apache2 with PHP-FPM, eliminating the hassle and potential security issues that come with other guides and tutorials.
 
-> 💡 To ensure that the image size is always compact and suitable for many different existing projects, the source code of the framework is not included in the container. The download size is under 100MB.
+> 💡 Streamline your project workflow and save storage space with our compact and versatile Docker images, boasting a lightweight download size of under 100MB without sacrificing on functionality.
 
 ## Usage
 
@@ -46,21 +46,19 @@ docker pull shinsenter/phpfpm-apache:php${PHP_VERSION}-tidy
 
 ### The document root
 
-You can choose your own path for the document root by using the environment variable `$WEBHOME`.
+By default, your application will be placed in the `/var/www/html` directory of the Docker container, also known as the document root. However, if you want to change the location of your application, you can simply adjust the `WEBHOME` environment variable.
 
 ```Dockerfile
 ENV WEBHOME="/var/www/html"
 ```
 
-> The default document root is set to `/var/www/html`, and your application must be copied or mounted to this path.
-
-> Sometimes you may wish to change the default document directory of Apache, for example if the `index.php` is placed in a `public` directory within the `$WEBHOME` path, you also can change it using an environment variable called `$APACHE_DOCUMENT_ROOT`.
+If you have your `index.php` file located in a `public` directory within your `$WEBHOME` path, you can also change the default document directory of Apache by using the `$APACHE_DOCUMENT_ROOT` environment variable.
 
 ```Dockerfile
 ENV APACHE_DOCUMENT_ROOT="/public"
 ```
 
-After changing the `$WEBHOME` variable, you also have to change your default working directory by adding these lines to the bottom of your `Dockerfile`:
+But don't forget, after changing this variable, you'll also need to update your default working directory in the Dockerfile. No worries, it's easy to do! Just add a couple of lines to the bottom of your Dockerfile and you're good to go:
 
 ```
 # sets the working directory
@@ -129,11 +127,15 @@ For example:
 docker run --rm -v $(pwd):/var/www/html -e PUID=$(id -u) -e PGID=$(id -g) shinsenter/phpfpm-apache composer dump-autoload
 ```
 
-## Customize Docker image
+## Customize Your Docker Image
 
-Here below is a sample `Dockerfile` for building your own Docker image extending this image. You also can add more [pre-defined Docker's ENV settings](https://code.shin.company/php#customize-docker-image) to change PHP-FPM behavior without copying configuration files to your containers.
+Easily change container configurations and tailor your image to your specific needs by utilizing pre-defined Docker environment variables.
 
-> Learn more about [Dockerfile](https://docs.docker.com/engine/reference/builder).
+Look no further than this `Dockerfile` sample for building your own custom image by extending the base image provided here.
+
+> Want to learn more about how to create the ultimate custom image? Check out the [Dockerfile documentation](https://docs.docker.com/engine/reference/builder) and start building today.
+
+But that's not all - you can also add more [pre-defined Docker environment variables](https://code.shin.company/php#customize-docker-image) to change PHP-FPM behavior without copying configuration files to your containers.
 
 ```Dockerfile
 ARG  PHP_VERSION=8.2
@@ -213,7 +215,7 @@ Create an empty directory for a new project and place in the directory a `docker
 ```yml
 version: '3'
 services:
-  my-container:
+  phpfpm-apache-app:
     image: shinsenter/phpfpm-apache:latest
     volumes:
       - ./my-website:/var/www/html
@@ -226,19 +228,19 @@ services:
       - "80:80"
       - "443:443"
     links:
-      - mysql
+      - db
       - redis
 
-  ## OTHER CONTAINERS SUCH AS REDIS OR MYSQL ###################################
-  mysql:
-    image: mysql:latest
+  ## OTHER CONTAINERS SUCH AS REDIS OR DATABASE ###################################
+  db:
+    image: mariadb:latest
     environment:
       TZ: UTC
       MYSQL_ROOT_PASSWORD: mydb_p@ssw0rd
       MYSQL_DATABASE: my_database
     volumes:
-      - "./mysql/data:/var/lib/mysql"
-      - "./mysql/dump:/docker-entrypoint-initdb.d"
+      - "./db/data:/var/lib/mysql"
+      - "./db/dump:/docker-entrypoint-initdb.d"
     ports:
       - "3306:3306"
   redis:

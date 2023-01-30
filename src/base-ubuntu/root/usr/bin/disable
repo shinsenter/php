@@ -1,3 +1,3 @@
 #!/bin/bash
-service $1 stop 2>/dev/null
-update-rc.d $1 disable 2>/dev/null
+service "$1" stop 2>/dev/null
+update-rc.d "$1" disable 2>/dev/null

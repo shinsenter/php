@@ -14,7 +14,7 @@ This image solves for is such a corner case that most people wouldn't run into i
 
 The problem arises when you are trying to build an image for another machine architecture, and have to use `FROM scratch` in your dockerfile, in which case the resulting image will be tagged as being for the build machine's architecture instead of the target architecture (even though Qemu was used).
 
-These images are actively maintained.
+These Docker images are continuously updated to provide you with the most cutting-edge technology in the container world.
 
 ## Usage
 
