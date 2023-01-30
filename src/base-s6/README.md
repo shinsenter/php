@@ -10,15 +10,13 @@
 
 ## About this project
 
-The images in this repository contain only unpacked [s6-overlay v3](https://github.com/just-containers/s6-overlay) as a multi-platform and reusable build stage.
+Are you tired of using clunky and outdated init systems for your containers? Look no further than this repository, where you'll find images containing only the latest version of [s6-overlay v3](https://github.com/just-containers/s6-overlay). This powerful tool was built specifically for the lifecycle of containers, giving you a more accurate way of bringing containers down and monitoring their health.
 
-The s6-overlay was built specifically for the lifecycle of containers, giving you a more accurate way of bringing containers down and monitoring their health.
-
-These images are actively maintained.
+But that's not all - these images are actively maintained, ensuring that you're always using the most up-to-date version of s6-overlay. Upgrade your Docker containers with ease.
 
 ## Usage
 
-This repository is not intended to be used directly, but rather consumed in other Dockerfiles as a multi-platform and reusable build stage.
+This repository is not just a one-trick pony - it's intended to be used as a multi-platform and reusable build stage in other Dockerfiles.
 
 ```Dockerfile
 FROM ubuntu:latest

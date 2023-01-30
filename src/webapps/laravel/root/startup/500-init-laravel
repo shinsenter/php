@@ -22,7 +22,7 @@ if [ -f "$LARAVEL_ARTISAN" ]; then
     if [ "$LARAVEL_AUTO_OPTIMIZE" == "true" ]; then
         las optimize:clear
         las optimize
-        las vendor:publish --all
+        # las vendor:publish --all
         wmd $LARAVEL_ROOT/bootstrap/cache -R &
         wmd $LARAVEL_ROOT/storage -R &
     fi

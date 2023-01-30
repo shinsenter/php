@@ -12,29 +12,26 @@
 
 ## About this project
 
-I have had those concerns when building environments for PHP applications.
+Are you tired of the tedious and time-consuming process of building environments for your PHP applications? I know I was.
 
-- Tired of waiting around for Docker images to build.
-- Tired of customizing modules from official Docker PHP images, and Docker image after installing more modules becomes too big.
-- Tired of installing web server like Apache or Nginx on the top of PHP, in order to run a PHP application on browser.
+From waiting for Docker images to build, to customizing modules on official Docker PHP images and dealing with bloated images after installing more modules, to installing web servers like Apache or Nginx on top of PHP just to run an application on a browser - it's all too much.
 
-Above jobs are quite boring and time consuming, am I right?
+With my many years of experience in the field, I've created this project to help you easily and quickly set up an environment for your PHP applications, whether it's for production or development. Say goodbye to the tedious tasks and hello to a streamlined process.
 
-Therefore, based on my many years of experience, I created this project to help you quickly build an environment to run your PHP applications (regardless of whether it is a production or development environment).
+I hope you find this project helpful. If you do, please consider supporting my work by visiting [this section](https://code.shin.company/php/blob/main/SPONSOR.md).
 
-I hope you find this project helpful, please consider [supporting my works](https://code.shin.company/php/blob/main/SPONSOR.md) if you like it.
-
-> ### Special thanks
+> ### Thanks
 >
-> This project is inspired by the [serversideup/docker-php](https://github.com/serversideup/docker-php) project, I love it.
+> This project was inspired by the [serversideup/docker-php](https://github.com/serversideup/docker-php) project, which I appreciate.
 >
-> However the owners seem to be quite busy updating their projects, so I made my own version.
+> However, as the original authors seemed to be occupied with other updates, I decided to create our own version.
 
-Let's check it out!
 
 ## Container OS
 
-This project is built on top of my Docker base image, which is Ubuntu 22.04 (Jammy) with [s6-overlay v3](https://docker.shin.company/s6-overlay) and OpenSSL included.
+These Docker images include the latest version of Ubuntu 22.04 (Jammy) and are packed with powerful tools such as [s6-overlay v3](https://docker.shin.company/s6-overlay) and OpenSSL.
+
+> The s6-overlay, designed specifically for the lifecycle of containers, provides a more accurate way of bringing them down and monitoring their health, while OpenSSL adds an extra layer of security to your containers.
 
 > Learn more:
 > - [![`shinsenter/s6-overlay`](https://img.shields.io/docker/image-size/shinsenter/s6-overlay/latest?label=shinsenter%2Fs6-overlay)](https://docker.shin.company/s6-overlay)
@@ -42,7 +39,9 @@ This project is built on top of my Docker base image, which is Ubuntu 22.04 (Jam
 
 ## Available images
 
-These images are actively maintained.
+These Docker images are continuously updated to provide you with the most cutting-edge technology in the container world.
+
+Let's check it out!
 
 ### PHP versions
 
@@ -127,17 +126,13 @@ docker pull shinsenter/php:${PHP_VERSION}-${PHP_VARIATION}
 
 ### The document root
 
-You can choose your own path for the document root by using the environment variable `$WEBHOME`.
+By default, your application will be placed in the `/var/www/html` directory of the Docker container, also known as the document root. However, if you want to change the location of your application, you can simply adjust the `WEBHOME` environment variable.
 
 ```Dockerfile
 ENV WEBHOME="/var/www/html"
 ```
 
-> The default document root is set to `/var/www/html`, and your application must be copied or mounted to this path.
-
-> Sometimes you may wish to change the default document root (away from `/var/www/html`), please consider changing the `$WEBHOME` value.
-
-After changing the `$WEBHOME` variable, you also have to change your default working directory by adding these lines to the bottom of your `Dockerfile`:
+But don't forget, after changing this variable, you'll also need to update your default working directory in the Dockerfile. No worries, it's easy to do! Just add a couple of lines to the bottom of your Dockerfile and you're good to go:
 
 ```
 # sets the working directory
@@ -221,11 +216,15 @@ For example:
 docker run --rm -v $(pwd):/var/www/html -e PUID=$(id -u) -e PGID=$(id -g) shinsenter/php:8.2-cli composer create-project laravel/laravel /var/www/html
 ```
 
-## Customize Docker image
+## Customize Your Docker Image
 
-Here below is a sample `Dockerfile` for building your own Docker image extending one of above images. You also can change below pre-defined Docker's ENV lines to change PHP-FPM behavior without copying configuration files to your containers.
+Easily change container configurations and tailor your image to your specific needs by utilizing pre-defined Docker environment variables.
 
-> Learn more about [Dockerfile](https://docs.docker.com/engine/reference/builder).
+Look no further than this `Dockerfile` sample for building your own custom image by extending the base image provided here.
+
+> Want to learn more about how to create the ultimate custom image? Check out the [Dockerfile documentation](https://docs.docker.com/engine/reference/builder) and start building today.
+
+But that's not all - you can also add more [pre-defined Docker environment variables](https://code.shin.company/php#customize-docker-image) to change PHP-FPM behavior without copying configuration files to your containers.
 
 ```Dockerfile
 # change the PHP_VERSION and PHP_VARIATION as your need
@@ -377,19 +376,19 @@ services:
       PUID: ${UID:-9999}
       PGID: ${GID:-9999}
     links:
-      - mysql
+      - db
       - redis
 
-  ## OTHER CONTAINERS SUCH AS REDIS OR MYSQL ###################################
-  mysql:
-    image: mysql:latest
+  ## OTHER CONTAINERS SUCH AS REDIS OR DATABASE ###################################
+  db:
+    image: mariadb:latest
     environment:
       TZ: UTC
       MYSQL_ROOT_PASSWORD: mydb_p@ssw0rd
       MYSQL_DATABASE: my_database
     volumes:
-      - "./mysql/data:/var/lib/mysql"
-      - "./mysql/dump:/docker-entrypoint-initdb.d"
+      - "./db/data:/var/lib/mysql"
+      - "./db/dump:/docker-entrypoint-initdb.d"
     ports:
       - "3306:3306"
   redis:

@@ -29,7 +29,7 @@ if [ -f "$CRATER_ARTISAN" ]; then
     if [ "$CRATER_AUTO_OPTIMIZE" == "true" ]; then
         las optimize:clear
         las optimize
-        las vendor:publish --all
+        # las vendor:publish --all
         wmd $CRATER_ROOT/bootstrap/cache -R &
         wmd $CRATER_ROOT/storage -R &
     fi

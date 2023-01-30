@@ -16,15 +16,15 @@
 
 🔰 (PHP) Run Laravel on Docker easily with a single Docker container.
 
-These images are built on top of latest LTS versions of Ubuntu + PHP-FPM and actively maintained.
+Stay ahead of the curve with our actively maintained and updated images, built on the solid foundation of the latest LTS versions of Ubuntu and PHP-FPM for maximum stability and performance.
 
-You can also easily [add more PHP modules](#enabling-or-disabling-php-modules) or [customize your Docker image](#customize-docker-image).
+> With these Docker images, you can easily [add more PHP modules](#enabling-or-disabling-php-modules) or [customize your Docker image](#customize-docker-image) to fit your specific needs.
 
 > Laravel is a web application framework with expressive, elegant syntax. Laravel takes the pain out of development by easing common tasks used in many web projects. More information can be found at their [official website](https://laravel.com).
 
-> 💡 To ensure that the image size is always compact and suitable for many different existing projects, the source code of the framework is not included in the container. The download size is under 100MB.
+> 💡 Streamline your project workflow and save storage space with our compact and versatile Docker images, boasting a lightweight download size of under 100MB without sacrificing on functionality.
 
-> ⏬ When you start a container mounting an empty directory to the document root path (the default document root is set to `/var/www/html`), the container will automatically pull the latest source code of the framework.
+> ⏬ Docker container will automatically pull the latest source code of the framework upon startup, when you mount an empty directory to the document root path (which is set to `/var/www/html` by default).
 
 
 ## Usage
@@ -51,17 +51,13 @@ docker pull shinsenter/laravel:php${PHP_VERSION}-tidy
 
 ### The document root
 
-You can choose your own path for the document root by using the environment variable `$WEBHOME`.
+By default, your application will be placed in the `/var/www/html` directory of the Docker container, also known as the document root. However, if you want to change the location of your application, you can simply adjust the `WEBHOME` environment variable.
 
 ```Dockerfile
 ENV WEBHOME="/var/www/html"
 ```
 
-> The default document root is set to `/var/www/html`, and your application must be copied or mounted to this path.
-
-> Sometimes you may wish to change the default document root (away from `/var/www/html`), please consider changing the `$WEBHOME` value.
-
-After changing the `$WEBHOME` variable, you also have to change your default working directory by adding these lines to the bottom of your `Dockerfile`:
+But don't forget, after changing this variable, you'll also need to update your default working directory in the Dockerfile. No worries, it's easy to do! Just add a couple of lines to the bottom of your Dockerfile and you're good to go:
 
 ```
 # sets the working directory
@@ -130,11 +126,15 @@ For example:
 docker run --rm -v $(pwd):/var/www/html -e PUID=$(id -u) -e PGID=$(id -g) shinsenter/laravel composer dump-autoload
 ```
 
-## Customize Docker image
+## Customize Your Docker Image
 
-Here below is a sample `Dockerfile` for building your own Docker image extending this image. You also can add more [pre-defined Docker's ENV settings](https://code.shin.company/php#customize-docker-image) to change PHP-FPM behavior without copying configuration files to your containers.
+Easily change container configurations and tailor your image to your specific needs by utilizing pre-defined Docker environment variables.
 
-> Learn more about [Dockerfile](https://docs.docker.com/engine/reference/builder).
+Look no further than this `Dockerfile` sample for building your own custom image by extending the base image provided here.
+
+> Want to learn more about how to create the ultimate custom image? Check out the [Dockerfile documentation](https://docs.docker.com/engine/reference/builder) and start building today.
+
+But that's not all - you can also add more [pre-defined Docker environment variables](https://code.shin.company/php#customize-docker-image) to change PHP-FPM behavior without copying configuration files to your containers.
 
 ```Dockerfile
 ARG  PHP_VERSION=8.2
@@ -166,7 +166,7 @@ ENV WEBHOME="/var/www/html"
 ENV LARAVEL_PROJECT="laravel/laravel"
 
 # Optimize and cache all config, views, routes
-ENV LARAVEL_AUTO_OPTIMIZE=true
+ENV LARAVEL_AUTO_OPTIMIZE=false
 
 # Create symlinks to the storage folder
 ENV LARAVEL_LINK_STORAGE=true
@@ -211,7 +211,7 @@ Create an empty directory for a new project and place in the directory a `docker
 ```yml
 version: '3'
 services:
-  my-container:
+  laravel-app:
     image: shinsenter/laravel:latest
     volumes:
       - ./my-website:/var/www/html
@@ -221,7 +221,7 @@ services:
       PUID: ${UID:-9999}
       PGID: ${GID:-9999}
       REDIS_HOST: redis
-      DB_HOST: mysql
+      DB_HOST: db
       DB_DATABASE: laravel
       DB_USERNAME: root
       DB_PASSWORD: mydb_p@ssw0rd
@@ -232,19 +232,19 @@ services:
       - "80:80"
       - "443:443"
     links:
-      - mysql
+      - db
       - redis
 
-  ## OTHER CONTAINERS SUCH AS REDIS OR MYSQL ###################################
-  mysql:
-    image: mysql:latest
+  ## OTHER CONTAINERS SUCH AS REDIS OR DATABASE ###################################
+  db:
+    image: mariadb:latest
     environment:
       TZ: UTC
       MYSQL_ROOT_PASSWORD: mydb_p@ssw0rd
       MYSQL_DATABASE: laravel
     volumes:
-      - "./mysql/data:/var/lib/mysql"
-      - "./mysql/dump:/docker-entrypoint-initdb.d"
+      - "./db/data:/var/lib/mysql"
+      - "./db/dump:/docker-entrypoint-initdb.d"
     ports:
       - "3306:3306"
   redis:
