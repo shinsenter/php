@@ -4,10 +4,7 @@ if [ "$(php -r 'echo PHP_VERSION_ID;')" -ge "80100" ]; then
     COMPOSER_CREATE_OPTIONS="--ignore-platform-reqs"
 fi
 exec composer create-project --ansi \
---no-cache \
 --no-interaction \
---no-progress \
 --no-secure-http \
---prefer-dist \
 $COMPOSER_CREATE_OPTIONS \
 "$@"

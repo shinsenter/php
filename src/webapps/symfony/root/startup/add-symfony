@@ -2,16 +2,19 @@
 SYMFONY_PROJECT="${SYMFONY_PROJECT:-symfony/skeleton}"
 SYMFONY_ROOT="$(webhome)"
 SYMFONY_CONSOLE="$SYMFONY_ROOT/bin/console"
-SYMFONY_DEVKIT="$SYMFONY_ROOT/vendor/symfony/debug-bundle"
+SYMFONY_DEVKIT="$SYMFONY_ROOT/${COMPOSER_VENDOR_DIR:-vendor}/symfony/debug-bundle"
 
 if [ ! -f "$SYMFONY_CONSOLE" ]; then
+    wait-for-fpm &>/dev/null
     echo; echo "🤖 Installing $SYMFONY_PROJECT from scratch"
     rm -rf $SYMFONY_ROOT/public $SYMFONY_ROOT/index.*
+
     composer-create -d $SYMFONY_ROOT/ $SYMFONY_PROJECT $SYMFONY_ROOT/
     wmd $SYMFONY_ROOT -R
 fi
 
 if [ "$SYMFONY_INSTALL_DEVKIT" == "true" ] && [ -f "$SYMFONY_CONSOLE" ] && [ ! -d "$SYMFONY_DEVKIT" ]; then
+    wait-for-composer
     echo; echo "🤖 Installing packages for development"
     composer-require -d $SYMFONY_ROOT/ webapp
     wmd $SYMFONY_ROOT -R &

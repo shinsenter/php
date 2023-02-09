@@ -1,11 +1,13 @@
 #!/command/with-contenv bash
 CI4_PROJECT="${CI4_PROJECT:-codeigniter4/appstarter}"
 CI4_ROOT="$(webhome)"
-CI4_CHECK="$CI4_ROOT/vendor/codeigniter4"
+CI4_CHECK="$CI4_ROOT/${COMPOSER_VENDOR_DIR:-vendor}/codeigniter4"
 
 if [ ! -d "$CI4_CHECK" ]; then
+    wait-for-fpm &>/dev/null
     echo; echo "🤖 Installing $CI4_PROJECT from scratch"
     rm -rf $CI4_ROOT/public $CI4_ROOT/index.*
+
     composer-create -d $CI4_ROOT/ $CI4_PROJECT $CI4_ROOT/
     wmd $CI4_ROOT -R &
 fi

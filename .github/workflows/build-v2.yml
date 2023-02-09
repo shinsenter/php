@@ -168,7 +168,6 @@ jobs:
             linux/arm/v7
             linux/arm64/v8
             linux/ppc64le
-            linux/riscv64
             linux/s390x
           build-args: |
             BUILD_CONTEXT=${{ env.BUILD_CONTEXT }}
@@ -263,7 +262,6 @@ jobs:
             linux/arm/v7
             linux/arm64/v8
             linux/ppc64le
-            linux/riscv64
             linux/s390x
           build-args: |
             BASE_OS_IMAGE=${{ matrix.base }}:${{ matrix.version }}
@@ -553,6 +551,7 @@ jobs:
           - kirby
           - laminas
           - laravel
+          - mautic
           - phpmyadmin
           - slim
           - statamic

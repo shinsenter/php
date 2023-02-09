@@ -24,8 +24,6 @@ FROM ${BASE_S6_IMAGE}:${S6_VERSION} as s6
 FROM ${BASE_OS_IMAGE} as base
 
 # sets defaults
-ARG PUID=9999
-ARG PGID=9999
 ARG DEBIAN_FRONTEND=noninteractive
 ARG BUILD_DEPS="apt-utils"
 
@@ -36,13 +34,6 @@ ADD root/ /
 
 # copies s6-overlay from source
 COPY --from=s6 / /
-
-# adds user and group
-RUN echo "🤖 Creating webuser and webgroup"
-RUN groupadd -r -g $PGID webgroup
-RUN useradd  -r -g $PGID -G root,www-data --no-log-init \
-    -d /root -s /usr/bin/bash -u $PUID webuser
-RUN wmd /root -R
 
 # updates packages
 RUN echo "🤖 Updating packages"
@@ -58,6 +49,10 @@ RUN cleanup $BUILD_DEPS
 # the main image
 FROM  scratch
 SHELL ["/bin/bash", "-c"]
+
+# sets defaults
+ARG WEBUSER=www-data
+ARG WEBGROUP=www-data
 
 # copies from from build stage
 COPY --from=base / /
@@ -79,11 +74,12 @@ ENV S6_KILL_FINISH_MAXTIME=3000
 ENV S6_KILL_GRACETIME=3000
 ENV S6_LOGGING=1
 ENV S6_SERVICES_GRACETIME=3000
+ENV S6_VERBOSITY=1
 ENV S6_VERSION=$S6_VERSION
 
-# sets GID and UID
-ENV PGID=9999
-ENV PUID=9999
+# sets WEBUSER and WEBGROUP
+ENV WEBUSER="$WEBUSER"
+ENV WEBGROUP="$WEBGROUP"
 ENV WEBHOME="/var/www/html"
 
 # adds OS variables
@@ -93,7 +89,7 @@ ENV HOME=/root
 ENV LANG=C.UTF-8
 ENV LANGUAGE=C.UTF-8
 ENV LC_ALL=C
-ENV PATH=/command:/bin:/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin
+ENV PATH=/command:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin
 ENV SHELL=/bin/bash
 ENV TERM=xterm
 

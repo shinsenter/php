@@ -3,8 +3,10 @@ WORDPRESS_ROOT="$(webhome)"
 WORDPRESS_CHECK="$WORDPRESS_ROOT/wp-content"
 
 if [ ! -d "$WORDPRESS_CHECK" ]; then
+    wait-for-fpm &>/dev/null
     echo; echo "🤖 Installing Wordpress from scratch"
-    rm -f $WORDPRESS_ROOT/index.*
+    rm -rf $WORDPRESS_ROOT/index.*
+
     wp core download \
         --locale="${WORDPRESS_LOCALE:-en_US}" \
         --force

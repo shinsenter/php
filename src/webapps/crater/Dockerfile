@@ -36,3 +36,10 @@ ENV CRATER_SCHEDULE_OPTIONS=
 ENV CRATER_SCHEDULE_ENABLED=true
 
 ################################################################################
+
+# recommended settings
+ENV PHP_MEMORY_LIMIT=512M
+ENV PHP_POST_MAX_SIZE=100M
+ENV PHP_UPLOAD_MAX_FILE_SIZE=10M
+
+################################################################################

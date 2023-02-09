@@ -1,6 +1,8 @@
 #!/bin/bash
 if [ ! -z "$1" ]; then
+    WEBUSER="${WEBUSER:-www-data}"
+    WEBGROUP="${WEBGROUP:-www-data}"
     DIR="$1"
     CHOWN="chown$([ "$2" == "recursive" ] || [ "$2" == "-R" ] && echo ' -R')"
-    mkdir -p $DIR && $CHOWN webuser:webgroup $DIR/ && chmod +s $DIR/
+    mkdir -p $DIR && $CHOWN $WEBUSER:$WEBGROUP $DIR/ && chmod +s $DIR/
 fi

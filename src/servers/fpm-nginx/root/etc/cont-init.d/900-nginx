@@ -1,5 +1,10 @@
 #!/command/with-contenv bash
+WEBUSER="${WEBUSER:-www-data}"
+WEBGROUP="${WEBGROUP:-www-data}"
 WEBROOT="$(webhome)${NGINX_DOCUMENT_ROOT}"
+
+sed -i "s/webuser/${WEBUSER}/"   /etc/nginx/nginx.conf
+sed -i "s/webgroup/${WEBGROUP}/" /etc/nginx/nginx.conf
 
 if [ ! -z "$PHP_POST_MAX_SIZE" ]; then
     echo "client_max_body_size ${PHP_POST_MAX_SIZE};" >/etc/nginx/extra.d/body-size.conf

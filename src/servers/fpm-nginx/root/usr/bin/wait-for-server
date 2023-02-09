@@ -1,0 +1,2 @@
+#!/command/with-contenv bash
+exec timeout ${1:-5} bash -c -- "while [ -z \"\$(pgrep nginx)\" ]; do sleep ${2:-0.1}; done"

@@ -26,7 +26,7 @@ services:
     image: shinsenter/phpfpm-nginx:php${PHP_VERSION:-8.2}
     extends:
       file: common.yml
-      service: common-php
+      service: common
     volumes:
       - ./data/phpinfo:/opt/www
     ports:
@@ -199,6 +199,29 @@ services:
 
   ##############################################################################
 
+  mautic:
+    image: shinsenter/mautic:php${PHP_VERSION:-8.2}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../src/webapps/mautic
+    volumes:
+      - ./data/mautic:/opt/www
+    ports:
+      - 9111:80
+    environment:
+      - MAUTIC_PROJECT=mautic/recommended-project
+      - DB_HOST=database
+      - DB_PORT=3306
+      - DB_NAME=test
+      - DB_USER=root
+      - DB_PASSWD=localhost
+      - MAUTIC_ADMIN_USERNAME=admin
+      - MAUTIC_ADMIN_PASSWORD=mautic
+
+  ##############################################################################
+
   phpmyadmin:
     image: shinsenter/phpmyadmin:php${PHP_VERSION:-8.2}
     extends:
@@ -209,7 +232,7 @@ services:
     volumes:
       - ./data/phpmyadmin:/opt/www
     ports:
-      - 9111:80
+      - 9112:80
     environment:
       - PMA_PROJECT=phpmyadmin/phpmyadmin
       - PMA_HOST=database
@@ -228,7 +251,7 @@ services:
     volumes:
       - ./data/slim:/opt/www
     ports:
-      - 9112:80
+      - 9113:80
     environment:
       - SLIM_PROJECT=slim/slim-skeleton
 
@@ -244,7 +267,7 @@ services:
     volumes:
       - ./data/statamic:/opt/www
     ports:
-      - 9113:80
+      - 9114:80
     environment:
       - REDIS_HOST=redis
       - STATAMIC_PROJECT=statamic/statamic
@@ -261,7 +284,7 @@ services:
     volumes:
       - ./data/symfony:/opt/www
     ports:
-      - 9114:80
+      - 9115:80
     environment:
       - SYMFONY_PROJECT=symfony/skeleton
       - SYMFONY_INSTALL_DEVKIT=true
@@ -278,7 +301,7 @@ services:
     volumes:
       - ./data/wordpress:/opt/www
     ports:
-      - 9115:80
+      - 9116:80
     environment:
       WORDPRESS_WP_DEBUG: true
       WORDPRESS_DB_HOST: database:3306
@@ -298,7 +321,7 @@ services:
     volumes:
       - ./data/yii:/opt/www
     ports:
-      - 9116:80
+      - 9117:80
     environment:
       - YII_PROJECT=yiisoft/yii2-app-basic
 

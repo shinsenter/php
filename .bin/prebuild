@@ -146,8 +146,8 @@ tee_or_print $SRC_DIR/servers/fpm-nginx/.source \
 tee_or_print $SRC_DIR/webapps/wordpress/.source \
     linkhash 'https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar.sha512'
 
-echo -e "\n🤖 Preparing $TARGET" >> $GITHUB_STEP_SUMMARY
-treehash $TARGET >> $GITHUB_STEP_SUMMARY
-prebuild $TARGET $2 >> $GITHUB_STEP_SUMMARY
-echo -e "\nCompleted." >> $GITHUB_STEP_SUMMARY
+echo -e "\n🤖 Preparing $TARGET"
+treehash $TARGET
+prebuild $TARGET $2
+echo -e "\nCompleted."
 mkdir -p $CACHE_DIR

@@ -16,11 +16,11 @@
 
 🔰 (PHP) Run Hyperf on Docker easily with a single Docker container.
 
+> Hyperf is an extremely performant and flexible PHP CLI framework. More information can be found at their [official website](https://www.hyperf.io).
+
 Stay ahead of the curve with our actively maintained and updated images, built on the solid foundation of the latest LTS versions of Ubuntu and PHP-FPM for maximum stability and performance.
 
 > With these Docker images, you can easily [add more PHP modules](#enabling-or-disabling-php-modules) or [customize your Docker image](#customize-docker-image) to fit your specific needs.
-
-> Hyperf is an extremely performant and flexible PHP CLI framework. More information can be found at their [official website](https://www.hyperf.io).
 
 > 💡 Streamline your project workflow and save storage space with our compact and versatile Docker images, boasting a lightweight download size of under 100MB without sacrificing on functionality.
 

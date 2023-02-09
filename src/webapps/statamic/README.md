@@ -16,11 +16,11 @@
 
 🔰 (PHP) Run Statamic on Docker easily with a single Docker container.
 
+> Statamic is an open source, flat-first, Laravel + Git powered CMS designed for building easy to manage websites. More information can be found at their [official website](https://statamic.dev).
+
 Stay ahead of the curve with our actively maintained and updated images, built on the solid foundation of the latest LTS versions of Ubuntu and PHP-FPM for maximum stability and performance.
 
 > With these Docker images, you can easily [add more PHP modules](#enabling-or-disabling-php-modules) or [customize your Docker image](#customize-docker-image) to fit your specific needs.
-
-> Statamic is an open source, flat-first, Laravel + Git powered CMS designed for building easy to manage websites. More information can be found at their [official website](https://statamic.dev).
 
 > 💡 Streamline your project workflow and save storage space with our compact and versatile Docker images, boasting a lightweight download size of under 100MB without sacrificing on functionality.
 

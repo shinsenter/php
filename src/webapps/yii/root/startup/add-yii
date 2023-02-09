@@ -4,6 +4,7 @@ YII_ROOT="$(webhome)"
 YII_CHECK="$YII_ROOT/yii"
 
 if [ ! -f "$YII_CHECK" ]; then
+    wait-for-fpm &>/dev/null
     echo; echo "🤖 Installing $YII_PROJECT from scratch"
     rm -rf $YII_ROOT/web $YII_ROOT/index.*
 

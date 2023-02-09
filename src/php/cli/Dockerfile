@@ -17,6 +17,8 @@ ARG PHP_MODULES="/usr/src/php${PHP_VERSION}.txt"
 ARG PHP_VERSION="8.2"
 ARG COMPOSER_INSTALLER="https://getcomposer.org/installer"
 ARG COMPOSER_SCRIPT="/tmp/composer-setup.php"
+ARG COMPOSER_BIN="/usr/bin/composer"
+ARG COMPOSER_VENDOR_DIR=vendor
 
 ENV PHP_VERSION=${PHP_VERSION}
 ADD php${PHP_VERSION}.txt $PHP_MODULES
@@ -25,7 +27,7 @@ ADD php${PHP_VERSION}.txt $PHP_MODULES
 ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV COMPOSER_HOME=/composer
 ENV COMPOSER_HTACCESS_PROTECT=1
-ENV COMPOSER_MAX_PARALLEL_HTTP=32
+ENV COMPOSER_MAX_PARALLEL_HTTP=8
 
 ################################################################################
 
@@ -49,9 +51,10 @@ RUN echo "Installing PHP ${PHP_VERSION}" \
     && ln -sf /usr/bin/phpdismod /usr/sbin/docker-php-ext-disable \
     \
     # installs composer
+    && mkdir -p ${COMPOSER_HOME} \
     && php -r "copy('${COMPOSER_INSTALLER}', '${COMPOSER_SCRIPT}');" \
     && php $COMPOSER_SCRIPT --install-dir=/usr/bin --filename=composer \
-    && chmod +xr /usr/bin/composer \
+    && chmod +xr ${COMPOSER_BIN} \
     \
     # cleanup
     && apt-upgrade -uq \
@@ -66,7 +69,7 @@ CMD ["/usr/bin/php", "-a"]
 
 ################################################################################
 
-ENV PATH=${COMPOSER_HOME}/vendor/bin:$PATH
+ENV PATH=${PATH}:${COMPOSER_HOME}/${COMPOSER_VENDOR_DIR}/bin
 ENV PHP_CONF_DIR=/etc/php/cli/conf.d
 ENV PHP_INI_DIR=/etc/php/cli
 

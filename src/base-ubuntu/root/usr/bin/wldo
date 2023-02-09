@@ -1,8 +1,10 @@
 #!/bin/bash
 export HOME=/root
+WEBUSER="${WEBUSER:-www-data}"
+WEBGROUP="${WEBGROUP:-www-data}"
 cmd="${@/exec /}"
 if [ -x "$(command -v sudo)" ]; then
-    exec sudo -u webuser -g webgroup -i -- $cmd
+    exec sudo -u $WEBUSER -g $WEBGROUP -i -- $cmd
 else
-    exec su   -  webuser -g webgroup -c -- $cmd
+    exec su   -  $WEBUSER -g $WEBGROUP -c -- $cmd
 fi

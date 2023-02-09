@@ -1,0 +1,3 @@
+#!/bin/bash
+AUTOLOAD="$(webhome)/${COMPOSER_VENDOR_DIR:-vendor}/composer/ClassLoader.php"
+while [ ! -f "$AUTOLOAD" ]; do sleep 1; done

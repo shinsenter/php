@@ -4,14 +4,16 @@ LARAVEL_ROOT="$(webhome)"
 LARAVEL_ARTISAN="$LARAVEL_ROOT/artisan"
 
 if [ ! -f "$LARAVEL_ARTISAN" ]; then
+    wait-for-fpm &>/dev/null
     echo; echo "🤖 Installing $LARAVEL_PROJECT from scratch"
     rm -rf $LARAVEL_ROOT/public $LARAVEL_ROOT/index.*
+
     composer-create -d $LARAVEL_ROOT/ $LARAVEL_PROJECT $LARAVEL_ROOT/
     wmd $LARAVEL_ROOT -R &
 fi
 
 if [ -f "$LARAVEL_ARTISAN" ]; then
-    composer-wait
+    wait-for-composer
     las() { echo; php $LARAVEL_ARTISAN --ansi "$@" 2>&1; }
 
     if [ ! -f "$LARAVEL_ROOT/.env" ] && [ ! -f "$LARAVEL_ROOT/.env.${APP_ENV}" ]; then

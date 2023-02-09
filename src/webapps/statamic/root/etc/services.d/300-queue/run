@@ -1,6 +1,6 @@
 #!/command/with-contenv bash
 if [ "$STATAMIC_QUEUE_ENABLED" == "true" ]; then
-    composer-wait
+    wait-for-composer
     echo; echo "🤖 Starting Statamic queue:work $STATAMIC_QUEUE_OPTIONS"
     exec wdo artisan queue:work $STATAMIC_QUEUE_OPTIONS
 else

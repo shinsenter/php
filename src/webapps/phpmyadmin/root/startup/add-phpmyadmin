@@ -4,8 +4,10 @@ PMA_ROOT="$(webhome)"
 PMA_CONFIG="$PMA_ROOT/config.inc.php"
 
 if [ ! -f "$PMA_CONFIG" ]; then
+    wait-for-fpm &>/dev/null
     echo; echo "🤖 Installing $PMA_PROJECT from scratch"
-    rm -f $PMA_ROOT/index.*
+    rm -rf $PMA_ROOT/index.*
+
     composer-create -d $PMA_ROOT/ $PMA_PROJECT $PMA_ROOT/ \
         --repository-url='https://www.phpmyadmin.net/packages.json'
 
