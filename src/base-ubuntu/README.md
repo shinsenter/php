@@ -85,7 +85,6 @@ ENV TZ="UTC"
 # sets GID and UID
 ENV PUID=9999
 ENV PGID=9999
-ENV WEBHOME="/var/www/html"
 
 # set ENABLE_CRONTAB=true to enable crontab
 ENV ENABLE_CRONTAB=false
@@ -128,7 +127,6 @@ Currently, the supported architectures are:
 - linux/arm/v7
 - linux/arm64/v8
 - linux/ppc64le
-- linux/riscv64
 - linux/s390x
 
 > You do not need to use a platform-specific tag (although you can), Docker will automatically choose the appropriate architecture.

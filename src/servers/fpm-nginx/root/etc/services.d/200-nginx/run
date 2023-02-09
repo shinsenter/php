@@ -1,5 +1,2 @@
 #!/command/with-contenv bash
-timeout 10 bash -c -- '\
-while [ ! -e "${PHPFPM_SOCK_PATH}" ]; do sleep 0.1; done;\
-echo "Found ${PHPFPM_SOCK_PATH}!"'
-exec nginx -g 'daemon off;'
+wait-for-fpm 10 0.1 && exec nginx -g 'daemon off;'

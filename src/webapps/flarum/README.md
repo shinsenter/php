@@ -16,11 +16,11 @@
 
 🔰 (PHP) Run Flarum on Docker easily with a single Docker container.
 
+> Flarum is a delightfully simple discussion platform for your website. It's fast and easy to use, with all the features you need to run a successful community. More information can be found at their [official website](https://flarum.org).
+
 Stay ahead of the curve with our actively maintained and updated images, built on the solid foundation of the latest LTS versions of Ubuntu and PHP-FPM for maximum stability and performance.
 
 > With these Docker images, you can easily [add more PHP modules](#enabling-or-disabling-php-modules) or [customize your Docker image](#customize-docker-image) to fit your specific needs.
-
-> Flarum is a delightfully simple discussion platform for your website. It's fast and easy to use, with all the features you need to run a successful community. More information can be found at their [official website](https://flarum.org).
 
 > 💡 Streamline your project workflow and save storage space with our compact and versatile Docker images, boasting a lightweight download size of under 100MB without sacrificing on functionality.
 

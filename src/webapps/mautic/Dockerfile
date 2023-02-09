@@ -13,12 +13,15 @@ ARG PHP_VERSION=8.2
 FROM ${BASE_IMAGE}:php${PHP_VERSION}${IMAGE_SUFFIX}
 
 # sets web server root path
-ENV APACHE_DOCUMENT_ROOT="/public"
+ENV APACHE_DOCUMENT_ROOT="/docroot"
 
 ################################################################################
 
 # adds config files
 ADD root/ /
+
+# installs PHP modules
+RUN phpaddmod imap
 
 # sets the working directory
 # WORKDIR $WEBHOME
@@ -29,5 +32,8 @@ ADD root/ /
 ENV PHP_MEMORY_LIMIT=512M
 ENV PHP_POST_MAX_SIZE=100M
 ENV PHP_UPLOAD_MAX_FILE_SIZE=10M
+
+# set more env variables
+ENV MAUTIC_PROJECT="mautic/recommended-project"
 
 ################################################################################

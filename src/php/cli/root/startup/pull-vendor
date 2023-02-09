@@ -1,6 +1,6 @@
 #!/command/with-contenv bash
 WEBHOME="$(webhome)"
-if [ -f $WEBHOME/composer.json ] && [ ! -d $WEBHOME/vendor/ ]; then
+if [ -f $WEBHOME/composer.json ] && [ ! -d $WEBHOME/${COMPOSER_VENDOR_DIR:-vendor}/ ]; then
     echo; echo "🤖 Installing packages from $WEBHOME/composer.json"
     composer-install -d $WEBHOME/
     wmd $WEBHOME -R &

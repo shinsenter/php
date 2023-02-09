@@ -1,0 +1,20 @@
+#!/command/with-contenv bash
+MAUTIC_PROJECT="${MAUTIC_PROJECT:-mautic/recommended-project}"
+MAUTIC_ROOT="$(webhome)"
+MAUTIC_CONSOLE="$MAUTIC_ROOT/bin/console"
+
+if [ ! -f "$MAUTIC_CONSOLE" ]; then
+    wait-for-fpm &>/dev/null
+    echo; echo "🤖 Installing $MAUTIC_PROJECT from scratch"
+    [ -x "$(command -v git)" ] || apt-oneshot git
+    rm -rf $MAUTIC_ROOT/docroot $MAUTIC_ROOT/index.*
+
+    git config --global --add safe.directory $MAUTIC_ROOT
+    composer-create  -d $MAUTIC_ROOT/ $MAUTIC_PROJECT $MAUTIC_ROOT/ --no-install
+    composer config  -d $MAUTIC_ROOT/ --no-plugins allow-plugins.composer/installers true
+    composer config  -d $MAUTIC_ROOT/ --no-plugins allow-plugins.mautic/core-composer-scaffold true
+    composer config  -d $MAUTIC_ROOT/ --no-plugins allow-plugins.mautic/core-project-message true
+    composer config  -d $MAUTIC_ROOT/ --no-plugins allow-plugins.symfony/flex true
+    composer-install -d $MAUTIC_ROOT/
+    wmd $MAUTIC_ROOT -R &
+fi

@@ -14,8 +14,6 @@ FROM ${BASE_IMAGE}:${PHP_VERSION}-fpm
 ARG APACHE_BUILD_DEPS="gnupg2 apt-utils"
 ARG APACHE_PPA_KEY="4F4EA0AAE5267A6C"
 ARG APACHE_PPA_URL="http://ppa.launchpadcontent.net/ondrej/apache2/ubuntu"
-ARG APACHE_RUN_GROUP="webgroup"
-ARG APACHE_RUN_USER="webuser"
 
 ################################################################################
 
@@ -29,8 +27,8 @@ RUN echo "Installing Apache" \
     && sed -i 's/LogFormat "%h %l %u %t \\\"%r\\\" %>s %O \\\"/LogFormat "%a %l %u %t \\\"%r\\\" %>s %O \\\"/' /etc/apache2/apache2.conf \
     && echo >>/etc/apache2/envvars \
     && echo "export DOCUMENT_ROOT=\"\${WEBHOME}\${APACHE_DOCUMENT_ROOT}\"" >>/etc/apache2/envvars \
-    && echo "export APACHE_RUN_USER=${APACHE_RUN_USER}" >>/etc/apache2/envvars \
-    && echo "export APACHE_RUN_GROUP=${APACHE_RUN_GROUP}" >>/etc/apache2/envvars \
+    && echo "export APACHE_RUN_USER=\${WEBUSER}" >>/etc/apache2/envvars \
+    && echo "export APACHE_RUN_GROUP=\${WEBGROUP}" >>/etc/apache2/envvars \
     \
     # modifies Apache modules
     && a2dismod \

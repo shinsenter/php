@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.0.0 - 2023-02-09
+
+Use the default `www-data` user and group for web server.
+If needed, the user and group can be altered using the `WEBUSER` and `WEBGROUP` environment variables in either the Dockerfile or the docker-compose.yml file.
+
 
 ## 3.0.0 - 2023-01-30
 

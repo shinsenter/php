@@ -4,8 +4,10 @@ CAKE4_ROOT="$(webhome)"
 CAKE4_CHECK="$CAKE4_ROOT/bin/cake"
 
 if [ ! -f "$CAKE4_CHECK" ]; then
+    wait-for-fpm &>/dev/null
     echo; echo "🤖 Installing $CAKE4_PROJECT from scratch"
     rm -rf $CAKE4_ROOT/webroot $CAKE4_ROOT/index.*
+
     composer-create -d $CAKE4_ROOT/ $CAKE4_PROJECT $CAKE4_ROOT/
     wmd $CAKE4_ROOT -R &
 fi

@@ -1,8 +1,0 @@
-#!/command/with-contenv bash
-DIR="${COMPOSER_HOME:-/composer}"
-if [ "$DIR" != "/composer" ]; then
-    wmd $DIR
-    [ -f "${DIR}/keys.dev.pub" ]  || wdo php -r "copy('https://composer.github.io/snapshots.pub','${DIR}/keys.dev.pub');"
-    [ -f "${DIR}/keys.tags.pub" ] || wdo php -r "copy('https://composer.github.io/releases.pub','${DIR}/keys.tags.pub');"
-    chmod 0644 $DIR/*.pub 2>/dev/null
-fi

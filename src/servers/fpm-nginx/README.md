@@ -16,9 +16,9 @@
 
 🌏 (PHP) Production-ready Ubuntu + PHP-FPM + [Nginx](https://nginx.org/) Docker images with plenty of common and useful extensions for your PHP applications. These images are actively maintained.
 
-> With these Docker images, you can easily [add more PHP modules](#enabling-or-disabling-php-modules) or [customize your Docker image](#customize-docker-image) to fit your specific needs.
-
 > We also provide an easy and secure way to configure Nginx with PHP-FPM, eliminating the hassle and potential security issues that come with other guides and tutorials.
+
+> With these Docker images, you can easily [add more PHP modules](#enabling-or-disabling-php-modules) or [customize your Docker image](#customize-docker-image) to fit your specific needs.
 
 > 💡 Streamline your project workflow and save storage space with our compact and versatile Docker images, boasting a lightweight download size of under 100MB without sacrificing on functionality.
 

@@ -1,21 +1,36 @@
 #!/command/with-contenv bash
-PUID="${PUID:-9999}"
-PGID="${PGID:-9999}"
 TZ="${TZ:-UTC}"
+PUID="${PUID:-$(id -u www-data)}"
+PGID="${PGID:-$(id -g www-data)}"
+WEBUSER="${WEBUSER:-www-data}"
+WEBGROUP="${WEBGROUP:-www-data}"
 WEBHOME="$(webhome)"
-
-[ ! -z "$WEBHOME" ] && wmd $WEBHOME
 
 if [ ! -z "$TZ" ] && [ -e /usr/share/zoneinfo/$TZ ]; then
     ln -sf /usr/share/zoneinfo/$TZ /etc/localtime
 fi
 
-if [[ "$PUID" != "9999" || "$PGID" != "9999" ]]; then
-    echo "🔥 New PUID and PGID for $WEBHOME will be updated. 🔥"
-    /usr/sbin/groupmod -o -g $PGID webgroup
-    /usr/sbin/usermod  -o -u $PUID webuser
+if [ "$WEBGROUP" != "www-data" ]; then
+    echo "🔥 Creating '${WEBGROUP}' group."
+    groupadd -r -g 9999 $WEBGROUP
+fi
+
+if [ "$WEBUSER" != "www-data" ];  then
+    echo "🔥 Creating '${WEBUSER}' user."
+    useradd -r -g 9999 \
+        -G root,www-data --no-log-init \
+        -d /root -s /usr/bin/bash -u $PUID $WEBUSER
+    wmd /root -R
+fi
+
+if [[ "$PUID" != "$(id -u $WEBUSER)" || "$PGID" != "$(id -g $WEBUSER)" ]]; then
+    echo "🔥 New PUID and PGID for $WEBHOME will be updated."
+    /usr/sbin/usermod  -o -u $PUID $WEBUSER
+    /usr/sbin/groupmod -o -g $PGID $WEBGROUP
     touch /tmp/owner-changed
 fi
+
+[ ! -z "$WEBHOME" ] && wmd $WEBHOME
 
 if [ -d /source/ ]; then
     echo "  🗂 Source folder detected. Moving files to $WEBHOME..."

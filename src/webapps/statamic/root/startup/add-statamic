@@ -5,15 +5,17 @@ STATAMIC_BINARY="$STATAMIC_ROOT/please"
 STATAMIC_ARTISAN="$STATAMIC_ROOT/artisan"
 
 if [ ! -f "$STATAMIC_BINARY" ]; then
+    wait-for-fpm &>/dev/null
     echo; echo "🤖 Installing $STATAMIC_PROJECT from scratch"
     rm -rf $STATAMIC_ROOT/public $STATAMIC_ROOT/index.*
+
     composer-create -d $STATAMIC_ROOT/ $STATAMIC_PROJECT $STATAMIC_ROOT/
-    please install
+    $STATAMIC_BINARY install
     wmd $STATAMIC_ROOT -R &
 fi
 
 if [ -f "$STATAMIC_ARTISAN" ]; then
-    composer-wait
+    wait-for-composer
     las() { echo; php $STATAMIC_ARTISAN --ansi "$@" 2>&1; }
 
     if [ ! -f "$STATAMIC_ROOT/.env" ] && [ ! -f "$STATAMIC_ROOT/.env.${APP_ENV}" ]; then

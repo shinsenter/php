@@ -1,6 +1,6 @@
 #!/command/with-contenv bash
 if [ "$CRATER_QUEUE_ENABLED" == "true" ]; then
-    composer-wait
+    wait-for-composer
     echo; echo "🤖 Starting Crater queue:work $CRATER_QUEUE_OPTIONS"
     exec wdo artisan queue:work $CRATER_QUEUE_OPTIONS
 else

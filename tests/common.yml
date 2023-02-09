@@ -24,17 +24,19 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-size: "32m"
-        max-file: "10"
+        max-size: "4m"
+        max-file: "1"
     volumes:
       - ./data/_ssl:/etc/ssl/web
     environment:
       - DEBUG_MODE=false
-      - PGID=${GID:-1234}
-      - PUID=${UID:-1234}
-      - S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
       - TZ=Asia/Tokyo
+      - PGID=${GID:-12345}
+      - PUID=${UID:-12345}
+      - WEBUSER=shin
+      - WEBGROUP=shincompany
       - WEBHOME=/opt/www
+      - S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
 
   common-php:
     extends: common

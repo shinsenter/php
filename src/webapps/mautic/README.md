@@ -1,22 +1,22 @@
-# shinsenter/grav
+# shinsenter/mautic
 
-🔰 (PHP) Run Grav CMS on Docker (for both production and local development).
+🔰 (PHP) Run Mautic on Docker (for both production and local development).
 
-> 🔗 https://docker.shin.company/grav
+> 🔗 https://docker.shin.company/mautic
 
-> 🚀 `shinsenter/grav` is also available in [smaller minified version](https://docker.shin.company/grav/tags?page=1&name=tidy).
+> 🚀 `shinsenter/mautic` is also available in [smaller minified version](https://docker.shin.company/mautic/tags?page=1&name=tidy).
 
 > 📦 Built on top of [shinsenter/php](https://docker.shin.company/php) docker base image.
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/grav)](https://docker.shin.company/grav) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/grav/latest?label=shinsenter%2Fgrav)](https://docker.shin.company/grav)
+[![Docker Pulls](https://img.shields.io/docker/pulls/shinsenter/mautic)](https://docker.shin.company/mautic) [![Docker Image Size](https://img.shields.io/docker/image-size/shinsenter/mautic/latest?label=shinsenter%2Fmautic)](https://docker.shin.company/mautic)
 
 * * *
 
 ## About this project
 
-🔰 (PHP) Run Grav CMS on Docker easily with a single Docker container.
+🔰 (PHP) Run Mautic on Docker easily with a single Docker container.
 
-> Grav is a modern open source flat-file CMS. More information can be found at their [official website](https://getgrav.org).
+> Mautic is focused on helping this belief become a reality by getting powerful marketing automation software into the hands of everyone. More information can be found at their [official website](https://docs.mautic.org/).
 
 Stay ahead of the curve with our actively maintained and updated images, built on the solid foundation of the latest LTS versions of Ubuntu and PHP-FPM for maximum stability and performance.
 
@@ -31,22 +31,22 @@ Stay ahead of the curve with our actively maintained and updated images, built o
 ### Docker Pull command
 
 ```bash
-docker pull shinsenter/grav:latest
+docker pull shinsenter/mautic:latest
 ```
 
 or
 
 ```bash
-docker pull shinsenter/grav:php${PHP_VERSION}
+docker pull shinsenter/mautic:php${PHP_VERSION}
 ```
 
 or
 
 ```bash
-docker pull shinsenter/grav:php${PHP_VERSION}-tidy
+docker pull shinsenter/mautic:php${PHP_VERSION}-tidy
 ```
 
-> View more image tags at [shinsenter/grav/tags](https://docker.shin.company/grav/tags).
+> View more image tags at [shinsenter/mautic/tags](https://docker.shin.company/mautic/tags).
 
 ### The document root
 
@@ -116,13 +116,13 @@ E.g.: `docker exec -it my-container composer install`
 ### Docker Run command
 
 ```bash
-docker run --rm [run options] shinsenter/grav <your_command>
+docker run --rm [run options] shinsenter/mautic <your_command>
 ```
 
 For example:
 
 ```bash
-docker run --rm -v $(pwd):/var/www/html -e PUID=$(id -u) -e PGID=$(id -g) shinsenter/grav composer dump-autoload
+docker run --rm -v $(pwd):/var/www/html -e PUID=$(id -u) -e PGID=$(id -g) shinsenter/mautic composer dump-autoload
 ```
 
 ## Customize Your Docker Image
@@ -137,7 +137,7 @@ But that's not all - you can also add more [pre-defined Docker environment varia
 
 ```Dockerfile
 ARG  PHP_VERSION=8.2
-FROM shinsenter/grav:php${PHP_VERSION}
+FROM shinsenter/mautic:php${PHP_VERSION}
 
 # ==========================================================
 
@@ -181,8 +181,8 @@ Create an empty directory for a new project and place in the directory a `docker
 ```yml
 version: '3'
 services:
-  grav-app:
-    image: shinsenter/grav:latest
+  mautic-app:
+    image: shinsenter/mautic:latest
     volumes:
       - ./my-website:/var/www/html
       - ./ssl-certs:/etc/ssl/web
@@ -190,6 +190,15 @@ services:
       TZ: UTC
       PUID: ${UID:-9999}
       PGID: ${GID:-9999}
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: my_database
+      DB_USER: root
+      DB_PASSWD: mydb_p@ssw0rd
+      MAUTIC_DB_PREFIX: test_
+      MAUTIC_ENV: test
+      MAUTIC_ADMIN_USERNAME: admin
+      MAUTIC_ADMIN_PASSWORD: mautic
     ports:
       - "80:80"
       - "443:443"

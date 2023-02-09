@@ -4,11 +4,8 @@ if [ "$(php -r 'echo PHP_VERSION_ID;')" -ge "80100" ]; then
     COMPOSER_INSTALL_OPTIONS="--ignore-platform-reqs"
 fi
 exec composer install --ansi \
---no-cache \
 --no-dev \
 --no-interaction \
---no-progress \
 --optimize-autoloader \
---prefer-dist \
 $COMPOSER_INSTALL_OPTIONS \
 "$@"

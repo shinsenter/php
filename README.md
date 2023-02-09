@@ -78,6 +78,7 @@ I also added more popular PHP open source projects:
 - [![`shinsenter/kirby`](https://img.shields.io/docker/image-size/shinsenter/kirby/latest?label=shinsenter%2Fkirby)](https://docker.shin.company/kirby)
 - [![`shinsenter/laminas`](https://img.shields.io/docker/image-size/shinsenter/laminas/latest?label=shinsenter%2Flaminas)](https://docker.shin.company/laminas)
 - [![`shinsenter/laravel`](https://img.shields.io/docker/image-size/shinsenter/laravel/latest?label=shinsenter%2Flaravel)](https://docker.shin.company/laravel)
+- [![`shinsenter/mautic`](https://img.shields.io/docker/image-size/shinsenter/mautic/latest?label=shinsenter%2Fmautic)](https://docker.shin.company/mautic)
 - [![`shinsenter/phpmyadmin`](https://img.shields.io/docker/image-size/shinsenter/phpmyadmin/latest?label=shinsenter%2Fphpmyadmin)](https://docker.shin.company/phpmyadmin)
 - [![`shinsenter/symfony`](https://img.shields.io/docker/image-size/shinsenter/symfony/latest?label=shinsenter%2Fsymfony)](https://docker.shin.company/symfony)
 - [![`shinsenter/slim`](https://img.shields.io/docker/image-size/shinsenter/slim/latest?label=shinsenter%2Fslim)](https://docker.shin.company/slim)
@@ -306,16 +307,16 @@ ENV PHP_PM_CONTROL="ondemand"
 
 # The number of child processes to be created when pm is set to static
 # and the maximum number of child processes to be created when pm is set to dynamic
-ENV PHP_PM_MAX_CHILDREN="28"
+ENV PHP_PM_MAX_CHILDREN="5"
 
 # The desired maximum number of idle server processes
-ENV PHP_PM_MAX_SPARE_SERVERS="21"
+ENV PHP_PM_MAX_SPARE_SERVERS="3"
 
 # The desired minimum number of idle server processes
-ENV PHP_PM_MIN_SPARE_SERVERS="7"
+ENV PHP_PM_MIN_SPARE_SERVERS="1"
 
 # The number of child processes created on startup
-ENV PHP_PM_START_SERVERS="7"
+ENV PHP_PM_START_SERVERS="2"
 
 # ==========================================================
 
@@ -332,7 +333,7 @@ ENV PHP_OPCACHE_MAX_WASTED_PERCENTAGE="15"
 ENV PHP_OPCACHE_MEMORY_CONSUMPTION="256"
 
 # This directive facilitates to let the preloading to be run as another user
-ENV PHP_OPCACHE_PRELOAD_USER="webuser"
+ENV PHP_OPCACHE_PRELOAD_USER="$WEBUSER"
 
 # Specifies a PHP script that is going to be compiled and executed at start-up
 ENV PHP_OPCACHE_PRELOAD=

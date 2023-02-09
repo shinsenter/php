@@ -4,8 +4,10 @@ ZEND_ROOT="$(webhome)"
 ZEND_CHECK="$ZEND_ROOT/module/Application"
 
 if [ ! -d "$ZEND_CHECK" ]; then
+    wait-for-fpm &>/dev/null
     echo; echo "🤖 Installing $ZEND_PROJECT from scratch"
     rm -rf $ZEND_ROOT/public $ZEND_ROOT/index.*
+
     composer-create -s dev -d $ZEND_ROOT/ $ZEND_PROJECT $ZEND_ROOT/
     wmd $ZEND_ROOT -R &
 fi

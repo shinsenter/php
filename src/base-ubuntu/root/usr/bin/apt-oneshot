@@ -1,4 +1,4 @@
 #!/bin/bash
 export DEBIAN_FRONTEND=noninteractive
 apt-update && apt-install -qum "$@"
-apt-cleanup
+if [ -z "$(pgrep s6-svscan)" ]; then apt-cleanup; fi
