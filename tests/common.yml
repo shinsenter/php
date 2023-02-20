@@ -45,6 +45,7 @@ services:
         - IMAGE_SUFFIX=
         - PHP_VERSION=${PHP_VERSION:-8.2}
     environment:
+      - AUTO_CREATE_INDEX_FILE=false
       - PHP_DEFAULT_CHARSET=UTF-8
       - PHPFPM_SOCK_PATH=/var/run/php/run.sock
 

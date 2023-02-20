@@ -4,7 +4,7 @@ PMA_ROOT="$(webhome)"
 PMA_CONFIG="$PMA_ROOT/config.inc.php"
 
 if [ ! -f "$PMA_CONFIG" ]; then
-    wait-for-fpm &>/dev/null
+    wait-for-server &>/dev/null
     echo; echo "🤖 Installing $PMA_PROJECT from scratch"
     rm -rf $PMA_ROOT/index.*
 

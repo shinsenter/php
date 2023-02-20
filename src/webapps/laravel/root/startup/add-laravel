@@ -4,7 +4,7 @@ LARAVEL_ROOT="$(webhome)"
 LARAVEL_ARTISAN="$LARAVEL_ROOT/artisan"
 
 if [ ! -f "$LARAVEL_ARTISAN" ]; then
-    wait-for-fpm &>/dev/null
+    wait-for-server &>/dev/null
     echo; echo "🤖 Installing $LARAVEL_PROJECT from scratch"
     rm -rf $LARAVEL_ROOT/public $LARAVEL_ROOT/index.*
 
@@ -36,6 +36,6 @@ if [ -f "$LARAVEL_ARTISAN" ]; then
     fi
 
     if [ "$LARAVEL_AUTO_MIGRATION" == "true" ]; then
-        las migrate:refresh --seed --force
+        las migrate:refresh --seed --force --isolated
     fi
 fi

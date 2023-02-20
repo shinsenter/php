@@ -4,7 +4,7 @@ GRAV_ROOT="$(webhome)"
 GRAV_CHECK="$GRAV_ROOT/bin/grav"
 
 if [ ! -f "$GRAV_CHECK" ]; then
-    wait-for-fpm &>/dev/null
+    wait-for-server &>/dev/null
     echo; echo "🤖 Installing $GRAV_PROJECT from scratch"
     [ -x "$(command -v git)" ] || apt-oneshot git
     rm -rf $GRAV_ROOT/web $GRAV_ROOT/index.*

@@ -166,6 +166,9 @@ ENV NGINX_DOCUMENT_ROOT=""
 # Set to "true" to fix permission for whole $WEBHOME
 ENV FIX_WEBHOME_PERMISSION="false"
 
+# Automatically create index.php
+ENV AUTO_CREATE_INDEX_FILE="true"
+
 # ==========================================================
 
 # You can easily change PHP-FPM configurations
