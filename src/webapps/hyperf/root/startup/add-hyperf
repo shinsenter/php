@@ -4,7 +4,7 @@ HYPERF_ROOT="$(webhome)"
 HYPERF_BIN="$HYPERF_ROOT/bin/hyperf.php"
 
 if [ ! -f "$HYPERF_BIN" ]; then
-    wait-for-fpm &>/dev/null
+    wait-for-server &>/dev/null
     echo; echo "🤖 Installing $HYPERF_PROJECT from scratch"
     rm -rf $HYPERF_ROOT/public $HYPERF_ROOT/index.*
 

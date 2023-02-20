@@ -5,7 +5,7 @@ SYMFONY_CONSOLE="$SYMFONY_ROOT/bin/console"
 SYMFONY_DEVKIT="$SYMFONY_ROOT/${COMPOSER_VENDOR_DIR:-vendor}/symfony/debug-bundle"
 
 if [ ! -f "$SYMFONY_CONSOLE" ]; then
-    wait-for-fpm &>/dev/null
+    wait-for-server &>/dev/null
     echo; echo "🤖 Installing $SYMFONY_PROJECT from scratch"
     rm -rf $SYMFONY_ROOT/public $SYMFONY_ROOT/index.*
 

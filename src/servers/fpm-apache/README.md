@@ -191,6 +191,9 @@ ENV APACHE_THREAD_LIMIT="64"
 # This directive sets the number of threads created by each child process
 ENV APACHE_THREADS_PER_CHILD="25"
 
+# Automatically create index.php
+ENV AUTO_CREATE_INDEX_FILE="true"
+
 # ==========================================================
 
 # You can easily change PHP-FPM configurations

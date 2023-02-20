@@ -49,6 +49,9 @@ ENTRYPOINT ["/init"]
 # sets env variables
 ENV NGINX_DOCUMENT_ROOT=""
 
+# automatically create index.php
+ENV AUTO_CREATE_INDEX_FILE="false"
+
 ################################################################################
 
 LABEL traefik.enable=true

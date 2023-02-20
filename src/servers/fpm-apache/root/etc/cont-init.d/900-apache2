@@ -2,9 +2,9 @@
 WEBROOT="$(webhome)${APACHE_DOCUMENT_ROOT}"
 
 wmd $WEBROOT
-if [ ! -z "$(ls -1 /web/ | grep 'index\.\(ht?ml\|php\)')" ] && [ -z "$(ls -1 $WEBROOT/ | grep 'index\.\(ht?ml\|php\)')" ]; then
+if [ "$AUTO_CREATE_INDEX_FILE" == "true" ] && [ -d /web/ ]; then
     echo; echo "📄 Copying temporary index page to ${WEBROOT}"
-    wdo cp -rf /web/index.* $WEBROOT/
+    wdo cp -r /web/* $WEBROOT/
 fi
 
 if [ ! -d /var/log/apache2 ]; then

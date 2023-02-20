@@ -68,6 +68,9 @@ ENV APACHE_START_SERVERS=2
 ENV APACHE_THREAD_LIMIT=64
 ENV APACHE_THREADS_PER_CHILD=25
 
+# automatically create index.php
+ENV AUTO_CREATE_INDEX_FILE="false"
+
 ################################################################################
 
 LABEL traefik.enable=true

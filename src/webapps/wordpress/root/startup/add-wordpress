@@ -3,7 +3,7 @@ WORDPRESS_ROOT="$(webhome)"
 WORDPRESS_CHECK="$WORDPRESS_ROOT/wp-content"
 
 if [ ! -d "$WORDPRESS_CHECK" ]; then
-    wait-for-fpm &>/dev/null
+    wait-for-server &>/dev/null
     echo; echo "🤖 Installing Wordpress from scratch"
     rm -rf $WORDPRESS_ROOT/index.*
 

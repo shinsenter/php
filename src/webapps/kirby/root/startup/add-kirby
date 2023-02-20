@@ -4,7 +4,7 @@ KIRBY_ROOT="$(webhome)"
 KIRBY_CHECK="$KIRBY_ROOT/kirby"
 
 if [ ! -d "$KIRBY_CHECK" ]; then
-    wait-for-fpm &>/dev/null
+    wait-for-server &>/dev/null
     echo; echo "🤖 Installing $KIRBY_PROJECT from scratch"
     rm -rf $KIRBY_ROOT/web $KIRBY_ROOT/index.*
 

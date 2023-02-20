@@ -4,7 +4,7 @@ FUEL_ROOT="$(webhome)"
 FUEL_CHECK="$FUEL_ROOT/fuel/app"
 
 if [ ! -d "$FUEL_CHECK" ]; then
-    wait-for-fpm &>/dev/null
+    wait-for-server &>/dev/null
     echo; echo "🤖 Installing $FUEL_PROJECT from scratch"
     rm -rf $FUEL_ROOT/public $FUEL_ROOT/index.*
 

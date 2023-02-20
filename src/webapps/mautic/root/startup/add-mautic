@@ -4,7 +4,7 @@ MAUTIC_ROOT="$(webhome)"
 MAUTIC_CONSOLE="$MAUTIC_ROOT/bin/console"
 
 if [ ! -f "$MAUTIC_CONSOLE" ]; then
-    wait-for-fpm &>/dev/null
+    wait-for-server &>/dev/null
     echo; echo "🤖 Installing $MAUTIC_PROJECT from scratch"
     [ -x "$(command -v git)" ] || apt-oneshot git
     rm -rf $MAUTIC_ROOT/docroot $MAUTIC_ROOT/index.*

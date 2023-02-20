@@ -4,7 +4,7 @@ SLIM_ROOT="$(webhome)"
 SLIM_CHECK="$SLIM_ROOT/src/Application"
 
 if [ ! -d "$SLIM_CHECK" ]; then
-    wait-for-fpm &>/dev/null
+    wait-for-server &>/dev/null
     echo; echo "🤖 Installing $SLIM_PROJECT from scratch"
     rm -rf $SLIM_ROOT/public $SLIM_ROOT/index.*
 

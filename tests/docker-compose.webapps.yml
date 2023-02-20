@@ -31,6 +31,8 @@ services:
       - ./data/phpinfo:/opt/www
     ports:
       - 9100:80
+    environment:
+      - AUTO_CREATE_INDEX_FILE=true
 
   ##############################################################################
 

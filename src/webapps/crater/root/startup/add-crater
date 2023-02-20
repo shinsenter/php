@@ -4,7 +4,7 @@ CRATER_ROOT="$(webhome)"
 CRATER_ARTISAN="$CRATER_ROOT/artisan"
 
 if [ ! -f "$CRATER_ARTISAN" ]; then
-    wait-for-fpm &>/dev/null
+    wait-for-server &>/dev/null
     echo; echo "🤖 Installing $CRATER_PROJECT from scratch"
     rm -rf $CRATER_ROOT/public $CRATER_ROOT/index.*
 
@@ -44,6 +44,6 @@ if [ -f "$CRATER_ARTISAN" ]; then
     fi
 
     if [ "$CRATER_AUTO_MIGRATION" == "true" ]; then
-        las migrate:refresh --seed --force
+        las migrate:refresh --seed --force --isolated
     fi
 fi

@@ -4,7 +4,7 @@ FLARUM_ROOT="$(webhome)"
 FLARUM_CHECK="$FLARUM_ROOT/flarum"
 
 if [ ! -f "$FLARUM_CHECK" ]; then
-    wait-for-fpm &>/dev/null
+    wait-for-server &>/dev/null
     echo; echo "🤖 Installing $FLARUM_PROJECT from scratch"
     rm -rf $FLARUM_ROOT/public $FLARUM_ROOT/index.*
 

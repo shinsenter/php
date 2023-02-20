@@ -1,5 +1,11 @@
 # Changelog
 
+
+## 4.1.0 - 2023-02-20
+
+Use [S6 Overlay v3.1.4.0](https://github.com/just-containers/s6-overlay/releases/tag/v3.1.4.0).
+
+
 ## 4.0.0 - 2023-02-09
 
 Use the default `www-data` user and group for web server.
