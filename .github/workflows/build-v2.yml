@@ -206,6 +206,7 @@ jobs:
         s6_version:
           - v3.1.3.0
           - v3.1.4.0
+          - v3.1.4.1
     env:
       DOCKER_BUILDKIT: "1"
     steps:

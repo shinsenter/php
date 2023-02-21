@@ -19,14 +19,16 @@ if [ "$WEBUSER" != "www-data" ];  then
     echo "🔥 Creating '${WEBUSER}' user."
     useradd -r -g 9999 \
         -G root,www-data --no-log-init \
-        -d /root -s /usr/bin/bash -u $PUID $WEBUSER
+        -d /root -s /bin/bash -u $PUID $WEBUSER
     wmd /root -R
+else
+    usermod -s /bin/bash $WEBUSER
 fi
 
 if [[ "$PUID" != "$(id -u $WEBUSER)" || "$PGID" != "$(id -g $WEBUSER)" ]]; then
     echo "🔥 New PUID and PGID for $WEBHOME will be updated."
-    /usr/sbin/usermod  -o -u $PUID $WEBUSER
-    /usr/sbin/groupmod -o -g $PGID $WEBGROUP
+    usermod  -o -u $PUID $WEBUSER
+    groupmod -o -g $PGID $WEBGROUP
     touch /tmp/owner-changed
 fi
 

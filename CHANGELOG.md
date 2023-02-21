@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 4.2.0 - 2023-02-21
+
+- Allow the `www-data` user to run bash scripts.
+- Use [S6 Overlay v3.1.4.1](https://github.com/just-containers/s6-overlay/releases/tag/v3.1.4.1).
+
+
 ## 4.1.0 - 2023-02-20
 
 Use [S6 Overlay v3.1.4.0](https://github.com/just-containers/s6-overlay/releases/tag/v3.1.4.0).
