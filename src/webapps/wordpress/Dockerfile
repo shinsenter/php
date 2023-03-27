@@ -22,7 +22,9 @@ ADD root/ /
 
 # installs wp-cli
 ARG WPCLI_URL=https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-RUN php -r "copy('$WPCLI_URL', '/usr/bin/wp-cli');" && chmod +xr /usr/bin/wp-cli
+ARG WPCONFIG_URL=https://raw.githubusercontent.com/docker-library/wordpress/master/wp-config-docker.php
+RUN php -r "copy('$WPCLI_URL', '/usr/bin/wp-cli');" && chmod +xr /usr/bin/wp-cli \
+    && php -r "copy('$WPCONFIG_URL', '/etc/wp-config-docker.php');"
 
 # sets the working directory
 # WORKDIR $WEBHOME

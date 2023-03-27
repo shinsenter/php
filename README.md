@@ -270,10 +270,17 @@ ENV MSMTP_RELAY_SERVER_PORT="1025"
 ENV PHP_DEFAULT_CHARSET="UTF-8"
 
 # Show PHP errors on screen
-ENV PHP_DISPLAY_ERRORS="On"
+ENV PHP_DISPLAY_ERRORS="1"
+
+# Show PHP startup errors on screen
+ENV PHP_DISPLAY_STARTUP_ERRORS="0"
+
+# Path to error log file
+ENV PHP_ERROR_LOG="/var/log/php-fpm/error.log"
 
 # Set PHP error reporting level
-ENV PHP_ERROR_REPORTING="E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_WARNING"
+# Default: 22527 (E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_WARNING)
+ENV PHP_ERROR_REPORTING="22527"
 
 # Set the maximum time in seconds a script is allowed
 # to run before it is terminated by the parser

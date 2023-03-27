@@ -10,9 +10,13 @@ if [ ! -d "$WORDPRESS_CHECK" ]; then
     wp core download \
         --locale="${WORDPRESS_LOCALE:-en_US}" \
         --force
+
     wmd $WORDPRESS_ROOT -R &
 fi
 
-if [ -f /etc/docker-wordpress.php ]; then
+if [ -f /etc/wp-config-docker.php ] && [ ! -f $WORDPRESS_ROOT/wp-config.php ] ; then
+    cp -p /etc/wp-config-docker.php $WORDPRESS_ROOT/wp-config.php
+elif [ -f /etc/docker-wordpress.php ]; then
     php /etc/docker-wordpress.php
+    mv  /etc/docker-wordpress.php{,.old}
 fi

@@ -2,6 +2,7 @@
 CI4_PROJECT="${CI4_PROJECT:-codeigniter4/appstarter}"
 CI4_ROOT="$(webhome)"
 CI4_CHECK="$CI4_ROOT/${COMPOSER_VENDOR_DIR:-vendor}/codeigniter4"
+fix-htaccess 2>/dev/null
 
 if [ ! -d "$CI4_CHECK" ]; then
     wait-for-server &>/dev/null
@@ -9,5 +10,6 @@ if [ ! -d "$CI4_CHECK" ]; then
     rm -rf $CI4_ROOT/public $CI4_ROOT/index.*
 
     composer-create -d $CI4_ROOT/ $CI4_PROJECT $CI4_ROOT/
+    if [ -f $CI4_ROOT/public/.htaccess ] ; then sed -i 's#index\.php\/#index.php?/#g' $CI4_ROOT/public/.htaccess; fi
     wmd $CI4_ROOT -R &
 fi
