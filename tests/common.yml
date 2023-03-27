@@ -47,6 +47,9 @@ services:
     environment:
       - AUTO_CREATE_INDEX_FILE=false
       - PHP_DEFAULT_CHARSET=UTF-8
+      - PHP_DISPLAY_ERRORS=1
+      - PHP_DISPLAY_STARTUP_ERRORS=1
+      - PHP_ERROR_REPORTING=-1
       - PHPFPM_SOCK_PATH=/var/run/php/run.sock
 
 ################################################################################

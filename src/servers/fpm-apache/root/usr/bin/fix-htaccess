@@ -1,0 +1,5 @@
+#!/command/with-contenv bash
+WEBROOT="$(webhome)${APACHE_DOCUMENT_ROOT}"
+if [ ! -f $WEBROOT/.htaccess ]; then
+    sed -i 's#index\.php\/#index.php?/#g' $WEBROOT/.htaccess
+fi

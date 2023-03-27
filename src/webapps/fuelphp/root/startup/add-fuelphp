@@ -2,6 +2,7 @@
 FUEL_PROJECT="${FUEL_PROJECT:-fuel/fuel}"
 FUEL_ROOT="$(webhome)"
 FUEL_CHECK="$FUEL_ROOT/fuel/app"
+fix-htaccess 2>/dev/null
 
 if [ ! -d "$FUEL_CHECK" ]; then
     wait-for-server &>/dev/null
