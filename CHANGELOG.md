@@ -1,6 +1,11 @@
 # Changelog
 
 
+## 4.4.0 - 2023-05-15
+
+- Use [S6 Overlay v3.1.5.0](https://github.com/just-containers/s6-overlay/releases/tag/v3.1.5.0).
+
+
 ## 4.3.0 - 2023-04-03
 
 - Use [S6 Overlay v3.1.4.2](https://github.com/just-containers/s6-overlay/releases/tag/v3.1.4.2).
