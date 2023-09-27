@@ -28,6 +28,9 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV COMPOSER_HOME=/composer
 ENV COMPOSER_HTACCESS_PROTECT=1
 ENV COMPOSER_MAX_PARALLEL_HTTP=8
+ENV COMPOSER_CREATE_OPTIONS="--ansi --no-interaction --no-secure-http"
+ENV COMPOSER_INSTALL_OPTIONS="--ansi --no-interaction --optimize-autoloader"
+ENV COMPOSER_REQUIRE_OPTIONS="--ansi --no-interaction --optimize-autoloader --sort-packages"
 
 ################################################################################
 

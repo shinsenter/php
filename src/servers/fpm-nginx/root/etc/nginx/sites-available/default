@@ -1,8 +1,14 @@
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
+
+    http2  on;
+    listen 443 ssl;
+    listen [::]:443 ssl;
+
+    http3  on;
+    listen 443 quic reuseport;
+    listen [::]:443 quic reuseport;
 
     server_name _;
     root /var/www/html;
@@ -32,6 +38,7 @@ server {
 
     # index.php fallback
     location / {
+        add_header Alt-Svc 'h3=":443"; ma=86400';
         try_files $uri $uri/ /index.php?$query_string;
     }
 }

@@ -37,6 +37,7 @@ services:
       - WEBGROUP=shincompany
       - WEBHOME=/opt/www
       - S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
+    working_dir: /opt/www
 
   common-php:
     extends: common

@@ -1,11 +1,6 @@
 #!/bin/bash
 echo; echo "  ⏬ Running composer install $@"
 if [ "$(php -r 'echo PHP_VERSION_ID;')" -ge "80100" ]; then
-    COMPOSER_INSTALL_OPTIONS="--ignore-platform-reqs"
+    COMPOSER_INSTALL_OPTIONS="${COMPOSER_INSTALL_OPTIONS} --ignore-platform-reqs"
 fi
-exec composer install --ansi \
---no-dev \
---no-interaction \
---optimize-autoloader \
-$COMPOSER_INSTALL_OPTIONS \
-"$@"
+exec composer install $COMPOSER_INSTALL_OPTIONS "$@"
