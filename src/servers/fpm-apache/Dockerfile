@@ -24,7 +24,8 @@ RUN echo "Installing Apache" \
     && apt-deb ppa-apache ${APACHE_PPA_URL} ${APACHE_PPA_KEY} \
     && apt-install apache2 && disable apache2 \
     && echo "ServerName localhost" >>/etc/apache2/apache2.conf \
-    && sed -i 's/LogFormat "%h %l %u %t \\\"%r\\\" %>s %O \\\"/LogFormat "%a %l %u %t \\\"%r\\\" %>s %O \\\"/' /etc/apache2/apache2.conf \
+    && sed  -i 's/LogFormat "%h %l %u %t \\\"%r\\\" %>s %O \\\"/LogFormat "%a %l %u %t \\\"%r\\\" %>s %O \\\"/' /etc/apache2/apache2.conf \
+    && grep -lr "unix" /etc/apache2/ | xargs -I {} sed -i 's#unix:.*fpm.sock#unix:${PHPFPM_SOCK_PATH}#g' {} \
     && echo >>/etc/apache2/envvars \
     && echo "export DOCUMENT_ROOT=\"\${WEBHOME}\${APACHE_DOCUMENT_ROOT}\"" >>/etc/apache2/envvars \
     && echo "export APACHE_RUN_USER=\${WEBUSER}" >>/etc/apache2/envvars \
@@ -36,6 +37,7 @@ RUN echo "Installing Apache" \
     && a2enmod \
         actions autoindex brotli cache deflate expires headers http2 \
         mpm_event proxy proxy_fcgi remoteip rewrite setenvif ssl unique_id \
+    && a2enconf php* \
     \
     # cleanup
     && rm -rf /var/log/apache2 ${WEBHOME}/*.html \

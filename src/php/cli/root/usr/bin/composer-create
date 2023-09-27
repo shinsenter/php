@@ -1,10 +1,6 @@
 #!/bin/bash
 echo; echo "  ⏬ Running composer create-project $@"
 if [ "$(php -r 'echo PHP_VERSION_ID;')" -ge "80100" ]; then
-    COMPOSER_CREATE_OPTIONS="--ignore-platform-reqs"
+    COMPOSER_CREATE_OPTIONS="${COMPOSER_CREATE_OPTIONS} --ignore-platform-reqs"
 fi
-exec composer create-project --ansi \
---no-interaction \
---no-secure-http \
-$COMPOSER_CREATE_OPTIONS \
-"$@"
+exec composer create-project $COMPOSER_CREATE_OPTIONS "$@"
