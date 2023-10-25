@@ -44,5 +44,5 @@ if [ -d /startup ]; then
     echo
 fi
 
-clear
+echo
 exec echo "$GREETING"
