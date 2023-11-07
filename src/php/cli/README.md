@@ -1,6 +1,6 @@
 # shinsenter/php
 
-📦 (PHP) Production-ready PHP-CLI Docker images with plenty of common and useful extensions.
+📦 (PHP) Production-ready PHP-CLI Docker images with common and useful PHP extensions.
 
 > 🔗 https://docker.shin.company/php
 
