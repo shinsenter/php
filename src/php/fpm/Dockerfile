@@ -22,6 +22,7 @@ RUN apt-update \
     && apt-install php${PHP_VERSION}-fpm msmtp msmtp-mta \
     && disable php${PHP_VERSION}-fpm \
     && swap-dir /etc/php/${PHP_VERSION}/fpm /etc/php/fpm \
+    # && sed -i -e 's/^zend\.assertions/;zend.assertions/' /etc/php/fpm/php.ini \
     && sed -i -e 's/\[www\]/\[$\{PHP_POOL_NAME\}]/g' /etc/php/fpm/pool.d/www.conf \
     && ln -sf /etc/php/fpm /usr/local/etc/php-fpm \
     && ln -sf /usr/sbin/php-fpm${PHP_VERSION} /usr/sbin/php-fpm \

@@ -48,7 +48,7 @@ jobs:
     env:
       DOCKER_BUILDKIT: "1"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       -
         id: config
         run: |
@@ -63,20 +63,20 @@ jobs:
           key: ${{ runner.os }}-${{ env.CHECKSUM }}
       -
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       -
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       -
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       -
         if: steps.cache.outputs.cache-hit != 'true'
         name: Build ${{ env.BUILD_NAME }}
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           push: ${{ github.ref_name == 'main' }}
           context: ${{ env.BUILD_CONTEXT }}
@@ -122,7 +122,7 @@ jobs:
     env:
       DOCKER_BUILDKIT: "1"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       -
         id: config
         run: |
@@ -137,20 +137,20 @@ jobs:
           key: ${{ runner.os }}-${{ env.CHECKSUM }}
       -
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       -
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       -
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       -
         if: steps.cache.outputs.cache-hit != 'true'
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.BUILD_NAME }}
           tags: |
@@ -159,7 +159,7 @@ jobs:
       -
         if: steps.cache.outputs.cache-hit != 'true'
         name: Build ${{ env.BUILD_NAME }}:${{ env.LATEST_S6 }}
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           push: ${{ github.ref_name == 'main' }}
           context: ${{ env.BUILD_CONTEXT }}
@@ -196,7 +196,7 @@ jobs:
     needs: s6-overlay
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 20
+      max-parallel: 24
       matrix:
         base:
           - ubuntu
@@ -204,13 +204,12 @@ jobs:
           - 20.04
           - 22.04
         s6_version:
-          - v3.1.4.1
-          - v3.1.4.2
           - v3.1.5.0
+          - v3.1.6.0
     env:
       DOCKER_BUILDKIT: "1"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       -
         id: config
         run: |
@@ -225,20 +224,20 @@ jobs:
           key: ${{ runner.os }}-ubuntu${{ matrix.version }}-${{ env.CHECKSUM }}
       -
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       -
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       -
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       -
         if: steps.cache.outputs.cache-hit != 'true'
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.BUILD_NAME }}
           tags: |
@@ -253,7 +252,7 @@ jobs:
       -
         if: steps.cache.outputs.cache-hit != 'true'
         name: Build ${{ env.BUILD_NAME }}:${{ matrix.version }}
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           push: ${{ github.ref_name == 'main' }}
           context: ${{ env.BUILD_CONTEXT }}
@@ -302,7 +301,7 @@ jobs:
     env:
       DOCKER_BUILDKIT: "1"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       -
         id: config
         run: |
@@ -319,20 +318,20 @@ jobs:
           key: ${{ runner.os }}-php${{ matrix.version }}-${{ env.CHECKSUM }}
       -
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       -
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       -
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       -
         if: steps.cache.outputs.cache-hit != 'true'
         id: meta-cli
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.BUILD_NAME }}
           tags: |
@@ -343,7 +342,7 @@ jobs:
       -
         if: steps.cache.outputs.cache-hit != 'true'
         id: meta-fpm
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.BUILD_NAME }}
           tags: |
@@ -352,7 +351,7 @@ jobs:
       -
         if: steps.cache.outputs.cache-hit != 'true'
         name: Build ${{ env.BUILD_NAME }}:${{ matrix.version }}-cli
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           push: ${{ github.ref_name == 'main' }}
           context: ${{ env.BUILD_CONTEXT_CLI }}
@@ -368,7 +367,7 @@ jobs:
       -
         if: steps.cache.outputs.cache-hit != 'true'
         name: Build ${{ env.BUILD_NAME }}:${{ matrix.version }}-fpm
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           push: ${{ github.ref_name == 'main' }}
           context: ${{ env.BUILD_CONTEXT_FPM }}
@@ -390,7 +389,7 @@ jobs:
     needs: ubuntu
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       -
         id: config
         run: |
@@ -429,7 +428,7 @@ jobs:
     env:
       DOCKER_BUILDKIT: "1"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       -
         id: config
         run: |
@@ -445,20 +444,20 @@ jobs:
           key: ${{ runner.os }}-php${{ matrix.version }}-${{ matrix.variation }}-${{ env.CHECKSUM }}
       -
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       -
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       -
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       -
         if: steps.cache.outputs.cache-hit != 'true'
         id: meta-php
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: shinsenter/php
           tags: |
@@ -467,7 +466,7 @@ jobs:
       -
         if: steps.cache.outputs.cache-hit != 'true'
         id: meta-server
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.BUILD_NAME }}
           tags: |
@@ -476,7 +475,7 @@ jobs:
       -
         if: steps.cache.outputs.cache-hit != 'true'
         name: Build ${{ env.BUILD_NAME }}:${{ env.BUILD_VERSION }}
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           push: ${{ github.ref_name == 'main' }}
           context: ${{ env.BUILD_CONTEXT }}
@@ -506,7 +505,7 @@ jobs:
       -
         if: steps.cache.outputs.cache-hit != 'true' && steps.minify.outputs.BUILD_TIDY_FILE != ''
         name: Minify ${{ env.BUILD_NAME }}:${{ env.BUILD_VERSION }}
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           push: ${{ github.ref_name == 'main' }}
           context: ${{ env.BUILD_CONTEXT }}
@@ -561,7 +560,7 @@ jobs:
     env:
       DOCKER_BUILDKIT: "1"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       -
         id: config
         run: |
@@ -577,20 +576,20 @@ jobs:
           key: ${{ runner.os }}-php${{ matrix.version }}-${{ matrix.app }}-${{ env.CHECKSUM }}
       -
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       -
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       -
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       -
         if: steps.cache.outputs.cache-hit != 'true'
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.BUILD_NAME }}
           tags: |
@@ -599,7 +598,7 @@ jobs:
       -
         if: steps.cache.outputs.cache-hit != 'true'
         name: Build ${{ env.BUILD_NAME }}:${{ env.BUILD_VERSION }}
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           push: ${{ github.ref_name == 'main' }}
           context: ${{ env.BUILD_CONTEXT }}
@@ -627,7 +626,7 @@ jobs:
       -
         if: steps.cache.outputs.cache-hit != 'true' && steps.minify.outputs.BUILD_TIDY_FILE != ''
         name: Minify ${{ env.BUILD_NAME }}:${{ env.BUILD_VERSION }}
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           push: ${{ github.ref_name == 'main' }}
           context: ${{ env.BUILD_CONTEXT }}

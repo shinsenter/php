@@ -1,6 +1,6 @@
 # shinsenter/phpfpm-nginx
 
-🌏 (PHP) Ubuntu + PHP-FPM + Nginx Docker images with plenty of common and useful extensions.
+🌏 (PHP) Ubuntu + PHP-FPM + Nginx Docker images with common and useful PHP extensions.
 
 > 🔗 https://docker.shin.company/phpfpm-nginx
 
