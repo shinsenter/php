@@ -136,7 +136,7 @@ Look no further than this `Dockerfile` sample for building your own custom image
 But that's not all - you can also add more [pre-defined Docker environment variables](https://code.shin.company/php#customize-docker-image) to change PHP-FPM behavior without copying configuration files to your containers.
 
 ```Dockerfile
-ARG  PHP_VERSION=8.2
+ARG  PHP_VERSION=8.3
 FROM shinsenter/laminas:php${PHP_VERSION}
 
 # ==========================================================

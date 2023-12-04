@@ -50,6 +50,7 @@ Let's check it out!
 - [![`shinsenter/php:8.0`](https://img.shields.io/docker/image-size/shinsenter/php/8.0?label=shinsenter%2Fphp%3A8.0)](https://docker.shin.company/php/tags?page=1&name=8.0)
 - [![`shinsenter/php:8.1`](https://img.shields.io/docker/image-size/shinsenter/php/8.1?label=shinsenter%2Fphp%3A8.1)](https://docker.shin.company/php/tags?page=1&name=8.1)
 - [![`shinsenter/php:8.2`](https://img.shields.io/docker/image-size/shinsenter/php/8.2?label=shinsenter%2Fphp%3A8.2)](https://docker.shin.company/php/tags?page=1&name=8.2)
+- [![`shinsenter/php:8.3`](https://img.shields.io/docker/image-size/shinsenter/php/8.3?label=shinsenter%2Fphp%3A8.3)](https://docker.shin.company/php/tags?page=1&name=8.3) <sup>(latest)</sup>
 
 ### PHP-CLI
 
@@ -214,7 +215,7 @@ docker run --rm [run options] shinsenter/php:${PHP_VERSION}-${PHP_VARIATION} <yo
 For example:
 
 ```bash
-docker run --rm -v $(pwd):/var/www/html -e PUID=$(id -u) -e PGID=$(id -g) shinsenter/php:8.2-cli composer create-project laravel/laravel /var/www/html
+docker run --rm -v $(pwd):/var/www/html -e PUID=$(id -u) -e PGID=$(id -g) shinsenter/php:8.3-cli composer create-project laravel/laravel /var/www/html
 ```
 
 ## Customize Your Docker Image
@@ -229,7 +230,7 @@ But that's not all - you can also add more [pre-defined Docker environment varia
 
 ```Dockerfile
 # change the PHP_VERSION and PHP_VARIATION as your need
-ARG PHP_VERSION=8.2
+ARG PHP_VERSION=8.3
 ARG PHP_VARIATION=fpm-nginx
 
 # extends from base image

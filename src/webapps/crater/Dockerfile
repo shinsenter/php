@@ -5,7 +5,7 @@
 
 ARG BASE_IMAGE=shinsenter/phpfpm-nginx
 ARG IMAGE_SUFFIX="-tidy"
-ARG PHP_VERSION=8.2
+ARG PHP_VERSION=8.3
 
 ################################################################################
 
