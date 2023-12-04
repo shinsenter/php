@@ -298,6 +298,7 @@ jobs:
           - "8.0"
           - "8.1"
           - "8.2"
+          - "8.3"
     env:
       DOCKER_BUILDKIT: "1"
     steps:
@@ -422,6 +423,7 @@ jobs:
           - "8.0"
           - "8.1"
           - "8.2"
+          - "8.3"
         variation:
           - fpm-apache
           - fpm-nginx
@@ -539,6 +541,7 @@ jobs:
           - "8.0"
           - "8.1"
           - "8.2"
+          - "8.3"
         app:
           - cakephp4
           - codeigniter4
