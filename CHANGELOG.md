@@ -1,6 +1,11 @@
 # Changelog
 
 
+## 4.8.0 - 2023-12-16
+
+- Use [S6 Overlay v3.1.6.2](https://github.com/just-containers/s6-overlay/releases/tag/v3.1.6.2).
+
+
 ## 4.7.0 - 2023-12-04
 
 Added [PHP8.3 docker images](https://docker.shin.company/php/tags?page=1&name=8.3).

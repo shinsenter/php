@@ -204,8 +204,7 @@ jobs:
           - 20.04
           - 22.04
         s6_version:
-          - v3.1.5.0
-          - v3.1.6.0
+          - v3.1.6.2
     env:
       DOCKER_BUILDKIT: "1"
     steps:
