@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+APPPATH="$(app-path)"
+APPROOT="$(app-root)"
+PMA_CONFIG="$APPPATH/config.inc.php"
+
+web-mkdir $APPPATH/tmp $APPPATH/tmp/save $APPPATH/tmp/upload
+
+if [ -f /etc/phpmyadmin-config.php ] && [ ! -f "$PMA_CONFIG" ] ; then
+    cp -p /etc/phpmyadmin-config.php "$PMA_CONFIG"
+    sed -i "s/random_string_with_32_chars_long/$(php -r 'echo md5(uniqid());')/g" "$PMA_CONFIG"
+
+    chmod 0644 "$PMA_CONFIG"
+
+    if [ -f $APPPATH/libraries/vendor_config.php ]; then
+        sed -i "s@'configFile'.*@'configFile' => '${PMA_CONFIG}',@" \
+            $APPPATH/libraries/vendor_config.php
+    fi
+fi

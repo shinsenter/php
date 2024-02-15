@@ -1,0 +1,32 @@
+#!/usr/bin/env sh
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+# for alpine
+if has-cmd apk; then
+    packages=$(echo "${APK_PACKAGES} $@")
+    if [ ! -z "$packages" ]; then
+        for pkg in $packages; do
+            echo; echo "Removing $pkg"
+            apk del --no-cache --purge $pkg
+        done
+    fi
+fi
+
+# for debian
+if has-cmd apt-get; then
+    packages=$(echo "${APT_PACKAGES} $@")
+    if [ ! -z "$packages" ]; then
+        for pkg in $packages; do
+            echo; echo "Removing $pkg"
+            apt-get -yq remove --purge $pkg 2>&1 | grep -v -F 'so not removed'
+        done
+    fi
+    apt-get -yq autoremove --purge
+    apt-get -yq clean
+fi

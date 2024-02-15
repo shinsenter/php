@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+APPPATH="$(app-path)"
+APPROOT="$(app-root)"

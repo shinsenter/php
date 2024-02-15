@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+marker=/tmp/.fix-ownership
+
+case "$1" in
+fix)
+    shift; rm -rf $marker
+    if [ $# -eq 0 ]; then set -- "$(app-path)"; fi
+    for target; do
+        web-debug "👨🏻‍🔧 Fixing ownership for $target"
+        chown -R "$APP_USER:$APP_GROUP" "$target" 2>&1 || true
+    done
+    ;;
+path)
+    echo $marker
+    ;;
+*)
+    touch $marker
+    if [ ! -z "$@" ]; then echo "$@" | tee -a $marker; fi
+    ;;
+esac

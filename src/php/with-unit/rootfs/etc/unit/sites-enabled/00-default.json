@@ -1,0 +1,71 @@
+{
+    "applications": {
+        "{{ PHP_POOL_NAME }}": {
+            "type": "php",
+            "targets": {
+                "direct": {
+                    "root": "{{ APP_PATH }}{{ DOCUMENT_ROOT }}/"
+                },
+                "index": {
+                    "root": "{{ APP_PATH }}{{ DOCUMENT_ROOT }}/",
+                    "script": "index.php"
+                }
+            }
+        }
+    },
+    "routes": [
+        {
+            "match": {
+                "uri": [
+                    "*.php",
+                    "*.php/*"
+                ]
+            },
+            "action": {
+                "pass": "applications/{{ PHP_POOL_NAME }}/direct"
+            }
+        },
+        {
+            "action": {
+                "share": "{{ APP_PATH }}{{ DOCUMENT_ROOT }}$uri",
+                "fallback": {
+                    "pass": "applications/{{ PHP_POOL_NAME }}/index"
+                }
+            }
+        }
+    ],
+    "listeners": {
+        "*:80": {
+            "pass": "routes",
+            "forwarded": {
+                "client_ip": "X-Forwarded-For",
+                "protocol": "X-Forwarded-Proto",
+                "recursive": true,
+                "source": [
+                    "*:80",
+                    "*:443"
+                ]
+            }
+        },
+        "*:443": {
+            "pass": "routes",
+            "tls": {
+                "certificate": "default"
+            },
+            "forwarded": {
+                "client_ip": "X-Forwarded-For",
+                "protocol": "X-Forwarded-Proto",
+                "recursive": true,
+                "source": [
+                    "*:80",
+                    "*:443"
+                ]
+            }
+        }
+    },
+    "settings": {
+        "http": {
+            "server_version": false
+        }
+    }
+}

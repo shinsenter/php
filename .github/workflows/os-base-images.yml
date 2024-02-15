@@ -1,0 +1,69 @@
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+name: Publish Linux + s6-overlay Docker Images
+
+################################################################################
+################################################################################
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - 5.x
+  #   paths:
+  #     - .github/workflows/*.yml
+  #     - README.md
+  #     - src/**
+  schedule:
+    - cron: "0 23 * * *"
+
+################################################################################
+################################################################################
+
+jobs:
+
+  ##############################################################################
+  # Build base images
+  ##############################################################################
+
+  s6-overlay:
+    uses: ./.github/workflows/build-template.yml
+    with:
+      app_name: "base-s6"
+      php_version: ""
+      os: "alpine"
+      os_version: latest
+    secrets: inherit
+
+  debian-s6:
+    uses: ./.github/workflows/build-template.yml
+    with:
+      app_name: "base-os"
+      php_version: ""
+      os: ""
+      os_version: "latest"
+    secrets: inherit
+
+  alpine-s6:
+    uses: ./.github/workflows/build-template.yml
+    with:
+      app_name: "base-os"
+      php_version: ""
+      os: "alpine"
+      os_version: "latest"
+    secrets: inherit
+
+  ubuntu-s6:
+    uses: ./.github/workflows/build-template.yml
+    with:
+      app_name: "base-os"
+      php_version: ""
+      os: "ubuntu"
+      os_version: "latest"
+    secrets: inherit

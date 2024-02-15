@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+usage() { du -sh / 2>/dev/null; }
+before="$(usage)"
+autorun /etc/cleanup.d/ 2>&1
+echo
+echo "Before cleanup: $before"
+echo "After cleanup:  $(usage)"
