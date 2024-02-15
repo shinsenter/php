@@ -1,0 +1,34 @@
+#!/usr/bin/env sh
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+nginx-conf 'root' "$(app-root)"
+nginx-conf 'user' "$APP_USER $APP_GROUP"
+nginx-conf 'pid'  "${NGINX_PID:-/run/nginx.pid}"
+
+if [ ! -z "$PHP_POST_MAX_SIZE" ]; then
+    echo "client_max_body_size ${PHP_POST_MAX_SIZE};" >/etc/nginx/custom.d/client_max_body_size.conf
+fi
+
+if [ ! -z "$PHP_MAX_EXECUTION_TIME" ] && [ "$PHP_MAX_EXECUTION_TIME" -gt "0" ]; then
+    echo "client_body_timeout ${PHP_MAX_EXECUTION_TIME};" >/etc/nginx/custom.d/client_body_timeout.conf
+    echo "proxy_read_timeout ${PHP_MAX_EXECUTION_TIME};"  >/etc/nginx/custom.d/proxy_read_timeout.conf
+fi
+
+if ! is-true $DISABLE_GREETING && has-cmd nginx; then
+    nginx -v 2>&1
+fi
+
+if is-debug; then
+    nginx-conf 'error_log' "$(log-path) debug"
+    echo "🐞 Nginx is in debug mode 🐞"
+else
+    nginx-conf 'error_log' "$(log-path) error"
+fi
+
+exec nginx -t

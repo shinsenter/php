@@ -1,0 +1,205 @@
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+name: Publish PHP Web Servers & Apps
+
+################################################################################
+################################################################################
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - 5.x
+  #   paths:
+  #     - .github/workflows/*.yml
+  #     - README.md
+  #     - src/**
+  schedule:
+    - cron: "0 0 * * *"
+
+################################################################################
+################################################################################
+
+jobs:
+
+  ##############################################################################
+  # PHP + Web Servers
+  ##############################################################################
+
+  main:
+    strategy:
+      matrix:
+        app:
+          - "with-apache"
+          - "with-nginx"
+        php_version:
+          - "8.3"
+          - "8.2"
+          - "8.1"
+          - "8.0"
+        os:
+          - ""
+          - "alpine"
+    uses: ./.github/workflows/build-template.yml
+    with:
+      app_name: ${{ matrix.app }}
+      php_version: ${{ matrix.php_version }}
+      os: ${{ matrix.os }}
+      os_version: latest
+    secrets: inherit
+
+  ##############################################################################
+  # Older PHP + Web Servers
+  ##############################################################################
+
+  older:
+    strategy:
+      matrix:
+        app:
+          - "with-apache"
+          - "with-nginx"
+        php_version:
+          - "7.4"
+          - "7.3"
+          - "7.2"
+          - "7.1"
+        os:
+          - ""
+          - "alpine"
+    uses: ./.github/workflows/build-template.yml
+    with:
+      app_name: ${{ matrix.app }}
+      php_version: ${{ matrix.php_version }}
+      os: ${{ matrix.os }}
+      os_version: latest
+    secrets: inherit
+
+  ##############################################################################
+  # PHP + Unpopular Web Servers
+  ##############################################################################
+
+  unpopular:
+    strategy:
+      matrix:
+        app:
+          - "with-unit"
+          - "with-f8p"
+        php_version:
+          - "8.3"
+          - "8.2"
+          - "8.1"
+          - "8.0"
+        os:
+          - ""
+          - "alpine"
+    uses: ./.github/workflows/build-template.yml
+    with:
+      app_name: ${{ matrix.app }}
+      php_version: ${{ matrix.php_version }}
+      os: ${{ matrix.os }}
+      os_version: latest
+    secrets: inherit
+
+  ##############################################################################
+  # Older PHP + Unpopular Web Servers
+  ##############################################################################
+
+  unpopular-older:
+    strategy:
+      matrix:
+        app:
+          - "with-unit"
+          - "with-f8p"
+        php_version:
+          - "7.4"
+          - "7.3"
+          - "7.2"
+          - "7.1"
+        os:
+          - ""
+          - "alpine"
+    uses: ./.github/workflows/build-template.yml
+    with:
+      app_name: ${{ matrix.app }}
+      php_version: ${{ matrix.php_version }}
+      os: ${{ matrix.os }}
+      os_version: latest
+    secrets: inherit
+
+  ##############################################################################
+  # Webapps images
+  ##############################################################################
+
+  popular-apps:
+    needs: [main, older]
+    strategy:
+      matrix:
+        app:
+          - "app-cakephp4"
+          - "app-codeigniter4"
+          - "app-drupal"
+          - "app-laravel"
+          - "app-phpmyadmin"
+          - "app-symfony"
+          - "app-wordpress"
+        php_version:
+          - "8.3"
+          - "8.2"
+          - "8.1"
+          - "8.0"
+          - "7.4"
+          - "7.3"
+          - "7.2"
+          - "7.1"
+        os:
+          - ""
+          - "alpine"
+    uses: ./.github/workflows/build-template.yml
+    with:
+      app_name: ${{ matrix.app }}
+      php_version: ${{ matrix.php_version }}
+      os: ${{ matrix.os }}
+      os_version: latest
+    secrets: inherit
+
+  unpopular-apps:
+    needs: [main, older]
+    strategy:
+      matrix:
+        app:
+          - "app-crater"
+          - "app-flarum"
+          - "app-fuelphp"
+          - "app-grav"
+          - "app-hyperf"
+          - "app-kirby"
+          - "app-laminas"
+          - "app-mautic"
+          - "app-slim"
+          - "app-statamic"
+          - "app-yii"
+        php_version:
+          - "8.3"
+          - "8.2"
+          - "8.1"
+          - "8.0"
+          - "7.4"
+          - "7.3"
+          - "7.2"
+          - "7.1"
+        os:
+          - ""
+          - "alpine"
+    uses: ./.github/workflows/build-template.yml
+    with:
+      app_name: ${{ matrix.app }}
+      php_version: ${{ matrix.php_version }}
+      os: ${{ matrix.os }}
+      os_version: latest
+    secrets: inherit

@@ -1,0 +1,41 @@
+#!/usr/bin/env sh
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+# for alpine
+if has-cmd apk; then
+    packages=$(echo "${APK_PACKAGES} $@")
+    if [ ! -z "$packages" ]; then
+        rm -rf /var/cache/apk && mkdir /var/cache/apk
+        apk update
+        for pkg in $packages; do
+            echo
+            if [ "$pkg" = "upgrade" ]; then
+                apk upgrade
+            else
+                echo "Installing $pkg" && apk add $pkg
+            fi
+        done
+    fi
+fi
+
+# for debian
+if has-cmd apt-get; then
+    packages=$(echo "${APT_PACKAGES} $@")
+    if [ ! -z "$packages" ]; then
+        apt-get update -yq
+        for pkg in $packages; do
+            echo
+            if [ "$pkg" = "upgrade" ]; then
+                apt-get upgrade -yq
+            else
+                echo "Installing $pkg" && apt-get install -yq --no-install-recommends --no-install-suggests $pkg
+            fi
+        done
+    fi
+fi

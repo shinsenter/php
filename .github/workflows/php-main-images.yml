@@ -1,0 +1,81 @@
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+name: Publish PHP Docker Images
+
+################################################################################
+################################################################################
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - 5.x
+  #   paths:
+  #     - .github/workflows/*.yml
+  #     - README.md
+  #     - src/**
+  schedule:
+    - cron: "0 4 * * *"
+
+################################################################################
+################################################################################
+
+jobs:
+
+  ##############################################################################
+  # PHP images
+  ##############################################################################
+
+  main:
+    strategy:
+      matrix:
+        app:
+          - "cli"
+          - "fpm"
+        php_version:
+          - "8.3"
+          - "8.2"
+          - "8.1"
+          - "8.0"
+        os:
+          - ""
+          - "alpine"
+    uses: ./.github/workflows/build-template.yml
+    with:
+      app_name: ${{ matrix.app }}
+      php_version: ${{ matrix.php_version }}
+      os: ${{ matrix.os }}
+      os_version: latest
+    secrets: inherit
+
+  ##############################################################################
+  # Older PHP images
+  ##############################################################################
+
+  older:
+    strategy:
+      matrix:
+        app:
+          - "cli"
+          - "fpm"
+        php_version:
+          - "7.4"
+          - "7.3"
+          - "7.2"
+          - "7.1"
+        os:
+          - ""
+          - "alpine"
+    uses: ./.github/workflows/build-template.yml
+    with:
+      app_name: ${{ matrix.app }}
+      php_version: ${{ matrix.php_version }}
+      os: ${{ matrix.os }}
+      os_version: latest
+    secrets: inherit

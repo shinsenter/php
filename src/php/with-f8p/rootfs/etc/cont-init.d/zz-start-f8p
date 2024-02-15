@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+web-mkdir /config/caddy /data/caddy /etc/caddy
+
+if ! is-true $DISABLE_GREETING && has-cmd frankenphp; then
+    frankenphp version 2>&1
+fi
+
+if is-debug; then
+    web-do touch /etc/caddy/envvars
+    web-do echo "export CADDY_GLOBAL_OPTIONS=debug" >>/etc/caddy/envvars
+    echo "🐞 FrankenPHP is in debug mode 🐞"
+fi

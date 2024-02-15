@@ -1,0 +1,94 @@
+#!/usr/bin/env sh
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+APPPATH="$(app-path)"
+APPROOT="$(app-root)"
+
+# copy from source
+if ! is-true $DISABLE_AUTORUN_COPYING_SOURCE && [ -d /source/ ]; then
+    mv {/source/*,/source/.*} $APPPATH/ 2>&1 >/dev/null
+    web-chown "Source code copied to $APPPATH."
+fi
+
+# create Composer project
+if ! is-true $DISABLE_AUTORUN_CREATING_PROJECT && [ ! -z "$INITIAL_PROJECT" ]; then
+    web-mkdir "$APPPATH"
+    if [ -z "$(ls -A "$APPPATH")" ] && has-cmd composer; then
+        set -e
+        cd "$APPPATH"
+        composer create-project $COMPOSER_CREATE_OPTIONS \
+            -n --no-secure-http --no-install --no-scripts \
+            -- "$INITIAL_PROJECT" "$APPPATH"
+
+        config="$APPPATH/composer.json"
+
+        # intall git if needed
+        if grep -q -F '"git"' $config || is-true $COMPOSER_REQUIRES_GIT; then
+            pkg-add git
+            git config --global --add safe.directory "$APPPATH"
+        fi
+
+        # intall npm if needed
+        if grep -q -F 'npm ' $config || is-true $COMPOSER_REQUIRES_NPM; then
+            pkg-add npm
+        fi
+
+        composer config -n --no-plugins "allow-plugins.*/*" true
+        composer update $COMPOSER_UPDATE_OPTIONS -n -W
+
+        if grep -q -F '"post-root-package-install"' $config; then
+            composer run post-root-package-install
+        fi
+
+        if grep -q -F '"post-create-project-cmd"' $config; then
+            composer run post-create-project-cmd
+        fi
+
+        composer config -n --unset "allow-plugins.*/*"
+        web-chown "Project $INITIAL_PROJECT created in $APPPATH."
+    else
+        web-debug "Skip creating project $INITIAL_PROJECT because $APPPATH is not empty."
+    fi
+fi
+
+# run composer install when vendor directory or ClassLoader.php is missing
+if ! is-true $DISABLE_AUTORUN_COMPOSER_INSTALL && [ -f "$APPPATH/composer.json" ] && has-cmd composer; then
+    cd "$APPPATH"
+    vendor_dir=$(composer config vendor-dir)
+    if [ ! -d "$APPPATH/$vendor_dir" ] || [ ! -f "$vendor_dir/composer/ClassLoader.php" ]; then
+        composer install $COMPOSER_INSTALL_OPTIONS -n
+        web-chown "Composer packages were installed in $APPPATH."
+    fi
+fi
+
+web-mkdir "$APPROOT"
+
+# create index.php when it doesn't exist
+if ! is-true $DISABLE_AUTORUN_GENERATING_INDEX; then
+    if [ -z "$(ls -A "$APPROOT")" ]; then
+        cat <<PHP >"$APPROOT/index.php"
+<?php
+// generated at $(date)
+if ((bool) trim((string) shell_exec('is-debug && echo 1 || echo 0'))) {
+    phpinfo();
+} else {
+    echo 'It works!';
+}
+PHP
+        web-chown fix "$APPROOT/index.php" 2>&1 >/dev/null
+    else
+        web-debug "Skip creating index.php because $APPROOT is not empty."
+    fi
+fi
+
+# fix .htaccess to allow uri path after index.php
+if [ -f "$APPROOT/.htaccess" ]; then
+    sed -i 's|index\.php/|index.php?/|g' "$APPROOT/.htaccess" 2>&1 >/dev/null
+    web-chown fix "$APPROOT/.htaccess" 2>&1 >/dev/null
+fi

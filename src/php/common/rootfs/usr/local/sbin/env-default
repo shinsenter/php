@@ -1,0 +1,43 @@
+#!/usr/bin/env sh
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+conf_path="${ENV:=/etc/docker-envvars}"
+
+if [ ! -f $conf_path ]; then
+    mkdir -p "$(dirname $conf_path)"
+    echo '#!/bin/sh
+export PATH=$(echo $PATH | sed "s/\/usr\/local\/aliases://")
+export DOCKER_ENVVARS_LOADED=$0
+if [ -d "$(app-path)" ]; then cd "$(app-path)"; fi
+
+' >$conf_path
+    chmod +x $conf_path
+fi
+
+if [ $# -eq 0 ]; then
+    source $conf_path && env | sort -n
+    exit
+fi
+
+line="$@"
+
+if [ "${line:0:1}" = "#" ]; then
+    echo -e "\n${line}\n# ------------------------------------------------------------ #" >>$conf_path
+    exit
+fi
+
+if [ "${line:0:6}" = "alias " ]; then
+    echo "$line" >>$conf_path
+    exit
+fi
+
+name="$1"; shift
+set -- "$(echo "$@" | sed -e 's/\([\\"]\)/\\\1/g')"
+sed -i "/$name=/d" $conf_path
+echo "if [ -z \${${name}+x} ]; then export $name=\"$@\"; fi" >>$conf_path

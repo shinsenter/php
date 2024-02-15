@@ -1,0 +1,67 @@
+#!/usr/bin/env sh
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+INSTALL="0"
+CERT="domain.crt"
+KEY="domain.key"
+DAYS=365
+LENGTH=4096
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+    -l | -length)
+        shift
+        LENGTH="$1"
+        ;;
+    -c | -cert-file)
+        shift
+        CERT="$1"
+        ;;
+    -k | -key-file)
+        shift
+        KEY="$1"
+        ;;
+    -d | -days)
+        shift
+        DAYS="$1"
+        ;;
+    -i | -install)
+        INSTALL="1"
+        ;;
+    *)
+        DOMAINS="${DOMAINS}${DOMAINS:+,}$1"
+        ;;
+    esac
+    shift
+done
+
+if [ -z "$DOMAINS" ]; then
+    echo "Usage: ${0##*/} example.com www.example.com [-c domain.crt] [-k domain.key] [-d 365] [-l 4096]" >&2
+    exit 1
+fi
+
+mkdir -p "$(dirname $CERT)" "$(dirname $KEY)"
+rm -rf $CERT $KEY
+
+echo "Generating self-signed CA for $DOMAINS"
+openssl dhparam -dsaparam -out "$(dirname $CERT)"/dhparam.pem $LENGTH
+openssl req -newkey rsa:$LENGTH \
+    -nodes -keyout $KEY -out $CERT \
+    -x509 -days $DAYS -subj "/CN=${DOMAINS}"
+
+if [ "$INSTALL" = "1" ]; then
+    if [ -f /etc/ssl/certs/ca-certificates.crt ]; then
+        ln -nsf $(realpath $CERT) /etc/ssl/certs/
+    elif [ -d /usr/local/share/ca-certificates ]; then
+        ln -nsf $(realpath $CERT) /usr/local/share/ca-certificates/
+    fi
+    if has-cmd update-ca-certificates; then
+        update-ca-certificates
+    fi
+fi

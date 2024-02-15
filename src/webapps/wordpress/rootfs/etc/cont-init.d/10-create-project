@@ -1,0 +1,44 @@
+#!/usr/bin/env sh
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+APPPATH="$(app-path)"
+APPROOT="$(app-root)"
+
+# create wordpress project
+if ! is-true $DISABLE_AUTORUN_CREATING_PROJECT; then
+    web-mkdir "$APPPATH"
+    if [ -z "$(ls -A "$APPPATH")" ]; then
+        cd "$APPPATH"
+
+        set -e
+        wp core download \
+            --locale="${WORDPRESS_LOCALE:-en_US}" \
+            --force
+
+        web-chown "Wordpress core downloaded in $APPPATH."
+    else
+        echo "Skip creating project because $APPPATH is not empty."
+    fi
+fi
+
+if [ -f /etc/wp-config-docker.php ] && [ ! -f "$APPPATH/wp-config.php" ] ; then
+    cp -p /etc/wp-config-docker.php "$APPPATH/wp-config.php"
+    web-chown fix "$APPPATH/wp-config.php" 2>&1 >/dev/null
+elif [ -f /etc/setup-wordpress.php ]; then
+    php /etc/setup-wordpress.php
+    mv  /etc/setup-wordpress.php /etc/setup-wordpress.php.disabled
+fi
+
+web-mkdir "$APPROOT"
+
+# fix .htaccess
+if [ -f "$APPROOT/.htaccess" ]; then
+    sed -i 's|index\.php/|index.php?/|g' "$APPROOT/.htaccess"
+    web-chown fix "$APPROOT/.htaccess" 2>&1 >/dev/null
+fi

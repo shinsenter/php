@@ -1,0 +1,50 @@
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+version: '3'
+services:
+
+  ##############################################################################
+
+  common:
+    platform: ${BUILD_PLATFORM:-linux/arm64/v8}
+    cap_add:
+      - SYS_ADMIN
+      - SYS_NICE
+      - SYS_PTRACE
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
+    environment:
+      - DEBUG=${DEBUG:-false}
+      - APP_PATH=/shin/web
+      - APP_GID=${APP_GID:-999}
+      - APP_UID=${APP_UID:-999}
+      - APP_GROUP=shincompany
+      - APP_USER=shin
+      - ENABLE_CRONTAB=1
+      - TZ=Asia/Tokyo
+    working_dir: /shin/web
+
+  common-php:
+    extends: common
+    build:
+      args:
+        - S6_VERSION=${S6_VERSION}
+        - PHP_VERSION=${PHP_VERSION:-8.3}
+        - SUFFIX=${SUFFIX:-}
+    environment:
+      - REDIS_HOST=redis
+      - PHP_DISPLAY_ERRORS=1
+      - PHP_DISPLAY_STARTUP_ERRORS=1
+      - PHP_ERROR_REPORTING=1
+      - PHP_ZEND_ASSERTIONS=1
+
+################################################################################

@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+if is-debug; then echo -e "$@" >&2; fi

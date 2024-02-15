@@ -1,0 +1,50 @@
+#!/usr/bin/env sh
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+APP_USER="${APP_USER:-root}"
+CRONTAB="/var/spool/cron/crontabs/$APP_USER"
+CRONTAB_DIR="${CRONTAB_DIR:-/etc/crontab.d}"
+
+if ! is-true $ENABLE_CRONTAB; then
+    rm -f $CRONTAB
+    exit 0
+fi
+
+set -e
+mkdir -p "$(dirname $CRONTAB)" $CRONTAB_DIR
+
+if is-debug; then
+    echo '* * * * * echo "DEBUG: Crontab is running as $(whoami)." | tee /tmp/cron-debug.txt' >$CRONTAB_DIR/debug
+fi
+
+cat <<CRONTAB >$CRONTAB
+CRON_TZ=${CRONTAB_TZ:-${TZ:-UTC}}
+HOME=${CRONTAB_HOME:-$(app-path)}
+PATH=${CRONTAB_PATH:-$PATH}
+SHELL=${CRONTAB_SHELL:-/bin/sh}
+MAILTO="${CRONTAB_MAILTO:-$APP_ADMIN}"
+
+# Job definition:
+# .---------------- minute (0 - 59)
+# |  .------------- hour (0 - 23)
+# |  |  .---------- day of month (1 - 31)
+# |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...
+# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
+# |  |  |  |  |
+# *  *  *  *  *  command to be executed
+$(if [ -d "$CRONTAB_DIR" ]; then
+    for script in $(find "$CRONTAB_DIR" -type f | sort -n); do
+        echo -e "\n# $script"; cat "$script"
+    done
+fi)
+
+CRONTAB
+
+chmod 0600 $CRONTAB
+echo "Cron is running as $APP_USER. Config: $CRONTAB"

@@ -1,0 +1,65 @@
+#!/usr/bin/env sh
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+# Generate S6 service files
+# See: https://github.com/just-containers/s6-overlay#writing-a-service-script
+
+s6="/etc/s6-overlay/s6-rc.d"
+set -e
+
+name="$1"
+shift
+
+if [ -z "$name" ]; then
+    echo "Usage: ${0##*/} <service-name> [longrun|oneshot|depends|finish|down] [exec script]" >&2
+    exit 1
+fi
+
+################################################################################
+
+create() {
+    local path="$1"
+    local dir="$(dirname $path)"
+
+    mkdir -p $dir && chmod 0755 $dir
+    touch $path   && chmod ugo+x $path
+
+    shift
+    if [ -f $path ] && [ ! -z "$@" ]; then echo "$@" >| $path; fi
+}
+
+################################################################################
+
+# get service type
+type="${1:oneshot}"
+shift
+
+if [ "$type" = "depends" ]; then
+    create "${s6}/${name}/dependencies.d/$1"
+    exit $?
+fi
+
+# get script contents
+if [ -f "$@" ]; then set -- "$(cat $@)"; fi
+
+if [ "$type" = "down" ] || [ "$type" = "finish" ]; then
+    create "${s6}/${name}/${type}" "$@"
+    exit $?
+fi
+
+################################################################################
+
+if [ "$type" = "oneshot" ]; then
+    create "${s6}/${name}/up" "exec ${s6}/${name}/run"
+fi
+
+create "${s6}/${name}/run" "$@"
+create "${s6}/${name}/type" "$type"
+create "${s6}/${name}/dependencies.d/base"
+create "${s6}/user/contents.d/${name}"

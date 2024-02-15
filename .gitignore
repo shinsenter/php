@@ -1,0 +1,11 @@
+!.env.example
+.env
+.env.*
+.secrets
+**/.DS_Store
+**/.git
+**/*.squashed
+**/*.working
+**/Dockerfile
+**/meta.dockerfile
+myproject

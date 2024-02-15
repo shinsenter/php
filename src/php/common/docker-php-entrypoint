@@ -1,0 +1,47 @@
+#!/usr/bin/env sh
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+export TZ="${TZ:=UTC}"
+
+# setuid bit
+chmod 4755 /usr/local/bin/web-*
+
+# activity logging
+touch /var/log/startup.log
+echo "$(date): $0 $@" >>/var/log/startup.log
+
+# set timezone
+if [ ! -z "$TZ" ] && [ -e /usr/share/zoneinfo/$TZ ]; then
+    ln -nsf /usr/share/zoneinfo/$TZ /etc/localtime
+fi
+
+# export env variables for PHP
+if has-cmd php-envvars; then
+    php-envvars export_envvars 2>&1
+fi
+
+# run scripts in the /etc/cont-init.d directory
+if ! has-cmd /command/s6-env && [ -d /etc/cont-init.d ]; then
+    autorun /etc/cont-init.d/ 2>&1
+fi
+
+# fallback for docker-php-entrypoint
+if [ -x "/init" ]; then
+    set -- /init "$@"
+fi
+
+# fallback empty entrypoint
+if [ "$#" -eq 0 ]; then
+    set -- /bin/sh
+fi
+
+# move to application directory
+if [ -d "$(app-path)" ]; then cd "$(app-path)"; fi
+
+exec with-env "$@"

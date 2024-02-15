@@ -1,0 +1,44 @@
+#!/usr/bin/env sh
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+apache-conf 'DocumentRoot' "$(app-root)"
+apache-conf 'PidFile'      "${APACHE_PID:-/run/apache2.pid}"
+
+if [ ! -z "$PHP_MAX_EXECUTION_TIME" ] && [ "$PHP_MAX_EXECUTION_TIME" -gt "0" ]; then
+    echo "
+Timeout ${PHP_MAX_EXECUTION_TIME}
+<IfModule proxy_module>
+    ProxyTimeout ${PHP_MAX_EXECUTION_TIME}
+</IfModule>
+" >/etc/apache2/custom.d/timeout.conf
+fi
+
+if ! is-true $DISABLE_GREETING && has-cmd apache2; then
+    apache2 -v 2>&1
+fi
+
+if is-debug; then
+    apache-conf 'LogLevel' 'debug'
+    echo "🐞 Apache is in debug mode 🐞"
+    apache2 -S
+else
+    apache-conf 'LogLevel' '${APACHE_LOG_LEVEL}'
+fi
+
+if [ -f /etc/apache2/envvars ]; then
+    source /etc/apache2/envvars
+fi
+
+if is-true $ENABLE_TUNING_MPM; then
+    apache-mpm
+fi
+
+export APP_PATH="$(app-path)"
+export APP_ROOT="$(app-root)"
+exec apache2 -t

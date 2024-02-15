@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+echo "${APP_LOG_PATH:-/proc/self/fd/2}"

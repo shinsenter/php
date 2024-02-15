@@ -1,0 +1,10 @@
+.env
+.env.*
+*.dockerfile
+*.squashed
+**/.DS_Store
+**/.git
+**/*.dockerfile
+**/*.squashed
+**/*.working
+**/Dockerfile
