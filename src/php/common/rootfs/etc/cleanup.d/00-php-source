@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+rm -rf /usr/src/php* || true
+
+if is-true $CLEANUP_PHPDBG && has-cmd phpdbg; then
+    echo 'Removing phpdbg binary'
+    rm -rf "$(command -v phpdbg)" || true
+fi
+
+if [ -d "$PHP_EXTENSION_DIR" ]; then
+    chmod -x "$PHP_EXTENSION_DIR"/*.so
+
+    if has-cmd strip; then
+        strip --strip-all --strip-debug "$PHP_EXTENSION_DIR"/*.so
+    fi
+fi

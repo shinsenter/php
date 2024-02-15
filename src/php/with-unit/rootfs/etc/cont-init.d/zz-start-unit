@@ -1,0 +1,66 @@
+#!/usr/bin/env sh
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+UNIT_CONTROL_SOCKET="${UNIT_CONTROL_SOCKET:-/run/control.unit.sock}"
+
+set -e
+
+if is-debug && has-cmd unitd-debug; then
+    unitd="$(command -v unitd-debug)"
+else
+    unitd="$(command -v unitd)"
+fi
+
+if ! is-true $DISABLE_GREETING && [ -x $unitd ]; then
+    $unitd --version 2>&1 | grep version
+fi
+
+configtest() {
+    curl --retry 2 -sL -X GET --unix-socket $UNIT_CONTROL_SOCKET http://localhost/ || true
+}
+
+initial() {
+    web-mkdir /var/lib/unit
+
+    if [ -e /var/lib/unit/conf.json ]; then
+        return 0
+    fi
+
+    # start daemon
+    $unitd --control unix:$UNIT_CONTROL_SOCKET
+
+    # wait for socket
+    while [ ! -e "$UNIT_CONTROL_SOCKET" ]; do sleep 0.5; done
+    configtest >&2 >/dev/null
+
+    # SSL bundle
+    cat /etc/ssl/site/*.crt /etc/ssl/site/*.key >/etc/ssl/site/localhost_ssl.pem
+    unit-conf /etc/ssl/site/localhost_ssl.pem "certificates/default"
+
+    # enabled sites
+    for json in $(find /etc/unit/sites-enabled -type f -name "*.json" | sort -n); do
+        unit-conf $json
+    done
+
+    # test config again
+    if is-debug; then
+        configtest >&2
+    fi
+
+    # stop Unit daemon after initial configuration
+    kill -TERM $(cat ${UNIT_CONTROL_PID:-/run/unit.pid})
+    while [ -e "$UNIT_CONTROL_SOCKET" ]; do sleep 0.5; done
+}
+
+if is-debug; then
+    echo "� Unit is in debug mode �"
+    initial || true
+else
+    initial 2>&1 >/dev/null || true
+fi
