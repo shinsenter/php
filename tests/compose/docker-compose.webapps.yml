@@ -1,0 +1,365 @@
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+version: '3'
+services:
+
+  ##############################################################################
+
+  database:
+    container_name: database
+    image: mariadb:latest
+    environment:
+      TZ: UTC
+      MYSQL_ROOT_PASSWORD: localhost
+      MYSQL_DATABASE: test
+
+  redis:
+    container_name: redis
+    image: redis:latest
+
+  ##############################################################################
+
+  phpinfo:
+    image: shinsenter/phpfpm-nginx:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common
+    volumes:
+      - ./data/phpinfo:/shin/web
+    ports:
+      - 6100:80
+      # - 6200:443
+
+  ##############################################################################
+
+  cakephp4:
+    image: shinsenter/cakephp4:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../../src/webapps/cakephp4
+      dockerfile: cakephp4.dockerfile
+      args:
+        - PHP_VARIANT=${SUFFIX}
+    volumes:
+      - ./data/cakephp4:/shin/web
+    ports:
+      - 6101:80
+      # - 6201:443
+
+################################################################################
+
+  codeigniter4:
+    image: shinsenter/codeigniter4:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../../src/webapps/codeigniter4
+      dockerfile: codeigniter4.dockerfile
+      args:
+        - PHP_VARIANT=${SUFFIX}
+    volumes:
+      - ./data/codeigniter4:/shin/web
+    ports:
+      - 6102:80
+      # - 6202:443
+
+  ##############################################################################
+
+  crater:
+    image: shinsenter/crater:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../../src/webapps/crater
+      dockerfile: crater.dockerfile
+      args:
+        - PHP_VARIANT=${SUFFIX}
+    volumes:
+      - ./data/crater:/shin/web
+    ports:
+      - 6103:80
+      # - 6203:443
+
+################################################################################
+
+  flarum:
+    image: shinsenter/flarum:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../../src/webapps/flarum
+      dockerfile: flarum.dockerfile
+      args:
+        - PHP_VARIANT=${SUFFIX}
+    volumes:
+      - ./data/flarum:/shin/web
+    ports:
+      - 6104:80
+      # - 6204:443
+
+################################################################################
+
+  fuelphp:
+    image: shinsenter/fuelphp:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../../src/webapps/fuelphp
+      dockerfile: fuelphp.dockerfile
+      args:
+        - PHP_VARIANT=${SUFFIX}
+    volumes:
+      - ./data/fuelphp:/shin/web
+    ports:
+      - 6105:80
+      # - 6205:443
+
+################################################################################
+
+  grav:
+    image: shinsenter/grav:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../../src/webapps/grav
+      dockerfile: grav.dockerfile
+      args:
+        - PHP_VARIANT=${SUFFIX}
+    volumes:
+      - ./data/grav:/shin/web
+    ports:
+      - 6106:80
+      # - 6206:443
+
+################################################################################
+
+  hyperf:
+    image: shinsenter/hyperf:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../../src/webapps/hyperf
+      dockerfile: hyperf.dockerfile
+      args:
+        - PHP_VARIANT=${SUFFIX}
+    volumes:
+      - ./data/hyperf:/shin/web
+    ports:
+      - 6107:80
+      # - 6207:443
+
+  ##############################################################################
+
+  kirby:
+    image: shinsenter/kirby:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../../src/webapps/kirby
+      dockerfile: kirby.dockerfile
+      args:
+        - PHP_VARIANT=${SUFFIX}
+    volumes:
+      - ./data/kirby:/shin/web
+    ports:
+      - 6108:80
+      # - 6208:443
+
+################################################################################
+
+  laminas:
+    image: shinsenter/laminas:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../../src/webapps/laminas
+      dockerfile: laminas.dockerfile
+      args:
+        - PHP_VARIANT=${SUFFIX}
+    volumes:
+      - ./data/laminas:/shin/web
+    ports:
+      - 6109:80
+      # - 6209:443
+
+  ##############################################################################
+
+  laravel:
+    image: shinsenter/laravel:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../../src/webapps/laravel
+      dockerfile: laravel.dockerfile
+      args:
+        - PHP_VARIANT=${SUFFIX}
+    volumes:
+      - ./data/laravel:/shin/web
+    ports:
+      - 6110:80
+      # - 6210:443
+
+  ##############################################################################
+
+  mautic:
+    image: shinsenter/mautic:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../../src/webapps/mautic
+      dockerfile: mautic.dockerfile
+      args:
+        - PHP_VARIANT=${SUFFIX}
+    volumes:
+      - ./data/mautic:/shin/web
+    ports:
+      - 6111:80
+      # - 6211:443
+    environment:
+      - DB_HOST=database
+      - DB_PORT=3306
+      - DB_NAME=test
+      - DB_USER=root
+      - DB_PASSWD=localhost
+      - MAUTIC_ADMIN_USERNAME=admin
+      - MAUTIC_ADMIN_PASSWORD=mautic
+
+  ##############################################################################
+
+  phpmyadmin:
+    image: shinsenter/phpmyadmin:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../../src/webapps/phpmyadmin
+      dockerfile: phpmyadmin.dockerfile
+      args:
+        - PHP_VARIANT=${SUFFIX}
+    volumes:
+      - ./data/phpmyadmin:/shin/web
+    ports:
+      - 6112:80
+      # - 6212:443
+    environment:
+      - PMA_HOST=database
+      - PMA_PASSWORD=localhost
+      - PMA_USER=root
+
+  ##############################################################################
+
+  slim:
+    image: shinsenter/slim:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../../src/webapps/slim
+      dockerfile: slim.dockerfile
+      args:
+        - PHP_VARIANT=${SUFFIX}
+    volumes:
+      - ./data/slim:/shin/web
+    ports:
+      - 6113:80
+      # - 6213:443
+
+  ##############################################################################
+
+  statamic:
+    image: shinsenter/statamic:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../../src/webapps/statamic
+      dockerfile: statamic.dockerfile
+      args:
+        - PHP_VARIANT=${SUFFIX}
+    volumes:
+      - ./data/statamic:/shin/web
+    ports:
+      - 6114:80
+      # - 6214:443
+
+  ##############################################################################
+
+  symfony:
+    image: shinsenter/symfony:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../../src/webapps/symfony
+      dockerfile: symfony.dockerfile
+      args:
+        - PHP_VARIANT=${SUFFIX}
+    volumes:
+      - ./data/symfony:/shin/web
+    ports:
+      - 6115:80
+      # - 6215:443
+    environment:
+      - SYMFONY_INSTALL_DEVKIT=true
+
+################################################################################
+
+  wordpress:
+    image: shinsenter/wordpress:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../../src/webapps/wordpress
+      dockerfile: wordpress.dockerfile
+      args:
+        - PHP_VARIANT=${SUFFIX}
+    volumes:
+      - ./data/wordpress:/shin/web
+    ports:
+      - 6116:80
+      # - 6216:443
+    environment:
+      - WORDPRESS_WP_DEBUG=true
+      - WORDPRESS_DB_HOST=database:3306
+      - WORDPRESS_DB_USER=root
+      - WORDPRESS_DB_PASSWORD=localhost
+      - WORDPRESS_DB_NAME=test
+
+  ##############################################################################
+
+  yii:
+    image: shinsenter/yii:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../../src/webapps/yii
+      dockerfile: yii.dockerfile
+      args:
+        - PHP_VARIANT=${SUFFIX}
+    volumes:
+      - ./data/yii:/shin/web
+    ports:
+      - 6117:80
+      # - 6217:443
+
+  ##############################################################################

@@ -1,0 +1,383 @@
+#!/usr/bin/env sh
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+if [ -d "$PHP_INI_DIR" ]; then
+    find "$PHP_INI_DIR"* -type f -name *generated-settings* -delete
+fi
+
+with-env php -d variables_order=EGPCS -- "$@" <<'DockerPHP'
+<?php
+
+define('DEBUG_MODE', (bool) trim((string) shell_exec('is-debug && echo 1 || echo 0')));
+
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+################################################################################
+
+function dd()
+{
+    $data = func_get_args();
+
+    if (1 == count($data)) {
+        $data = array_pop($data);
+    }
+
+    var_export($data);
+    unset($data);
+
+    exit(0);
+}
+
+function save($path, $content = '')
+{
+    @mkdir(dirname($path), 0755, true);
+    @file_put_contents($path, $content);
+
+    if (DEBUG_MODE) {
+        echo "$path\n$content\n\n";
+    }
+}
+
+function run($command)
+{
+    return passthru($command);
+}
+
+################################################################################
+
+/**
+ * @class  DockerPHP
+ * @author Mai Nhut Tan <shin@shin.company>
+ */
+final class DockerPHP
+{
+    public const NOT_SET_VALUE = ''; // for php.ini and fpm.conf
+    public const NULL_VALUES   = ['no value', 'none', 'null', 'undefined', 'unknown val', 'unknown value'];
+    public const TRUTHY_VALUES = ['yes', 'true', 'on'];
+    public const FALSY_VALUES  = ['no', 'false', 'off'];
+    public const PHP_DEFAULTS  = [
+        'daemonize' => 'no',
+        'clear_env' => 'no',
+        'log_buffering' => 'yes',
+        'fastcgi.logging' => 'no',
+        'process.dumpable' => 'no',
+        'catch_workers_output' => 'yes',
+        'decorate_workers_output' => 'no',
+        'request_terminate_timeout_track_finished' => 'no',
+    ];
+
+    protected $php_conf_path;
+    protected $fpm_conf_path;
+    protected $php_settings;
+    protected $fpm_settings;
+    protected $all_env_vars;
+
+    public function __construct(
+        $php_conf_file = 'custom.ini',
+        $fpm_conf_file = 'custom.conf',
+        $prefix = null
+    ) {
+        if (!empty($_ENV['PHP_INI_DIR'])) {
+            $this->php_conf_path = "{$_ENV['PHP_INI_DIR']}/conf.d/$php_conf_file";
+            $this->fpm_conf_path = "{$_ENV['PHP_INI_DIR']}-fpm.d/$fpm_conf_file";
+        } else {
+            $this->php_conf_path = "/etc/php/conf.d/$php_conf_file";
+            $this->fpm_conf_path = "/etc/php/php-fpm.d/$fpm_conf_file";
+        }
+
+        $this->build_env_vars();
+    }
+
+    public function __set($key, $val)
+    {
+        $env_key = $this->env_key($key);
+
+        if (array_key_exists($env_key, $_ENV)) {
+            $val = $this->clean_val($_ENV[$env_key]);
+        }
+
+        $this->all_env_vars[$env_key] = isset($val) ? $this->env_val($val) : self::NOT_SET_VALUE;
+    }
+
+    public function __get($env_key)
+    {
+        if ($this->__isset($env_key)) {
+            return (string) $this->all_env_vars[$env_key];
+        }
+
+        return '';
+    }
+
+    public function __isset($env_key)
+    {
+        return array_key_exists($env_key, $this->all_env_vars);
+    }
+
+    public function override_envvars()
+    {
+        $this->export_envvars(true);
+    }
+
+    public function export_envvars($override = false)
+    {
+        run("env-default '# Environment variables for PHP'");
+
+        foreach ($this->all_env_vars as $env_key => $env_val) {
+            if (!$override && isset($_ENV[$env_key])) {
+                continue;
+            }
+
+            run("env-default '$env_key' '$env_val'");
+        }
+
+        if (DEBUG_MODE) {
+            $this->list();
+        }
+    }
+
+    public function export_dynamic_conf($use_envvars = false)
+    {
+        $this->export_conf(true);
+    }
+
+    public function export_conf($use_envvars = false)
+    {
+        $date     = '; Generated at '.date('Y-m-d H:i:s') . "\n\n";
+        $defaults = self::PHP_DEFAULTS;
+
+        $php_conf = $this->build_conf($this->php_settings, $defaults, $use_envvars);
+
+        if (!empty($php_conf)) {
+            $php_conf = implode("\n", $php_conf);
+            save($this->php_conf_path, "[PHP]\n{$php_conf}\n{$date}");
+            unset($php_conf);
+        }
+
+        $fpm_conf = [];
+
+        foreach ($this->fpm_settings as $scope => $settings) {
+            if ($use_envvars && 'www' == $scope) {
+                $fpm_conf[] = '[${PHP_POOL_NAME}]';
+            } else {
+                $fpm_conf[] = "[$scope]";
+            }
+
+            $fpm_conf = array_merge($fpm_conf, $this->build_conf($settings, $defaults, $use_envvars));
+        }
+
+        if (!empty($fpm_conf)) {
+            $fpm_conf = implode("\n", $fpm_conf);
+            save($this->fpm_conf_path, "{$fpm_conf}\n{$date}");
+            unset($fpm_conf);
+        }
+
+        if (DEBUG_MODE) {
+            echo implode("\n", [
+                'PHP config exported:',
+                '  '.$this->php_conf_path,
+                '  '.$this->fpm_conf_path,
+            ]).PHP_EOL;
+        }
+    }
+
+    public function list()
+    {
+        run('env-default | grep PHP_');
+    }
+
+    public function dump()
+    {
+        dd([
+            'php_conf_path' => $this->php_conf_path,
+            'fpm_conf_path' => $this->fpm_conf_path,
+            'php_settings'  => $this->php_settings,
+            'fpm_settings'  => $this->fpm_settings,
+            'all_env_vars'  => $this->all_env_vars,
+        ]);
+    }
+
+    protected function get_fpm_ini()
+    {
+        exec(
+            "$(command -v php-fpm) -n -d log_level=notice -tt 2>&1 | sed -e 's#^.*\?NOTICE:[ \t]*##' | uniq | grep '[=\[]'",
+            $lines
+        );
+
+        $outputs = [];
+        $scope   = 'global';
+
+        foreach ($lines as $line) {
+            if (preg_match("/^\[(.+)\]/", $line, $matches)) {
+                $scope = $matches[1];
+                continue;
+            }
+
+            if (false !== strpos($line, ' = ')) {
+                $parts = explode(' = ', ltrim($line), 2);
+                $key   = $this->clean_key($parts[0]);
+
+                if (empty($key)) {
+                    continue;
+                }
+
+                if (!isset($outputs[$scope])) {
+                    $outputs[$scope] = [];
+                }
+
+                $outputs[$scope][$key] = $this->clean_val($parts[1], $key);
+            }
+        }
+
+        foreach ($outputs as &$settings) {
+            ksort($settings);
+        }
+
+        return $outputs;
+    }
+
+    protected function get_php_ini()
+    {
+        $settings = ini_get_all(null, false);
+        $outputs  = [];
+
+        foreach ($settings as $key => $val) {
+            if (empty($key)) {
+                continue;
+            }
+
+            $outputs[$key] = $this->clean_val($val, $key);
+        }
+
+        ksort($outputs);
+
+        return $outputs;
+    }
+
+    protected function clean_key($key)
+    {
+        return trim((string) $key);
+    }
+
+    protected function clean_val($val, $key = null)
+    {
+        if (!empty($key) && array_key_exists($key, self::PHP_DEFAULTS)) {
+            $val = self::PHP_DEFAULTS[$key];
+        }
+
+        if (is_string($val)) {
+            $low = strtolower(trim((string) $val));
+        } else {
+            $low = $val;
+        }
+
+        if (is_null($val) || in_array($low, self::NULL_VALUES, true)) {
+            return null;
+        }
+
+        if (in_array($low, self::TRUTHY_VALUES, true)) {
+            return 'yes';
+        }
+
+        if (in_array($low, self::FALSY_VALUES, true)) {
+            return 'no';
+        }
+
+        return $val;
+    }
+
+    protected function env_key($key)
+    {
+        return 'PHP_' . trim(strtoupper(preg_replace('/[^A-Za-z0-9]+/', '_', (string) $key)), '_');
+    }
+
+    protected function env_val($val)
+    {
+        return addcslashes((string) $val, "'");
+    }
+
+    protected function build_env_vars()
+    {
+        $this->php_settings = $this->get_php_ini();
+        $this->fpm_settings = $this->get_fpm_ini();
+        $this->all_env_vars = [];
+
+        foreach ($this->php_settings as $key => $val) {
+            $this->$key = $val;
+        }
+
+        foreach ($this->fpm_settings as $scope => $settings) {
+            foreach ($settings as $key => $val) {
+                $this->$key = $val;
+            }
+        }
+    }
+
+    protected function build_conf($settings, $defaults = [], $use_envvars)
+    {
+        $conf = [];
+
+        if (!empty($settings)) {
+            foreach ($settings as $key => $val) {
+                $env_key = $this->env_key($key);
+                if (array_key_exists($key, $defaults)) {
+                    $conf[] = "{$key} = {$defaults[$key]}";
+                } elseif ($this->$env_key === '' && is_null($val)) {
+                    $conf[] = ";{$key} = none";
+                } elseif ($use_envvars) {
+                    $conf[] = "{$key} = \${{$env_key}}";
+                } else {
+                    $conf[] = "{$key} = {$val}";
+                }
+            }
+
+            $conf[] = '';
+        }
+
+        return $conf;
+    }
+}
+
+################################################################################
+
+$arguments = $argv;
+array_shift($arguments);
+
+$instance = new DockerPHP(
+    'zz-generated-settings.ini',
+    'zz-generated-settings.conf',
+    'PHP'
+);
+
+if (empty($arguments)) {
+    $arguments = ['export_envvars', 'export_dynamic_conf'];
+}
+
+foreach ($arguments as $action) {
+    if (empty($action)) {
+        continue;
+    }
+
+    $action = strtolower($action);
+
+    if (method_exists($instance, $action)) {
+        $instance->$action();
+    } else {
+        echo "Invalid option $action\n";
+    }
+}
+
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+################################################################################
+
+DockerPHP

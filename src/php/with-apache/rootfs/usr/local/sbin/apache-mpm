@@ -1,0 +1,55 @@
+#!/usr/bin/env sh
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+# Gather system information
+cpu_cores=$(grep -c ^processor /proc/cpuinfo)
+ram_mb=$(free -m | awk '/^Mem:/{print $2}')
+
+# Determine appropriate MPM module
+if [ "$(apache2 -M | grep mpm_prefork)"]; then
+    mpm_module='prefork'
+else
+    mpm_module='event'
+fi
+
+# Set MPM-specific directives based on system specs and best practices
+if [[ $mpm_module == "prefork" ]]; then
+    start_servers=$((cpu_cores * 5))
+    min_spare_servers=$((cpu_cores * 2))
+    max_spare_servers=$((cpu_cores * 10))
+    max_clients=$((ram_mb / 10))
+    max_requests_per_child=1000
+    cat <<EOF >/etc/apache2/custom.d/mpm_tuning.conf
+<IfModule mpm_${mpm_module}_module>
+    ServerLimit 20000
+    StartServers $start_servers
+    MinSpareServers $min_spare_servers
+    MaxSpareServers $max_spare_servers
+    MaxRequestWorkers $max_clients
+    MaxConnectionsPerChild $max_requests_per_child
+</IfModule>
+EOF
+else
+    start_servers=$((cpu_cores * 2))
+    min_spare_threads=$((cpu_cores * 10))
+    max_spare_threads=$((cpu_cores * 20))
+    threads_per_child=25
+    max_clients=$((ram_mb / 10 / threads_per_child * threads_per_child))
+    cat <<EOF >/etc/apache2/custom.d/mpm_tuning.conf
+<IfModule mpm_${mpm_module}_module>
+    ServerLimit 20000
+    StartServers $start_servers
+    MinSpareThreads $min_spare_threads
+    MaxSpareThreads $max_spare_threads
+    ThreadsPerChild $threads_per_child
+    MaxRequestWorkers $max_clients
+    MaxConnectionsPerChild 0
+</IfModule>
+EOF
+fi

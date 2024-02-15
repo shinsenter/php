@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+document_root="$DOCUMENT_ROOT"
+
+# falls back to old $APACHE_DOCUMENT_ROOT or $NGINX_DOCUMENT_ROOT if it is set
+if [ ! -z "$APACHE_DOCUMENT_ROOT" ]; then
+    document_root="$APACHE_DOCUMENT_ROOT"
+elif [ ! -z "$NGINX_DOCUMENT_ROOT" ]; then
+    document_root="$NGINX_DOCUMENT_ROOT"
+fi
+
+echo "$(app-path)$document_root"

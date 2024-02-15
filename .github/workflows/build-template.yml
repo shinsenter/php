@@ -1,0 +1,203 @@
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+name: Build Template
+
+################################################################################
+################################################################################
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        required: true
+        type: string
+      php_version:
+        required: false
+        type: string
+      os:
+        required: false
+        type: string
+      os_version:
+        required: false
+        type: string
+    secrets:
+      DOCKER_HUB_ACCESS_TOKEN:
+        required: true
+      DOCKER_HUB_USERNAME:
+        required: true
+      DOCKER_HUB_PASSWORD:
+        required: true
+
+################################################################################
+################################################################################
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - '5000:5000'
+    env:
+      ARCHIVES_REPO: "shinsenter/php-archives"
+      USE_BUILD_CACHE: "0"
+    steps:
+      -
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+
+      -
+        name: Generate build config
+        run: ./build/config.sh "${{ inputs.os }}" "${{ inputs.app_name }}" "${{ inputs.php_version }}"
+
+      -
+        id: cache
+        if: ${{ !env.SKIP_BUILD }}
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.BUILD_CACHE_PATH }}
+          key: ${{ runner.os }}-${{ env.BUILD_CACHE_KEY }}
+          # restore-keys: ${{ runner.os }}-
+
+      -
+        if: ${{ !env.SKIP_BUILD && env.USE_BUILD_CACHE != '1' && steps.cache.outputs.cache-hit == 'true' }}
+        name: Skip building ${{ env.BUILD_TAG }}
+        run: echo "SKIP_BUILD=1" >> $GITHUB_ENV
+
+      -
+        if: ${{ !env.SKIP_BUILD }}
+        uses: docker/setup-qemu-action@v3
+
+      -
+        if: ${{ !env.SKIP_BUILD }}
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: network=host
+
+      -
+        if: ${{ !env.SKIP_BUILD }}
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      -
+        if: ${{ !env.SKIP_BUILD && env.SKIP_SQUASH == '1' }}
+        name: Build and push ${{ env.BUILD_TAG }} using ${{ env.OS_BASE }}
+        uses: docker/build-push-action@v5
+        with:
+          pull: false
+          push: ${{ !env.SKIP_PUSH }}
+          platforms: ${{ env.BUILD_PLATFORM }}
+          file: ${{ env.BUILD_DOCKERFILE }}
+          context: ${{ env.BUILD_CONTEXT }}
+          tags: ${{ env.BUILD_TAGS }}
+          sbom: true
+          build-args: |
+            BUILD_CACHE_KEY=${{ env.BUILD_CACHE_KEY }}
+            BUILD_CACHE_PATH=${{ env.BUILD_CACHE_PATH }}
+            BUILD_CONTEXT=${{ env.BUILD_CONTEXT }}
+            BUILD_DATE=${{ env.BUILD_DATE }}
+            BUILD_DESC=${{ env.BUILD_DESC }}
+            BUILD_NAME=${{ env.BUILD_NAME }}
+            BUILD_PLATFORM=${{ env.BUILD_PLATFORM }}
+            BUILD_REVISION=${{ env.BUILD_REVISION }}
+            BUILD_SOURCE_IMAGE=${{ env.BUILD_SOURCE_IMAGE }}
+            BUILD_TAG=${{ env.BUILD_TAG }}
+            BUILD_TAGS=${{ env.BUILD_TAGS }}
+            LATEST_PHP=${{ env.LATEST_PHP }}
+            LATEST_S6=${{ env.LATEST_S6 }}
+            OS_BASE=${{ env.OS_BASE }}
+            OS_VERSION=${{ env.OS_VERSION }}
+            PHP_VARIANT=${{ env.PHP_VARIANT }}
+            PHP_VERSION=${{ env.PHP_VERSION }}
+            S6_PATH=${{ env.S6_PATH }}
+            S6_VERSION=${{ env.S6_VERSION }}
+          # cache-from: type=local,src=${{ env.BUILD_CACHE_PATH }}
+          # cache-to: type=local,dest=${{ env.BUILD_CACHE_PATH }}-new,mode=max
+
+      -
+        if: ${{ !env.SKIP_BUILD && !env.SKIP_SQUASH }}
+        name: Build ${{ env.BUILD_TAG }} using ${{ env.OS_BASE }}
+        uses: docker/build-push-action@v5
+        with:
+          pull: false
+          push: true
+          platforms: ${{ env.BUILD_PLATFORM }}
+          file: ${{ env.BUILD_DOCKERFILE }}
+          context: ${{ env.BUILD_CONTEXT }}
+          tags: ${{ env.BUILD_TMP_NAME }}
+          build-args: |
+            BUILD_CACHE_KEY=${{ env.BUILD_CACHE_KEY }}
+            BUILD_CACHE_PATH=${{ env.BUILD_CACHE_PATH }}
+            BUILD_CONTEXT=${{ env.BUILD_CONTEXT }}
+            BUILD_DATE=${{ env.BUILD_DATE }}
+            BUILD_DESC=${{ env.BUILD_DESC }}
+            BUILD_NAME=${{ env.BUILD_NAME }}
+            BUILD_PLATFORM=${{ env.BUILD_PLATFORM }}
+            BUILD_REVISION=${{ env.BUILD_REVISION }}
+            BUILD_SOURCE_IMAGE=${{ env.BUILD_SOURCE_IMAGE }}
+            BUILD_TAG=${{ env.BUILD_TAG }}
+            BUILD_TAGS=${{ env.BUILD_TAGS }}
+            LATEST_PHP=${{ env.LATEST_PHP }}
+            LATEST_S6=${{ env.LATEST_S6 }}
+            OS_BASE=${{ env.OS_BASE }}
+            OS_VERSION=${{ env.OS_VERSION }}
+            PHP_VARIANT=${{ env.PHP_VARIANT }}
+            PHP_VERSION=${{ env.PHP_VERSION }}
+            S6_PATH=${{ env.S6_PATH }}
+            S6_VERSION=${{ env.S6_VERSION }}
+          # cache-from: type=local,src=${{ env.BUILD_CACHE_PATH }}
+          # cache-to: type=local,dest=${{ env.BUILD_CACHE_PATH }}-new,mode=max
+
+      -
+        if: ${{ !env.SKIP_BUILD && !env.SKIP_SQUASH }}
+        name: Make squashed Dockerfile for ${{ env.BUILD_TAG }}
+        run: |
+          docker pull "${{ env.BUILD_TMP_NAME }}"
+          DEBUG= ${{ env.SQUASH_CMD }} "${{ env.BUILD_TMP_NAME }}" -p >"${{ env.BUILD_DOCKERFILE_SQUASHED }}"
+          cat "${{ env.BUILD_DOCKERFILE_SQUASHED }}"
+
+      -
+        if: ${{ !env.SKIP_BUILD && !env.SKIP_SQUASH }}
+        name: Squash and push ${{ env.BUILD_TAG }} using ${{ env.OS_BASE }}
+        uses: docker/build-push-action@v5
+        with:
+          pull: false
+          push: ${{ !env.SKIP_PUSH }}
+          platforms: ${{ env.BUILD_PLATFORM }}
+          file: ${{ env.BUILD_DOCKERFILE_SQUASHED }}
+          context: ${{ env.BUILD_CONTEXT }}
+          tags: ${{ env.BUILD_TAGS }}
+          sbom: true
+          build-args: |
+            PRESQUASH_SCRIPTS=cleanup
+
+      -
+        if: ${{ env.BUILD_README != '' && env.UPDATE_README == '1' }}
+        name: Update ${{ env.BUILD_NAME }}/README.md
+        uses: peter-evans/dockerhub-description@v4
+        continue-on-error: true
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+          repository: ${{ env.BUILD_NAME }}
+          short-description: '${{ env.BUILD_DESC }}'
+          readme-filepath: ${{ env.BUILD_README }}
+
+      - # Temp fix
+        # https://github.com/docker/build-push-action/issues/252
+        # https://github.com/moby/buildkit/issues/1896
+        if: ${{ !env.SKIP_BUILD && env.USE_BUILD_CACHE == '1' }}
+        name: Move local cache
+        run: |
+          rm -rf ${{ env.BUILD_CACHE_PATH }}
+          mv ${{ env.BUILD_CACHE_PATH }}-new ${{ env.BUILD_CACHE_PATH }}

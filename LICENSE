@@ -632,7 +632,7 @@ state the exclusion of warranty; and each file should have at least
 the "copyright" line and a pointer to where the full notice is found.
 
     PHP Docker Images (https://hub.docker.com/r/shinsenter/php)
-    Copyright (C) 2024  SHIN <shin@shin.company
+    Copyright (C) 2024  Mai Nhut Tan <shin@shin.company>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

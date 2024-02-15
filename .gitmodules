@@ -1,0 +1,3 @@
+[submodule "build/docker-squash"]
+	path = build/docker-squash
+	url = https://github.com/shinsenter/docker-squash.git

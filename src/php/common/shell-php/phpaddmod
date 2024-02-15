@@ -1,0 +1,43 @@
+#!/usr/bin/env sh
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+PHP_MODS=""
+REQUIRED_MODS="$@"
+INSTALLED_MODS="$(php -m 2>/dev/null | grep -v '^\[' | tr '[:upper:]' '[:lower:]')"
+
+for mod in $REQUIRED_MODS; do
+    if [ ! -z "$mod" ] && grep -q "\<$mod\>" <<< "$INSTALLED_MODS"; then
+        echo "Module $mod is already installed."
+    else
+        PHP_MODS="$PHP_MODS $mod"
+    fi
+done
+
+if [ -z "$PHP_MODS" ] || ! has-cmd install-php-extensions; then
+    exit 0
+fi
+
+if ! has-cmd gcc; then
+    echo "Installing build tools"
+    APK_PACKAGES="tar xz" \
+    APT_PACKAGES="xz-utils" \
+    pkg-add $PHPIZE_DEPS curl
+fi
+
+if [ ! -e "/usr/src/php.tar.xz" ] && [ ! -z "$PHP_URL" ]; then
+    echo "Installing PHP modules: $PHP_MODS"
+    curl --retry 2 -ksL "$PHP_URL" -o /usr/src/php.tar.xz
+
+    if [ ! -z "$PHP_ASC_URL" ]; then
+        curl --retry 2 -ksL "$PHP_ASC_URL" -o /usr/src/php.tar.xz.asc
+    fi
+fi
+
+echo "Installing PHP modules: $PHP_MODS"
+exec with-env install-php-extensions $PHP_MODS | grep -v StandWith

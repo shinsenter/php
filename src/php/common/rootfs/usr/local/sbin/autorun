@@ -1,0 +1,22 @@
+#!/usr/bin/env sh
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+for dir; do
+    if [ -d "$dir" ]; then
+        web-debug "\n\n🔎 Scanning autorun scripts in $dir"
+        find $dir -type f -name '*.sh' | xargs -r chmod +x 2>&1 >/dev/null
+
+        for script in $(find $dir -type f -perm -111 | sort -n); do
+            if [ -x "$script" ]; then
+                web-debug "🚀 Autorun $script"
+                with-env sh "$script"
+            fi
+        done
+    fi
+done

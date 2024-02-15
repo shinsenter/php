@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+
+# fix environment variables for crontab
+mkdir -p /etc/default && with-env | sort >/etc/default/locale
+
+# fix ownership for the application path
+if [ -e "$(web-chown path)" ] || is-true $FIX_APP_PATH_PERMISSION || is-true $FIX_WEBHOME_PERMISSION; then
+    web-chown fix
+fi
