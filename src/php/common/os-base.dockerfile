@@ -7,11 +7,11 @@
 ################################################################################
 
 # set defaults from build arguments
+ARG DEBCONF_NOWARNINGS=yes
 ARG DEBIAN_FRONTEND=noninteractive
 ARG DOCKER_ENTRYPOINT=/usr/local/bin/docker-php-entrypoint
 
 ARG APP_PATH=${APP_PATH:-/var/www/html}
-ARG DOCUMENT_ROOT=${DOCUMENT_ROOT:-}
 ARG APP_GROUP=${APP_GROUP:-www-data}
 ARG APP_USER=${APP_USER:-www-data}
 
@@ -34,6 +34,9 @@ ADD --link ./common/rootfs/ /
 RUN <<'EOF'
 echo 'Configure OS middlewares'
 set -e
+
+# setuid bit
+chmod 4755 /usr/local/bin/web-*
 
 # install common packages
 APK_PACKAGES='bash shadow su-exec tar xz' \
@@ -81,7 +84,7 @@ env-default 'alias ll="ls -alh"'
 # Set OS default settings
 env-default '# Environment variables for OS'
 env-default DEBIAN_FRONTEND $DEBIAN_FRONTEND
-env-default DOCUMENT_ROOT $DOCUMENT_ROOT
+env-default DEBCONF_NOWARNINGS $DEBCONF_NOWARNINGS
 env-default HISTCONTROL 'ignoredups:ignorespace'
 env-default HISTFILESIZE '2000'
 env-default HISTSIZE '1000'

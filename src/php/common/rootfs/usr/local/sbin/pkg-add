@@ -7,35 +7,36 @@
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-# for alpine
-if has-cmd apk; then
-    packages=$(echo "${APK_PACKAGES} $@")
+alpine() {
+    local packages="$@"
     if [ ! -z "$packages" ]; then
         rm -rf /var/cache/apk && mkdir /var/cache/apk
-        apk update
+        apk update | debug-echo -l
         for pkg in $packages; do
-            echo
             if [ "$pkg" = "upgrade" ]; then
-                apk upgrade
+                apk upgrade | debug-echo -l
             else
-                echo "Installing $pkg" && apk add $pkg
+                debug-echo -i "\nInstall $pkg"
+                apk add $pkg | debug-echo -l
             fi
         done
     fi
-fi
+}
 
-# for debian
-if has-cmd apt-get; then
-    packages=$(echo "${APT_PACKAGES} $@")
+debian() {
+    local packages="$@"
     if [ ! -z "$packages" ]; then
-        apt-get update -yq
+        apt-get update -yq | debug-echo -l
         for pkg in $packages; do
-            echo
-            if [ "$pkg" = "upgrade" ]; then
-                apt-get upgrade -yq
+            if [ "$pkg" = "upgrade" ] || [ "$pkg" = "update" ]; then
+                apt-get upgrade -yq | debug-echo -l
             else
-                echo "Installing $pkg" && apt-get install -yq --no-install-recommends --no-install-suggests $pkg
+                debug-echo -i "\nInstall $pkg"
+                apt-get install -yq --no-install-recommends --no-install-suggests $pkg | debug-echo -l
             fi
         done
     fi
-fi
+}
+
+if has-cmd apk; then alpine "${APK_PACKAGES} $@"; fi
+if has-cmd apt; then debian "${APT_PACKAGES} $@"; fi

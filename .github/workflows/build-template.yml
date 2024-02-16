@@ -135,6 +135,7 @@ jobs:
           file: ${{ env.BUILD_DOCKERFILE }}
           context: ${{ env.BUILD_CONTEXT }}
           tags: ${{ env.BUILD_TMP_NAME }}
+          sbom: true
           build-args: |
             BUILD_CACHE_KEY=${{ env.BUILD_CACHE_KEY }}
             BUILD_CACHE_PATH=${{ env.BUILD_CACHE_PATH }}

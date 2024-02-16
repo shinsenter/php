@@ -42,14 +42,14 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [ -z "$DOMAINS" ]; then
-    echo "Usage: ${0##*/} example.com www.example.com [-c domain.crt] [-k domain.key] [-d 365] [-l 4096]" >&2
+    debug-echo -w "Usage: ${0##*/} example.com www.example.com [-c domain.crt] [-k domain.key] [-d 365] [-l 4096]"
     exit 1
 fi
 
 mkdir -p "$(dirname $CERT)" "$(dirname $KEY)"
 rm -rf $CERT $KEY
 
-echo "Generating self-signed CA for $DOMAINS"
+debug-echo -w "Generate self-signed CA for $DOMAINS"
 openssl dhparam -dsaparam -out "$(dirname $CERT)"/dhparam.pem $LENGTH
 openssl req -newkey rsa:$LENGTH \
     -nodes -keyout $KEY -out $CERT \

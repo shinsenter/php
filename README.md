@@ -1,4 +1,4 @@
-# Customizable PHP Docker Images
+# PHP Docker Images
 
 📦 A set of prebuilt PHP Docker images that simplify customization and extension installation.
 
@@ -8,9 +8,9 @@
 
 ## Introduction
 
-Our PHP Docker images are built on top of [the official PHP Docker images](https://hub.docker.com/_/php) to enable easy tuning of PHP and PHP-FPM settings via environment variables. This avoids having to rebuild images to change settings.
+Our PHP Docker images are built on top of [the official PHP Docker images](https://hub.docker.com/_/php). These images enable easy tuning of PHP and PHP-FPM settings through environment variables. This eliminates the need to rebuild images when changing settings.
 
-These images also include the latest version of [Composer](https://getcomposer.org), and well-known web servers like [Apache2](https://httpd.apache.org), [Nginx](https://nginx.org), [Nginx Unit](https://unit.nginx.org) or [FrankenPHP](https://frankenphp.dev) pre-installed so your projects can get started faster without extra setup.
+These images also include the latest version of [Composer](https://getcomposer.org), well-known web servers like [Apache2](https://httpd.apache.org), [Nginx](https://nginx.org), [Nginx Unit](https://unit.nginx.org) or [FrankenPHP](https://frankenphp.dev), allowing projects to get started faster without additional installation.
 
 > 🪶 Note: Though built on top of the official PHP images and including more useful extensions, we have **drastically reduced the sizes** compared to the base images while maintaining compatibility. This optimization improves download times and resource usage without sacrificing functionality, thanks to the [docker-squash](https://code.shin.company/docker-squash) project.
 
@@ -127,7 +127,7 @@ services:
 
 ## Pre-installed PHP Extensions
 
-Popular PHP extensions are pre-installed by default, so your projects can get started faster without extra setup.
+Popular PHP extensions are pre-installed by default, allowing projects to get started faster without additional installation.
 
 ```list
 apcu
@@ -240,7 +240,7 @@ This mechanism can be used to initialize projects before the main program on the
 
 #### Usage
 
-For example, a script called `00-cache-config` could be copied into `/startup/` via a Dockerfile.
+For example, a script called `00-copy-config` could be copied into `/startup/` via a Dockerfile.
 
 > Note: The script file must have executable permissions to run.
 
@@ -248,8 +248,8 @@ For example, a script called `00-cache-config` could be copied into `/startup/` 
 FROM shinsenter/php:8.3-cli
 
 ADD ./application /var/www/html
-ADD ./00-cache-config /startup/00-cache-config
-RUN chmod +x /startup/00-cache-config
+ADD ./autorun/00-copy-config /startup/00-copy-config
+RUN chmod +x /startup/00-copy-config
 ```
 
 > 👉🏻 Info: The startup directory already includes a script called `99-greeting` that prints a welcome message when container starts:

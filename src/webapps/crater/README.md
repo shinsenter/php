@@ -6,15 +6,15 @@
 
 ## Introduction
 
-These images are built on top of [the official PHP Docker images](https://hub.docker.com/_/php) to enable easy tuning of PHP and PHP-FPM settings via environment variables. This avoids having to rebuild images to change settings.
+Built on top of [our PHP Docker images](https://hub.docker.com/r/shinsenter/php), these images enable easy tuning of PHP and PHP-FPM settings through environment variables. This eliminates the need to rebuild images when changing settings.
 
-The images also include the latest of [Composer](https://getcomposer.org) so your projects can get started faster without extra setup.
+These images also include the latest version of [Composer](https://getcomposer.org), allowing projects to get started faster without additional installation.
 
 ## Usage
 
 [![shinsenter/php](https://repository-images.githubusercontent.com/458053748/24e848e1-c0fc-4893-b2b9-f7dbfad263f3)](https://docker.shin.company/php)
 
-See [this document](https://hub.docker.com/r/shinsenter/php) to learn how to customize these Docker images for your projects.
+Refer to [our documentation](https://hub.docker.com/r/shinsenter/php) to learn how to customize these Docker images for your projects.
 
 ## Create new project
 

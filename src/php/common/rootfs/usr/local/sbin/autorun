@@ -9,12 +9,12 @@
 
 for dir; do
     if [ -d "$dir" ]; then
-        web-debug "\n\n🔎 Scanning autorun scripts in $dir"
+        debug-echo "\nScanning autorun scripts in $dir"
         find $dir -type f -name '*.sh' | xargs -r chmod +x 2>&1 >/dev/null
 
         for script in $(find $dir -type f -perm -111 | sort -n); do
             if [ -x "$script" ]; then
-                web-debug "🚀 Autorun $script"
+                debug-echo "\nAutorun $script"
                 with-env sh "$script"
             fi
         done

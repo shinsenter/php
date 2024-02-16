@@ -25,7 +25,7 @@ fi
 
 if is-debug; then
     apache-conf 'LogLevel' 'debug'
-    echo "🐞 Apache is in debug mode 🐞"
+    debug-echo -w "🐞 Apache is in DEBUG MODE 🐞"
     apache2 -S
 else
     apache-conf 'LogLevel' '${APACHE_LOG_LEVEL}'
@@ -36,6 +36,7 @@ if [ -f /etc/apache2/envvars ]; then
 fi
 
 if is-true $ENABLE_TUNING_MPM; then
+    debug-echo -w "Tune Apache MPM"
     apache-mpm
 fi
 

@@ -8,4 +8,6 @@
 ################################################################################
 
 if is-true $DISABLE_AUTORUN_SCRIPTS; then exit 0; fi
+
+cd "$(app-path)"
 exec autorun /startup/ 2>&1

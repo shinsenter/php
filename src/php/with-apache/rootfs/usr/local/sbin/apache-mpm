@@ -7,6 +7,8 @@
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
+config="${1:-/etc/apache2/custom.d/mpm_tuning.conf}"
+
 # Gather system information
 cpu_cores=$(grep -c ^processor /proc/cpuinfo)
 ram_mb=$(free -m | awk '/^Mem:/{print $2}')
@@ -25,7 +27,7 @@ if [[ $mpm_module == "prefork" ]]; then
     max_spare_servers=$((cpu_cores * 10))
     max_clients=$((ram_mb / 10))
     max_requests_per_child=1000
-    cat <<EOF >/etc/apache2/custom.d/mpm_tuning.conf
+    cat <<EOF >$config
 <IfModule mpm_${mpm_module}_module>
     ServerLimit 20000
     StartServers $start_servers
@@ -41,7 +43,7 @@ else
     max_spare_threads=$((cpu_cores * 20))
     threads_per_child=25
     max_clients=$((ram_mb / 10 / threads_per_child * threads_per_child))
-    cat <<EOF >/etc/apache2/custom.d/mpm_tuning.conf
+    cat <<EOF >$config
 <IfModule mpm_${mpm_module}_module>
     ServerLimit 20000
     StartServers $start_servers

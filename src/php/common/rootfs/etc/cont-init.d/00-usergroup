@@ -12,33 +12,35 @@ DEFAULT_GROUP="www-data"
 DEFAULT_UID="$(id -u $DEFAULT_USER)"
 DEFAULT_GID="$(id -g $DEFAULT_USER)"
 
-APPPATH="$(app-path)"
+APP_PATH="$(app-path)"
 APP_USER="${APP_USER:=$DEFAULT_USER}"
 APP_GROUP="${APP_GROUP:=$DEFAULT_GROUP}"
+APP_UID="${APP_UID:=$DEFAULT_UID}"
+APP_GID="${APP_GID:=$DEFAULT_GID}"
 USER_HOME="/home/$APP_USER"
 
 rand_id() { echo "$((RANDOM % 500 + 499))"; }
 
 ################################################################################
 
+debug-echo "Verify group $APP_GROUP"
 if [ "$APP_GROUP" != "$DEFAULT_GROUP" ]; then
     APP_GID="${APP_GID:=$(rand_id)}"
     groupadd -o -r -g $APP_GID $APP_GROUP 2>&1 >/dev/null
 else
-    APP_GID="${APP_GID:=$DEFAULT_GID}"
     if [ "$APP_GID" != "$DEFAULT_GID" ]; then
         groupmod -o -g $APP_GID $APP_GROUP 2>&1
         web-chown "GID changed to $APP_GROUP ($APP_GID)."
     fi
 fi
 
+debug-echo "Verify user $APP_USER"
 if [ "$APP_USER" != "$DEFAULT_USER" ]; then
     APP_UID="${APP_UID:=$(rand_id)}"
     useradd -o -r -g $APP_GID \
         -G $APP_GROUP,$DEFAULT_GROUP --no-log-init \
         -d $USER_HOME -s /sbin/nologin -u $APP_UID $APP_USER 2>&1 >/dev/null
 else
-    APP_UID="${APP_UID:=$DEFAULT_UID}"
     usermod -g $APP_GID -G $APP_GROUP,$DEFAULT_GROUP \
         -d $USER_HOME -s /sbin/nologin $APP_USER 2>&1
 
@@ -48,5 +50,5 @@ else
     fi
 fi
 
-web-mkdir $USER_HOME
-web-mkdir $APPPATH
+debug-echo "Create $APP_PATH if not exists"
+web-mkdir $APP_PATH

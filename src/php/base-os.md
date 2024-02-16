@@ -103,15 +103,15 @@ This mechanism can be used to initialize projects before the main program on the
 
 #### Usage
 
-For example, a script called `00-cache-config` could be copied into `/startup/` via a Dockerfile.
+For example, a script called `00-copy-config` could be copied into `/startup/` via a Dockerfile.
 
 > Note: The script file must have executable permissions to run.
 
 ```Dockerfile
 FROM shinsenter/ubuntu-s6:latest
 
-ADD ./00-cache-config /startup/00-cache-config
-RUN chmod +x /startup/00-cache-config
+ADD ./autorun/00-copy-config /startup/00-copy-config
+RUN chmod +x /startup/00-copy-config
 ```
 
 > 👉🏻 Info: The startup directory already includes a script called `99-greeting` that prints a welcome message when container starts.

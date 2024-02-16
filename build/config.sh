@@ -204,6 +204,9 @@ app-*)
         LATEST_PHP="8.1"
         verlt "$PHP_VERSION" "8.0" && SKIP_BUILD=1
         ;;
+    phpixie)
+        # https://phpixie.com/quickstart.html
+        ;;
     phpmyadmin)
         # https://docs.phpmyadmin.net/en/latest/setup.html
         ;;

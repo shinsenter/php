@@ -13,7 +13,7 @@ INSTALLED_MODS="$(php -m 2>/dev/null | grep -v '^\[' | tr '[:upper:]' '[:lower:]
 
 for mod in $REQUIRED_MODS; do
     if [ ! -z "$mod" ] && grep -q "\<$mod\>" <<< "$INSTALLED_MODS"; then
-        echo "Module $mod is already installed."
+        debug-echo -i "Module $mod is already installed."
     else
         PHP_MODS="$PHP_MODS $mod"
     fi
@@ -24,14 +24,14 @@ if [ -z "$PHP_MODS" ] || ! has-cmd install-php-extensions; then
 fi
 
 if ! has-cmd gcc; then
-    echo "Installing build tools"
+    debug-echo -i "\nInstall build tools"
     APK_PACKAGES="tar xz" \
     APT_PACKAGES="xz-utils" \
     pkg-add $PHPIZE_DEPS curl
 fi
 
 if [ ! -e "/usr/src/php.tar.xz" ] && [ ! -z "$PHP_URL" ]; then
-    echo "Installing PHP modules: $PHP_MODS"
+    debug-echo -i "\nDownload PHP source from $PHP_URL"
     curl --retry 2 -ksL "$PHP_URL" -o /usr/src/php.tar.xz
 
     if [ ! -z "$PHP_ASC_URL" ]; then
@@ -39,5 +39,5 @@ if [ ! -e "/usr/src/php.tar.xz" ] && [ ! -z "$PHP_URL" ]; then
     fi
 fi
 
-echo "Installing PHP modules: $PHP_MODS"
-exec with-env install-php-extensions $PHP_MODS | grep -v StandWith
+debug-echo -w "\nInstall PHP modules: $(echo $PHP_MODS)"
+exec with-env install-php-extensions $PHP_MODS | grep -v StandWith | debug-echo -l

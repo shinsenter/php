@@ -20,7 +20,7 @@ set -e
 mkdir -p "$(dirname $CRONTAB)" $CRONTAB_DIR
 
 if is-debug; then
-    echo '* * * * * echo "DEBUG: Crontab is running as $(whoami)." | tee /tmp/cron-debug.txt' >$CRONTAB_DIR/debug
+    echo '* * * * * debug-echo -w "DEBUG: Crontab is running as $(whoami)." | tee /tmp/cron-debug.txt' >$CRONTAB_DIR/debug
 fi
 
 cat <<CRONTAB >$CRONTAB
@@ -47,4 +47,4 @@ fi)
 CRONTAB
 
 chmod 0600 $CRONTAB
-echo "Cron is running as $APP_USER. Config: $CRONTAB"
+debug-echo -i "Cron is running as $APP_USER. Config: $CRONTAB"

@@ -11,6 +11,6 @@ while [[ $# -gt 0 ]]; do
     MODULE="$1"
     PATTERN="/^LoadModule ${MODULE}_module/s/^/#/g"
     shift
-    echo "Disabling module $MODULE"
+    debug-echo -e "Disable Apache module $MODULE"
     sed -i "$PATTERN" /etc/apache2/*.conf
 done

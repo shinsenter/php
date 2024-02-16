@@ -16,7 +16,7 @@ command=$1
 shift
 
 if [ -z "$command" ] || [ -z "$@" ]; then
-    echo "Usage: ${0##*/} <name> <command> [options]" >&2
+    debug-echo -w "Usage: ${0##*/} <name> <command> [options]"
     exit 1
 fi
 

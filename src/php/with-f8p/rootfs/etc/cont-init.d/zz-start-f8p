@@ -16,5 +16,5 @@ fi
 if is-debug; then
     web-do touch /etc/caddy/envvars
     web-do echo "export CADDY_GLOBAL_OPTIONS=debug" >>/etc/caddy/envvars
-    echo "🐞 FrankenPHP is in debug mode 🐞"
+    debug-echo -w "🐞 FrankenPHP is in DEBUG MODE 🐞"
 fi

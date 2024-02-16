@@ -2,7 +2,7 @@
 rm -rf /usr/src/php* || true
 
 if is-true $CLEANUP_PHPDBG && has-cmd phpdbg; then
-    echo 'Removing phpdbg binary'
+    debug-echo -w 'Removing phpdbg binary'
     rm -rf "$(command -v phpdbg)" || true
 fi
 

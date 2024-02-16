@@ -144,8 +144,11 @@ jobs:
           - "app-cakephp4"
           - "app-codeigniter4"
           - "app-drupal"
+          - "app-fuelphp"
+          - "app-laminas"
           - "app-laravel"
           - "app-phpmyadmin"
+          - "app-slim"
           - "app-symfony"
           - "app-wordpress"
         php_version:
@@ -175,13 +178,11 @@ jobs:
         app:
           - "app-crater"
           - "app-flarum"
-          - "app-fuelphp"
           - "app-grav"
           - "app-hyperf"
           - "app-kirby"
-          - "app-laminas"
           - "app-mautic"
-          - "app-slim"
+          - "app-phpixie"
           - "app-statamic"
           - "app-yii"
         php_version:
