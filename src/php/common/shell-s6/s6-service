@@ -17,7 +17,7 @@ name="$1"
 shift
 
 if [ -z "$name" ]; then
-    echo "Usage: ${0##*/} <service-name> [longrun|oneshot|depends|finish|down] [exec script]" >&2
+    debug-echo -w "Usage: ${0##*/} <service-name> [longrun|oneshot|depends|finish|down] [exec script]"
     exit 1
 fi
 

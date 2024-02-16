@@ -59,7 +59,7 @@ initial() {
 }
 
 if is-debug; then
-    echo "� Unit is in debug mode �"
+    debug-echo -w "🐞 Nginx Unit is in DEBUG MODE 🐞"
     initial || true
 else
     initial 2>&1 >/dev/null || true

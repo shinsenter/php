@@ -7,38 +7,38 @@
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-APPPATH="$(app-path)"
-APPROOT="$(app-root)"
+APP_PATH="$(app-path)"
+APP_ROOT="$(app-root)"
 
 # create wordpress project
 if ! is-true $DISABLE_AUTORUN_CREATING_PROJECT; then
-    web-mkdir "$APPPATH"
-    if [ -z "$(ls -A "$APPPATH")" ]; then
-        cd "$APPPATH"
-
+    web-mkdir "$APP_PATH"
+    if [ -z "$(ls -A "$APP_PATH")" ]; then
+        debug-echo -w "Install Wordpress to $APP_PATH"
+        cd "$APP_PATH"
         set -e
         wp core download \
             --locale="${WORDPRESS_LOCALE:-en_US}" \
             --force
 
-        web-chown "Wordpress core downloaded in $APPPATH."
+        web-chown "Wordpress core downloaded to $APP_PATH."
     else
-        echo "Skip creating project because $APPPATH is not empty."
+        debug-echo "Skip creating project because $APP_PATH is not empty."
     fi
 fi
 
-if [ -f /etc/wp-config-docker.php ] && [ ! -f "$APPPATH/wp-config.php" ] ; then
-    cp -p /etc/wp-config-docker.php "$APPPATH/wp-config.php"
-    web-chown fix "$APPPATH/wp-config.php" 2>&1 >/dev/null
+if [ -f /etc/wp-config-docker.php ] && [ ! -f "$APP_PATH/wp-config.php" ] ; then
+    cp -p /etc/wp-config-docker.php "$APP_PATH/wp-config.php"
+    web-chown fix "$APP_PATH/wp-config.php" 2>&1 >/dev/null
 elif [ -f /etc/setup-wordpress.php ]; then
     php /etc/setup-wordpress.php
     mv  /etc/setup-wordpress.php /etc/setup-wordpress.php.disabled
 fi
 
-web-mkdir "$APPROOT"
+web-mkdir "$APP_ROOT"
 
 # fix .htaccess
-if [ -f "$APPROOT/.htaccess" ]; then
-    sed -i 's|index\.php/|index.php?/|g' "$APPROOT/.htaccess"
-    web-chown fix "$APPROOT/.htaccess" 2>&1 >/dev/null
+if [ -f "$APP_ROOT/.htaccess" ]; then
+    sed -i 's|index\.php/|index.php?/|g' "$APP_ROOT/.htaccess"
+    web-chown fix "$APP_ROOT/.htaccess" 2>&1 >/dev/null
 fi
