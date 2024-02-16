@@ -9,12 +9,12 @@
 
 export TZ="${TZ:=UTC}"
 
-# setuid bit
-chmod 4755 /usr/local/bin/web-*
+debug-echo "Initialize container"
+web-mkdir "$(app-path)"
 
 # activity logging
 touch /var/log/startup.log
-echo "$(date): $0 $@" >>/var/log/startup.log
+echo "$(date) $(whoami)@$(hostname):$(pwd)\$ $0 $@" >>/var/log/startup.log
 
 # set timezone
 if [ ! -z "$TZ" ] && [ -e /usr/share/zoneinfo/$TZ ]; then
@@ -44,4 +44,5 @@ fi
 # move to application directory
 if [ -d "$(app-path)" ]; then cd "$(app-path)"; fi
 
+debug-echo "Start container with command $@"
 exec with-env "$@"

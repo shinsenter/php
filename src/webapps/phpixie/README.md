@@ -1,8 +1,8 @@
-# shinsenter/phpfpm-apache
+# shinsenter/phpixie
 
-🌏 (PHP) PHP-FPM + Apache2 docker containers for both production and development.
+🌏 (PHP) PHPixie docker containers for both production and development.
 
-> Docker Hub: https://hub.docker.com/r/shinsenter/phpfpm-apache
+> Docker Hub: https://hub.docker.com/r/shinsenter/phpixie
 
 ## Introduction
 
@@ -12,15 +12,39 @@ These images also include the latest version of [Composer](https://getcomposer.o
 
 ## Usage
 
-```shell
-docker run --rm -p 80:80 -p 443:443 \
-    -v ./myproject:/var/www/html \
-    shinsenter/phpfpm-apache:latest
-```
-
 [![shinsenter/php](https://repository-images.githubusercontent.com/458053748/24e848e1-c0fc-4893-b2b9-f7dbfad263f3)](https://docker.shin.company/php)
 
 Refer to [our documentation](https://hub.docker.com/r/shinsenter/php) to learn how to customize these Docker images for your projects.
+
+## Create new project
+
+When you mount an empty directory into the container, it will automatically pull down the entire source code for the framework. This allows you to quickly bootstrap a new project.
+
+### To do this
+
+Create an empty directory on your host machine that will be used for your project code. For example:
+
+```shell
+mkdir myproject
+```
+
+When running the container, mount this empty directory as a volume. For example:
+
+```shell
+docker run --rm -p 80:80 -p 443:443 \
+    -v ./myproject:/var/www/html \
+    shinsenter/phpixie:latest
+```
+
+The container will detect content in directory mounted to `/var/www/html` and clone the framework source code into it if it is empty.
+
+## Existing project
+
+You can mount your application code on your host machine to `/var/www/html` directory inside the container.
+
+Because the source code is mounted as a volume, your changes on the host will be reflected in the container. You can run builds, tests, etc inside the container and see the changes.
+
+This allows you to leverage the container while keeping your code on the host.
 
 ## Using HTTPS
 
@@ -35,7 +59,7 @@ To use valid HTTPS certificates for your website in production, you need to repl
 #### Using Dockerfile
 
 ```Dockerfile
-FROM shinsenter/phpfpm-apache:latest
+FROM shinsenter/phpixie:latest
 
 # Copy your own certs into the container
 COPY my_site.crt /etc/ssl/site/server.crt
@@ -49,7 +73,7 @@ docker run --rm -p 80:80 -p 443:443 \
     -v ./myproject:/var/www/html \
     -v ./my_site.crt:/etc/ssl/site/server.crt \
     -v ./my_site.key:/etc/ssl/site/server.key \
-    shinsenter/phpfpm-apache:latest
+    shinsenter/phpixie:latest
 ```
 
 #### Using docker-compose:
@@ -57,18 +81,11 @@ docker run --rm -p 80:80 -p 443:443 \
 ```yml
 services:
   web:
-    image: shinsenter/phpfpm-apache:latest
+    image: shinsenter/phpixie:latest
     volumes:
       - ./my_site.crt:/etc/ssl/site/server.crt
       - ./my_site.key:/etc/ssl/site/server.key
 ```
-
-## Supported Platforms
-
-Check our [Docker Hub](https://hub.docker.com/r/shinsenter/phpfpm-apache/tags) for all available platforms.
-
-> Docker image tags ending in `-alpine` or `-tidy` indicate Docker images built on the Alpine Linux base OS.
-> These Docker images are lightweight, helping to speed up builds and save bandwidth for your CI/CD.
 
 ## Contributing
 

@@ -14,7 +14,7 @@ fix)
     shift; rm -rf $marker
     if [ $# -eq 0 ]; then set -- "$(app-path)"; fi
     for target; do
-        web-debug "👨🏻‍🔧 Fixing ownership for $target"
+        debug-echo "Fix ownership for $target"
         chown -R "$APP_USER:$APP_GROUP" "$target" 2>&1 || true
     done
     ;;
@@ -23,6 +23,6 @@ path)
     ;;
 *)
     touch $marker
-    if [ ! -z "$@" ]; then echo "$@" | tee -a $marker; fi
+    if [ ! -z "$@" ]; then debug-echo "$@"; fi
     ;;
 esac
