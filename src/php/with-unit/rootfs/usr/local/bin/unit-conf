@@ -10,12 +10,12 @@
 config_file="$1"
 
 if [ -z "$config_file" ]; then
-    echo "Usage: ${0##*/} /path/to/config.json <config/path>" >&2
+    debug-echo -w "Usage: ${0##*/} /path/to/config.json <config/path>"
     exit 1
 fi
 
 if [ ! -f "$config_file" ]; then
-    echo "Error: Invalid config file: $config_file" >&2
+    debug-echo -e "Error: Invalid config file: $config_file"
     exit 1
 fi
 
@@ -59,11 +59,11 @@ if [ ! -z "$output" ]; then
     rm -f "$output"
 fi
 
-web-debug "$RET"
+debug-echo "$RET"
 
 if [ "$STATUS" -ne "200" ]; then
-    echo "Error: HTTP response status code is '$STATUS'" >&2
+    debug-echo -e "Error: HTTP response status code is '$STATUS'"
     exit 1
 fi
 
-echo "OK: HTTP response status code is '$STATUS'" >&2
+debug-echo -s "OK: HTTP response status code is '$STATUS'"

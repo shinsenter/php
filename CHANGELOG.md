@@ -2,11 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.0.1] - 2024-02-16
+
+We have made some minor improvements to the content of debug messages and variable naming.
+
 ## [5.0.0] - 2024-02-15
 
-We are rolling out updated Docker images based on the [official PHP Docker images](https://hub.docker.com/_/php). We have taken steps to minimize the impact of this change on your existing setup.
+We are thrilled to announce the rollout of updated Docker images (v5) built directly from the [official PHP Docker images](https://hub.docker.com/_/php) to ensure you get the most up-to-date packages and bug fixes!
 
-We are using different Docker image tags to maintain the old Docker image versions. All old Docker images have been published with `*-deprecated` tag names. However, we will no longer provide any update for the old Docker images. https://hub.docker.com/r/shinsenter/php/tags?page=1&name=-deprecated
+Check out the document and available tags on Docker Hub:
+https://hub.docker.com/r/shinsenter/php
+> The `-alpine` and `-tidy` tags are lightweight Alpine-based images to speed up your builds and save bandwidth.
+
+These images are updated daily to stay current with the latest PHP, OS, and tooling updates for maximum freshness. We also apply stable version tags on a separate repo for dependable production images:
+https://hub.docker.com/r/shinsenter/php-archives/tags
+
+Old image versions (pre v5.x) now have `-deprecated` tags but will no longer receive updates. See them here:
+https://hub.docker.com/r/shinsenter/php/tags?name=-deprecated
 
 <!--
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),

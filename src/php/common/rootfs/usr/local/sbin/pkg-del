@@ -7,26 +7,27 @@
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-# for alpine
-if has-cmd apk; then
-    packages=$(echo "${APK_PACKAGES} $@")
+alpine() {
+    local packages="$@"
     if [ ! -z "$packages" ]; then
         for pkg in $packages; do
-            echo; echo "Removing $pkg"
-            apk del --no-cache --purge $pkg
+            debug-echo -e "\nRemove $pkg"
+            apk del --no-cache --purge $pkg | debug-echo -l
         done
     fi
-fi
+}
 
-# for debian
-if has-cmd apt-get; then
-    packages=$(echo "${APT_PACKAGES} $@")
+debian() {
+    local packages="$@"
     if [ ! -z "$packages" ]; then
         for pkg in $packages; do
-            echo; echo "Removing $pkg"
-            apt-get -yq remove --purge $pkg 2>&1 | grep -v -F 'so not removed'
+            debug-echo -e "\nRemove $pkg"
+            apt-get -yq remove --purge $pkg 2>&1 | grep -v -F 'so not removed' | debug-echo -l
         done
     fi
-    apt-get -yq autoremove --purge
-    apt-get -yq clean
-fi
+    apt-get -yq autoremove --purge | debug-echo -l
+    apt-get -yq clean | debug-echo -l
+}
+
+if has-cmd apk; then alpine "${APK_PACKAGES} $@"; fi
+if has-cmd apt; then debian "${APT_PACKAGES} $@"; fi

@@ -7,31 +7,37 @@
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-APPPATH="$(app-path)"
-APPROOT="$(app-root)"
+APP_PATH="$(app-path)"
+APP_ROOT="$(app-root)"
+
+web-mkdir "$APP_PATH"
 
 # copy from source
-if ! is-true $DISABLE_AUTORUN_COPYING_SOURCE && [ -d /source/ ]; then
-    mv {/source/*,/source/.*} $APPPATH/ 2>&1 >/dev/null
-    web-chown "Source code copied to $APPPATH."
+if ! is-true $DISABLE_AUTORUN_COPYING_SOURCE; then
+    if [ -d /source/ ] && [ -z "$(ls -A "$APP_PATH")" ]; then
+        debug-echo "Copy files from /source/ to $APP_PATH"
+        mv {/source/*,/source/.*} $APP_PATH/ 2>&1 >/dev/null
+        web-chown "Source code copied to $APP_PATH."
+    fi
 fi
 
 # create Composer project
 if ! is-true $DISABLE_AUTORUN_CREATING_PROJECT && [ ! -z "$INITIAL_PROJECT" ]; then
-    web-mkdir "$APPPATH"
-    if [ -z "$(ls -A "$APPPATH")" ] && has-cmd composer; then
+    if [ -z "$(ls -A "$APP_PATH")" ] && has-cmd composer; then
+        debug-echo "Create Composer project $INITIAL_PROJECT in $APP_PATH"
+        cd "$APP_PATH"
         set -e
-        cd "$APPPATH"
+
         composer create-project $COMPOSER_CREATE_OPTIONS \
             -n --no-secure-http --no-install --no-scripts \
-            -- "$INITIAL_PROJECT" "$APPPATH"
+            -- "$INITIAL_PROJECT" "$APP_PATH"
 
-        config="$APPPATH/composer.json"
+        config="$APP_PATH/composer.json"
 
         # intall git if needed
         if grep -q -F '"git"' $config || is-true $COMPOSER_REQUIRES_GIT; then
             pkg-add git
-            git config --global --add safe.directory "$APPPATH"
+            git config --global --add safe.directory "$APP_PATH"
         fi
 
         # intall npm if needed
@@ -51,28 +57,31 @@ if ! is-true $DISABLE_AUTORUN_CREATING_PROJECT && [ ! -z "$INITIAL_PROJECT" ]; t
         fi
 
         composer config -n --unset "allow-plugins.*/*"
-        web-chown "Project $INITIAL_PROJECT created in $APPPATH."
+        web-chown "Project $INITIAL_PROJECT created in $APP_PATH."
     else
-        web-debug "Skip creating project $INITIAL_PROJECT because $APPPATH is not empty."
+        debug-echo "Skip creating project $INITIAL_PROJECT because $APP_PATH is not empty."
     fi
 fi
 
 # run composer install when vendor directory or ClassLoader.php is missing
-if ! is-true $DISABLE_AUTORUN_COMPOSER_INSTALL && [ -f "$APPPATH/composer.json" ] && has-cmd composer; then
-    cd "$APPPATH"
+if ! is-true $DISABLE_AUTORUN_COMPOSER_INSTALL && [ -e "$APP_PATH/composer.json" ] && has-cmd composer; then
+    cd "$APP_PATH"
+    set -e
     vendor_dir=$(composer config vendor-dir)
-    if [ ! -d "$APPPATH/$vendor_dir" ] || [ ! -f "$vendor_dir/composer/ClassLoader.php" ]; then
+    if [ ! -d "$APP_PATH/$vendor_dir" ] || [ ! -e "$vendor_dir/composer/ClassLoader.php" ]; then
+        debug-echo "Run composer install because ClassLoader.php is missing"
         composer install $COMPOSER_INSTALL_OPTIONS -n
-        web-chown "Composer packages were installed in $APPPATH."
+        web-chown "Composer packages were installed in $APP_PATH."
     fi
 fi
 
-web-mkdir "$APPROOT"
+web-mkdir "$APP_ROOT"
 
 # create index.php when it doesn't exist
 if ! is-true $DISABLE_AUTORUN_GENERATING_INDEX; then
-    if [ -z "$(ls -A "$APPROOT")" ]; then
-        cat <<PHP >"$APPROOT/index.php"
+    if [ -z "$(ls -A "$APP_ROOT")" ]; then
+        debug-echo "Create index.php"
+        cat <<PHP >"$APP_ROOT/index.php"
 <?php
 // generated at $(date)
 if ((bool) trim((string) shell_exec('is-debug && echo 1 || echo 0'))) {
@@ -81,14 +90,15 @@ if ((bool) trim((string) shell_exec('is-debug && echo 1 || echo 0'))) {
     echo 'It works!';
 }
 PHP
-        web-chown fix "$APPROOT/index.php" 2>&1 >/dev/null
+        web-chown fix "$APP_ROOT/index.php" 2>&1 >/dev/null
     else
-        web-debug "Skip creating index.php because $APPROOT is not empty."
+        debug-echo "Skip creating index.php because $APP_ROOT is not empty."
     fi
 fi
 
 # fix .htaccess to allow uri path after index.php
-if [ -f "$APPROOT/.htaccess" ]; then
-    sed -i 's|index\.php/|index.php?/|g' "$APPROOT/.htaccess" 2>&1 >/dev/null
-    web-chown fix "$APPROOT/.htaccess" 2>&1 >/dev/null
+if [ -f "$APP_ROOT/.htaccess" ]; then
+    debug-echo "Fix .htaccess to allow uri path after index.php"
+    sed -i 's|index\.php/|index.php?/|g' "$APP_ROOT/.htaccess" 2>&1 >/dev/null
+    web-chown fix "$APP_ROOT/.htaccess" 2>&1 >/dev/null
 fi
