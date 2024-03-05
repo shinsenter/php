@@ -179,7 +179,7 @@ RUN phpaddmod imagick swoole xdebug
 The default application directory is `/var/www/html` and can be customized via the `$APP_PATH` environment variable:
 
 ```shell
-docker run --rm -p 80:80 -p 443:443 \
+docker run --rm -p 80:80 -p 443:443 -p 443:443/udp \
     -v "$PWD":/app \
     -e APP_PATH=/app \
     shinsenter/php:8.3-fpm-nginx
@@ -190,7 +190,7 @@ This would change the web application directory to `/app`.
 Moreover, the default document root (a relative path inside the application directory that contains your index.php file) can be customized by setting the `$DOCUMENT_ROOT` environment variable:
 
 ```shell
-docker run --rm -p 80:80 -p 443:443 \
+docker run --rm -p 80:80 -p 443:443 -p 443:443/udp \
     -v "$PWD":/app \
     -e APP_PATH=/app \
     -e DOCUMENT_ROOT=/public \
@@ -216,7 +216,7 @@ The available variables are:
 
 For example, to run a container as user `myapp` with uid `5000`, you could do:
 ```shell
-docker run --rm -p 80:80 -p 443:443 \
+docker run --rm -p 80:80 -p 443:443 -p 443:443/udp \
     -e APP_USER=myapp \
     -e APP_UID=5000 \
     shinsenter/php:8.3-fpm-nginx

@@ -13,7 +13,7 @@ These images also include the latest version of [Composer](https://getcomposer.o
 ## Usage
 
 ```shell
-docker run --rm -p 80:80 -p 443:443 \
+docker run --rm -p 80:80 -p 443:443 -p 443:443/udp \
     -v ./myproject:/var/www/html \
     shinsenter/phpfpm-apache:latest
 ```
@@ -45,7 +45,7 @@ COPY my_site.key /etc/ssl/site/server.key
 #### Using docker run
 
 ```shell
-docker run --rm -p 80:80 -p 443:443 \
+docker run --rm -p 80:80 -p 443:443 -p 443:443/udp \
     -v ./myproject:/var/www/html \
     -v ./my_site.crt:/etc/ssl/site/server.crt \
     -v ./my_site.key:/etc/ssl/site/server.key \
