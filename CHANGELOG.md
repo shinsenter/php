@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [5.0.3] - 2024-03-12
 
-Tightened Apache directory permissions to deny access to dotfiles and system directories. This also fixes #59.
+Added Sulu containers, updated descriptions for DockerHub repositories.
 
 ## [5.0.2] - 2024-02-23
 
