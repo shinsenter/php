@@ -104,6 +104,7 @@ jobs:
           build-args: |
             BUILD_CACHE_KEY=${{ env.BUILD_CACHE_KEY }}
             BUILD_CACHE_PATH=${{ env.BUILD_CACHE_PATH }}
+            BUILD_FROM_IMAGE=${{ env.BUILD_FROM_IMAGE }}
             BUILD_CONTEXT=${{ env.BUILD_CONTEXT }}
             BUILD_DATE=${{ env.BUILD_DATE }}
             BUILD_DESC=${{ env.BUILD_DESC }}
@@ -139,6 +140,7 @@ jobs:
           build-args: |
             BUILD_CACHE_KEY=${{ env.BUILD_CACHE_KEY }}
             BUILD_CACHE_PATH=${{ env.BUILD_CACHE_PATH }}
+            BUILD_FROM_IMAGE=${{ env.BUILD_FROM_IMAGE }}
             BUILD_CONTEXT=${{ env.BUILD_CONTEXT }}
             BUILD_DATE=${{ env.BUILD_DATE }}
             BUILD_DESC=${{ env.BUILD_DESC }}

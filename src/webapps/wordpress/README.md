@@ -1,6 +1,6 @@
 # shinsenter/wordpress
 
-🌏 (PHP) Wordpress docker containers for both production and development.
+🔋 (PHP / Wordpress) Production-ready container with automatic Wordpress installer.
 
 > Docker Hub: https://hub.docker.com/r/shinsenter/wordpress
 
@@ -33,7 +33,7 @@ mkdir myproject
 When running the container, mount this empty directory as a volume. For example:
 
 ```shell
-docker run --rm -p 80:80 -p 443:443 \
+docker run --rm -p 80:80 -p 443:443 -p 443:443/udp \
     -v ./myproject:/var/www/html \
     shinsenter/wordpress:latest
 ```
@@ -71,7 +71,7 @@ COPY my_site.key /etc/ssl/site/server.key
 #### Using docker run
 
 ```shell
-docker run --rm -p 80:80 -p 443:443 \
+docker run --rm -p 80:80 -p 443:443 -p 443:443/udp \
     -v ./myproject:/var/www/html \
     -v ./my_site.crt:/etc/ssl/site/server.crt \
     -v ./my_site.key:/etc/ssl/site/server.key \
