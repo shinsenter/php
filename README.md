@@ -269,11 +269,12 @@ DockerHub: https://docker.shin.company/php
 (To edit this welcome message, add your text to /etc/welcome.txt)
 
 ----------------------------------------
-Container : shinsenter/php
-Distro    : Alpine Linux v3.19
-Timezone  : UTC (GMT+0000)
-UID / GID : www-data:www-data (82:82)
-Web Root  : /var/www/html
+Container      : shinsenter/php
+Distro         : Alpine Linux v3.19
+Timezone       : UTC (GMT+0000)
+UID / GID      : www-data:www-data (82:82)
+App Root       : /var/www/html
+Document Root  : /var/www/html/public
 ----------------------------------------
 
 PHP Docker Images (https://hub.docker.com/r/shinsenter/php)
@@ -286,11 +287,11 @@ but WITHOUT ANY WARRANTY. See the GNU GPL for more details.
 
 To get support, please contact: SHIN (@shinsenter)
 
-PHP 8.3.2 (cli) (built: Jan 27 2024 04:26:04) (NTS)
+PHP 8.3.3 (fpm-fcgi) (built: Feb 16 2024 23:20:45)
 Copyright (c) The PHP Group
-Zend Engine v4.3.2, Copyright (c) Zend Technologies
-    with Zend OPcache v8.3.2, Copyright (c), by Zend Technologies
-Composer version 2.6.6 2023-12-08 18:32:26
+Zend Engine v4.3.3, Copyright (c) Zend Technologies
+    with Zend OPcache v8.3.3, Copyright (c), by Zend Technologies
+Composer version 2.7.1 2024-02-09 15:26:28
 ```
 
 #### Disable autorun scripts
