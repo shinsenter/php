@@ -184,6 +184,7 @@ jobs:
           - "app-mautic"
           - "app-phpixie"
           - "app-statamic"
+          - "app-sulu"
           - "app-yii"
         php_version:
           - "8.3"
