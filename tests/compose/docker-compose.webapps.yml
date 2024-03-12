@@ -320,6 +320,26 @@ services:
     environment:
       - SYMFONY_INSTALL_DEVKIT=true
 
+  ##############################################################################
+
+  sulu:
+    image: shinsenter/sulu:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../../src/webapps/sulu
+      dockerfile: sulu.dockerfile
+      args:
+        - PHP_VARIANT=${SUFFIX}
+    volumes:
+      - ./data/sulu:/shin/web
+    ports:
+      - 6116:80
+      # - 6216:443
+    environment:
+      - SYMFONY_INSTALL_DEVKIT=true
+
 ################################################################################
 
   wordpress:
@@ -335,8 +355,8 @@ services:
     volumes:
       - ./data/wordpress:/shin/web
     ports:
-      - 6116:80
-      # - 6216:443
+      - 6117:80
+      # - 6217:443
     environment:
       - WORDPRESS_WP_DEBUG=true
       - WORDPRESS_DB_HOST=database:3306
@@ -359,7 +379,7 @@ services:
     volumes:
       - ./data/yii:/shin/web
     ports:
-      - 6117:80
-      # - 6217:443
+      - 6118:80
+      # - 6218:443
 
   ##############################################################################

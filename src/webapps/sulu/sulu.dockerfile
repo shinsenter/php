@@ -21,9 +21,13 @@ ADD --link ./rootfs/ /
 
 ################################################################################
 
-# https://getkirby.com/docs/cookbook/setup/composer
-ENV DOCUMENT_ROOT=""
-ENV INITIAL_PROJECT="getkirby/starterkit"
+# https://github.com/sulu/skeleton
+ENV DOCUMENT_ROOT="/public"
+ENV INITIAL_PROJECT="sulu/skeleton"
 ENV DISABLE_GENERATING_INDEX=1
 
 ################################################################################
+
+RUN web-cmd console 'php $(app-path)/bin/console'
+RUN web-cmd symfony 'php $(app-path)/bin/console'
+RUN web-cmd sulu 'php $(app-path)/bin/console'

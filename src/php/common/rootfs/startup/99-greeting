@@ -12,11 +12,12 @@ if ! is-true $DISABLE_GREETING; then
 $([ -f $WELCOME_TXT ] && cat $WELCOME_TXT | sed "s#%PATH%#$WELCOME_TXT#g")
 
 ----------------------------------------
-Container : $NAME
-Distro    : $(source /etc/os-release && echo ${PRETTY_NAME:-Unknown})
-Timezone  : $(date +'%Z') (GMT$(date +'%z'))
-UID / GID : $APP_USER:$APP_GROUP ($(id -u $APP_USER):$(id -g $APP_USER))
-Web Root  : $(app-root)
+Container     : $NAME
+Distro        : $(source /etc/os-release && echo ${PRETTY_NAME:-Unknown})
+Timezone      : $(date +'%Z') (GMT$(date +'%z'))
+UID / GID     : $APP_USER:$APP_GROUP ($(id -u $APP_USER):$(id -g $APP_USER))
+App Root      : $(app-path)
+Document Root : $(app-root)
 ----------------------------------------
 
 $([ -f $LICENSE_TXT ] && cat $LICENSE_TXT | sed "s#%EMAIL%#$EMAIL#g" | sed "s#%YEAR%#$YEAR#g")

@@ -120,7 +120,7 @@ with-unit)
     S6_VERSION="latest"
     BUILD_DOCKERFILE=$BASE_DIR/src/php/with-unit.dockerfile
     BUILD_SOURCE_IMAGE="https://codeload.github.com/nginx/unit/tar.gz/refs/tags/$unit_version"
-    BUILD_CACHE_KEY="unit@$unit_version"
+    BUILD_CACHE_KEY="unit@$(echo "$unit_version" | head -c17)"
     PHP_VARIANT="zts$SUFFIX"
     verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
     ;;
@@ -138,12 +138,14 @@ with-f8p)
     BUILD_SOURCE_IMAGE="dunglas/frankenphp:$(get_dockerhub_latest_tag "dunglas/frankenphp" 1 "latest-php$PHP_VERSION$SUFFIX")"
     BUILD_DOCKERFILE=$BASE_DIR/src/php/with-f8p.dockerfile
     BUILD_PLATFORM="linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8"
+    BUILD_CACHE_KEY="frankenphp@$(get_dockerhub_latest_sha "dunglas/frankenphp" 1 "latest-php$PHP_VERSION$SUFFIX" | head -c17)"
     PHP_VARIANT="zts$SUFFIX"
     verlt "$PHP_VERSION" "8.2" && SKIP_BUILD=1
     ;;
 app-*)
     # implement later
     APP_NAME="${APP//app-/}"
+    BUILD_FROM_IMAGE="shinsenter/phpfpm-apache"
     BUILD_NAME="shinsenter/$APP_NAME"
     BUILD_DOCKERFILE=$BASE_DIR/src/webapps/$APP_NAME/$APP_NAME.dockerfile
     PHP_VARIANT="$SUFFIX"
@@ -161,6 +163,7 @@ app-*)
     crater)
         # https://docs.craterapp.com/installation.html
         LATEST_PHP="8.1"
+        BUILD_FROM_IMAGE="shinsenter/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
         ;;
     drupal)
@@ -169,6 +172,7 @@ app-*)
         ;;
     flarum)
         # https://docs.flarum.org/install/
+        BUILD_FROM_IMAGE="shinsenter/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.3" && SKIP_BUILD=1
         ;;
     fuelphp)
@@ -183,6 +187,7 @@ app-*)
     hyperf)
         # https://hyperf.wiki/3.1/#/en/quick-start/install
         BUILD_PLATFORM="linux/amd64,linux/arm/v7,linux/arm64/v8"
+        BUILD_FROM_IMAGE="shinsenter/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.2" && SKIP_BUILD=1
         if verlte "8.3" "$PHP_VERSION"; then
             BUILD_PLATFORM="linux/amd64,linux/arm64/v8"
@@ -194,10 +199,12 @@ app-*)
         ;;
     laminas)
         # https://docs.laminas.dev/tutorials/getting-started/skeleton-application/
+        BUILD_FROM_IMAGE="shinsenter/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.3" && SKIP_BUILD=1
         ;;
     laravel)
         # https://laravel.com/docs/master/installation
+        BUILD_FROM_IMAGE="shinsenter/phpfpm-nginx"
         ;;
     mautic)
         # https://docs.mautic.org/en/5.x/getting_started/how_to_install_mautic.html#installing-with-composer
@@ -209,6 +216,7 @@ app-*)
         ;;
     phpmyadmin)
         # https://docs.phpmyadmin.net/en/latest/setup.html
+        BUILD_FROM_IMAGE="shinsenter/phpfpm-nginx"
         ;;
     slim)
         # https://www.slimframework.com/docs/v4/start/installation.html
@@ -220,6 +228,9 @@ app-*)
     symfony)
         # https://symfony.com/doc/current/setup.html
         ;;
+    sulu)
+        # https://github.com/sulu/skeleton
+        ;;
     wordpress)
         # https://wordpress.org/documentation/category/installation/
         ;;
@@ -227,7 +238,10 @@ app-*)
         # https://www.yiiframework.com/doc/guide/2.0/en/start-installation
         ;;
     esac
+
+    BUILD_CACHE_KEY="$BUILD_FROM_IMAGE@$(get_dockerhub_latest_sha "$BUILD_FROM_IMAGE" 1 "php$PHP_VERSION$PHP_VARIANT" | head -c17)"
     ;;
+
 *)
     # default
     BUILD_DOCKERFILE=$BASE_DIR/src/php/base-php.dockerfile
