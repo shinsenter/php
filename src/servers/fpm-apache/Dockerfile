@@ -9,7 +9,7 @@ ARG PHP_VERSION=8.3
 ################################################################################
 
 # base image
-FROM ${BASE_IMAGE}:${PHP_VERSION}-fpm
+FROM ${BASE_IMAGE}:${PHP_VERSION}-fpm-deprecated
 
 ARG APACHE_BUILD_DEPS="gnupg2 apt-utils"
 ARG APACHE_PPA_KEY="4F4EA0AAE5267A6C"

@@ -101,6 +101,7 @@ prebuild () {
     echo "  #️⃣ Checksum: $checksum"
 
     echo -e "\n🖨 Making output for the next steps"
+    echo "SUFFIX=-deprecated" >> $GITHUB_ENV
     echo "BUILD_CACHE_DIR=$CACHE_DIR" >> $GITHUB_ENV
     echo "BUILD_CACHE=shinsenter/php:build-cache" >> $GITHUB_ENV
     echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV

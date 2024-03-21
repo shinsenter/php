@@ -10,7 +10,7 @@ ARG PHP_VERSION=8.3
 ################################################################################
 
 # base image
-FROM ${BASE_IMAGE}:php${PHP_VERSION}${IMAGE_SUFFIX}
+FROM ${BASE_IMAGE}:php${PHP_VERSION}${IMAGE_SUFFIX}-deprecated
 
 # sets web server root path
 ENV APACHE_DOCUMENT_ROOT="/webroot"
