@@ -6,9 +6,15 @@
 
 ## Introduction
 
-Built on top of [our PHP Docker images](https://hub.docker.com/r/shinsenter/php), these images enable easy tuning of PHP and PHP-FPM settings through environment variables. This eliminates the need to rebuild images when changing settings.
+Built on top of [our PHP Docker images](https://hub.docker.com/r/shinsenter/php),
+these images allow easy tuning of PHP and PHP-FPM settings through environment variables,
+eliminating the need to rebuild images when changing configurations.
 
-These images also include the latest version of [Composer](https://getcomposer.org), allowing projects to get started faster without additional installation.
+These images also include the latest version of [Composer](https://getcomposer.org),
+allowing you to get started with your projects faster without additional installation.
+
+> 💡 Hint: Docker image tags ending in `-alpine` or `-tidy` indicate Docker images built on the Alpine Linux base operating system.
+> These Docker images are lightweight, helping to speed up builds and save bandwidth for your CI/CD pipelines.
 
 ## Usage
 
@@ -54,7 +60,11 @@ The files are:
 - /etc/ssl/site/server.crt
 - /etc/ssl/site/server.key
 
-To use valid HTTPS certificates for your website in production, you need to replace these files with your own valid SSL certificates by copying over or mounting from the host machine into the container. Simply overwrite the default certificate files with your own valid cert and key files to enable true HTTPS for your production website.
+To use valid HTTPS certificates for your production website,
+you need to replace these files with your own valid SSL certificates
+by copying or mounting them from the host machine into the container.
+Simply overwrite the default certificate files with your own valid
+certificate and key files to enable true HTTPS for your production website.
 
 #### Using Dockerfile
 
@@ -76,7 +86,7 @@ docker run --rm -p 80:80 -p 443:443 -p 443:443/udp \
     shinsenter/hyperf:latest
 ```
 
-#### Using docker-compose:
+#### Using docker-compose
 
 ```yml
 services:
@@ -89,15 +99,15 @@ services:
 
 ## Contributing
 
-If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or open an issue on [Github](https://github.com/shinsenter/php/issues/new).
+If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [Github](https://github.com/shinsenter/php/issues/new).
 
-Your support helps keep these images maintained and improved for the community.
+Your support helps maintain and improve these images for the community.
 
 ## License
 
 This project is licensed under the terms of the [GNU General Public License v3.0](https://code.shin.company/php/blob/main/LICENSE).
 
-I appreciate you respecting my intellectual efforts in creating them. If you intend to copy or use ideas from this project, please credit properly.
+I appreciate you respecting my intellectual efforts in creating them. If you intend to copy or use ideas from this project, please give proper credit.
 
 ---
 

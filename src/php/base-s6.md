@@ -37,7 +37,8 @@ ENTRYPOINT ["/init"]
 
 ## Contributing
 
-If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or open an issue on [Github](https://github.com/shinsenter/php/issues/new).
+If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter)
+or opening an issue on [Github](https://github.com/shinsenter/php/issues/new).
 
 Your support helps keep these images maintained and improved for the community.
 
@@ -45,7 +46,8 @@ Your support helps keep these images maintained and improved for the community.
 
 This project is licensed under the terms of the [GNU General Public License v3.0](https://code.shin.company/php/blob/main/LICENSE).
 
-I appreciate you respecting my intellectual efforts in creating them. If you intend to copy or use ideas from this project, please credit properly.
+I appreciate you respecting my intellectual efforts in creating them.
+If you intend to copy or use ideas from this project, please credit properly.
 
 ---
 
