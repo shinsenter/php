@@ -9,7 +9,7 @@ ARG PHP_VERSION=8.3
 ################################################################################
 
 # base image
-FROM ${BASE_IMAGE}:${PHP_VERSION}-cli
+FROM ${BASE_IMAGE}:${PHP_VERSION}-cli-deprecated
 
 # adds PHP configs
 ARG PHP_POOL_NAME=www
