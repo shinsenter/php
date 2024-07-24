@@ -2,7 +2,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -17,17 +17,15 @@ echo 'Install FrankenPHP'
 
 set -e
 
-# phpaddmod sockets swoole
-
-if has-cmd frankenphp; then
-    ln -nsf "$(command -v frankenphp)" /usr/local/sbin/caddy
+if ! has-cmd frankenphp; then
+    exit 1
 fi
 
 if has-cmd setcap; then
-    setcap cap_net_bind_service=+ep /usr/local/bin/frankenphp
+    setcap cap_net_bind_service=+ep "$(command -v frankenphp)"
 fi
 
-if [ -x "$LEGACY_ENTRYPOINT" ]; then
-    sed -i 's|php|frankenphp run|g' "$LEGACY_ENTRYPOINT"
-fi
+ln -nsf "$(command -v frankenphp)" /usr/local/sbin/caddy
+
+frankenphp version
 EOF

@@ -3,7 +3,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -23,7 +23,7 @@ ADD --link ./rootfs/ /
 
 # https://book.cakephp.org/4/en/installation.html
 ENV DOCUMENT_ROOT="/webroot"
-ENV INITIAL_PROJECT="cakephp/app"
+ENV INITIAL_PROJECT="cakephp/app:~4.0"
 ENV DISABLE_GENERATING_INDEX=1
 
 ################################################################################

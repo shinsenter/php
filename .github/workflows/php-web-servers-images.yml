@@ -21,7 +21,7 @@ on:
   #     - README.md
   #     - src/**
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 3 * * *"
 
 ################################################################################
 ################################################################################
@@ -39,6 +39,7 @@ jobs:
           - "with-apache"
           - "with-nginx"
         php_version:
+          - "8.4-rc"
           - "8.3"
           - "8.2"
           - "8.1"
@@ -80,6 +81,25 @@ jobs:
       os_version: latest
     secrets: inherit
 
+  super-old:
+    strategy:
+      matrix:
+        app:
+          - "with-apache"
+          - "with-nginx"
+        php_version:
+          - "7.0"
+          - "5.6"
+        os:
+          - ""
+    uses: ./.github/workflows/build-template.yml
+    with:
+      app_name: ${{ matrix.app }}
+      php_version: ${{ matrix.php_version }}
+      os: ${{ matrix.os }}
+      os_version: latest
+    secrets: inherit
+
   ##############################################################################
   # PHP + Unpopular Web Servers
   ##############################################################################
@@ -91,6 +111,7 @@ jobs:
           - "with-unit"
           - "with-f8p"
         php_version:
+          - "8.4-rc"
           - "8.3"
           - "8.2"
           - "8.1"
@@ -136,22 +157,19 @@ jobs:
   # Webapps images
   ##############################################################################
 
-  popular-apps:
+  apps-group1:
     needs: [main, older]
     strategy:
       matrix:
         app:
-          - "app-cakephp4"
-          - "app-codeigniter4"
-          - "app-drupal"
-          - "app-fuelphp"
+          - "app-bedrock"
           - "app-laminas"
           - "app-laravel"
           - "app-phpmyadmin"
-          - "app-slim"
           - "app-symfony"
           - "app-wordpress"
         php_version:
+          - "8.4-rc"
           - "8.3"
           - "8.2"
           - "8.1"
@@ -171,22 +189,81 @@ jobs:
       os_version: latest
     secrets: inherit
 
-  unpopular-apps:
+  apps-group2:
+    needs: [main, older]
+    strategy:
+      matrix:
+        app:
+          - "app-cakephp4"
+          - "app-cakephp5"
+          - "app-codeigniter4"
+          - "app-drupal"
+          - "app-fuelphp"
+          - "app-slim"
+        php_version:
+          - "8.4-rc"
+          - "8.3"
+          - "8.2"
+          - "8.1"
+          - "8.0"
+          - "7.4"
+          - "7.3"
+          - "7.2"
+          - "7.1"
+        os:
+          - ""
+          - "alpine"
+    uses: ./.github/workflows/build-template.yml
+    with:
+      app_name: ${{ matrix.app }}
+      php_version: ${{ matrix.php_version }}
+      os: ${{ matrix.os }}
+      os_version: latest
+    secrets: inherit
+
+  apps-group3:
     needs: [main, older]
     strategy:
       matrix:
         app:
           - "app-crater"
           - "app-flarum"
+          - "app-mautic"
+          - "app-statamic"
+          - "app-yii"
+        php_version:
+          - "8.4-rc"
+          - "8.3"
+          - "8.2"
+          - "8.1"
+          - "8.0"
+          - "7.4"
+          - "7.3"
+          - "7.2"
+          - "7.1"
+        os:
+          - ""
+          - "alpine"
+    uses: ./.github/workflows/build-template.yml
+    with:
+      app_name: ${{ matrix.app }}
+      php_version: ${{ matrix.php_version }}
+      os: ${{ matrix.os }}
+      os_version: latest
+    secrets: inherit
+
+  apps-group4:
+    needs: [main, older]
+    strategy:
+      matrix:
+        app:
           - "app-grav"
           - "app-hyperf"
           - "app-kirby"
-          - "app-mautic"
           - "app-phpixie"
-          - "app-statamic"
           - "app-sulu"
-          - "app-yii"
         php_version:
+          - "8.4-rc"
           - "8.3"
           - "8.2"
           - "8.1"

@@ -3,7 +3,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -29,19 +29,22 @@ ENV DISABLE_GENERATING_INDEX=1
 
 # installs wp-cli
 ARG WPCLI_URL=https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-ARG WPCONFIG_URL=https://raw.githubusercontent.com/docker-library/wordpress/master/wp-config-docker.php
+ARG WPCLI_PATH=/usr/local/bin/wp-cli
 
 RUN <<'EOF'
 echo 'Install WP-CLI'
 
 set -e
 
-env-default '# Environment variables for WP-Cli'
-env-default WP_CLI_CACHE_DIR '/home/${APP_USER}/.wp-cli/cache/'
-env-default WP_CLI_CONFIG_PATH '/home/${APP_USER}/.wp-cli/config.yml'
-env-default WP_CLI_PACKAGES_DIR '/home/${APP_USER}/.wp-cli/packages/'
+web-mkdir "/.wp-cli"
 
-php -r "copy('$WPCLI_URL', '/usr/bin/wp-cli');" && chmod +xr /usr/bin/wp-cli
-php -r "copy('$WPCONFIG_URL', '/etc/wp-config.php');"
-web-cmd wp '/usr/bin/wp-cli --allow-root --path="$(app-path)"'
+env-default '# Environment variables for WP-Cli'
+env-default WP_CLI_DIR          '/.wp-cli'
+env-default WP_CLI_CACHE_DIR    '$WP_CLI_DIR/cache/'
+env-default WP_CLI_PACKAGES_DIR '$WP_CLI_DIR/packages/'
+env-default WP_CLI_CONFIG_PATH  '$WP_CLI_DIR/config.yml'
+env-default WORDPRESS_DEBUG     '$(is-debug && echo 1 || echo 0)'
+
+php -r "copy('$WPCLI_URL', '$WPCLI_PATH');" && chmod +xr $WPCLI_PATH
+web-cmd wp "$WPCLI_PATH --allow-root --path=\"\$(app-path)\""
 EOF

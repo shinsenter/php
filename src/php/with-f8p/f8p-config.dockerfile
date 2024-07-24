@@ -2,7 +2,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -25,9 +25,14 @@ env-default CADDY_GLOBAL_OPTIONS ''
 env-default CADDY_EXTRA_CONFIG ''
 env-default CADDY_SERVER_EXTRA_DIRECTIVES ''
 
+if [ -f /etc/caddy/Caddyfile ]; then
+    frankenphp fmt --overwrite /etc/caddy/Caddyfile
+fi
+
 # create s6 services
 if has-cmd s6-service; then
     s6-service frankenphp longrun '#!/usr/bin/env sh
+
 if [ -f /etc/caddy/envvars ]; then
     source /etc/caddy/envvars
 fi

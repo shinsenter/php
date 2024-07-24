@@ -1,9 +1,30 @@
 #!/usr/bin/env sh
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  SHIN Company <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
 
-debug-echo "Cache environment variables"
-mkdir -p /etc/default && with-env | sort >/etc/default/locale
+APP_PATH="$(app-path)"
+APP_ROOT="$(app-root)"
 
+################################################################################
+
+# fix .htaccess to allow uri path after index.php
+if [ -f "$APP_ROOT/.htaccess" ]; then
+    debug-echo "Fix .htaccess to allow uri path after index.php"
+    sed -i 's|index\.php/|index.php?/|g' "$APP_ROOT/.htaccess" 2>&1 >/dev/null
+    web-chown fix "$APP_ROOT/.htaccess" 2>&1 >/dev/null
+fi
+
+# fix ownership
 if [ -e "$(web-chown path)" ] || is-true $FIX_APP_PATH_PERMISSION || is-true $FIX_WEBHOME_PERMISSION; then
     debug-echo "Fix ownership for the application path"
     web-chown fix
+elif [ -f "$APP_PATH/index.php" ] && ! is-true $DISABLE_AUTORUN_FIX_OWNER_GROUP; then
+    if [ "$(ls -ld "$APP_PATH/index.php" | awk '{print $3 ":" $4}')" != "$APP_USER:$APP_GROUP" ]; then
+    web-chown fix
+    fi
 fi

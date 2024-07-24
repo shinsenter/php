@@ -1,0 +1,137 @@
+#!/usr/bin/env sh
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  SHIN Company <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+APP_PATH="$(app-path)"
+APP_ROOT="$(app-root)"
+
+################################################################################
+
+composer_install() {
+    local app_dir="${1:-$APP_PATH}"
+    local config="$app_dir/composer.json"
+    local enable_plugins=${2:-0}
+
+    if has-cmd composer && [ -e "$config" ]; then
+        cd "$app_dir"
+
+        # intall git if needed
+        if grep -qF '"git"' $config || is-true $COMPOSER_REQUIRES_GIT; then
+            pkg-add git
+            git config --global --add safe.directory "$app_dir"
+        fi
+
+        # intall nodejs if needed
+        if grep -qF 'node ' $config || is-true $COMPOSER_REQUIRES_NODEJS; then
+            pkg-add nodejs
+        fi
+
+        # intall npm if needed
+        if grep -qF 'npm ' $config || is-true $COMPOSER_REQUIRES_NPM; then
+            pkg-add npm
+            if [ -f "$app_dir/package.json" ]; then
+                npm install || true
+            fi
+        fi
+
+        # enable composer plugins
+        if is-true $enable_plugins; then
+            composer config -n --no-plugins "allow-plugins.*/*" true
+        fi
+
+        # update composer dependencies
+        composer update $COMPOSER_UPDATE_OPTIONS -n -W
+
+        # remove temporary composer config
+        if is-true $enable_plugins; then
+            composer config -n --unset "allow-plugins.*/*"
+        fi
+
+        web-chown "Composer packages were installed in $APP_PATH."
+    fi
+}
+
+composer_create() {
+    local app_dir="${1:-$APP_PATH}"
+    local project="${2:-$INITIAL_PROJECT}"
+    local config="$app_dir/composer.json"
+
+    if has-cmd composer; then
+        web-mkdir "$app_dir" && cd "$app_dir"
+
+        composer create-project $COMPOSER_CREATE_OPTIONS \
+            -n --no-secure-http --no-install --no-scripts \
+            -- "$project" "$app_dir"
+
+        if [ -e "$config" ]; then
+            composer config -n --no-plugins "allow-plugins.*/*" true
+
+            if grep -qF '"post-root-package-install"' $config; then
+                composer run post-root-package-install
+            fi
+
+            composer_install "$app_dir" false
+
+            if grep -qF '"post-create-project-cmd"' $config; then
+                composer run post-create-project-cmd
+            fi
+
+            composer config -n --unset "allow-plugins.*/*"
+            web-chown "Project $project created in $app_dir."
+        fi
+    fi
+}
+
+create_index() {
+    local index_path="${1:-$APP_ROOT}/index.php"
+    cat <<PHP >"$index_path"
+<?php
+// generated at $(date)
+if ((bool) trim((string) shell_exec('is-debug && echo 1 || echo 0'))) {
+    phpinfo();
+} else {
+    echo 'It works!';
+}
+PHP
+    web-chown fix "$index_path" 2>&1 >/dev/null
+}
+
+################################################################################
+
+web-mkdir "$APP_PATH" "$COMPOSER_HOME" && cd "$APP_PATH"
+
+if [ -z "$(ls -A "$APP_PATH")" ]; then
+    # create project
+    if ! is-true $DISABLE_AUTORUN_CREATING_PROJECT && [ ! -z "$INITIAL_PROJECT" ]; then
+        debug-echo "Create Composer project $INITIAL_PROJECT in $APP_PATH"
+        composer_create "$APP_PATH" "$INITIAL_PROJECT"
+    fi
+
+    # copy from source
+    if ! is-true $DISABLE_AUTORUN_COPYING_SOURCE && [ -d /source/ ]; then
+        debug-echo "Copy files from /source/ to $APP_PATH"
+        mv {/source/*,/source/.*} "$APP_PATH"/ 2>&1 >/dev/null
+    fi
+
+    # copy .env.example to .env
+    if [ ! -e "$APP_PATH/.env" ] && [ -f "$APP_PATH/.env.example" ]; then
+        debug-echo "Copy .env.example to .env"
+        cp -p "$APP_PATH/.env.example" "$APP_PATH/.env"
+    fi
+else
+    debug-echo "Skip initializing project because $APP_PATH is not empty."
+fi
+
+# run composer install when vendor directory or ClassLoader.php is missing
+if ! is-true $DISABLE_AUTORUN_COMPOSER_INSTALL && [ -e "$APP_PATH/composer.json" ] && has-cmd composer; then
+    vendor_dir="$APP_PATH/$(cd "$APP_PATH" && composer config vendor-dir 2>/dev/null)"
+    if [ ! -e "$vendor_dir/composer/ClassLoader.php" ]; then
+        debug-echo "Run composer install because ClassLoader.php is missing"
+        composer_install "$APP_PATH" true
+    fi
+fi

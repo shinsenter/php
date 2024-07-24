@@ -29,8 +29,9 @@ Build the following Dockerfile and try it out:
 ```Dockerfile
 FROM shinsenter/ubuntu-s6:latest
 
-# Add your instructions here
-# E.g. ADD ./your-project/src/ /var/www/html/
+# You may add your constructions from here
+# For example:
+# ADD --chown=$APP_USER:$APP_GROUP ./myproject/ /var/www/html/
 ```
 
 #### Debian
@@ -38,8 +39,9 @@ FROM shinsenter/ubuntu-s6:latest
 ```Dockerfile
 FROM shinsenter/debian-s6:latest
 
-# Add your instructions here
-# E.g. ADD ./your-project/src/ /var/www/html/
+# You may add your constructions from here
+# For example:
+# ADD --chown=$APP_USER:$APP_GROUP ./myproject/ /var/www/html/
 ```
 
 #### Alpine
@@ -47,8 +49,9 @@ FROM shinsenter/debian-s6:latest
 ```Dockerfile
 FROM shinsenter/alpine-s6:latest
 
-# Add your instructions here
-# E.g. ADD ./your-project/src/ /var/www/html/
+# You may add your constructions from here
+# For example:
+# ADD --chown=$APP_USER:$APP_GROUP ./myproject/ /var/www/html/
 ```
 
 ## Application Directory
@@ -56,7 +59,7 @@ FROM shinsenter/alpine-s6:latest
 The default application directory is `/var/www/html` and can be customized via the `$APP_PATH` environment variable:
 
 ```shell
-docker run --rm -v "$PWD":/app \
+docker run -v "$PWD":/app \
     -e APP_PATH=/app \
     shinsenter/ubuntu-s6:latest
 ```
@@ -69,17 +72,17 @@ The Docker image likely has a default user and group set, such as `www-data` for
 
 The available variables are:
 
-| Environment Variable | Description                             | Default           |
-|----------------------|-----------------------------------------|-------------------|
-| `APP_USER`           | Sets the username inside the container  | `www-data`        |
-| `APP_GROUP`          | Sets the groupname inside the container | `www-data`        |
-| `APP_UID`            | Sets the numeric uid of the user        | uid in base image |
-| `APP_GID`            | Sets the numeric gid of the group       | gid in base image |
+| Environment Variable | Description                             | Default          |
+|----------------------|-----------------------------------------|------------------|
+| `APP_USER`           | Sets the username inside the container  | `www-data`       |
+| `APP_GROUP`          | Sets the groupname inside the container | `www-data`       |
+| `APP_UID`            | Sets the numeric uid of the user        | uid in container |
+| `APP_GID`            | Sets the numeric gid of the group       | gid in container |
 
 
 For example, to run a container as user `myapp` with uid `5000`, you could do:
 ```shell
-docker run --rm \
+docker run \
     -e APP_USER=myapp \
     -e APP_UID=5000 \
     shinsenter/ubuntu-s6:latest
@@ -103,15 +106,15 @@ This mechanism can be used to initialize projects before the main program on the
 
 #### Usage
 
-For example, a script called `00-copy-config` could be copied into `/startup/` via a Dockerfile.
+For example, a script called `00-migration` could be copied into `/startup/` via a Dockerfile.
 
 > Note: The script file must have executable permissions to run.
 
 ```Dockerfile
 FROM shinsenter/ubuntu-s6:latest
 
-ADD ./autorun/00-copy-config /startup/00-copy-config
-RUN chmod +x /startup/00-copy-config
+ADD ./autorun/00-migration /startup/00-migration
+RUN chmod +x /startup/00-migration
 ```
 
 > 👉🏻 Info: The startup directory already includes a script called `99-greeting` that prints a welcome message when container starts.
@@ -122,7 +125,7 @@ To disable autorunning scripts, set `DISABLE_AUTORUN_SCRIPTS=1` as an environmen
 
 For example, this can be done with docker run:
 ```shell
-docker run --rm -e DISABLE_AUTORUN_SCRIPTS=1 shinsenter/ubuntu-s6:latest bash
+docker run -e DISABLE_AUTORUN_SCRIPTS=1 shinsenter/ubuntu-s6:latest bash
 ```
 
 Or in a `docker-compose.yml`:
@@ -145,7 +148,7 @@ This works both with `docker run` and in `docker-compose.yml`.
 #### Command Line
 
 ```shell
-docker run --rm -e DEBUG=1 shinsenter/ubuntu-s6:latest bash
+docker run -e DEBUG=1 shinsenter/ubuntu-s6:latest bash
 ```
 
 #### docker-compose.yml
@@ -172,7 +175,8 @@ These Docker images also include other environment variables for fine-tuning the
 
 ## Contributing
 
-If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or open an issue on [Github](https://github.com/shinsenter/php/issues/new).
+If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter)
+or opening an issue on [Github](https://github.com/shinsenter/php/issues/new).
 
 Your support helps keep these images maintained and improved for the community.
 
@@ -180,7 +184,8 @@ Your support helps keep these images maintained and improved for the community.
 
 This project is licensed under the terms of the [GNU General Public License v3.0](https://code.shin.company/php/blob/main/LICENSE).
 
-I appreciate you respecting my intellectual efforts in creating them. If you intend to copy or use ideas from this project, please credit properly.
+I appreciate you respecting my intellectual efforts in creating them.
+If you intend to copy or use ideas from this project, please credit properly.
 
 ---
 

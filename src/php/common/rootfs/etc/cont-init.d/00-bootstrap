@@ -3,7 +3,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -17,7 +17,7 @@ APP_USER="${APP_USER:=$DEFAULT_USER}"
 APP_GROUP="${APP_GROUP:=$DEFAULT_GROUP}"
 APP_UID="${APP_UID:=$DEFAULT_UID}"
 APP_GID="${APP_GID:=$DEFAULT_GID}"
-USER_HOME="/home/$APP_USER"
+USER_HOME="/home/${APP_USER}"
 
 rand_id() { echo "$((RANDOM % 500 + 499))"; }
 
@@ -51,4 +51,4 @@ else
 fi
 
 debug-echo "Create $APP_PATH if not exists"
-web-mkdir $APP_PATH
+web-mkdir "$APP_PATH" "$USER_HOME"

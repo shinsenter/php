@@ -21,7 +21,7 @@ on:
   #     - README.md
   #     - src/**
   schedule:
-    - cron: "0 4 * * *"
+    - cron: "0 0 * * *"
 
 ################################################################################
 ################################################################################
@@ -39,6 +39,7 @@ jobs:
           - "cli"
           - "fpm"
         php_version:
+          - "8.4-rc"
           - "8.3"
           - "8.2"
           - "8.1"
@@ -72,6 +73,25 @@ jobs:
         os:
           - ""
           - "alpine"
+    uses: ./.github/workflows/build-template.yml
+    with:
+      app_name: ${{ matrix.app }}
+      php_version: ${{ matrix.php_version }}
+      os: ${{ matrix.os }}
+      os_version: latest
+    secrets: inherit
+
+  super-old:
+    strategy:
+      matrix:
+        app:
+          - "cli"
+          - "fpm"
+        php_version:
+          - "7.0"
+          - "5.6"
+        os:
+          - ""
     uses: ./.github/workflows/build-template.yml
     with:
       app_name: ${{ matrix.app }}

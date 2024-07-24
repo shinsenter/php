@@ -2,5 +2,5 @@
 find /etc/ -name '*.dpkg-*' -or -name '*-' -exec rm -f {} \; || true
 find /var/log/ -type f -exec rm -f {} \; || true
 rm -rf $@ \
-    /tmp/* /usr/share/doc/* /var/cache/* /var/lib/apt/lists/* /var/tmp/* \
+    /tmp/* /usr/share/doc/* /var/cache/* /var/lib/apt/lists/* \
     ~/.cache/ ~/.composer/ ~/.git/ ~/.log/ ~/.npm/ ~/.tmp/ || true

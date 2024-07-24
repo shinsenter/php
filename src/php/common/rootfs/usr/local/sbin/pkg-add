@@ -3,16 +3,15 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
 alpine() {
-    local packages="$@"
-    if [ ! -z "$packages" ]; then
+    if [ $# -gt 0 ]; then
         rm -rf /var/cache/apk && mkdir /var/cache/apk
         apk update | debug-echo -l
-        for pkg in $packages; do
+        for pkg; do
             if [ "$pkg" = "upgrade" ]; then
                 apk upgrade | debug-echo -l
             else
@@ -24,10 +23,9 @@ alpine() {
 }
 
 debian() {
-    local packages="$@"
-    if [ ! -z "$packages" ]; then
+    if [ $# -gt 0 ]; then
         apt-get update -yq | debug-echo -l
-        for pkg in $packages; do
+        for pkg; do
             if [ "$pkg" = "upgrade" ] || [ "$pkg" = "update" ]; then
                 apt-get upgrade -yq | debug-echo -l
             else
@@ -38,5 +36,5 @@ debian() {
     fi
 }
 
-if has-cmd apk; then alpine "${APK_PACKAGES} $@"; fi
-if has-cmd apt; then debian "${APT_PACKAGES} $@"; fi
+if has-cmd apk; then alpine $APK_PACKAGES "$@"; fi
+if has-cmd apt; then debian $APT_PACKAGES "$@"; fi

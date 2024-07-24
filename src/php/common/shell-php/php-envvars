@@ -3,7 +3,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -55,30 +55,30 @@ function run($command)
 
 /**
  * @class  DockerPHP
- * @author Mai Nhut Tan <shin@shin.company>
+ * @author SHIN Company <shin@shin.company>
  */
 final class DockerPHP
 {
-    public const NOT_SET_VALUE = ''; // for php.ini and fpm.conf
-    public const NULL_VALUES   = ['no value', 'none', 'null', 'undefined', 'unknown val', 'unknown value'];
-    public const TRUTHY_VALUES = ['yes', 'true', 'on'];
-    public const FALSY_VALUES  = ['no', 'false', 'off'];
-    public const PHP_DEFAULTS  = [
-        'daemonize' => 'no',
-        'clear_env' => 'no',
-        'log_buffering' => 'yes',
-        'fastcgi.logging' => 'no',
-        'process.dumpable' => 'no',
-        'catch_workers_output' => 'yes',
-        'decorate_workers_output' => 'no',
+    const NOT_SET_VALUE = ''; // for php.ini and fpm.conf
+    const NULL_VALUES   = ['no value', 'none', 'null', 'undefined', 'unknown val', 'unknown value'];
+    const TRUTHY_VALUES = ['yes', 'true', 'on'];
+    const FALSY_VALUES  = ['no', 'false', 'off'];
+    const PHP_DEFAULTS  = [
+        'daemonize'                                => 'no',
+        'clear_env'                                => 'no',
+        'log_buffering'                            => 'yes',
+        'fastcgi.logging'                          => 'no',
+        'process.dumpable'                         => 'no',
+        'catch_workers_output'                     => 'yes',
+        'decorate_workers_output'                  => 'no',
         'request_terminate_timeout_track_finished' => 'no',
     ];
 
-    protected $php_conf_path;
-    protected $fpm_conf_path;
-    protected $php_settings;
-    protected $fpm_settings;
     protected $all_env_vars;
+    protected $fpm_conf_path;
+    protected $fpm_settings;
+    protected $php_conf_path;
+    protected $php_settings;
 
     public function __construct(
         $php_conf_file = 'custom.ini',
@@ -139,13 +139,13 @@ final class DockerPHP
         }
 
         if (DEBUG_MODE) {
-            $this->list();
+            $this->list_env();
         }
     }
 
-    public function export_dynamic_conf($use_envvars = false)
+    public function export_dynamic_conf($use_envvars = true)
     {
-        $this->export_conf(true);
+        $this->export_conf($use_envvars);
     }
 
     public function export_conf($use_envvars = false)
@@ -188,7 +188,7 @@ final class DockerPHP
         }
     }
 
-    public function list()
+    public function list_env()
     {
         run('env-default | grep PHP_');
     }
@@ -216,7 +216,7 @@ final class DockerPHP
 
         foreach ($lines as $line) {
             if (preg_match("/^\[(.+)\]/", $line, $matches)) {
-                $scope = $matches[1];
+                $scope = (strtolower($matches[1]) == 'general') ? 'global' : $matches[1];
                 continue;
             }
 
@@ -347,6 +347,8 @@ final class DockerPHP
 
 ################################################################################
 
+date_default_timezone_set('UTC');
+
 $arguments = $argv;
 array_shift($arguments);
 
@@ -381,3 +383,6 @@ foreach ($arguments as $action) {
 ################################################################################
 
 DockerPHP
+
+debug-echo "Cache environment variables"
+mkdir -p /etc/default && with-env | sort >/etc/default/locale

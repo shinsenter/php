@@ -2,7 +2,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -19,6 +19,7 @@ ARG APP_USER=${APP_USER:-www-data}
 ENV ENV="/etc/docker-envvars"
 ENV PATH="/usr/local/aliases:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 ENV PS1="\\u@\\h:\\w\\$ "
+ENV PRESQUASH_SCRIPTS="cleanup"
 
 # set APP_PATH, APP_USER and APP_GROUP
 ENV APP_PATH="$APP_PATH"
@@ -39,9 +40,10 @@ set -e
 chmod 4755 /usr/local/bin/web-*
 
 # install common packages
-APK_PACKAGES='bash shadow su-exec tar xz' \
+APK_PACKAGES='bash shadow su-exec tar unzip xz' \
 APT_PACKAGES='procps xz-utils' \
-pkg-add ca-certificates curl htop less openssl upgrade
+pkg-add ca-certificates coreutils curl htop less openssl
+pkg-add upgrade
 
 # patch sh binary if bash exists
 if has-cmd bash; then
