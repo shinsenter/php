@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.0.4] - 2024-07-31
+
+- Added Docker images for PHP versions [5.6](https://hub.docker.com/r/shinsenter/php/tags?name=5.6), [7.0](https://hub.docker.com/r/shinsenter/php/tags?name=7.0), and [8.4-rc](https://hub.docker.com/r/shinsenter/php/tags?name=8.4).
+- Added Docker images for [CakePHP 5](http://hub.docker.com/r/shinsenter/cakephp5) and [Bedrock](http://hub.docker.com/r/shinsenter/bedrock).
+- Improved SSL configuration for FrankenPHP containers.
+- Removed warning messages from Nginx related to the HTTP2 directive.
+- Fixed issues related to read/write permissions of container directories.
+- Resolved bugs for WordPress containers.
+- Updated descriptions for Docker images on Docker Hub.
+- Updated greeting message content upon container startup.
+- Enhanced GitHub actions for building Docker images.
+- Various minor improvements.
+
 ## [5.0.3] - 2024-03-12
 
 Added Sulu containers, updated descriptions for DockerHub repositories.
