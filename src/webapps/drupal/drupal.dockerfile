@@ -24,6 +24,6 @@ ADD --link ./rootfs/ /
 # https://www.drupal.org/download
 ENV DOCUMENT_ROOT="/web"
 ENV INITIAL_PROJECT="drupal/recommended-project"
-ENV DISABLE_GENERATING_INDEX=1
+ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 
 ################################################################################

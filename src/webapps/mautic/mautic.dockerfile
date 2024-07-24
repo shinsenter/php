@@ -24,7 +24,7 @@ ADD --link ./rootfs/ /
 # https://docs.mautic.org/en/5.x/getting_started/how_to_install_mautic.html#installing-with-composer
 ENV DOCUMENT_ROOT="/docroot"
 ENV INITIAL_PROJECT="mautic/recommended-project"
-ENV DISABLE_GENERATING_INDEX=1
+ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 ENV COMPOSER_REQUIRES_GIT=1
 
 ################################################################################

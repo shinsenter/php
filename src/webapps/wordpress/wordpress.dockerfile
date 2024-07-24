@@ -23,7 +23,7 @@ ADD --link ./rootfs/ /
 
 # https://wordpress.org/documentation/category/installation/
 ENV DOCUMENT_ROOT=""
-ENV DISABLE_GENERATING_INDEX=1
+ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 
 ################################################################################
 

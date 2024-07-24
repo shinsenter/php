@@ -24,6 +24,6 @@ ADD --link ./rootfs/ /
 # https://docs.phpmyadmin.net/en/latest/setup.html
 ENV DOCUMENT_ROOT=""
 ENV INITIAL_PROJECT="phpmyadmin/phpmyadmin"
-ENV DISABLE_GENERATING_INDEX=1
+ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 
 ################################################################################

@@ -24,7 +24,7 @@ ADD --link ./rootfs/ /
 # https://symfony.com/doc/current/setup.html
 ENV DOCUMENT_ROOT="/public"
 ENV INITIAL_PROJECT="symfony/skeleton"
-ENV DISABLE_GENERATING_INDEX=1
+ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 
 ################################################################################
 

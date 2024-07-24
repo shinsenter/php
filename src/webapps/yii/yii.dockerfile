@@ -24,7 +24,7 @@ ADD --link ./rootfs/ /
 # https://www.yiiframework.com/doc/guide/2.0/en/start-installation
 ENV DOCUMENT_ROOT="/web"
 ENV INITIAL_PROJECT="yiisoft/yii2-app-basic"
-ENV DISABLE_GENERATING_INDEX=1
+ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 
 ################################################################################
 

@@ -24,7 +24,7 @@ ADD --link ./rootfs/ /
 # https://github.com/sulu/skeleton
 ENV DOCUMENT_ROOT="/public"
 ENV INITIAL_PROJECT="sulu/skeleton"
-ENV DISABLE_GENERATING_INDEX=1
+ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 
 ################################################################################
 
