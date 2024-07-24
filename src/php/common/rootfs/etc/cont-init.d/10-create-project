@@ -87,20 +87,6 @@ composer_create() {
     fi
 }
 
-create_index() {
-    local index_path="${1:-$APP_ROOT}/index.php"
-    cat <<PHP >"$index_path"
-<?php
-// generated at $(date)
-if ((bool) trim((string) shell_exec('is-debug && echo 1 || echo 0'))) {
-    phpinfo();
-} else {
-    echo 'It works!';
-}
-PHP
-    web-chown fix "$index_path" 2>&1 >/dev/null
-}
-
 ################################################################################
 
 web-mkdir "$APP_PATH" "$COMPOSER_HOME" && cd "$APP_PATH"
