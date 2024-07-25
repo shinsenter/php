@@ -2,14 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
-## [5.0.4] - 2024-07-31
+## [5.1.0] - 2024-08-01
+
+We have updated the behavior of the environment variables used to change PHP configurations to enhance container performance:
+
+By default, the `PHP_*` environment variables only take effect when set before starting the container.
+To dynamically change PHP configurations using `PHP_*` environment variables while running commands within the container,
+you need to start your container with the `ALLOW_RUNTIME_PHP_ENVVARS=1` environment variable.
+
+Other updates:
 
 - Added Docker images for PHP versions [5.6](https://hub.docker.com/r/shinsenter/php/tags?name=5.6), [7.0](https://hub.docker.com/r/shinsenter/php/tags?name=7.0), and [8.4-rc](https://hub.docker.com/r/shinsenter/php/tags?name=8.4).
 - Added Docker images for [CakePHP 5](http://hub.docker.com/r/shinsenter/cakephp5) and [Bedrock](http://hub.docker.com/r/shinsenter/bedrock).
 - Improved SSL configuration for FrankenPHP containers.
 - Removed warning messages from Nginx related to the HTTP2 directive.
-- Fixed issues related to read/write permissions of container directories.
-- Resolved bugs for WordPress containers.
+- Fixed read/write permission issues in container directories.
+- Resolved bugs in WordPress containers.
 - Updated descriptions for Docker images on Docker Hub.
 - Updated greeting message content upon container startup.
 - Enhanced GitHub actions for building Docker images.

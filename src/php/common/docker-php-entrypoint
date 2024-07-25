@@ -28,8 +28,8 @@ if ! grep -qF "$ENV_CHECK" ~/.bashrc; then echo "
 $ENV_CHECK
 " >> ~/.bashrc; fi
 
-# export env variables for PHP
-if has-cmd php-envvars; then
+# export all env variables for PHP
+if is-true $ALLOW_RUNTIME_PHP_ENVVARS && has-cmd php-envvars; then
     php-envvars export_envvars 2>&1
 fi
 

@@ -96,7 +96,12 @@ The environment variable names follow these conventions:
 
 This naming convention helps you easily identify which environment variable applies to which PHP/PHP-FPM configuration directive.
 
-> 💡 Hint: Run `env-default` or `env | sort | grep PHP_` in the container to get a full list of default environment values.
+> 👉🏻 Info: By default, the `PHP_*` environment variables only take effect when set before starting the container.
+> To dynamically change PHP configurations using `PHP_*` environment variables while running commands within the container,
+> you need to start your container with the `ALLOW_RUNTIME_PHP_ENVVARS=1` environment variable.
+
+> 💡 Hint: Run `php-envvars` in the container to get a full list of default `PHP_` environment variables.
+
 
 ### Examples
 
@@ -366,6 +371,7 @@ These Docker images also include other environment variables for fine-tuning the
 
 | Setting Name                       | Default Value | Description                                                      | Example |
 |------------------------------------|---------------|------------------------------------------------------------------|---------|
+| `ALLOW_RUNTIME_PHP_ENVVARS`        | Not set       | When set to "1", you can use `PHP_*` environment variables to dynamically change the configurations when running PHP commands in the container. | 1 |
 | `DEBUG` or `DEBUG_MODE`            | Not set       | When set to "1", this enables debug mode with more verbose logs. | 1 |
 | `TZ`                               | `UTC`         | Sets the default timezone to be used for the container. View the [full list](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) here. | `Asia/Tokyo` |
 | `DISABLE_AUTORUN_CREATING_PROJECT` | Not set       | When set to "1", this disables creating a new project. By default, Composer will create a project when the `INITIAL_PROJECT` environment variable is set and if the app directory is empty. | 0 |
