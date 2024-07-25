@@ -13,6 +13,7 @@ DEFAULT_UID="$(id -u $DEFAULT_USER)"
 DEFAULT_GID="$(id -g $DEFAULT_USER)"
 
 APP_PATH="$(app-path)"
+LOG_PATH="$(dirname $(log-path))"
 APP_USER="${APP_USER:=$DEFAULT_USER}"
 APP_GROUP="${APP_GROUP:=$DEFAULT_GROUP}"
 APP_UID="${APP_UID:=$DEFAULT_UID}"
@@ -51,4 +52,4 @@ else
 fi
 
 debug-echo "Create $APP_PATH if not exists"
-web-mkdir "$APP_PATH" "$USER_HOME"
+web-mkdir "$APP_PATH" "$USER_HOME" "$LOG_PATH"

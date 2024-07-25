@@ -366,9 +366,10 @@ These Docker images include additional environment variables for fine-tuning con
 
 | Setting Name                       | Default Value    | Description                                                                                                                           | Example |
 |------------------------------------|------------------|---------------------------------------------------------------------------------------------------------------------------------------|---------|
-| `ALLOW_RUNTIME_PHP_ENVVARS`        | Not set          | Enables the use of `$PHP_*` environment variables to dynamically change configurations when running PHP commands in the container.    | 1 |
+| `APP_LOG_PATH`                     | `/dev/stderr`    | Sets the log output path. By default, logs will be sent to the container's standard output.                                           | `/var/log/container.txt` |
 | `DEBUG` or `DEBUG_MODE`            | Not set          | Activates debug mode with more verbose logs when set to `1`.                                                                          | 1 |
 | `TZ`                               | `UTC`            | Sets the default timezone for the container. [Full list](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).               | `Asia/Tokyo` |
+| `ALLOW_RUNTIME_PHP_ENVVARS`        | Not set          | Enables the use of `$PHP_*` environment variables to dynamically change configurations when running PHP commands in the container.    | 1 |
 | `INITIAL_PROJECT`                  | Not set          | Specifies a project for Composer to create in the app directory when it is empty.                                                     | `laravel/laravel` |
 | `DISABLE_AUTORUN_CREATING_PROJECT` | Not set          | Prevents the creation of a new project when set to `1`. By default, Composer creates a project if `$INITIAL_PROJECT` is set and the app directory is empty. | 0 |
 | `DISABLE_AUTORUN_COMPOSER_INSTALL` | Not set          | Disables `composer install` at startup when set to `1`. By default, `composer install` runs at startup if `composer.json` is present but packages are missing. | 0 |
