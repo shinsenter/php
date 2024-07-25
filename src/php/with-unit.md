@@ -2,7 +2,8 @@
 
 🌏 (PHP) PHP + Nginx Unit docker containers for both production and development.
 
-> Docker Hub: https://hub.docker.com/r/shinsenter/unit-php
+- Docker Hub: https://hub.docker.com/r/shinsenter/unit-php
+- GitHub Packages: https://github.com/shinsenter/php/pkgs/container/unit-php
 
 ## Introduction
 
@@ -81,7 +82,7 @@ Check our [Docker Hub](https://hub.docker.com/r/shinsenter/unit-php/tags) for al
 ## Contributing
 
 If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter)
-or opening an issue on [Github](https://github.com/shinsenter/php/issues/new).
+or opening an issue on [GitHub](https://github.com/shinsenter/php/issues/new).
 
 Your support helps keep these images maintained and improved for the community.
 

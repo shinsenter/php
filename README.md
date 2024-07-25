@@ -2,7 +2,8 @@
 
 📦 Simplified PHP Docker images for effortless customization and extension setup.
 
-> Docker Hub: https://hub.docker.com/r/shinsenter/php
+- Docker Hub: https://hub.docker.com/r/shinsenter/php
+- GitHub Packages: https://github.com/shinsenter/php/pkgs/container/php
 
 [![shinsenter/php](https://repository-images.githubusercontent.com/458053748/24e848e1-c0fc-4893-b2b9-f7dbfad263f3)](https://docker.shin.company/php)
 
@@ -55,7 +56,7 @@ You can simply copy and paste one of these `docker run` commands to run a contai
 
 ```shell
 # non-interactive
-docker run shinsenter/php:8.3-cli php -m
+docker run --rm shinsenter/php:8.3-cli php -m
 
 # interactive
 docker run -it -v ./myproject:/var/www/html shinsenter/php:8.3-cli
@@ -100,7 +101,7 @@ This naming convention helps you easily identify which environment variable appl
 > To dynamically change PHP configurations using `PHP_*` environment variables while running commands within the container,
 > you need to start your container with the `ALLOW_RUNTIME_PHP_ENVVARS=1` environment variable.
 
-> 💡 Hint: Run `php-envvars` in the container to get a full list of default `PHP_` environment variables.
+> 💡 Hint: Run `php-envvars` in the container to get a full list of default `PHP_*` environment variables.
 
 
 ### Examples
@@ -139,7 +140,7 @@ services:
 | PHP_UPLOAD_MAX_FILESIZE=100M  | Increases the maximum upload file size from the default 2MB.   | `upload_max_filesize 100M`  |
 | PHP_SESSION_COOKIE_HTTPONLY=1 | Enables the HttpOnly flag for session cookie security. | `session.cookie_httponly 1` |
 
-> 💡 Hint: Run `env-default` or `env | sort | grep PHP_` in the container to get a full list of default environment values.
+> 💡 Hint: Run `php-envvars` in the container to get a full list of default `PHP_*` environment variables.
 
 ## Pre-installed PHP Extensions
 
@@ -168,7 +169,7 @@ zip
 
 > 👉🏻 Info: The pre-installed PHP extensions from the official Docker images are excluded from this list.
 
-> 💡 Hint: Run `docker run shinsenter/php:8.3-cli php -m` in the container
+> 💡 Hint: Run `docker run --rm shinsenter/php:8.3-cli php -m` in the container
 to get a list of extensions (you can replace `8.3` with a specific PHP version).
 
 ## Adding PHP Extensions
@@ -291,13 +292,14 @@ RUN chmod +x /startup/00-migration
 |_ -||   || ||   ||_ -|| -_||   ||  _|| -_||  _| / / | . ||   || . |
 |___||_|_||_||_|_||___||___||_|_||_|  |___||_|  |_/  |  _||_|_||  _|
                                                      |_|       |_|
-Github:    https://code.shin.company/php
-DockerHub: https://docker.shin.company/php
+
+If you find my Docker images useful, consider donating via PayPal:
+ -> https://www.paypal.me/shinsenter
 
 (To edit this welcome message, add your text to /etc/welcome.txt)
 
 ---------------
-Container     : shinsenter/php (built: 2024-07-24T06:19:06+0000)
+Container     : shinsenter/php (built: 2024-08-01T00:00:00+0000)
 Distro        : Debian GNU/Linux 12 (bookworm)
 Timezone      : UTC (GMT+0000)
 UID / GID     : www-data:www-data (33:33)
@@ -305,15 +307,17 @@ App Root      : /var/www/html
 Document Root : /var/www/html
 ---------------
 
-PHP Docker Images (https://hub.docker.com/r/shinsenter/php)
-Copyright (C) 2024  SHIN Company <shin@shin.company>
+Docker Images by SHIN Company
+Copyright (C) %YEAR% %EMAIL%
 
-This is free software under the GNU GPL.
+This software is free under the GNU General Public License (GPL).
 You can redistribute and/or modify it under the terms of the GNU GPL.
-This program is distributed in the hope it will be useful,
-but WITHOUT ANY WARRANTY. See the GNU GPL for more details.
+This program is provided with the hope that it will be useful,
+but it comes WITHOUT ANY WARRANTY. For more details, refer to the GNU GPL.
 
-To get support, please contact: SHIN Company <shin@shin.company>
+To get support, please contact: %EMAIL%
+Docker Hub:      https://hub.docker.com/u/shinsenter
+GitHub Packages: https://github.com/shinsenter?tab=packages
 
 PHP 8.3.9 (cli) (built: Jul 23 2024 06:02:10) (NTS)
 Copyright (c) The PHP Group
@@ -415,7 +419,7 @@ providing both the latest code and production stability.
 ## Contributing
 
 If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter)
-or opening an issue on [Github](https://github.com/shinsenter/php/issues/new).
+or opening an issue on [GitHub](https://github.com/shinsenter/php/issues/new).
 
 Your support helps keep these images maintained and improved for the community.
 

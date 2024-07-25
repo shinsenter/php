@@ -2,7 +2,8 @@
 
 🔋 (PHP / Grav) Production-ready container with automatic Grav installer.
 
-> Docker Hub: https://hub.docker.com/r/shinsenter/grav
+- Docker Hub: https://hub.docker.com/r/shinsenter/grav
+- GitHub Packages: https://github.com/shinsenter/php/pkgs/container/grav
 
 ## Introduction
 
@@ -104,7 +105,7 @@ services:
 
 ## Contributing
 
-If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [Github](https://github.com/shinsenter/php/issues/new).
+If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://github.com/shinsenter/php/issues/new).
 
 Your support helps maintain and improve these images for the community.
 

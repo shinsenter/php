@@ -2,7 +2,8 @@
 
 🔋 (PHP / phpMyAdmin) Production-ready container with automatic phpMyAdmin installer.
 
-> Docker Hub: https://hub.docker.com/r/shinsenter/phpmyadmin
+- Docker Hub: https://hub.docker.com/r/shinsenter/phpmyadmin
+- GitHub Packages: https://github.com/shinsenter/php/pkgs/container/phpmyadmin
 
 ## Introduction
 
@@ -104,7 +105,7 @@ services:
 
 ## Contributing
 
-If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [Github](https://github.com/shinsenter/php/issues/new).
+If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://github.com/shinsenter/php/issues/new).
 
 Your support helps maintain and improve these images for the community.
 

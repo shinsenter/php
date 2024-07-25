@@ -3,7 +3,8 @@
 |_ -||   || ||   ||_ -|| -_||   ||  _|| -_||  _| / / | . ||   || . |
 |___||_|_||_||_|_||___||___||_|_||_|  |___||_|  |_/  |  _||_|_||  _|
                                                      |_|       |_|
-Github:    https://code.shin.company/php
-DockerHub: https://docker.shin.company/php
+
+If you find my Docker images useful, consider donating via PayPal:
+ -> https://www.paypal.me/shinsenter
 
 (To edit this welcome message, add your text to %PATH%)

@@ -2,7 +2,8 @@
 
 🔋 (PHP / Wordpress) Production-ready container with automatic Bedrock Wordpress installer.
 
-> Docker Hub: https://hub.docker.com/r/shinsenter/bedrock
+- Docker Hub: https://hub.docker.com/r/shinsenter/bedrock
+- GitHub Packages: https://github.com/shinsenter/php/pkgs/container/bedrock
 
 ## Introduction
 
@@ -107,7 +108,7 @@ services:
 
 ## Contributing
 
-If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [Github](https://github.com/shinsenter/php/issues/new).
+If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://github.com/shinsenter/php/issues/new).
 
 Your support helps maintain and improve these images for the community.
 

@@ -25,7 +25,7 @@ Other updates:
 
 ## [5.0.3] - 2024-03-12
 
-Added Sulu containers, updated descriptions for DockerHub repositories.
+Added Sulu containers, updated descriptions for Docker Hub repositories.
 
 ## [5.0.2] - 2024-02-23
 
@@ -56,7 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Contributing
 
-If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [Github](https://github.com/shinsenter/php/issues/new).
+If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://github.com/shinsenter/php/issues/new).
 
 Your support helps maintain and improve these images for the community.
 
