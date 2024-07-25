@@ -366,7 +366,7 @@ These Docker images include additional environment variables for fine-tuning con
 
 | Setting Name                       | Default Value    | Description                                                                                                                           | Example |
 |------------------------------------|------------------|---------------------------------------------------------------------------------------------------------------------------------------|---------|
-| `APP_LOG_PATH`                     | `/dev/stderr`    | Sets the log output path. By default, logs will be sent to the container's standard output.                                           | `/var/log/container.txt` |
+| `DEFAULT_LOG_PATH`                 | `/dev/stderr`    | Sets the log output path. By default, logs will be sent to the container's standard output.                                           | `/var/log/container.txt` |
 | `DEBUG` or `DEBUG_MODE`            | Not set          | Activates debug mode with more verbose logs when set to `1`.                                                                          | 1 |
 | `TZ`                               | `UTC`            | Sets the default timezone for the container. [Full list](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).               | `Asia/Tokyo` |
 | `ALLOW_RUNTIME_PHP_ENVVARS`        | Not set          | Enables the use of `$PHP_*` environment variables to dynamically change configurations when running PHP commands in the container.    | 1 |
