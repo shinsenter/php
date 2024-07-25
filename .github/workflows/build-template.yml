@@ -94,6 +94,14 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       -
+        if: ${{ !env.SKIP_BUILD && env.PUBLISH_TO_GHCR }}
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      -
         if: ${{ !env.SKIP_BUILD }}
         name: Cleanup before building ${{ env.BUILD_TAG }}
         run: |
