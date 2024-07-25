@@ -40,6 +40,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
     services:
       registry:
         image: registry:2
@@ -47,6 +50,7 @@ jobs:
           - '5000:5000'
     env:
       ARCHIVES_REPO: "shinsenter/php-archives"
+      PUBLISH_TO_GHCR: "1"
       USE_BUILD_CACHE: "0"
     steps:
       -
