@@ -331,9 +331,9 @@ final class DockerPHP
     {
         $conf = [];
 
-        // only export settings that are set in environment variables
-        $settings = array_filter($settings, function ($value, $key) {
-            return array_key_exists($this->env_key($key), $_ENV);
+        // only export settings that are manually set
+        $settings = array_filter($settings, function ($value, $key) use ($defaults) {
+            return array_key_exists($key, $defaults) || array_key_exists($this->env_key($key), $_ENV);
         }, ARRAY_FILTER_USE_BOTH);
 
         // export the settings
