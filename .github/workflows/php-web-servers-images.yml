@@ -68,7 +68,7 @@ jobs:
   ##############################################################################
 
   apps-group1:
-    needs: [main, older]
+    needs: [web-servers]
     strategy:
       matrix:
         php_version:
@@ -102,7 +102,7 @@ jobs:
     secrets: inherit
 
   apps-group2:
-    needs: [main, older]
+    needs: [web-servers]
     strategy:
       matrix:
         php_version:
@@ -136,7 +136,7 @@ jobs:
     secrets: inherit
 
   apps-group3:
-    needs: [main, older]
+    needs: [web-servers]
     strategy:
       matrix:
         php_version:
