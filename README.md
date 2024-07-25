@@ -301,14 +301,14 @@ Document Root : /var/www/html
 ---------------
 
 Docker Images by SHIN Company
-Copyright (C) %YEAR% %EMAIL%
+Copyright (C) 2024 SHIN Company <shin@shin.company>
 
 This software is free under the GNU General Public License (GPL).
 You can redistribute and/or modify it under the terms of the GNU GPL.
 This program is provided with the hope that it will be useful,
 but it comes WITHOUT ANY WARRANTY. For more details, refer to the GNU GPL.
 
-To get support, please contact: %EMAIL%
+To get support, please contact: SHIN Company <shin@shin.company>
 Docker Hub:      https://hub.docker.com/u/shinsenter
 GitHub Packages: https://github.com/shinsenter?tab=packages
 
