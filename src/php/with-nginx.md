@@ -7,12 +7,12 @@
 
 ## Introduction
 
-Built on top of [our PHP Docker images](https://hub.docker.com/r/shinsenter/php),
-these images allow easy tuning of PHP and PHP-FPM settings through environment variables,
-eliminating the need to rebuild images when changing configurations.
+Our PHP Docker images, available on [Docker Hub](https://hub.docker.com/r/shinsenter/php),
+are designed for easy configuration of PHP and PHP-FPM settings via environment variables.
+This approach eliminates the need to rebuild images when making configuration changes.
 
-These images also include the latest version of [Composer](https://getcomposer.org),
-allowing you to get started with your projects faster without additional installation.
+These images also come with the latest version of [Composer](https://getcomposer.org),
+enabling you to start projects quickly without additional installations.
 
 ## Usage
 
@@ -91,14 +91,14 @@ Check our [Docker Hub](https://hub.docker.com/r/shinsenter/phpfpm-nginx/tags) fo
 If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter)
 or opening an issue on [GitHub](https://github.com/shinsenter/php/issues/new).
 
-Your support helps keep these images maintained and improved for the community.
+Your support helps maintain and improve these images for the community.
 
 ## License
 
 This project is licensed under the terms of the [GNU General Public License v3.0](https://code.shin.company/php/blob/main/LICENSE).
 
-I appreciate you respecting my intellectual efforts in creating them.
-If you intend to copy or use ideas from this project, please credit properly.
+Please respect the intellectual efforts involved in creating these images.
+If you intend to copy or use ideas from this project, proper credit is appreciated.
 
 ---
 

@@ -7,12 +7,12 @@
 
 ## Introduction
 
-Built on top of [our PHP Docker images](https://hub.docker.com/r/shinsenter/php),
-these images allow easy tuning of PHP and PHP-FPM settings through environment variables,
-eliminating the need to rebuild images when changing configurations.
+Our PHP Docker images, available on [Docker Hub](https://hub.docker.com/r/shinsenter/php),
+are designed for easy configuration of PHP and PHP-FPM settings via environment variables.
+This approach eliminates the need to rebuild images when making configuration changes.
 
-These images also include the latest version of [Composer](https://getcomposer.org),
-allowing you to get started with your projects faster without additional installation.
+These images also come with the latest version of [Composer](https://getcomposer.org),
+enabling you to start projects quickly without additional installations.
 
 ## Usage
 

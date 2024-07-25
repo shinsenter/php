@@ -6,8 +6,8 @@ All notable changes to this project will be documented in this file.
 
 We have updated the behavior of the environment variables used to change PHP configurations to enhance container performance:
 
-By default, the `PHP_*` environment variables only take effect when set before starting the container.
-To dynamically change PHP configurations using `PHP_*` environment variables while running commands within the container,
+By default, the `$PHP_*` environment variables only take effect when set before starting the container.
+To dynamically change PHP configurations using `$PHP_*` environment variables while running commands within the container,
 you need to start your container with the `ALLOW_RUNTIME_PHP_ENVVARS=1` environment variable.
 
 Other updates:
