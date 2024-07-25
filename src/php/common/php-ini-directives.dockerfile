@@ -46,7 +46,6 @@ env-default PHP_SESSION_COOKIE_SAMESITE 'Lax'
 env-default PHP_SESSION_COOKIE_SECURE '0'
 env-default PHP_SESSION_USE_COOKIES '1'
 env-default PHP_UPLOAD_MAX_FILESIZE '100M'
-env-default PHP_USER_AGENT 'PHP ${PHP_VERSION} Container (https://hub.docker.com/r/${DOCKER_TAG:-shinsenter/php})'
 env-default PHP_VARIABLES_ORDER 'EGPCS'
 if [ ! -z "$SENDMAIL_PATH" ]; then env-default PHP_SENDMAIL_PATH '$SENDMAIL_PATH'; fi
 if [ ! -z "$SENDMAIL_FROM" ]; then env-default PHP_SENDMAIL_FROM '$SENDMAIL_FROM'; fi
