@@ -35,63 +35,24 @@ jobs:
   main:
     strategy:
       matrix:
-        app:
-          - "cli"
-          - "fpm"
         php_version:
-          - "8.4-rc"
-          - "8.3"
-          - "8.2"
-          - "8.1"
-          - "8.0"
-        os:
-          - ""
-          - "alpine"
-    uses: ./.github/workflows/build-template.yml
-    with:
-      app_name: ${{ matrix.app }}
-      php_version: ${{ matrix.php_version }}
-      os: ${{ matrix.os }}
-      os_version: latest
-    secrets: inherit
-
-  ##############################################################################
-  # Older PHP images
-  ##############################################################################
-
-  older:
-    strategy:
-      matrix:
-        app:
-          - "cli"
-          - "fpm"
-        php_version:
-          - "7.4"
-          - "7.3"
-          - "7.2"
-          - "7.1"
-        os:
-          - ""
-          - "alpine"
-    uses: ./.github/workflows/build-template.yml
-    with:
-      app_name: ${{ matrix.app }}
-      php_version: ${{ matrix.php_version }}
-      os: ${{ matrix.os }}
-      os_version: latest
-    secrets: inherit
-
-  super-old:
-    strategy:
-      matrix:
-        app:
-          - "cli"
-          - "fpm"
-        php_version:
-          - "7.0"
           - "5.6"
+          - "7.0"
+          - "7.1"
+          - "7.2"
+          - "7.3"
+          - "7.4"
+          - "8.0"
+          - "8.1"
+          - "8.2"
+          - "8.3"
+          - "8.4-rc"
+        app:
+          - "cli"
+          - "fpm"
         os:
           - ""
+          - "alpine"
     uses: ./.github/workflows/build-template.yml
     with:
       app_name: ${{ matrix.app }}
@@ -99,3 +60,6 @@ jobs:
       os: ${{ matrix.os }}
       os_version: latest
     secrets: inherit
+
+################################################################################
+################################################################################

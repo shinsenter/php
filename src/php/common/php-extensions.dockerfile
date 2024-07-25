@@ -22,7 +22,7 @@ echo 'Configure PHP extensions'
 set -e
 
 # Make alias for php with env
-web-cmd root php "$(command -v php)"
+web-cmd root php  "$(command -v php)"
 web-cmd root pecl "$(command -v pecl)"
 
 # Set IPE default settings

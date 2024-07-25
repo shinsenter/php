@@ -32,116 +32,26 @@ jobs:
   # PHP + Web Servers
   ##############################################################################
 
-  main:
+  web-servers:
     strategy:
       matrix:
-        app:
-          - "with-apache"
-          - "with-nginx"
         php_version:
-          - "8.4-rc"
-          - "8.3"
-          - "8.2"
-          - "8.1"
-          - "8.0"
-        os:
-          - ""
-          - "alpine"
-    uses: ./.github/workflows/build-template.yml
-    with:
-      app_name: ${{ matrix.app }}
-      php_version: ${{ matrix.php_version }}
-      os: ${{ matrix.os }}
-      os_version: latest
-    secrets: inherit
-
-  ##############################################################################
-  # Older PHP + Web Servers
-  ##############################################################################
-
-  older:
-    strategy:
-      matrix:
-        app:
-          - "with-apache"
-          - "with-nginx"
-        php_version:
-          - "7.4"
-          - "7.3"
-          - "7.2"
-          - "7.1"
-        os:
-          - ""
-          - "alpine"
-    uses: ./.github/workflows/build-template.yml
-    with:
-      app_name: ${{ matrix.app }}
-      php_version: ${{ matrix.php_version }}
-      os: ${{ matrix.os }}
-      os_version: latest
-    secrets: inherit
-
-  super-old:
-    strategy:
-      matrix:
-        app:
-          - "with-apache"
-          - "with-nginx"
-        php_version:
-          - "7.0"
           - "5.6"
-        os:
-          - ""
-    uses: ./.github/workflows/build-template.yml
-    with:
-      app_name: ${{ matrix.app }}
-      php_version: ${{ matrix.php_version }}
-      os: ${{ matrix.os }}
-      os_version: latest
-    secrets: inherit
-
-  ##############################################################################
-  # PHP + Unpopular Web Servers
-  ##############################################################################
-
-  unpopular:
-    strategy:
-      matrix:
-        app:
-          - "with-unit"
-          - "with-f8p"
-        php_version:
-          - "8.4-rc"
-          - "8.3"
-          - "8.2"
-          - "8.1"
-          - "8.0"
-        os:
-          - ""
-          - "alpine"
-    uses: ./.github/workflows/build-template.yml
-    with:
-      app_name: ${{ matrix.app }}
-      php_version: ${{ matrix.php_version }}
-      os: ${{ matrix.os }}
-      os_version: latest
-    secrets: inherit
-
-  ##############################################################################
-  # Older PHP + Unpopular Web Servers
-  ##############################################################################
-
-  unpopular-older:
-    strategy:
-      matrix:
-        app:
-          - "with-unit"
-          - "with-f8p"
-        php_version:
-          - "7.4"
-          - "7.3"
-          - "7.2"
+          - "7.0"
           - "7.1"
+          - "7.2"
+          - "7.3"
+          - "7.4"
+          - "8.0"
+          - "8.1"
+          - "8.2"
+          - "8.3"
+          - "8.4-rc"
+        app:
+          - "with-apache"
+          - "with-nginx"
+          - "with-unit"
+          - "with-f8p"
         os:
           - ""
           - "alpine"
@@ -161,6 +71,18 @@ jobs:
     needs: [main, older]
     strategy:
       matrix:
+        php_version:
+          - "5.6"
+          - "7.0"
+          - "7.1"
+          - "7.2"
+          - "7.3"
+          - "7.4"
+          - "8.0"
+          - "8.1"
+          - "8.2"
+          - "8.3"
+          - "8.4-rc"
         app:
           - "app-bedrock"
           - "app-laminas"
@@ -168,16 +90,6 @@ jobs:
           - "app-phpmyadmin"
           - "app-symfony"
           - "app-wordpress"
-        php_version:
-          - "8.4-rc"
-          - "8.3"
-          - "8.2"
-          - "8.1"
-          - "8.0"
-          - "7.4"
-          - "7.3"
-          - "7.2"
-          - "7.1"
         os:
           - ""
           - "alpine"
@@ -193,6 +105,18 @@ jobs:
     needs: [main, older]
     strategy:
       matrix:
+        php_version:
+          - "5.6"
+          - "7.0"
+          - "7.1"
+          - "7.2"
+          - "7.3"
+          - "7.4"
+          - "8.0"
+          - "8.1"
+          - "8.2"
+          - "8.3"
+          - "8.4-rc"
         app:
           - "app-cakephp4"
           - "app-cakephp5"
@@ -200,16 +124,6 @@ jobs:
           - "app-drupal"
           - "app-fuelphp"
           - "app-slim"
-        php_version:
-          - "8.4-rc"
-          - "8.3"
-          - "8.2"
-          - "8.1"
-          - "8.0"
-          - "7.4"
-          - "7.3"
-          - "7.2"
-          - "7.1"
         os:
           - ""
           - "alpine"
@@ -225,22 +139,29 @@ jobs:
     needs: [main, older]
     strategy:
       matrix:
+        php_version:
+          - "5.6"
+          - "7.0"
+          - "7.1"
+          - "7.2"
+          - "7.3"
+          - "7.4"
+          - "8.0"
+          - "8.1"
+          - "8.2"
+          - "8.3"
+          - "8.4-rc"
         app:
           - "app-crater"
           - "app-flarum"
+          - "app-grav"
+          - "app-hyperf"
+          - "app-kirby"
           - "app-mautic"
+          - "app-phpixie"
           - "app-statamic"
+          - "app-sulu"
           - "app-yii"
-        php_version:
-          - "8.4-rc"
-          - "8.3"
-          - "8.2"
-          - "8.1"
-          - "8.0"
-          - "7.4"
-          - "7.3"
-          - "7.2"
-          - "7.1"
         os:
           - ""
           - "alpine"
@@ -252,33 +173,5 @@ jobs:
       os_version: latest
     secrets: inherit
 
-  apps-group4:
-    needs: [main, older]
-    strategy:
-      matrix:
-        app:
-          - "app-grav"
-          - "app-hyperf"
-          - "app-kirby"
-          - "app-phpixie"
-          - "app-sulu"
-        php_version:
-          - "8.4-rc"
-          - "8.3"
-          - "8.2"
-          - "8.1"
-          - "8.0"
-          - "7.4"
-          - "7.3"
-          - "7.2"
-          - "7.1"
-        os:
-          - ""
-          - "alpine"
-    uses: ./.github/workflows/build-template.yml
-    with:
-      app_name: ${{ matrix.app }}
-      php_version: ${{ matrix.php_version }}
-      os: ${{ matrix.os }}
-      os_version: latest
-    secrets: inherit
+################################################################################
+################################################################################

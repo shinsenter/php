@@ -262,6 +262,11 @@ app-*)
     ;;
 esac
 
+# skip build if the PHP version is earlier than 7.1 and the OS is not Debian
+if [ ! -z "$PHP_VERSION" ] && verlt "$PHP_VERSION" "7.1" && [ "$OS_BASE" != "debian" ]; then
+    BUILD_DOCKERFILE=
+fi
+
 # lazy load the latest Composer version when necessary
 if [ "$COMPOSER_VERSION" = "latest" ]; then
     COMPOSER_VERSION="$(get_github_latest_tag "composer/composer" 1)"
