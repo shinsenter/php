@@ -15,16 +15,16 @@ ARG APP_PATH=${APP_PATH:-/var/www/html}
 ARG APP_GROUP=${APP_GROUP:-www-data}
 ARG APP_USER=${APP_USER:-www-data}
 
+# set APP_PATH, APP_USER and APP_GROUP
+ENV APP_PATH="$APP_PATH"
+ENV APP_USER="$APP_USER"
+ENV APP_GROUP="$APP_GROUP"
+
 # set OS variables
 ENV ENV="/etc/docker-envvars"
 ENV PATH="/usr/local/aliases:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 ENV PS1="\\u@\\h:\\w\\$ "
 ENV PRESQUASH_SCRIPTS="cleanup"
-
-# set APP_PATH, APP_USER and APP_GROUP
-ENV APP_PATH="$APP_PATH"
-ENV APP_USER="$APP_USER"
-ENV APP_GROUP="$APP_GROUP"
 
 ################################################################################
 
@@ -40,9 +40,9 @@ set -e
 chmod 4755 /usr/local/bin/web-*
 
 # install common packages
-APK_PACKAGES='bash shadow su-exec tar unzip xz' \
+APK_PACKAGES='shadow su-exec tar unzip xz' \
 APT_PACKAGES='procps xz-utils' \
-pkg-add ca-certificates coreutils curl htop less openssl
+pkg-add bash ca-certificates coreutils curl htop less openssl
 pkg-add upgrade
 
 # patch sh binary if bash exists

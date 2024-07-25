@@ -1,4 +1,4 @@
-PHP Docker Images (https://hub.docker.com/r/shinsenter/php)
+SHIN Company's Docker Images
 Copyright (C) %YEAR%  %EMAIL%
 
 This is free software under the GNU GPL.
@@ -7,3 +7,4 @@ This program is distributed in the hope it will be useful,
 but WITHOUT ANY WARRANTY. See the GNU GPL for more details.
 
 To get support, please contact: %EMAIL%
+Docker Hub: https://hub.docker.com/u/shinsenter
