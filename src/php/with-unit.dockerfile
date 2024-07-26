@@ -18,6 +18,8 @@ FROM ./base-php AS php
 INCLUDE ./with-unit/unit-install
 INCLUDE ./with-unit/unit-config
 
+RUN unitd --version
+
 ################################################################################
 
 EXPOSE 80

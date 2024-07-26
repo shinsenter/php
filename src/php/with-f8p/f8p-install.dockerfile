@@ -27,5 +27,4 @@ fi
 
 ln -nsf "$(command -v frankenphp)" /usr/local/sbin/caddy
 
-frankenphp version
 EOF

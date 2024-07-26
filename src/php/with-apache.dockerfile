@@ -18,6 +18,8 @@ FROM ./base-php AS php
 INCLUDE ./with-apache/apache-install
 INCLUDE ./with-apache/apache-config
 
+RUN apache2 -v
+
 ################################################################################
 
 EXPOSE 80

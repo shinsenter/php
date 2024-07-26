@@ -18,6 +18,8 @@ FROM ./base-php AS php
 INCLUDE ./with-nginx/nginx-install
 INCLUDE ./with-nginx/nginx-config
 
+RUN nginx -V
+
 ################################################################################
 
 EXPOSE 80

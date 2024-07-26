@@ -54,6 +54,4 @@ if has-cmd httpd && ! has-cmd apache2; then
     ln -nsf "$(command -v httpd)" "/usr/local/sbin/apache2"
 fi
 
-apache2 -v
-
 EOF

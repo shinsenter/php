@@ -20,6 +20,8 @@ FROM ./base-php AS php
 INCLUDE ./with-f8p/f8p-install
 INCLUDE ./with-f8p/f8p-config
 
+RUN frankenphp version
+
 ################################################################################
 
 EXPOSE 2019

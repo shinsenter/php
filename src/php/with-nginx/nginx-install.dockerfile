@@ -16,7 +16,6 @@ set -e
 
 # install nginx
 pkg-add nginx
-nginx -V
 
 # clean up
 rm -rf /var/www/localhost \
