@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-echo "${DEFAULT_LOG_PATH:-/proc/self/fd/2}"
+echo "${DEFAULT_LOG_PATH:-/proc/1/fd/2}"
