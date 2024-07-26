@@ -190,11 +190,11 @@ RUN phpaddmod imagick swoole xdebug
 # ADD --chown=$APP_USER:$APP_GROUP ./myproject/ /var/www/html/
 ```
 
-> 👉🏻 Info: The `phpaddmod` command is a wrapper around the [`install-php-extensions`](https://github.com/mlocati/docker-php-extension-installer) utility,
+> 👉🏻 Info: The `phpaddmod` command is a wrapper around the [`mlocati/docker-php-extension-installer`](https://github.com/mlocati/docker-php-extension-installer) utility,
 which takes care of all required steps to compile and activate the extensions.
 
 > 💡 Hint: If you're having trouble figuring out which extensions can be installed,
-have a look at [the install-php-extensions project](https://github.com/mlocati/docker-php-extension-installer#supported-php-extensions).
+have a look at [their documentation](https://github.com/mlocati/docker-php-extension-installer/blob/master/README.md#supported-php-extensions).
 
 ## Application Directory
 

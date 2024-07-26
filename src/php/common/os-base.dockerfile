@@ -32,6 +32,16 @@ ADD --link ./common/rootfs/ /
 
 ################################################################################
 
+# Temporary workaround to fix Let's Encrypt CA certificates for old distros
+# https://github.com/mlocati/docker-php-extension-installer/pull/450
+# https://github.com/mlocati/docker-php-extension-installer/pull/451
+# https://github.com/mlocati/docker-php-extension-installer/pull/724
+# https://github.com/mlocati/docker-php-extension-installer/pull/737
+RUN --mount=type=bind,from=mlocati/php-extension-installer:latest,source=/usr/bin/install-php-extensions,target=/tmp/install-php-extensions \
+    /tmp/install-php-extensions @fix_letsencrypt || true
+
+################################################################################
+
 RUN <<'EOF'
 echo 'Configure OS middlewares'
 set -e
