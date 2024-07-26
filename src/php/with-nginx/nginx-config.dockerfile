@@ -36,16 +36,6 @@ mkdir -p /etc/nginx \
     /var/tmp/nginx/scgi \
     /var/lib/nginx /var/log/nginx /run/nginx
 
-# customize extensions
-if nginx-test 'gzip';   then rm -f /etc/nginx/custom.d/gzip.conf;   fi
-if nginx-test 'brotli'; then rm -f /etc/nginx/custom.d/brotli.conf; fi
-if nginx-test 'http3';  then rm -f /etc/nginx/custom.d/http3.conf;  fi
-
-# turn on or of ssl_stapling
-if nginx-test '"ssl_stapling" ignored'; then
-    nginx-conf 'ssl_stapling' 'off';
-fi
-
 # disable TLSv1.3 when not supported
 if nginx-test 'invalid value "TLSv1.3"'; then
     nginx-conf 'ssl_protocols' 'TLSv1.2'
@@ -57,10 +47,15 @@ if nginx-test 'use the "http2" directive'; then
     echo "http2 on;" >/etc/nginx/custom.d/http2.conf
 fi
 
+# customize extensions
+if nginx-test 'brotli'; then rm -f /etc/nginx/custom.d/brotli.conf; fi
+if nginx-test 'gzip';   then rm -f /etc/nginx/custom.d/gzip.conf;   fi
+if nginx-test 'http3';  then rm -f /etc/nginx/custom.d/http3.conf;  fi
+
 # create s6 services
 if has-cmd s6-service; then
     s6-service php-fpm longrun '#!/usr/bin/env sh
-exec php-fpm -y /usr/local/etc/php-fpm.d/zz-generated-settings.conf --nodaemonize'
+exec php-fpm -y /usr/local/etc/php-fpm.d/zz-generated-settings.conf --nodaemonize -d clear_env=no'
 
     s6-service nginx depends php-fpm
     s6-service nginx longrun '#!/usr/bin/env sh

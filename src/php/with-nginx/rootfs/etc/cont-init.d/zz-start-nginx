@@ -32,6 +32,13 @@ fi
 
 web-chown fix /var/lib/nginx /var/log/nginx /run/nginx
 
+# turn on or off ssl_stapling
+if nginx-test '"ssl_stapling" ignored'; then
+    nginx-conf 'ssl_stapling' 'off';
+else
+    nginx-conf 'ssl_stapling' 'off';
+fi
+
 # enable debug logs
 if is-debug; then
     nginx-conf 'error_log' "$(log-path) debug"
