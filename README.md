@@ -14,7 +14,7 @@ These images facilitate the easy adjustment of PHP and PHP-FPM settings using en
 eliminating the need to rebuild images when making configuration changes.
 
 These images also come with the latest version of [Composer](https://getcomposer.org)
-and popular web servers like [Apache2](https://httpd.apache.org), [Nginx](https://nginx.org), [Nginx Unit](https://unit.nginx.org), or [FrankenPHP](https://frankenphp.dev).
+and popular web servers like [Apache2](https://httpd.apache.org), [Nginx](https://nginx.org), [RoadRunner](https://roadrunner.dev), [FrankenPHP](https://frankenphp.dev) or [Nginx Unit](https://unit.nginx.org).
 This setup allows for faster project initiation without additional installations.
 
 > 🪶 Info: While built on the official PHP images and including more useful extensions,
@@ -25,19 +25,21 @@ This setup allows for faster project initiation without additional installations
 ## Image Variants
 
 Our image tags cover PHP versions from 5.6 to 8.4<sup>(*)</sup>,
-available in `cli`, `fpm`, `fpm-nginx`, `fpm-apache`, `frankenphp`<sup>(1)</sup>, and `unit-php`<sup>(2)</sup> variants.
-
-> <sup>(*)</sup>: The latest stable version is 8.3.<br>
-> <sup>(1)</sup>: FrankenPHP is still in BETA. The `frankenphp` variant supports PHP >= 8.2.<br>
-> <sup>(2)</sup>: PHP with Nginx Unit. The `unit-php` variant supports PHP >= 7.4.
+available in `cli`, `fpm`, `fpm-nginx`, `fpm-apache`, `roadrunner`<sup>(1)</sup>, `frankenphp`<sup>(2)</sup>, and `unit-php`<sup>(3)</sup> variants.
 
 Examples include:
 - `shinsenter/php:7.3-cli`
 - `shinsenter/php:7.4-fpm`
 - `shinsenter/php:8.0-fpm-apache`
 - `shinsenter/php:8.1-fpm-nginx`
-- `shinsenter/php:8.2-frankenphp` <sup>(1)</sup>
-- `shinsenter/php:8.3-unit-php` <sup>(2)</sup>
+- `shinsenter/php:8.2-roadrunner` <sup>(1)</sup>
+- `shinsenter/php:8.3-frankenphp` <sup>(2)</sup>
+- `shinsenter/php:8.4-unit-php` <sup>(3)</sup>
+
+> <sup>(*)</sup>: The latest stable version is 8.3.<br>
+> <sup>(1)</sup>: PHP with RoadRunner server. The `roadrunner` variant supports PHP >= 8.0.<br>
+> <sup>(2)</sup>: FrankenPHP is still in BETA. The `frankenphp` variant supports PHP >= 8.2.<br>
+> <sup>(3)</sup>: PHP with Nginx Unit server. The `unit-php` variant supports PHP >= 7.4.
 
 Explore all available tags on our [Docker Hub](https://hub.docker.com/r/shinsenter/php/tags).
 
@@ -66,7 +68,7 @@ docker run -it -v ./myproject:/var/www/html shinsenter/php:8.3-cli
 docker run -v ./myproject:/var/www/html -p 9000:9000 shinsenter/php:8.3-fpm
 ```
 
-#### PHP-FPM + Nginx (or Apache, FrankenPHP, Nginx Unit)
+#### PHP-FPM + Nginx (or Apache, RoadRunner, FrankenPHP, Nginx Unit)
 
 ```shell
 # with Nginx
@@ -74,6 +76,9 @@ docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.3-f
 
 # with Apache
 docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.3-fpm-apache
+
+# with RoadRunner
+docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.3-roadrunner
 
 # with FrankenPHP
 docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.3-frankenphp
