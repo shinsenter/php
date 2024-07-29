@@ -1,0 +1,10 @@
+{
+    "name": "shinsenter/roadrunner",
+    "description": "Sample application",
+    "type": "project",
+    "require": {
+        "spiral/roadrunner-http": "*",
+        "nyholm/psr7": "*"
+    },
+    "minimum-stability": "stable"
+}

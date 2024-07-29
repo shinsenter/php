@@ -25,6 +25,6 @@ if [ -e "$(web-chown path)" ] || is-true $FIX_APP_PATH_PERMISSION || is-true $FI
     web-chown fix
 elif [ -f "$APP_PATH/index.php" ] && ! is-true $DISABLE_AUTORUN_FIX_OWNER_GROUP; then
     if [ "$(ls -ld "$APP_PATH/index.php" | awk '{print $3 ":" $4}')" != "$APP_USER:$APP_GROUP" ]; then
-    web-chown fix
+        web-chown fix
     fi
 fi

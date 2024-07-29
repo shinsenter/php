@@ -94,30 +94,33 @@ web-mkdir "$APP_PATH" "$COMPOSER_HOME" && cd "$APP_PATH"
 if [ -z "$(ls -A "$APP_PATH")" ]; then
     # create project
     if ! is-true $DISABLE_AUTORUN_CREATING_PROJECT && [ ! -z "$INITIAL_PROJECT" ]; then
-        debug-echo "Create Composer project $INITIAL_PROJECT in $APP_PATH"
         composer_create "$APP_PATH" "$INITIAL_PROJECT"
     fi
 
     # copy from source
     if ! is-true $DISABLE_AUTORUN_COPYING_SOURCE && [ -d /source/ ]; then
-        debug-echo "Copy files from /source/ to $APP_PATH"
         mv {/source/*,/source/.*} "$APP_PATH"/ 2>&1 >/dev/null
-    fi
-
-    # copy .env.example to .env
-    if [ ! -e "$APP_PATH/.env" ] && [ -f "$APP_PATH/.env.example" ]; then
-        debug-echo "Copy .env.example to .env"
-        cp -p "$APP_PATH/.env.example" "$APP_PATH/.env"
+        web-chown "Copied files from /source/ to $APP_PATH"
     fi
 else
     debug-echo "Skip initializing project because $APP_PATH is not empty."
+fi
+
+# copy .env.example to .env
+if [ ! -e "$APP_PATH/.env" ]; then
+    if [ -f "$APP_PATH/.env.example" ]; then
+        cp -p "$APP_PATH/.env.example" "$APP_PATH/.env"
+        web-chown "Copied .env.example to .env"
+    elif [ -f "$APP_PATH/.env.sample" ]; then
+        cp -p "$APP_PATH/.env.sample" "$APP_PATH/.env"
+        web-chown "Copied .env.sample to .env"
+    fi
 fi
 
 # run composer install when vendor directory or ClassLoader.php is missing
 if ! is-true $DISABLE_AUTORUN_COMPOSER_INSTALL && [ -e "$APP_PATH/composer.json" ] && has-cmd composer; then
     vendor_dir="$APP_PATH/$(cd "$APP_PATH" && composer config vendor-dir 2>/dev/null)"
     if [ ! -e "$vendor_dir/composer/ClassLoader.php" ]; then
-        debug-echo "Run composer install because ClassLoader.php is missing"
         composer_install "$APP_PATH" true
     fi
 fi

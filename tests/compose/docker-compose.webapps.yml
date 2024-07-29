@@ -424,4 +424,22 @@ services:
       - WORDPRESS_DB_PASSWORD=localhost
       - WORDPRESS_DB_NAME=test
 
+  ##############################################################################
+
+  spiral:
+    image: shinsenter/spiral:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../../src/webapps/spiral
+      dockerfile: spiral.dockerfile
+      args:
+        - PHP_VARIANT=${SUFFIX}
+    volumes:
+      - ./data/spiral:/shin/web
+    ports:
+      - 6121:80
+      # - 6121:443
+
 ################################################################################

@@ -123,7 +123,36 @@ jobs:
           - "app-hyperf"
           - "app-kirby"
           - "app-mautic"
+        os:
+          - ""
+          - "alpine"
+    uses: ./.github/workflows/build-template.yml
+    with:
+      app_name: ${{ matrix.app }}
+      php_version: ${{ matrix.php_version }}
+      os: ${{ matrix.os }}
+      os_version: latest
+    secrets: inherit
+
+  apps-group4:
+    needs: [popular-servers]
+    strategy:
+      matrix:
+        php_version:
+          - "5.6"
+          - "7.0"
+          - "7.1"
+          - "7.2"
+          - "7.3"
+          - "7.4"
+          - "8.0"
+          - "8.1"
+          - "8.2"
+          - "8.3"
+          - "8.4-rc"
+        app:
           - "app-phpixie"
+          - "app-spiral"
           - "app-statamic"
           - "app-sulu"
           - "app-yii"
@@ -187,8 +216,9 @@ jobs:
           - "8.3"
           - "8.4-rc"
         app:
-          - "with-unit"
           - "with-f8p"
+          - "with-roadrunner"
+          - "with-unit"
         os:
           - ""
           - "alpine"

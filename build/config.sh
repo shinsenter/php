@@ -146,6 +146,17 @@ with-f8p)
     PHP_VARIANT="zts$SUFFIX"
     verlt "$PHP_VERSION" "8.2" && SKIP_BUILD=1
     ;;
+with-roadrunner)
+    # https://docs.roadrunner.dev/docs/general/install
+    PREFIX="roadrunner"
+    BUILD_NAME="shinsenter/roadrunner"
+    BUILD_DOCKERFILE=$BASE_DIR/src/php/with-roadrunner.dockerfile
+    PHP_VARIANT="zts$SUFFIX"
+    BUILD_PLATFORM="linux/amd64,linux/arm64"
+    BUILD_CACHE_KEY="roadrunner@$(get_github_latest_tag "roadrunner-server/roadrunner" | head -c17)"
+    ALLOW_RC=1
+    verlt "$PHP_VERSION" "8.0" && SKIP_BUILD=1
+    ;;
 app-*)
     # implement later
     APP_NAME="${APP//app-/}"
@@ -227,6 +238,10 @@ app-*)
         ;;
     slim)
         # https://www.slimframework.com/docs/v4/start/installation.html
+        ;;
+    spiral)
+        # https://spiral.dev/docs/start-installation/current/en
+        verlt "$PHP_VERSION" "8.1" && SKIP_BUILD=1
         ;;
     statamic)
         # https://statamic.dev/installing
