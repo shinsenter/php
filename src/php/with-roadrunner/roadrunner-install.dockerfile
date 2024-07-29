@@ -13,4 +13,4 @@ COPY --link --from=ghcr.io/roadrunner-server/roadrunner:latest /usr/bin/rr /usr/
 COPY --link --from=ghcr.io/roadrunner-server/roadrunner:latest /etc/rr.yaml /etc/rr.yaml
 
 # Install PHP extensions
-# RUN phpaddmod grpc sockets
+RUN phpaddmod sockets

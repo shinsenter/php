@@ -19,11 +19,11 @@ cd "$(app-path)"
 exec /usr/local/bin/rr -w "$(app-path)" \
     -o rpc.listen=tcp://127.0.0.1:6001 \
     -o http.address=0.0.0.0:80 \
+    -o http.headers.response.X-Powered-By=RoadRunner \
     -o http.ssl.address=0.0.0.0:443 \
     -o http.ssl.cert=/etc/ssl/site/server.crt \
     -o http.ssl.key=/etc/ssl/site/server.key \
-    -o http.pool.debug=$(is-debug && echo 1 || echo 0) \
-    $(if is-debug; then echo -d; fi) \
+    $(if is-debug; then echo "-o http.pool.debug=1 -d"; fi) \
     $ROADRUNNER_COMMAND_OPTIONS \
     serve
 '

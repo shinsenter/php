@@ -18,9 +18,6 @@ INCLUDE ./meta
 
 ADD --link ./rootfs/ /
 
-# Install PHP extensions
-RUN phpaddmod sockets
-
 ################################################################################
 
 # https://spiral.dev/docs/start-installation/current/en
