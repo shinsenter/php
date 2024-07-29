@@ -120,7 +120,7 @@ fi
 # run composer install when vendor directory or ClassLoader.php is missing
 if ! is-true $DISABLE_AUTORUN_COMPOSER_INSTALL && [ -e "$APP_PATH/composer.json" ] && has-cmd composer; then
     vendor_dir="$APP_PATH/$(cd "$APP_PATH" && composer config vendor-dir 2>/dev/null)"
-    if [ ! -e "$vendor_dir/composer/ClassLoader.php" ]; then
+    if [ ! -d "$vendor_dir" ] || [ ! -e "$vendor_dir/composer/ClassLoader.php" ]; then
         composer_install "$APP_PATH" true
     fi
 fi

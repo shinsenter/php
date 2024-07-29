@@ -401,6 +401,9 @@ Check our [Docker Hub](https://hub.docker.com/r/shinsenter/php/tags) for all ava
 
 ## Stable Image Tags
 
+The release versions on this GitHub repository don't guarantee
+that Docker images built from the same source code will always be identical.
+
 We build new Docker images daily to ensure they stay up-to-date
 with the latest upstream updates for PHP, base OS, Composer, etc.
 The images in this repo are regularly updated under the same tag names.
