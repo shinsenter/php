@@ -189,6 +189,7 @@ jobs:
         app:
           - "with-apache"
           - "with-nginx"
+          - "with-roadrunner"
         os:
           - ""
           - "alpine"
@@ -217,7 +218,6 @@ jobs:
           - "8.4-rc"
         app:
           - "with-f8p"
-          - "with-roadrunner"
           - "with-unit"
         os:
           - ""
