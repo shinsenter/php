@@ -9,7 +9,11 @@
 
 if has-cmd php-envvars; then
     debug-echo "Generate PHP config"
-    php-envvars write_dynamic_config 2>&1
+    if is-true $ALLOW_RUNTIME_PHP_ENVVARS; then
+        php-envvars write_dynamic_config 2>&1
+    else
+        php-envvars write_static_config 2>&1
+    fi
 fi
 
 if is-true $ENABLE_TUNING_FPM && has-cmd fpm-pm; then

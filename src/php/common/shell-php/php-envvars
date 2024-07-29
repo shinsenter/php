@@ -150,29 +150,34 @@ final class DockerPHP
         }
     }
 
+    public function write_static_config()
+    {
+        $this->write_config(false);
+    }
+
     public function write_dynamic_config()
     {
         $this->write_config(true);
     }
 
-    public function write_config($use_env = false)
+    public function write_config($dynamic = false)
     {
         $defaults = self::PHP_DEFAULTS;
 
-        $php_conf = array_merge(['[PHP]'], $this->build_conf($this->php_settings, $defaults, $use_env));
+        $php_conf = array_merge(['[PHP]'], $this->build_conf($this->php_settings, $defaults, $dynamic));
         $fpm_conf = [];
 
         save($this->php_conf_path, $php_conf);
         unset($php_conf);
 
         foreach ($this->fpm_settings as $scope => $settings) {
-            if ($use_env && 'www' == $scope) {
+            if ($dynamic && 'www' == $scope) {
                 $fpm_conf[] = '[${PHP_POOL_NAME}]';
             } else {
                 $fpm_conf[] = "[$scope]";
             }
 
-            $fpm_conf   = array_merge($fpm_conf, $this->build_conf($settings, $defaults, $use_env));
+            $fpm_conf   = array_merge($fpm_conf, $this->build_conf($settings, $defaults, $dynamic));
             $fpm_conf[] = '';
         }
 
@@ -327,7 +332,7 @@ final class DockerPHP
         ksort($this->all_env_vars);
     }
 
-    private function build_conf($settings, $defaults = [], $use_env)
+    private function build_conf($settings, $defaults = [], $dynamic = false)
     {
         $conf = [];
 
@@ -340,13 +345,17 @@ final class DockerPHP
         if (!empty($settings)) {
             foreach ($settings as $key => $val) {
                 $env_key = $this->env_key($key);
+
                 if (array_key_exists($key, $defaults)) {
                     $conf[] = "{$key} = {$defaults[$key]}";
                 } elseif ($this->$env_key === '' && is_null($val)) {
                     $conf[] = ";{$key} = none";
-                } elseif ($use_env) {
+                } elseif ($dynamic) {
                     $conf[] = "{$key} = \${{$env_key}}";
                 } else {
+                    if (array_key_exists($env_key, $_ENV)) {
+                        $val = $this->clean_val($_ENV[$env_key]);
+                    }
                     $conf[] = "{$key} = {$val}";
                 }
             }
