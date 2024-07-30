@@ -38,6 +38,11 @@ if ! has-cmd /command/s6-env && [ -d /etc/cont-init.d ]; then
     autorun /etc/cont-init.d/ 2>&1
 fi
 
+# run custom command defined in $SUPERVISOR_PHP_COMMAND
+if [ ! -z "$SUPERVISOR_PHP_COMMAND" ]; then
+    set -- "$SUPERVISOR_PHP_COMMAND" "$@"
+fi
+
 # fallback for docker-php-entrypoint
 if [ -x "/init" ]; then
     set -- /init "$@"
