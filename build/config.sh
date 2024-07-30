@@ -241,6 +241,7 @@ app-*)
         ;;
     spiral)
         # https://spiral.dev/docs/start-installation/current/en
+        BUILD_PLATFORM="linux/amd64,linux/arm64"
         verlt "$PHP_VERSION" "8.1" && SKIP_BUILD=1
         ;;
     statamic)
