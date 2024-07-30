@@ -105,7 +105,7 @@ jobs:
         if: ${{ !env.SKIP_BUILD }}
         name: Cleanup before building ${{ env.BUILD_TAG }}
         run: |
-          docker system prune -a --volumes -f
+          # docker system prune -a --volumes -f
           sudo swapoff -a || true
           sudo rm -f /mnt/swapfile || true
           free -h
@@ -191,7 +191,7 @@ jobs:
         if: ${{ !env.SKIP_BUILD && !env.SKIP_SQUASH }}
         name: Make squashed Dockerfile for ${{ env.BUILD_TAG }}
         run: |
-          docker system prune -a --volumes -f
+          # docker system prune -a --volumes -f
           docker pull "${{ env.BUILD_TMP_NAME }}"
           DEBUG= ${{ env.SQUASH_CMD }} "${{ env.BUILD_TMP_NAME }}" -p >"${{ env.BUILD_DOCKERFILE_SQUASHED }}"
           cat "${{ env.BUILD_DOCKERFILE_SQUASHED }}"
