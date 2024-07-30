@@ -79,6 +79,27 @@ Check our [Docker Hub](https://hub.docker.com/r/shinsenter/roadrunner/tags) for 
 > Docker image tags ending in `-alpine` or `-tidy` indicate Docker images built on the Alpine Linux base operating system.
 > These Docker images are lightweight, helping to speed up builds and save bandwidth for your CI/CD pipelines.
 
+## Stable Image Tags
+
+The release versions on this GitHub repository don't guarantee
+that Docker images built from the same source code will always be identical.
+
+We build new Docker images daily to ensure they stay up-to-date
+with the latest upstream updates for PHP, base OS, Composer, etc.
+The images in this repo are regularly updated under the same tag names.
+
+But you can pull the image from `shinsenter/roadrunner:latest`,
+and tag it with a name that indicates its stability,
+such as `shinsenter/roadrunner:stable` using the below commands:
+
+```shell
+docker pull shinsenter/roadrunner:latest
+docker tag  shinsenter/roadrunner:latest your-repo/roadrunner:stable
+docker push your-repo/roadrunner:stable
+```
+
+Then use the image `your-repo/roadrunner:stable` as a base image to build containers for production.
+
 ## Contributing
 
 If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter)

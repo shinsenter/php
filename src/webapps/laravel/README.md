@@ -103,6 +103,27 @@ services:
       - ./my_domain.key:/etc/ssl/site/server.key
 ```
 
+## Stable Image Tags
+
+The release versions on this GitHub repository don't guarantee
+that Docker images built from the same source code will always be identical.
+
+We build new Docker images daily to ensure they stay up-to-date
+with the latest upstream updates for PHP, base OS, Composer, etc.
+The images in this repo are regularly updated under the same tag names.
+
+But you can pull the image from `shinsenter/laravel:latest`,
+and tag it with a name that indicates its stability,
+such as `shinsenter/laravel:stable` using the below commands:
+
+```shell
+docker pull shinsenter/laravel:latest
+docker tag  shinsenter/laravel:latest your-repo/laravel:stable
+docker push your-repo/laravel:stable
+```
+
+Then use the image `your-repo/laravel:stable` as a base image to build containers for production.
+
 ## Contributing
 
 If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://github.com/shinsenter/php/issues/new).
