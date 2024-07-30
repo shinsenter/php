@@ -35,6 +35,13 @@ jobs:
   main:
     strategy:
       matrix:
+        app:
+          - "cli"
+          - "fpm"
+          - "zts"
+        os:
+          - ""
+          - "alpine"
         php_version:
           - "5.6"
           - "7.0"
@@ -47,12 +54,6 @@ jobs:
           - "8.2"
           - "8.3"
           - "8.4-rc"
-        app:
-          - "cli"
-          - "fpm"
-        os:
-          - ""
-          - "alpine"
     uses: ./.github/workflows/build-template.yml
     with:
       app_name: ${{ matrix.app }}
