@@ -12,6 +12,9 @@ APP_ROOT="$(app-root)"
 
 ################################################################################
 
+# cache environment variables for other processes
+mkdir -p /etc/default && with-env | sort >/etc/default/locale
+
 # fix .htaccess to allow uri path after index.php
 if [ -f "$APP_ROOT/.htaccess" ]; then
     debug-echo "Fix .htaccess to allow uri path after index.php"

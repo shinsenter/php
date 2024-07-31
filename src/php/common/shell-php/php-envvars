@@ -143,11 +143,14 @@ final class DockerPHP
             }
 
             run("env-default '$env_key' '$env_val'");
+
+            if (DEBUG_MODE) {
+                echo "$env_key='$env_val'\n";
+            }
         }
 
-        if (DEBUG_MODE) {
-            $this->list_env();
-        }
+        // Cache environment variables
+        run('mkdir -p /etc/default && with-env | sort >/etc/default/locale');
     }
 
     public function write_static_config()
@@ -191,15 +194,12 @@ final class DockerPHP
                 '  '.$this->fpm_conf_path,
             ])."\n\n";
         }
-
-        // Cache environment variables
-        run('mkdir -p /etc/default && with-env | sort >/etc/default/locale');
     }
 
     public function list_env()
     {
-        foreach ($this->all_env_vars as $key => $val) {
-            echo "$key='$val'\n";
+        foreach ($this->all_env_vars as $env_key => $env_val) {
+            echo "$env_key='$env_val'\n";
         }
     }
 
