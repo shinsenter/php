@@ -151,7 +151,7 @@ with-roadrunner)
     PREFIX="roadrunner"
     BUILD_NAME="shinsenter/roadrunner"
     BUILD_DOCKERFILE=$BASE_DIR/src/php/with-roadrunner.dockerfile
-    PHP_VARIANT="$SUFFIX"
+    PHP_VARIANT="zts$SUFFIX"
     BUILD_PLATFORM="linux/amd64,linux/arm64"
     BUILD_CACHE_KEY="roadrunner@$(get_github_latest_tag "roadrunner-server/roadrunner" | head -c17)"
     ALLOW_RC=1
