@@ -74,7 +74,7 @@ if [ -z "$(ls -A "$APP_PATH")" ]; then
 
     # copy from source
     if ! is-true $DISABLE_AUTORUN_COPYING_SOURCE && [ -d /source/ ]; then
-        mv {/source/*,/source/.*} "$APP_PATH"/ 2>&1 >/dev/null
+        cp -rpf /source/. "$APP_PATH"/ 2>&1 >/dev/null
         web-chown "Copied files from /source/ to $APP_PATH"
     fi
 else
