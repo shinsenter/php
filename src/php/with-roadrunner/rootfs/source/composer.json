@@ -6,5 +6,11 @@
         "spiral/roadrunner-http": "*",
         "nyholm/psr7": "*"
     },
-    "minimum-stability": "stable"
+    "scripts": {
+        "post-create-project-cmd": [
+            "composer dump-autoload"
+        ]
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
