@@ -7,14 +7,16 @@
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-marker=/tmp/.fix-ownership
+del_flg=/etc/.fix-ownership
 
 case "$1" in
 fix)
     shift
-    rm -rf $marker
 
-    if [ $# -eq 0 ]; then set -- "$(app-path)"; fi
+    if [ $# -eq 0 ]; then
+        rm -rf $del_flg
+        set -- "$(app-path)"
+    fi
 
     for target; do
         if [ ! -z "$target" ] && [ -e "$target" ]; then
@@ -24,10 +26,10 @@ fix)
     done
     ;;
 path)
-    echo $marker
+    echo $del_flg
     ;;
 *)
-    touch $marker
+    touch $del_flg
     if [ ! -z "$@" ]; then debug-echo "$@"; fi
     ;;
 esac

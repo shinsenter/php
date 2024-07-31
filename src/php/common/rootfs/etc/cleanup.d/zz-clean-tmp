@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 find /etc/ -name '*.dpkg-*' -or -name '*-' -exec rm -f {} \; || true
 find /var/log/ -type f -exec rm -f {} \; || true
-rm -rf $@ \
+rm -rf $@ $(web-chown path || true) \
     /tmp/* /usr/share/doc/* /var/cache/* /var/lib/apt/lists/* \
     ~/.cache/ ~/.composer/ ~/.git/ ~/.log/ ~/.npm/ ~/.tmp/ || true
