@@ -25,10 +25,11 @@ This setup allows for faster project initiation without additional installations
 ## Image Variants
 
 Our image tags cover PHP versions from 5.6 to 8.4<sup>(*)</sup>,
-available in `cli`, `fpm`, `fpm-nginx`, `fpm-apache`, `roadrunner`<sup>(1)</sup>, `frankenphp`<sup>(2)</sup>, and `unit-php`<sup>(3)</sup> variants.
+available in `cli`, `zts`, `fpm`, `fpm-nginx`, `fpm-apache`, `roadrunner`<sup>(1)</sup>, `frankenphp`<sup>(2)</sup>, and `unit-php`<sup>(3)</sup> variants.
 
-Examples include:
-- `shinsenter/php:7.3-cli`
+Examples:
+- `shinsenter/php:7.2-cli`
+- `shinsenter/php:7.3-zts`
 - `shinsenter/php:7.4-fpm`
 - `shinsenter/php:8.0-fpm-apache`
 - `shinsenter/php:8.1-fpm-nginx`
