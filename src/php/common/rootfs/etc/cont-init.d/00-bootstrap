@@ -52,4 +52,5 @@ else
 fi
 
 debug-echo "Create $APP_PATH if not exists"
-web-mkdir "$APP_PATH" "$USER_HOME" "$LOG_PATH"
+web-mkdir  "$APP_PATH" "$LOG_PATH"
+chmod 4755 "$APP_PATH"
