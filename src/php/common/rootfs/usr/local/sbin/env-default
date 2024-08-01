@@ -3,7 +3,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -12,9 +12,13 @@ conf_path="${ENV:=/etc/docker-envvars}"
 if [ ! -f $conf_path ]; then
     mkdir -p "$(dirname $conf_path)"
     echo '#!/bin/sh
-export PATH=$(echo $PATH | sed "s/\/usr\/local\/aliases://")
-export DOCKER_ENVVARS_LOADED=$0
-if [ -d "$(app-path)" ]; then cd "$(app-path)"; fi
+APP_PATH="$(app-path)"
+if [ -d "$APP_PATH" ]; then cd "$APP_PATH"; fi
+
+NEW_PATH="$(echo $PATH | sed "s/\/usr\/local\/aliases://")"
+if [ ! -z "$COMPOSER_HOME" ] && ! echo $NEW_PATH | grep -qF "$COMPOSER_HOME/vendor/bin"; then NEW_PATH="$COMPOSER_HOME/vendor/bin:$NEW_PATH"; fi
+if ! echo $NEW_PATH | grep -qF "$APP_PATH/vendor/bin"; then NEW_PATH="$APP_PATH/vendor/bin:$NEW_PATH"; fi
+export PATH="$NEW_PATH"
 
 ' >$conf_path
     chmod +x $conf_path
@@ -39,5 +43,5 @@ fi
 
 name="$1"; shift
 set -- "$(echo "$@" | sed -e 's/\([\\"]\)/\\\1/g')"
-sed -i "/$name=/d" $conf_path
+sed -i "/$name=/d" $conf_path 2>&1 >/dev/null
 echo "if [ -z \${${name}+x} ]; then export $name=\"$@\"; fi" >>$conf_path

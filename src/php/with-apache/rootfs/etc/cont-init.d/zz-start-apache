@@ -3,9 +3,12 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
+
+export APP_PATH="$(app-path)"
+export APP_ROOT="$(app-root)"
 
 apache-conf 'DocumentRoot' "$(app-root)"
 apache-conf 'PidFile'      "${APACHE_PID:-/run/apache2.pid}"
@@ -35,11 +38,14 @@ if [ -f /etc/apache2/envvars ]; then
     source /etc/apache2/envvars
 fi
 
+web-mkdir "$APACHE_LOG_DIR" "$APACHE_LOCK_DIR" "$APACHE_RUN_DIR"
+web-chown fix \
+    "$APACHE_LOG_DIR" "$APACHE_LOCK_DIR" "$APACHE_RUN_DIR" \
+    /var/lib/apache2 /var/log/apache2 /run/apache2
+
 if is-true $ENABLE_TUNING_MPM; then
     debug-echo -w "Tune Apache MPM"
     apache-mpm
 fi
 
-export APP_PATH="$(app-path)"
-export APP_ROOT="$(app-root)"
 exec apache2 -t

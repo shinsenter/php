@@ -66,7 +66,7 @@ services:
   #     dockerfile: with-f8p.dockerfile
   #     args:
   #       - PHP_VARIANT=zts${SUFFIX}
-  #       - BUILD_SOURCE_IMAGE=${BUILD_SOURCE_IMAGE:-dunglas/frankenphp:latest-php${PHP_VERSION:-8.3}${SUFFIX}}
+  #       - BUILD_SOURCE_IMAGE=${BUILD_SOURCE_IMAGE:-dunglas/frankenphp:1-php${PHP_VERSION:-8.3}${SUFFIX}}
   #   ports:
   #     - 6004:80
 

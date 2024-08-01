@@ -3,7 +3,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -24,7 +24,7 @@ ADD --link ./rootfs/ /
 # https://learn.getgrav.org/17/basics/installation
 ENV DOCUMENT_ROOT=""
 ENV INITIAL_PROJECT="getgrav/grav"
-ENV DISABLE_GENERATING_INDEX=1
+ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 ENV COMPOSER_REQUIRES_GIT=1
 
 ################################################################################

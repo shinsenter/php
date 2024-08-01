@@ -3,7 +3,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -11,24 +11,44 @@ nginx-conf 'root' "$(app-root)"
 nginx-conf 'user' "$APP_USER $APP_GROUP"
 nginx-conf 'pid'  "${NGINX_PID:-/run/nginx.pid}"
 
+# adjust max upload size
 if [ ! -z "$PHP_POST_MAX_SIZE" ]; then
     echo "client_max_body_size ${PHP_POST_MAX_SIZE};" >/etc/nginx/custom.d/client_max_body_size.conf
 fi
 
+# adjust max timeout
 if [ ! -z "$PHP_MAX_EXECUTION_TIME" ] && [ "$PHP_MAX_EXECUTION_TIME" -gt "0" ]; then
-    echo "client_body_timeout ${PHP_MAX_EXECUTION_TIME};" >/etc/nginx/custom.d/client_body_timeout.conf
-    echo "proxy_read_timeout ${PHP_MAX_EXECUTION_TIME};"  >/etc/nginx/custom.d/proxy_read_timeout.conf
+    echo "
+send_timeout        ${PHP_MAX_EXECUTION_TIME};
+client_body_timeout ${PHP_MAX_EXECUTION_TIME};
+" >/etc/nginx/custom.d/client_body_timeout.conf
+
+    echo "
+proxy_connect_timeout ${PHP_MAX_EXECUTION_TIME};
+proxy_read_timeout    ${PHP_MAX_EXECUTION_TIME};
+proxy_send_timeout    ${PHP_MAX_EXECUTION_TIME};
+" >/etc/nginx/custom.d/proxy_timeout.conf
 fi
 
-if ! is-true $DISABLE_GREETING && has-cmd nginx; then
-    nginx -v 2>&1
+web-chown fix /var/lib/nginx /var/log/nginx /run/nginx
+
+# turn on or off ssl_stapling
+if nginx-test '"ssl_stapling" ignored'; then
+    nginx-conf 'ssl_stapling' 'off';
+else
+    nginx-conf 'ssl_stapling' 'off';
 fi
 
+# enable debug logs
 if is-debug; then
     nginx-conf 'error_log' "$(log-path) debug"
     debug-echo -w "🐞 Nginx is in DEBUG MODE 🐞"
 else
     nginx-conf 'error_log' "$(log-path) error"
+fi
+
+if ! is-true $DISABLE_GREETING && has-cmd nginx; then
+    nginx -v 2>&1
 fi
 
 exec nginx -t

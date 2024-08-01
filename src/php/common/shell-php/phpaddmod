@@ -3,23 +3,26 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-PHP_MODS=""
-REQUIRED_MODS="$@"
+if ! has-cmd install-php-extensions; then
+    debug-echo -e "install-php-extensions not found."
+    exit 1
+fi
+
 INSTALLED_MODS="$(php -m 2>/dev/null | grep -v '^\[' | tr '[:upper:]' '[:lower:]')"
 
-for mod in $REQUIRED_MODS; do
-    if [ ! -z "$mod" ] && grep -q "\<$mod\>" <<< "$INSTALLED_MODS"; then
-        debug-echo -i "Module $mod is already installed."
+for module; do
+    if [ ! -z "$module" ] && grep -q "\<$module\>" <<< "$INSTALLED_MODS"; then
+        debug-echo -i "Module $module is already installed."
     else
-        PHP_MODS="$PHP_MODS $mod"
+        NEW_MODS="$NEW_MODS${NEW_MODS:+ }$module"
     fi
 done
 
-if [ -z "$PHP_MODS" ] || ! has-cmd install-php-extensions; then
+if [ -z "$NEW_MODS" ]; then
     exit 0
 fi
 
@@ -32,12 +35,30 @@ fi
 
 if [ ! -e "/usr/src/php.tar.xz" ] && [ ! -z "$PHP_URL" ]; then
     debug-echo -i "\nDownload PHP source from $PHP_URL"
-    curl --retry 2 -ksL "$PHP_URL" -o /usr/src/php.tar.xz
+    curl --retry 3 -ksL "$PHP_URL" -o /usr/src/php.tar.xz
 
     if [ ! -z "$PHP_ASC_URL" ]; then
         curl --retry 2 -ksL "$PHP_ASC_URL" -o /usr/src/php.tar.xz.asc
     fi
 fi
 
-debug-echo -w "\nInstall PHP modules: $(echo $PHP_MODS)"
-exec with-env install-php-extensions $PHP_MODS | grep -v StandWith | debug-echo -l
+PID=/tmp/$(php -r 'echo md5(uniqid());' || echo "$0-temp")
+
+set -o pipefail
+debug-echo -w "\nInstall PHP modules: $NEW_MODS"
+with-env install-php-extensions $NEW_MODS | while read -r line; do
+    echo "$line"
+    if [[ "$line" == *"only for installation"* ]]; then
+        echo ${line##*:} | xargs echo -n >$PID
+    fi
+done | grep -vF StandWith | debug-echo -l
+
+EXIT_CODE=$?
+
+# clean up when failed
+if [ $EXIT_CODE -ne 0 ] && [ -f $PID ]; then
+    pkg-del $(cat $PID)
+    rm -f $PID
+fi
+
+exit $EXIT_CODE

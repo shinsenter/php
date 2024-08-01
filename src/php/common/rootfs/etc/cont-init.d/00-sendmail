@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  SHIN Company <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+if has-cmd msmtp; then
+    debug-echo "Configure MSMTP"
+    cat >/etc/msmtprc <<EOF
+account default
+host ${SENDMAIL_SERVER_HOSTNAME:-"mailhog"}
+port ${SENDMAIL_SERVER_PORT:-"1025"}
+logfile -
+EOF
+fi
+
+if has-cmd ssmtp; then
+    debug-echo "Configure SSMTP"
+    cat > /etc/ssmtp/ssmtp.conf << EOF
+root=postmaster
+mailhub=${SENDMAIL_SERVER_HOSTNAME:-"mailhog"}:${SENDMAIL_SERVER_PORT:-"1025"}
+hostname=`hostname`
+FromLineOverride=YES
+EOF
+fi

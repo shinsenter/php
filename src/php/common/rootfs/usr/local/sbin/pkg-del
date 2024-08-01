@@ -3,31 +3,26 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
 alpine() {
-    local packages="$@"
-    if [ ! -z "$packages" ]; then
-        for pkg in $packages; do
-            debug-echo -e "\nRemove $pkg"
-            apk del --no-cache --purge $pkg | debug-echo -l
-        done
+    if [ $# -gt 0 ]; then
+        debug-echo -e "\nRemove" $@
+        apk del --no-cache --purge "$@" 2>&1 | grep -vF 'No such package' | debug-echo -l
     fi
 }
 
 debian() {
-    local packages="$@"
-    if [ ! -z "$packages" ]; then
-        for pkg in $packages; do
-            debug-echo -e "\nRemove $pkg"
-            apt-get -yq remove --purge $pkg 2>&1 | grep -v -F 'so not removed' | debug-echo -l
-        done
+    if [ $# -gt 0 ]; then
+        debug-echo -e "\nRemove" $@
+        apt-get -yq remove --purge "$@" 2>&1 | grep -vF 'so not removed' | debug-echo -l
     fi
+
     apt-get -yq autoremove --purge | debug-echo -l
     apt-get -yq clean | debug-echo -l
 }
 
-if has-cmd apk; then alpine "${APK_PACKAGES} $@"; fi
-if has-cmd apt; then debian "${APT_PACKAGES} $@"; fi
+if has-cmd apk; then alpine $APK_PACKAGES "$@"; fi
+if has-cmd apt; then debian $APT_PACKAGES "$@"; fi

@@ -3,7 +3,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -38,11 +38,18 @@ function dd()
 
 function save($path, $content = '')
 {
+    if (is_array($content)) {
+        $content = implode("\n", $content);
+    }
+
+    $date    = date('Y-m-d H:i:s');
+    $content = "$content\n; Generated at $date\n\n";
+
     @mkdir(dirname($path), 0755, true);
     @file_put_contents($path, $content);
 
     if (DEBUG_MODE) {
-        echo "$path\n$content\n\n";
+        echo "$path\n\n$content";
     }
 }
 
@@ -55,30 +62,30 @@ function run($command)
 
 /**
  * @class  DockerPHP
- * @author Mai Nhut Tan <shin@shin.company>
+ * @author SHIN Company <shin@shin.company>
  */
 final class DockerPHP
 {
-    public const NOT_SET_VALUE = ''; // for php.ini and fpm.conf
-    public const NULL_VALUES   = ['no value', 'none', 'null', 'undefined', 'unknown val', 'unknown value'];
-    public const TRUTHY_VALUES = ['yes', 'true', 'on'];
-    public const FALSY_VALUES  = ['no', 'false', 'off'];
-    public const PHP_DEFAULTS  = [
-        'daemonize' => 'no',
-        'clear_env' => 'no',
-        'log_buffering' => 'yes',
-        'fastcgi.logging' => 'no',
-        'process.dumpable' => 'no',
-        'catch_workers_output' => 'yes',
-        'decorate_workers_output' => 'no',
+    const NOT_SET_VALUE = ''; // for php.ini and fpm.conf
+    const NULL_VALUES   = ['no value', 'none', 'null', 'undefined', 'unknown val', 'unknown value'];
+    const TRUTHY_VALUES = ['yes', 'true', 'on'];
+    const FALSY_VALUES  = ['no', 'false', 'off'];
+    const PHP_DEFAULTS  = [
+        'daemonize'                                => 'no',
+        'clear_env'                                => 'no',
+        'log_buffering'                            => 'yes',
+        'fastcgi.logging'                          => 'no',
+        'process.dumpable'                         => 'no',
+        'catch_workers_output'                     => 'yes',
+        'decorate_workers_output'                  => 'no',
         'request_terminate_timeout_track_finished' => 'no',
     ];
 
-    protected $php_conf_path;
-    protected $fpm_conf_path;
-    protected $php_settings;
-    protected $fpm_settings;
     protected $all_env_vars;
+    protected $fpm_conf_path;
+    protected $fpm_settings;
+    protected $php_conf_path;
+    protected $php_settings;
 
     public function __construct(
         $php_conf_file = 'custom.ini',
@@ -121,7 +128,7 @@ final class DockerPHP
         return array_key_exists($env_key, $this->all_env_vars);
     }
 
-    public function override_envvars()
+    public function reset_envvars()
     {
         $this->export_envvars(true);
     }
@@ -136,61 +143,64 @@ final class DockerPHP
             }
 
             run("env-default '$env_key' '$env_val'");
+
+            if (DEBUG_MODE) {
+                echo "$env_key='$env_val'\n";
+            }
         }
 
-        if (DEBUG_MODE) {
-            $this->list();
-        }
+        // Cache environment variables
+        run('mkdir -p /etc/default && with-env | sort >/etc/default/locale');
     }
 
-    public function export_dynamic_conf($use_envvars = false)
+    public function write_static_config()
     {
-        $this->export_conf(true);
+        $this->write_config(false);
     }
 
-    public function export_conf($use_envvars = false)
+    public function write_dynamic_config()
     {
-        $date     = '; Generated at '.date('Y-m-d H:i:s') . "\n\n";
+        $this->write_config(true);
+    }
+
+    public function write_config($dynamic = false)
+    {
         $defaults = self::PHP_DEFAULTS;
 
-        $php_conf = $this->build_conf($this->php_settings, $defaults, $use_envvars);
-
-        if (!empty($php_conf)) {
-            $php_conf = implode("\n", $php_conf);
-            save($this->php_conf_path, "[PHP]\n{$php_conf}\n{$date}");
-            unset($php_conf);
-        }
-
+        $php_conf = array_merge(['[PHP]'], $this->build_conf($this->php_settings, $defaults, $dynamic));
         $fpm_conf = [];
 
+        save($this->php_conf_path, $php_conf);
+        unset($php_conf);
+
         foreach ($this->fpm_settings as $scope => $settings) {
-            if ($use_envvars && 'www' == $scope) {
+            if ($dynamic && 'www' == $scope) {
                 $fpm_conf[] = '[${PHP_POOL_NAME}]';
             } else {
                 $fpm_conf[] = "[$scope]";
             }
 
-            $fpm_conf = array_merge($fpm_conf, $this->build_conf($settings, $defaults, $use_envvars));
+            $fpm_conf   = array_merge($fpm_conf, $this->build_conf($settings, $defaults, $dynamic));
+            $fpm_conf[] = '';
         }
 
-        if (!empty($fpm_conf)) {
-            $fpm_conf = implode("\n", $fpm_conf);
-            save($this->fpm_conf_path, "{$fpm_conf}\n{$date}");
-            unset($fpm_conf);
-        }
+        save($this->fpm_conf_path, $fpm_conf);
+        unset($fpm_conf);
 
         if (DEBUG_MODE) {
             echo implode("\n", [
                 'PHP config exported:',
                 '  '.$this->php_conf_path,
                 '  '.$this->fpm_conf_path,
-            ]).PHP_EOL;
+            ])."\n\n";
         }
     }
 
-    public function list()
+    public function list_env()
     {
-        run('env-default | grep PHP_');
+        foreach ($this->all_env_vars as $env_key => $env_val) {
+            echo "$env_key='$env_val'\n";
+        }
     }
 
     public function dump()
@@ -204,7 +214,7 @@ final class DockerPHP
         ]);
     }
 
-    protected function get_fpm_ini()
+    private function get_fpm_ini()
     {
         exec(
             "$(command -v php-fpm) -n -d log_level=notice -tt 2>&1 | sed -e 's#^.*\?NOTICE:[ \t]*##' | uniq | grep '[=\[]'",
@@ -216,7 +226,7 @@ final class DockerPHP
 
         foreach ($lines as $line) {
             if (preg_match("/^\[(.+)\]/", $line, $matches)) {
-                $scope = $matches[1];
+                $scope = (strtolower($matches[1]) == 'general') ? 'global' : $matches[1];
                 continue;
             }
 
@@ -243,7 +253,7 @@ final class DockerPHP
         return $outputs;
     }
 
-    protected function get_php_ini()
+    private function get_php_ini()
     {
         $settings = ini_get_all(null, false);
         $outputs  = [];
@@ -261,12 +271,12 @@ final class DockerPHP
         return $outputs;
     }
 
-    protected function clean_key($key)
+    private function clean_key($key)
     {
         return trim((string) $key);
     }
 
-    protected function clean_val($val, $key = null)
+    private function clean_val($val, $key = null)
     {
         if (!empty($key) && array_key_exists($key, self::PHP_DEFAULTS)) {
             $val = self::PHP_DEFAULTS[$key];
@@ -293,17 +303,17 @@ final class DockerPHP
         return $val;
     }
 
-    protected function env_key($key)
+    private function env_key($key)
     {
         return 'PHP_' . trim(strtoupper(preg_replace('/[^A-Za-z0-9]+/', '_', (string) $key)), '_');
     }
 
-    protected function env_val($val)
+    private function env_val($val)
     {
         return addcslashes((string) $val, "'");
     }
 
-    protected function build_env_vars()
+    private function build_env_vars()
     {
         $this->php_settings = $this->get_php_ini();
         $this->fpm_settings = $this->get_fpm_ini();
@@ -318,27 +328,39 @@ final class DockerPHP
                 $this->$key = $val;
             }
         }
+
+        ksort($this->all_env_vars);
     }
 
-    protected function build_conf($settings, $defaults = [], $use_envvars)
+    private function build_conf($settings, $defaults = [], $dynamic = false)
     {
         $conf = [];
 
+        // only export settings that are manually set
+        $settings = array_filter($settings, function ($value, $key) use ($defaults) {
+            return array_key_exists($key, $defaults) || array_key_exists($this->env_key($key), $_ENV);
+        }, ARRAY_FILTER_USE_BOTH);
+
+        // export the settings
         if (!empty($settings)) {
             foreach ($settings as $key => $val) {
                 $env_key = $this->env_key($key);
+
                 if (array_key_exists($key, $defaults)) {
                     $conf[] = "{$key} = {$defaults[$key]}";
                 } elseif ($this->$env_key === '' && is_null($val)) {
                     $conf[] = ";{$key} = none";
-                } elseif ($use_envvars) {
+                } elseif ($dynamic) {
                     $conf[] = "{$key} = \${{$env_key}}";
                 } else {
+                    if (array_key_exists($env_key, $_ENV)) {
+                        $val = $this->clean_val($_ENV[$env_key]);
+                    }
                     $conf[] = "{$key} = {$val}";
                 }
             }
-
-            $conf[] = '';
+        } else {
+            $conf[] = '; Nothing to configure';
         }
 
         return $conf;
@@ -346,6 +368,8 @@ final class DockerPHP
 }
 
 ################################################################################
+
+date_default_timezone_set('UTC');
 
 $arguments = $argv;
 array_shift($arguments);
@@ -357,7 +381,7 @@ $instance = new DockerPHP(
 );
 
 if (empty($arguments)) {
-    $arguments = ['export_envvars', 'export_dynamic_conf'];
+    $arguments = ['list_env'];
 }
 
 foreach ($arguments as $action) {

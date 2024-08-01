@@ -3,7 +3,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -27,6 +27,7 @@ configtest() {
 
 initial() {
     web-mkdir /var/lib/unit
+    web-chown fix /var/lib/unit /var/log/unit /run/unit
 
     if [ -e /var/lib/unit/conf.json ]; then
         return 0
@@ -40,8 +41,9 @@ initial() {
     configtest >&2 >/dev/null
 
     # SSL bundle
-    cat /etc/ssl/site/*.crt /etc/ssl/site/*.key >/etc/ssl/site/localhost_ssl.pem
-    unit-conf /etc/ssl/site/localhost_ssl.pem "certificates/default"
+    CERT_PATH="/etc/ssl/site/server_${PHP_POOL_NAME:-www}.pem"
+    cat /etc/ssl/site/*.crt /etc/ssl/site/*.key >$CERT_PATH
+    unit-conf $CERT_PATH "certificates/default"
 
     # enabled sites
     for json in $(find /etc/unit/sites-enabled -type f -name "*.json" | sort -n); do

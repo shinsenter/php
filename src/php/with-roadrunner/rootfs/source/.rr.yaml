@@ -1,0 +1,19 @@
+version: '3'
+
+rpc:
+  listen: tcp://127.0.0.1:6001
+
+server:
+  command: "php index.php"
+  relay: pipes
+
+http:
+  address: 0.0.0.0:80
+  middleware: [ "gzip", "static" ]
+  ssl:
+    address: 0.0.0.0:443
+    cert: "/etc/ssl/site/server.crt"
+    key: "/etc/ssl/site/server.key"
+  static:
+    dir: "."
+    forbid: [ ".php", ".htaccess" ]
