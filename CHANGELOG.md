@@ -2,9 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.1.0] - 2024-08-01
+
+We have updated the behavior of the environment variables used to change PHP configurations to enhance container performance:
+- By default, the `$PHP_*` environment variables only take effect when set before starting the container.
+- To dynamically change PHP configurations using `$PHP_*` environment variables while running commands within the container,
+you need to start your container with the `ALLOW_RUNTIME_PHP_ENVVARS=1` environment variable.
+
+Other updates:
+- Added Docker images for PHP versions [5.6](https://hub.docker.com/r/shinsenter/php/tags?name=5.6), [7.0](https://hub.docker.com/r/shinsenter/php/tags?name=7.0), and [8.4-rc](https://hub.docker.com/r/shinsenter/php/tags?name=8.4).
+- Added Docker images for [RoadRunner](http://hub.docker.com/r/shinsenter/roadrunner).
+- Added Docker images for [Bedrock](http://hub.docker.com/r/shinsenter/bedrock), [CakePHP 5](http://hub.docker.com/r/shinsenter/cakephp5) and [Spiral](http://hub.docker.com/r/shinsenter/spiral).
+- Improved SSL configuration for FrankenPHP containers.
+- Removed warning messages from Nginx related to the HTTP2 directive.
+- Fixed read/write permission issues in container directories.
+- Resolved bugs in WordPress containers.
+- Updated descriptions for Docker images on Docker Hub.
+- Updated greeting message content upon container startup.
+- Enhanced GitHub actions for building Docker images.
+- Various minor improvements.
+
 ## [5.0.3] - 2024-03-12
 
-Added Sulu containers, updated descriptions for DockerHub repositories.
+Added Sulu containers, updated descriptions for Docker Hub repositories.
 
 ## [5.0.2] - 2024-02-23
 
@@ -35,15 +55,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Contributing
 
-If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or open an issue on [Github](https://github.com/shinsenter/php/issues/new).
+If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://github.com/shinsenter/php/issues/new).
 
-Your support helps keep these images maintained and improved for the community.
+Your support helps maintain and improve these images for the community.
 
 ## License
 
 This project is licensed under the terms of the [GNU General Public License v3.0](https://code.shin.company/php/blob/main/LICENSE).
 
-I appreciate you respecting my intellectual efforts in creating them. If you intend to copy or use ideas from this project, please credit properly.
+I appreciate you respecting my intellectual efforts in creating them. If you intend to copy or use ideas from this project, please give proper credit.
 
 ---
 

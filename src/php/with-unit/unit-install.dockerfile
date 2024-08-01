@@ -2,36 +2,34 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
 ARG PHP_VERSION=${PHP_VERSION:-8.3}
 ARG BUILD_SOURCE_IMAGE=${BUILD_SOURCE_IMAGE:-https://codeload.github.com/nginx/unit/legacy.tar.gz/refs/heads/branches/default}
+ADD $BUILD_SOURCE_IMAGE /tmp/unit.tar.gz
 
 ENV UNIT_CONTROL_PID=/run/unit.pid
 ENV UNIT_CONTROL_SOCKET=/run/control.unit.sock
 
-ADD --link $BUILD_SOURCE_IMAGE /tmp/unit.tar.gz
-
 # Install Nginx
 RUN <<'EOF'
 echo 'Install Nginx Unit'
-
-if [ ! -f "/tmp/unit.tar.gz" ]; then
-    exit 0
-fi
-
 set -e
 
-# extract Unit source
-mkdir -p /tmp/unit
-tar -xzf /tmp/unit.tar.gz --strip=1 -C "/tmp/unit"
+if [ ! -f "/tmp/unit.tar.gz" ]; then
+    exit 1
+fi
 
 # install dependencies
 APK_PACKAGES="openssl-dev" \
 APT_PACKAGES="libssl-dev" \
 pkg-add
+
+# extract Unit source
+mkdir -p /tmp/unit
+tar -xzf /tmp/unit.tar.gz --strip=1 -C "/tmp/unit"
 
 cd /tmp/unit
 NCPU="$(getconf _NPROCESSORS_ONLN)"

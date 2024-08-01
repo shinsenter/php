@@ -1,0 +1,22 @@
+#!/usr/bin/env sh
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  SHIN Company <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+set -e
+
+# enable debug logs
+if is-debug; then
+    roadrunner-conf 'debug' 'true'
+    debug-echo -w "🐞 RoadRunner is in DEBUG MODE 🐞"
+else
+    roadrunner-conf 'debug' 'false'
+fi
+
+if ! is-true $DISABLE_GREETING && has-cmd rr; then
+    rr -v 2>&1 | head -n1
+fi

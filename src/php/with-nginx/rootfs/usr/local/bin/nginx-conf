@@ -3,7 +3,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -11,5 +11,5 @@ conf_dir=/etc/nginx
 disable="$([ "${1:0:1}" = "#" ] && echo "# " || echo "")"
 name="${1/#/}"; shift
 if [ -d $conf_dir ]; then
-    grep -lr "^ *#* *${name} " $conf_dir | grep '\.conf$' | xargs -r sed -i "s~^ *#* *${name} *.*\$~${disable}${name} $@;~g"
+    grep -lr "^ *#* *${name} " $conf_dir | grep '\.conf$' | xargs -r sed -i "s~^ *#* *${name}  *.*\$~${disable}${name} $@;~g" 2>&1 >/dev/null
 fi

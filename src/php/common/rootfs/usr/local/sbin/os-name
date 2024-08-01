@@ -1,6 +1,2 @@
 #!/usr/bin/env sh
-if [ -f /etc/os-release ]; then
-    echo $(source /etc/os-release && echo "$ID")
-else
-    echo unknown
-fi
+if [ -f /etc/os-release ]; then echo $(source /etc/os-release && echo "$ID"); else echo unknown; fi

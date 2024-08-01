@@ -2,7 +2,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -71,7 +71,7 @@ if [ -n "$S6_VERSION" ]; then
     # inject legacy entrypoint
     if [ -x $FALLBACK_ENTRYPOINT ]; then
         env-default FALLBACK_ENTRYPOINT $FALLBACK_ENTRYPOINT
-        sed -i "s|^exec |\nif [ -z "\$#" ]; then set -- $FALLBACK_ENTRYPOINT \"\$@\"; fi\n\nexec |" /init
+        sed -i "s|^exec |\nif [ \$# -eq 0 ]; then set -- $FALLBACK_ENTRYPOINT \"\$@\"; fi\n\nexec |" /init
     fi
 
     # add setuid bit

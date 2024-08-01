@@ -39,7 +39,7 @@ services:
   ##############################################################################
 
   cakephp4:
-    image: shinsenter/cakephp4:php${PHP_VERSION:-8.3}${SUFFIX}
+    image: shinsenter/cakephp4:php${PHP_VERSION:-8.2}${SUFFIX}
     extends:
       file: common.yml
       service: common-php
@@ -75,7 +75,7 @@ services:
   ##############################################################################
 
   crater:
-    image: shinsenter/crater:php${PHP_VERSION:-8.3}${SUFFIX}
+    image: shinsenter/crater:php${PHP_VERSION:-8.1}${SUFFIX}
     extends:
       file: common.yml
       service: common-php
@@ -111,7 +111,7 @@ services:
 ################################################################################
 
   fuelphp:
-    image: shinsenter/fuelphp:php${PHP_VERSION:-8.3}${SUFFIX}
+    image: shinsenter/fuelphp:php${PHP_VERSION:-7.4}${SUFFIX}
     extends:
       file: common.yml
       service: common-php
@@ -219,7 +219,7 @@ services:
   ##############################################################################
 
   mautic:
-    image: shinsenter/mautic:php${PHP_VERSION:-8.3}${SUFFIX}
+    image: shinsenter/mautic:php${PHP_VERSION:-8.1}${SUFFIX}
     extends:
       file: common.yml
       service: common-php
@@ -383,3 +383,63 @@ services:
       # - 6218:443
 
   ##############################################################################
+
+  cakephp5:
+    image: shinsenter/cakephp5:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../../src/webapps/cakephp5
+      dockerfile: cakephp5.dockerfile
+      args:
+        - PHP_VARIANT=${SUFFIX}
+    volumes:
+      - ./data/cakephp5:/shin/web
+    ports:
+      - 6119:80
+      # - 6219:443
+
+  ##############################################################################
+
+  bedrock:
+    image: shinsenter/bedrock:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../../src/webapps/bedrock
+      dockerfile: bedrock.dockerfile
+      args:
+        - PHP_VARIANT=${SUFFIX}
+    volumes:
+      - ./data/bedrock:/shin/web
+    ports:
+      - 6120:80
+      # - 6220:443
+    environment:
+      - WORDPRESS_WP_DEBUG=true
+      - WORDPRESS_DB_HOST=database:3306
+      - WORDPRESS_DB_USER=root
+      - WORDPRESS_DB_PASSWORD=localhost
+      - WORDPRESS_DB_NAME=test
+
+  ##############################################################################
+
+  spiral:
+    image: shinsenter/spiral:php${PHP_VERSION:-8.3}${SUFFIX}
+    extends:
+      file: common.yml
+      service: common-php
+    build:
+      context: ../../src/webapps/spiral
+      dockerfile: spiral.dockerfile
+      args:
+        - PHP_VARIANT=${SUFFIX}
+    volumes:
+      - ./data/spiral:/shin/web
+    ports:
+      - 6121:80
+      # - 6121:443
+
+################################################################################

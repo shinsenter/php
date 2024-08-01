@@ -40,6 +40,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
     services:
       registry:
         image: registry:2
@@ -47,6 +50,7 @@ jobs:
           - '5000:5000'
     env:
       ARCHIVES_REPO: "shinsenter/php-archives"
+      PUBLISH_TO_GHCR: "1"
       USE_BUILD_CACHE: "0"
     steps:
       -
@@ -90,9 +94,27 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       -
+        if: ${{ !env.SKIP_BUILD && env.PUBLISH_TO_GHCR }}
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      -
+        if: ${{ !env.SKIP_BUILD }}
+        name: Cleanup before building ${{ env.BUILD_TAG }}
+        run: |
+          # docker system prune -a --volumes -f
+          sudo swapoff -a || true
+          sudo rm -f /mnt/swapfile || true
+          free -h
+          df -h
+
+      -
         if: ${{ !env.SKIP_BUILD && env.SKIP_SQUASH == '1' }}
         name: Build and push ${{ env.BUILD_TAG }} using ${{ env.OS_BASE }}
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           pull: false
           push: ${{ !env.SKIP_PUSH }}
@@ -122,13 +144,15 @@ jobs:
             PHP_VERSION=${{ env.PHP_VERSION }}
             S6_PATH=${{ env.S6_PATH }}
             S6_VERSION=${{ env.S6_VERSION }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           # cache-from: type=local,src=${{ env.BUILD_CACHE_PATH }}
           # cache-to: type=local,dest=${{ env.BUILD_CACHE_PATH }}-new,mode=max
 
       -
         if: ${{ !env.SKIP_BUILD && !env.SKIP_SQUASH }}
         name: Build ${{ env.BUILD_TAG }} using ${{ env.OS_BASE }}
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           pull: false
           push: true
@@ -158,6 +182,8 @@ jobs:
             PHP_VERSION=${{ env.PHP_VERSION }}
             S6_PATH=${{ env.S6_PATH }}
             S6_VERSION=${{ env.S6_VERSION }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           # cache-from: type=local,src=${{ env.BUILD_CACHE_PATH }}
           # cache-to: type=local,dest=${{ env.BUILD_CACHE_PATH }}-new,mode=max
 
@@ -165,14 +191,16 @@ jobs:
         if: ${{ !env.SKIP_BUILD && !env.SKIP_SQUASH }}
         name: Make squashed Dockerfile for ${{ env.BUILD_TAG }}
         run: |
+          # docker system prune -a --volumes -f
           docker pull "${{ env.BUILD_TMP_NAME }}"
           DEBUG= ${{ env.SQUASH_CMD }} "${{ env.BUILD_TMP_NAME }}" -p >"${{ env.BUILD_DOCKERFILE_SQUASHED }}"
           cat "${{ env.BUILD_DOCKERFILE_SQUASHED }}"
+          df -h
 
       -
         if: ${{ !env.SKIP_BUILD && !env.SKIP_SQUASH }}
         name: Squash and push ${{ env.BUILD_TAG }} using ${{ env.OS_BASE }}
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           pull: false
           push: ${{ !env.SKIP_PUSH }}
@@ -204,3 +232,4 @@ jobs:
         run: |
           rm -rf ${{ env.BUILD_CACHE_PATH }}
           mv ${{ env.BUILD_CACHE_PATH }}-new ${{ env.BUILD_CACHE_PATH }}
+          df -h

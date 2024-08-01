@@ -3,7 +3,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -14,7 +14,8 @@ if ! is-true $DISABLE_GREETING && has-cmd frankenphp; then
 fi
 
 if is-debug; then
-    web-do touch /etc/caddy/envvars
-    web-do echo "export CADDY_GLOBAL_OPTIONS=debug" >>/etc/caddy/envvars
+    echo 'export CADDY_GLOBAL_OPTIONS="$CADDY_GLOBAL_OPTIONS debug"' >/etc/caddy/envvars || true
     debug-echo -w "🐞 FrankenPHP is in DEBUG MODE 🐞"
+else
+    rm -f /etc/caddy/envvars || true
 fi

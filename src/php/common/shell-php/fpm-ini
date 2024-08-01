@@ -3,7 +3,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -14,8 +14,8 @@ name="${1/;/}"; shift
 if [ -d $conf_dir ]; then
     set -e
     if [ "$name" = "pool_name" ]; then
-        grep -lr '^\[\(www\|\$.*\)\]' $conf_dir | xargs -r sed -i "s#^\\[\\(www\\|\\$.*\\)\\]#[$@]#g"
+        grep -lr '^\[\(www\|\$.*\)\]' $conf_dir | xargs -r sed -i "s#^\\[\\(www\\|\\$.*\\)\\]#[$@]#g" 2>&1 >/dev/null
     else
-        grep -lr "^;* *${name} *=.*\$" $conf_dir | xargs -r sed -i "s#^;* *${name} *=.*\$#${disable}${name} = $@#g"
+        grep -lr "^;* *${name} *=.*\$" $conf_dir | xargs -r sed -i "s#^;* *${name} *=.*\$#${disable}${name} = $@#g" 2>&1 >/dev/null
     fi
 fi

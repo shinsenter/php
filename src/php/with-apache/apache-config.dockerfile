@@ -2,7 +2,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -42,7 +42,7 @@ if [ -e $CONF_FILE ]; then
             module="${module_path##*mod_}"
             module="${module/.so/_module}"
             echo "Found ${module} at ${module_path}"
-            sed -i "s|^# End Modules|#LoadModule ${module} ${module_path}\n# End Modules|" $CONF_FILE
+            sed -i "s|^# End Modules|#LoadModule ${module} ${module_path}\n# End Modules|" $CONF_FILE 2>&1 >/dev/null
         done
     fi
 
@@ -70,22 +70,21 @@ a2enmod \
 # create s6 services
 if has-cmd s6-service; then
     s6-service php-fpm longrun '#!/usr/bin/env sh
-exec php-fpm -y /usr/local/etc/php-fpm.d/zz-generated-settings.conf --nodaemonize'
+exec php-fpm -y /usr/local/etc/php-fpm.d/zz-generated-settings.conf --nodaemonize -d clear_env=no'
 
     s6-service apache depends php-fpm
     s6-service apache longrun '#!/usr/bin/env sh
+export APP_PATH="$(app-path)"
+export APP_ROOT="$(app-root)"
+
 if [ -f /etc/apache2/envvars ]; then
     source /etc/apache2/envvars
 fi
 
-web-mkdir $APACHE_LOG_DIR $APACHE_LOCK_DIR $APACHE_RUN_DIR
-web-chown fix $APACHE_LOG_DIR $APACHE_LOCK_DIR $APACHE_RUN_DIR \
-    /var/lib/apache2 /var/log/apache2 /run/apache2
-
 rm -f ${APACHE_PID:-/run/apache2.pid}
-export APP_PATH="$(app-path)"
-export APP_ROOT="$(app-root)"
+
 cd $APP_PATH
+
 if is-debug; then
     exec apache2 -e error -DFOREGROUND -X
 else

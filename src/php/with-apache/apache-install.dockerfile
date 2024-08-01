@@ -2,7 +2,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -15,7 +15,7 @@ echo 'Install Apache2'
 set -e
 
 # install apache
-APK_PACKAGES="apache2 apache2-ssl apache2-utils apache2-proxy" \
+APK_PACKAGES="apache2 apache2-proxy apache2-ssl apache2-utils" \
 APT_PACKAGES="apache2" \
 pkg-add
 
@@ -33,11 +33,6 @@ rm -rf /etc/init.d/apache* \
     /etc/apache2/ports.conf \
     $APP_PATH/*
 
-# alias for apache2
-if has-cmd httpd && ! has-cmd apache2; then
-    ln -nsf "$(command -v httpd)" "/usr/local/sbin/apache2"
-fi
-
 # copy mime types
 if [ -f /etc/mime.types ]; then
     cp -rf /etc/mime.types /etc/apache2/mime.types
@@ -53,4 +48,10 @@ if [ -d "$module_dir" ]; then
         strip --strip-all --strip-debug "$module_dir"/*.so
     fi
 fi
+
+# alias for apache2
+if has-cmd httpd && ! has-cmd apache2; then
+    ln -nsf "$(command -v httpd)" "/usr/local/sbin/apache2"
+fi
+
 EOF

@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+exec nginx -t 2>&1 | grep -qF "$@"

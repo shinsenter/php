@@ -3,20 +3,21 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
 APP_PATH="$(app-path)"
 APP_ROOT="$(app-root)"
+WPCONFIG_URL=https://raw.githubusercontent.com/docker-library/wordpress/master/wp-config-docker.php
+
+web-mkdir "$APP_PATH" "$WP_CLI_DIR" "$WP_CLI_CACHE_DIR" "$WP_CLI_PACKAGES_DIR"
 
 # create wordpress project
 if ! is-true $DISABLE_AUTORUN_CREATING_PROJECT; then
-    web-mkdir "$APP_PATH"
     if [ -z "$(ls -A "$APP_PATH")" ]; then
         debug-echo -w "Install Wordpress to $APP_PATH"
         cd "$APP_PATH"
-        set -e
         wp core download \
             --locale="${WORDPRESS_LOCALE:-en_US}" \
             --force
@@ -27,18 +28,7 @@ if ! is-true $DISABLE_AUTORUN_CREATING_PROJECT; then
     fi
 fi
 
-if [ -f /etc/wp-config-docker.php ] && [ ! -f "$APP_PATH/wp-config.php" ] ; then
-    cp -p /etc/wp-config-docker.php "$APP_PATH/wp-config.php"
+if [ ! -f "$APP_PATH/wp-config.php" ]; then
+    php -r "copy('$WPCONFIG_URL', '$APP_PATH/wp-config.php');"
     web-chown fix "$APP_PATH/wp-config.php" 2>&1 >/dev/null
-elif [ -f /etc/setup-wordpress.php ]; then
-    php /etc/setup-wordpress.php
-    mv  /etc/setup-wordpress.php /etc/setup-wordpress.php.disabled
-fi
-
-web-mkdir "$APP_ROOT"
-
-# fix .htaccess
-if [ -f "$APP_ROOT/.htaccess" ]; then
-    sed -i 's|index\.php/|index.php?/|g' "$APP_ROOT/.htaccess"
-    web-chown fix "$APP_ROOT/.htaccess" 2>&1 >/dev/null
 fi

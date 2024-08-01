@@ -3,26 +3,33 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-export TZ="${TZ:=UTC}"
-
 debug-echo "Initialize container"
 web-mkdir "$(app-path)"
+
+# set timezone
+export TZ="${TZ:=UTC}"
+if [ ! -z "$TZ" ] && [ -e /usr/share/zoneinfo/$TZ ]; then
+    ln -nsf /usr/share/zoneinfo/$TZ /etc/localtime
+fi
 
 # activity logging
 touch /var/log/startup.log
 echo "$(date) $(whoami)@$(hostname):$(pwd)\$ $0 $@" >>/var/log/startup.log
 
-# set timezone
-if [ ! -z "$TZ" ] && [ -e /usr/share/zoneinfo/$TZ ]; then
-    ln -nsf /usr/share/zoneinfo/$TZ /etc/localtime
-fi
+# load the $ENV in ~/.bashrc
+ENV_CHECK="if [ -x "\$ENV" ]; then source \$ENV; fi"
+touch ~/.bashrc
+if ! grep -qF "$ENV_CHECK" ~/.bashrc; then echo "
+# load environment variables for PHP
+$ENV_CHECK
+" >> ~/.bashrc; fi
 
-# export env variables for PHP
-if has-cmd php-envvars; then
+# export all env variables for PHP
+if is-true $ALLOW_RUNTIME_PHP_ENVVARS && has-cmd php-envvars; then
     php-envvars export_envvars 2>&1
 fi
 
@@ -31,18 +38,22 @@ if ! has-cmd /command/s6-env && [ -d /etc/cont-init.d ]; then
     autorun /etc/cont-init.d/ 2>&1
 fi
 
+# run custom command defined in $SUPERVISOR_PHP_COMMAND
+if [ ! -z "$SUPERVISOR_PHP_COMMAND" ]; then
+    set -- "$SUPERVISOR_PHP_COMMAND" "$@"
+fi
+
 # fallback for docker-php-entrypoint
 if [ -x "/init" ]; then
     set -- /init "$@"
 fi
 
 # fallback empty entrypoint
-if [ "$#" -eq 0 ]; then
+if [ $# -eq 0 ]; then
     set -- /bin/sh
 fi
 
-# move to application directory
-if [ -d "$(app-path)" ]; then cd "$(app-path)"; fi
-
+# start container with command
 debug-echo "Start container with command $@"
+if [ -d "$(app-path)" ]; then cd "$(app-path)"; fi
 exec with-env "$@"

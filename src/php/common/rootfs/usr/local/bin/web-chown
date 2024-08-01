@@ -3,26 +3,33 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-marker=/tmp/.fix-ownership
+del_flg=/etc/.fix-ownership
 
 case "$1" in
 fix)
-    shift; rm -rf $marker
-    if [ $# -eq 0 ]; then set -- "$(app-path)"; fi
+    shift
+
+    if [ $# -eq 0 ]; then
+        rm -rf $del_flg
+        set -- "$(app-path)"
+    fi
+
     for target; do
-        debug-echo "Fix ownership for $target"
-        chown -R "$APP_USER:$APP_GROUP" "$target" 2>&1 || true
+        if [ ! -z "$target" ] && [ -e "$target" ]; then
+            debug-echo "Fix ownership for $target"
+            chown -R "$APP_USER:$APP_GROUP" "$target" 2>&1 || true
+        fi
     done
     ;;
 path)
-    echo $marker
+    echo $del_flg
     ;;
 *)
-    touch $marker
+    touch $del_flg
     if [ ! -z "$@" ]; then debug-echo "$@"; fi
     ;;
 esac

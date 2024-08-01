@@ -2,7 +2,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -24,18 +24,17 @@ mkdir -p /etc/unit /etc/unit/sites-enabled \
 # create s6 services
 if has-cmd s6-service; then
     s6-service unit longrun '#!/usr/bin/env sh
+UNIT_CONTROL_PID=${UNIT_CONTROL_PID:-/run/unit.pid}
+UNIT_CONTROL_SOCKET=${UNIT_CONTROL_SOCKET:-/run/control.unit.sock}
+
 if is-debug && has-cmd unitd-debug; then
     unitd="$(command -v unitd-debug)"
 else
     unitd="$(command -v unitd)"
 fi
 
-UNIT_CONTROL_PID=${UNIT_CONTROL_PID:-/run/unit.pid}
-UNIT_CONTROL_SOCKET=${UNIT_CONTROL_SOCKET:-/run/control.unit.sock}
-
-web-chown fix /var/lib/unit /var/log/unit /run/unit
-
 rm -f $UNIT_CONTROL_PID
+
 cd "$(app-path)"
 exec "$unitd" --no-daemon \
     --user ${APP_USER:-www-data} \

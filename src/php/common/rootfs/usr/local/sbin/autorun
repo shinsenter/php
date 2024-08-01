@@ -3,19 +3,19 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
 for dir; do
-    if [ -d "$dir" ]; then
+    if [ ! -z "$dir" ] && [ -d "$dir" ]; then
         debug-echo "\nScanning autorun scripts in $dir"
         find $dir -type f -name '*.sh' | xargs -r chmod +x 2>&1 >/dev/null
 
         for script in $(find $dir -type f -perm -111 | sort -n); do
             if [ -x "$script" ]; then
                 debug-echo "\nAutorun $script"
-                with-env sh "$script"
+                with-env "$script"
             fi
         done
     fi
