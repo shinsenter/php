@@ -3,29 +3,27 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
 DEFAULT_ENV=/etc/docker-envvars
 
-if [ -z "$DOCKER_ENVVARS_LOADED" ]; then
-    # load extra env variables
-    if [ -e /etc/environment ]; then
-        set -a
-        source /etc/environment
-        set +a
-    fi
-
-    # load extra env variables
-    if [ "$ENV" != "$DEFAULT_ENV" ] && [ -x "$DEFAULT_ENV" ]; then
-        source "$DEFAULT_ENV"
-    fi
-    if [ -x "$ENV" ]; then source "$ENV"; fi
+# load extra env variables
+if [ -e /etc/environment ]; then
+    set -a
+    source /etc/environment
+    set +a
 fi
 
+# load extra env variables
+if [ "$ENV" != "$DEFAULT_ENV" ] && [ -x "$DEFAULT_ENV" ]; then source "$DEFAULT_ENV"; fi
+if [ -x "$ENV" ]; then source "$ENV"; fi
+
+# set the default command
 if [ $# -eq 0 ]; then
     set -- "$(command -v env)"
 fi
 
+# run the command with loaded env variables
 exec "$@"
