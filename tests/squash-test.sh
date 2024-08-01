@@ -29,6 +29,7 @@ platform="linux/${PLATFORM:-amd64}"
 variant="${PHP_VARIANT:-}"
 dockerfile="$BASE_DIR/src/${DOCKERFILE:-php/base-php.dockerfile}"
 context=$(dirname $dockerfile)
+s6_version=$(get_github_latest_tag "just-containers/s6-overlay" 1)
 
 if [ ! -f "$context/meta.dockerfile" ]; then
     cp -p "$BASE_DIR/src/php/meta.dockerfile" "$context/meta.dockerfile"
@@ -40,15 +41,22 @@ for version; do
         --no-cache \
         --tag "docker-php-$version-${DOCKERTAG:-$variant}:squashed" \
         --platform  "$platform" \
-        --build-arg S6_VERSION=$(get_github_latest_tag "just-containers/s6-overlay" 1) \
+        --build-arg S6_VERSION=$s6_version \
         --build-arg PHP_VERSION=$version \
         --build-arg PHP_VARIANT=$variant \
         2>&1 | tee "$BASE_DIR/tests/logs/squash-$version-${DOCKERTAG:-$variant}.txt" &
 done
 
-# example
+# build examples
 # PLATFORM=arm64 DOCKERTAG=nginx DOCKERFILE=php/with-nginx.dockerfile PHP_VARIANT=fpm-alpine ./tests/squash-test.sh 5.6 8.4-rc
+# PLATFORM=arm64 DOCKERTAG=apache DOCKERFILE=php/with-apache.dockerfile PHP_VARIANT=fpm ./tests/squash-test.sh 5.6 8.4-rc
 # PLATFORM=arm64 DOCKERTAG=f8p DOCKERFILE=php/with-f8p.dockerfile PHP_VARIANT=zts ./tests/squash-test.sh 8.3
 # PLATFORM=arm64 DOCKERTAG=unit DOCKERFILE=php/with-unit.dockerfile PHP_VARIANT=zts ./tests/squash-test.sh 8.2
 # PLATFORM=arm64 DOCKERTAG=roadrunner DOCKERFILE=php/with-roadrunner.dockerfile PHP_VARIANT=zts-alpine ./tests/squash-test.sh 8.0 8.3
 # PLATFORM=arm64 DOCKERTAG=bedrock DOCKERFILE=webapps/bedrock/bedrock.dockerfile PHP_VARIANT= ./tests/squash-test.sh 8.3
+
+# run examples
+# PLATFORM=arm64 DOCKERTAG=apache DOCKERFILE=php/with-apache.dockerfile PHP_VARIANT=fpm ./tests/squash-test.sh 5.6 8.3
+# docker run --rm -p 443:443 -p 80:80 -e S6_VERBOSITY=3 docker-php-5.6-apache:squashed
+# docker run --rm -p 443:443 -p 80:80 -e S6_VERBOSITY=3 docker-php-8.3-apache:squashed
+# docker run --rm -p 443:443 -p 80:80 -e S6_VERBOSITY=3 shinsenter/php-archives:20240731-8.3-fpm-apache

@@ -71,7 +71,7 @@ if [ -n "$S6_VERSION" ]; then
     # inject legacy entrypoint
     if [ -x $FALLBACK_ENTRYPOINT ]; then
         env-default FALLBACK_ENTRYPOINT $FALLBACK_ENTRYPOINT
-        sed -i "s|^exec |\nif [ \$# -eq 0 ]; then set -- $FALLBACK_ENTRYPOINT \"\$@\"; fi\n\nexec |" /init
+        sed -i "s|^exec |\n# CAUTION: this may crash s6-overlay\n# if [ \$# -eq 0 ]; then set -- $FALLBACK_ENTRYPOINT \"\$@\"; fi\n\nexec |" /init
     fi
 
     # add setuid bit

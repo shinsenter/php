@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+exec with-env apache2 -t 2>&1 | grep -qF "$@"
