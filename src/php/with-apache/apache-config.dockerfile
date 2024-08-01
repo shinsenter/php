@@ -67,6 +67,12 @@ a2enmod \
     cache cgid deflate dir env expires filter headers http2 log_config mime mime_magic \
     mpm_event negotiation proxy proxy_fcgi remoteip rewrite setenvif ssl status unixd 2>&1 || true
 
+# fix ProxyFCGIBackendType directive for Apache 2.4
+if apache-test 'ProxyFCGIBackendType'; then
+    echo 'Disable ProxyFCGIBackendType because it is not supported in this Apache version'
+    sed -i 's/ProxyFCGIBackendType/#ProxyFCGIBackendType/g' $CONF_FILE
+fi
+
 # create s6 services
 if has-cmd s6-service; then
     s6-service php-fpm longrun '#!/usr/bin/env sh

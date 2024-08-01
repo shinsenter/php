@@ -38,6 +38,7 @@ mkdir -p /etc/nginx \
 
 # disable TLSv1.3 when not supported
 if nginx-test 'invalid value "TLSv1.3"'; then
+    echo 'Disable TLSv1.3 because it is not supported in this Nginx version'
     nginx-conf 'ssl_protocols' 'TLSv1.2'
 fi
 
