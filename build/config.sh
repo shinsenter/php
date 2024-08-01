@@ -346,21 +346,25 @@ if [ ! -z "$PHP_VERSION" ]; then
             BUILD_TAGS="$BUILD_TAGS,$BUILD_NAME:latest$SUFFIX"
         fi
         case $APP in
-        with-nginx)
-            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-fpm-nginx" "$BUILD_TAGS")"
-            BUILD_TAGS="$(append_tags "$BUILD_NAME:latest" "$DEFAULT_BUILD_NAME:fpm-nginx" "$BUILD_TAGS")"
-            ;;
-        with-unit)
-            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-unit-php" "$BUILD_TAGS")"
-            BUILD_TAGS="$(append_tags "$BUILD_NAME:latest" "$DEFAULT_BUILD_NAME:unit-php" "$BUILD_TAGS")"
-            ;;
         with-apache)
             BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-fpm-apache" "$BUILD_TAGS")"
             BUILD_TAGS="$(append_tags "$BUILD_NAME:latest" "$DEFAULT_BUILD_NAME:fpm-apache" "$BUILD_TAGS")"
             ;;
+        with-nginx)
+            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-fpm-nginx" "$BUILD_TAGS")"
+            BUILD_TAGS="$(append_tags "$BUILD_NAME:latest" "$DEFAULT_BUILD_NAME:fpm-nginx" "$BUILD_TAGS")"
+            ;;
+        with-roadrunner)
+            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-roadrunner" "$BUILD_TAGS")"
+            BUILD_TAGS="$(append_tags "$BUILD_NAME:latest" "$DEFAULT_BUILD_NAME:roadrunner" "$BUILD_TAGS")"
+            ;;
         with-f8p)
             BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-frankenphp" "$BUILD_TAGS")"
             BUILD_TAGS="$(append_tags "$BUILD_NAME:latest" "$DEFAULT_BUILD_NAME:frankenphp" "$BUILD_TAGS")"
+            ;;
+        with-unit)
+            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-unit-php" "$BUILD_TAGS")"
+            BUILD_TAGS="$(append_tags "$BUILD_NAME:latest" "$DEFAULT_BUILD_NAME:unit-php" "$BUILD_TAGS")"
             ;;
         esac
     elif [ "${APP:0:4}" = "app-" ]; then
