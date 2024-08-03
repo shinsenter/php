@@ -13,13 +13,17 @@ ARG S6_PATH=${S6_PATH:-}
 ################################################################################
 
 RUN <<'EOF'
-echo 'Configure s6-overlay'
+if ! has-s6 && [ ! -z "$S6_VERSION" ]; then
+    echo 'Configure s6-overlay'
+    set -e
 
-if [ -n "$S6_VERSION" ]; then
     SOURCE="https://github.com/just-containers/s6-overlay/releases/download/${S6_VERSION}"
     FALLBACK_ENTRYPOINT="/usr/local/bin/fallback-entrypoint"
 
-    set -e
+    # install deps
+    APK_PACKAGES='xz' \
+    APT_PACKAGES='xz-utils' \
+    pkg-add
 
     # backup existing entrypoint
     if [ -x /init ]; then mv -f /init $FALLBACK_ENTRYPOINT; fi
