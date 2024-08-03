@@ -229,6 +229,7 @@ app-*)
         ;;
     phpixie)
         # https://phpixie.com/quickstart.html
+        LATEST_PHP="7.4"
         ;;
     phpmyadmin)
         # https://docs.phpmyadmin.net/en/latest/setup.html
