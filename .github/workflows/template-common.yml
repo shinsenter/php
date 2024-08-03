@@ -54,6 +54,8 @@ jobs:
           - '5000:5000'
     env:
       ARCHIVES_REPO: "shinsenter/php-archives"
+      DOCKER_BUILD_RECORD_UPLOAD: false
+      DOCKER_BUILD_SUMMARY: false
       PUBLISH_TO_GHCR: "1"
       USE_BUILD_CACHE: "0"
     steps:
