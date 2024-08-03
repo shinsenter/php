@@ -19,19 +19,21 @@ set -e
 
 # Show usage if no arguments are passed
 if [ $# -eq 0 ]; then
-    echo "Usage: ${0##*/} <os> <app_name> <php_version>" >&2
+    echo "Usage: ${0##*/} <os> <app_name> <php_version> [server]" >&2
     exit 1
 fi
 
 OS=$1
 APP=$2
 PHP_VERSION=$3
+USE_SERVER=$4
 
 ################################################################################
 # Build environment variables
 ################################################################################
 
-DEFAULT_BUILD_NAME="shinsenter/php"
+DEFAULT_REPO="shinsenter"
+DEFAULT_BUILD_NAME="$DEFAULT_REPO/php"
 DEFAULT_README="$BASE_DIR/README.md"
 UPDATE_README=0
 
@@ -85,7 +87,7 @@ fi
 
 case $APP in
 base-os)
-    BUILD_NAME="shinsenter/$OS_BASE-s6"
+    BUILD_NAME="$DEFAULT_REPO/$OS_BASE-s6"
     BUILD_DOCKERFILE=$BASE_DIR/src/php/base-os.dockerfile
     PHP_VERSION=
     IPE_VERSION=
@@ -101,7 +103,7 @@ base-os)
 base-s6)
     # only build on alpine
     if [ "$OS_BASE" = "alpine" ]; then
-        BUILD_NAME="shinsenter/s6-overlay"
+        BUILD_NAME="$DEFAULT_REPO/s6-overlay"
         S6_PATH=/s6
         BUILD_DOCKERFILE=$BASE_DIR/src/php/base-s6.dockerfile
         PHP_VERSION=
@@ -113,14 +115,14 @@ base-s6)
     ;;
 with-apache)
     PREFIX="fpm-apache"
-    BUILD_NAME="shinsenter/phpfpm-apache"
+    BUILD_NAME="$DEFAULT_REPO/phpfpm-apache"
     BUILD_DOCKERFILE=$BASE_DIR/src/php/with-apache.dockerfile
     PHP_VARIANT="fpm$SUFFIX"
     ALLOW_RC=1
     ;;
 with-nginx)
     PREFIX="fpm-nginx"
-    BUILD_NAME="shinsenter/phpfpm-nginx"
+    BUILD_NAME="$DEFAULT_REPO/phpfpm-nginx"
     BUILD_DOCKERFILE=$BASE_DIR/src/php/with-nginx.dockerfile
     PHP_VARIANT="fpm$SUFFIX"
     ALLOW_RC=1
@@ -129,39 +131,39 @@ with-unit)
     verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
     unit_version="$(get_github_latest_tag nginx/unit)"
     PREFIX="unit"
-    BUILD_NAME="shinsenter/unit-php"
+    BUILD_NAME="$DEFAULT_REPO/unit-php"
     BUILD_DOCKERFILE=$BASE_DIR/src/php/with-unit.dockerfile
     BUILD_SOURCE_IMAGE="https://codeload.github.com/nginx/unit/tar.gz/refs/tags/$unit_version"
-    BUILD_CACHE_KEY="unit@$(echo "$unit_version" | head -c17)"
+    BUILD_CACHE_KEY="(unit@$(echo "$unit_version" | head -c17))"
     PHP_VARIANT="zts$SUFFIX"
     ALLOW_RC=1
     ;;
 with-f8p)
     verlt "$PHP_VERSION" "8.2" && SKIP_BUILD=1
     PREFIX="frankenphp"
-    BUILD_NAME="shinsenter/frankenphp"
+    BUILD_NAME="$DEFAULT_REPO/frankenphp"
     BUILD_SOURCE_IMAGE="dunglas/frankenphp:1-php$PHP_VERSION$SUFFIX"
     BUILD_DOCKERFILE=$BASE_DIR/src/php/with-f8p.dockerfile
     BUILD_PLATFORM="linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8"
-    BUILD_CACHE_KEY="frankenphp@$(get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php$PHP_VERSION$SUFFIX" | head -c17)"
+    BUILD_CACHE_KEY="(frankenphp@$(get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php$PHP_VERSION$SUFFIX" | head -c17))"
     PHP_VARIANT="zts$SUFFIX"
     ;;
 with-roadrunner)
     verlt "$PHP_VERSION" "8.0" && SKIP_BUILD=1
     # https://docs.roadrunner.dev/docs/general/install
     PREFIX="roadrunner"
-    BUILD_NAME="shinsenter/roadrunner"
+    BUILD_NAME="$DEFAULT_REPO/roadrunner"
     BUILD_DOCKERFILE=$BASE_DIR/src/php/with-roadrunner.dockerfile
     PHP_VARIANT="cli$SUFFIX"
     BUILD_PLATFORM="linux/amd64,linux/arm64"
-    BUILD_CACHE_KEY="roadrunner@$(get_github_latest_tag "roadrunner-server/roadrunner" | head -c17)"
+    BUILD_CACHE_KEY="(roadrunner@$(get_github_latest_tag "roadrunner-server/roadrunner" | head -c17))"
     ALLOW_RC=1
     ;;
 app-*)
     # implement later
     APP_NAME="${APP//app-/}"
-    BUILD_FROM_IMAGE="shinsenter/phpfpm-apache"
-    BUILD_NAME="shinsenter/$APP_NAME"
+    BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-apache"
+    BUILD_NAME="$DEFAULT_REPO/$APP_NAME"
     BUILD_DOCKERFILE=$BASE_DIR/src/webapps/$APP_NAME/$APP_NAME.dockerfile
     PHP_VARIANT="$SUFFIX"
 
@@ -181,7 +183,7 @@ app-*)
     crater)
         # https://docs.craterapp.com/installation.html
         LATEST_PHP="8.1"
-        BUILD_FROM_IMAGE="shinsenter/phpfpm-nginx"
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
         ;;
     drupal)
@@ -190,7 +192,7 @@ app-*)
         ;;
     flarum)
         # https://docs.flarum.org/install/
-        BUILD_FROM_IMAGE="shinsenter/phpfpm-nginx"
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.3" && SKIP_BUILD=1
         ;;
     fuelphp)
@@ -204,7 +206,7 @@ app-*)
     hyperf)
         # https://hyperf.wiki/3.1/#/en/quick-start/install
         BUILD_PLATFORM="linux/amd64,linux/arm/v7,linux/arm64/v8"
-        BUILD_FROM_IMAGE="shinsenter/phpfpm-nginx"
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.2" && SKIP_BUILD=1
         if verlte "8.3" "$PHP_VERSION"; then
             BUILD_PLATFORM="linux/amd64,linux/arm64/v8"
@@ -216,12 +218,12 @@ app-*)
         ;;
     laminas)
         # https://docs.laminas.dev/tutorials/getting-started/skeleton-application/
-        BUILD_FROM_IMAGE="shinsenter/phpfpm-nginx"
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.3" && SKIP_BUILD=1
         ;;
     laravel)
         # https://laravel.com/docs/master/installation
-        BUILD_FROM_IMAGE="shinsenter/phpfpm-nginx"
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         ;;
     mautic)
         # https://docs.mautic.org/en/5.x/getting_started/how_to_install_mautic.html#installing-with-composer
@@ -233,7 +235,7 @@ app-*)
         ;;
     phpmyadmin)
         # https://docs.phpmyadmin.net/en/latest/setup.html
-        BUILD_FROM_IMAGE="shinsenter/phpfpm-nginx"
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         ;;
     slim)
         # https://www.slimframework.com/docs/v4/start/installation.html
@@ -265,7 +267,42 @@ app-*)
         ;;
     esac
 
-    BUILD_CACHE_KEY="$BUILD_FROM_IMAGE@$(get_dockerhub_latest_sha "$BUILD_FROM_IMAGE" 1 "php$PHP_VERSION$PHP_VARIANT" | head -c17)"
+    # override the default server variant
+    case "$USE_SERVER" in
+        httpd|apache*)
+            if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/phpfpm-apache" ]; then
+                SUFFIX="-apache${SUFFIX}"
+                BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-apache"
+            fi
+            ;;
+        nginx)
+            if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/phpfpm-nginx" ]; then
+                SUFFIX="-nginx${SUFFIX}"
+                BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
+            fi
+            ;;
+        unit)
+            if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/unit-php" ]; then
+                SUFFIX="-unit${SUFFIX}"
+                BUILD_FROM_IMAGE="$DEFAULT_REPO/unit-php"
+            fi
+            ;;
+        f8p|frankenphp)
+            if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/frankenphp" ]; then
+                SUFFIX="-frankenphp${SUFFIX}"
+                BUILD_FROM_IMAGE="$DEFAULT_REPO/frankenphp"
+            fi
+            ;;
+        rr|roadrunner)
+            if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/roadrunner" ]; then
+                SUFFIX="-roadrunner${SUFFIX}"
+                BUILD_FROM_IMAGE="$DEFAULT_REPO/roadrunner"
+            fi
+            ;;
+    esac
+
+    # get checksum of the base image
+    BUILD_CACHE_KEY="($BUILD_FROM_IMAGE@$(get_dockerhub_latest_sha "$BUILD_FROM_IMAGE" 1 "php$PHP_VERSION" | head -c17))"
     ;;
 
 *)
@@ -422,7 +459,7 @@ fi
 
 # also publish to ghcr.io
 if [ ! -z "$PUBLISH_TO_GHCR" ]; then
-    BUILD_TAGS="$(append_tags "shinsenter" "ghcr.io/shinsenter" "$BUILD_TAGS")"
+    BUILD_TAGS="$(append_tags "$DEFAULT_REPO" "ghcr.io/$DEFAULT_REPO" "$BUILD_TAGS")"
 fi
 
 # also push a copy to archived repo
@@ -437,7 +474,7 @@ fi
 
 if [ ! -z "$DUMMY" ]; then
     BUILD_DOCKERFILE="$BASE_DIR/src/dummy.dockerfile"
-    BUILD_CACHE_KEY="dummy@$BUILD_REVISION"
+    BUILD_CACHE_KEY="(dummy@$BUILD_REVISION)"
 fi
 
 if [ ! -z "$BUILD_DOCKERFILE" ] && [ -f $BUILD_DOCKERFILE ]; then
@@ -496,23 +533,30 @@ if [ ! -e "$BUILD_CACHE_PATH" ]; then
     mkdir -p "${BUILD_CACHE_PATH}-new" 2>&1
 fi
 
-if [ "$SKIP_BUILD" != "1" ] && [ ! -z "$PHP_VERSION" ]; then
-    PHP_SHA="$(get_dockerhub_latest_sha "library/php" 1 "$PHP_VERSION-$PHP_VARIANT" | head -c17)"
+
+BUILD_CACHE_KEY="($APP@$BUILD_NAME)${BUILD_CACHE_KEY:+/}$BUILD_CACHE_KEY"
+
+if [ ! -z "$S6_VERSION" ]; then
+    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(s6@$S6_VERSION)"
 fi
 
-if [ "$SKIP_BUILD" != "1" ] && [ ! -z "$OS_BASE" ]; then
-    OS_SHA="$(get_dockerhub_latest_sha "library/$OS_BASE" 1 "$OS_VERSION" | head -c17)"
+if [ ! -z "$OS_BASE" ]; then
+    if [ "$SKIP_BUILD" != "1" ]; then
+        OS_SHA="$(get_dockerhub_latest_sha "library/$OS_BASE" 1 "$OS_VERSION" | head -c17)"
+    fi
+    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/($OS_BASE:$OS_VERSION@$OS_SHA)/(s6@$S6_VERSION)"
 fi
-
-BUILD_CACHE_KEY="$BUILD_CACHE_KEY${BUILD_CACHE_KEY:+/}$APP@$BUILD_NAME/$OS_BASE:$OS_VERSION@$OS_SHA/s6@$S6_VERSION"
 
 if [ ! -z "$PHP_VERSION" ]; then
-    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/php:$PHP_VERSION-$PHP_VARIANT@$PHP_SHA/IPE:$IPE_VERSION/composer:$COMPOSER_VERSION"
+    if [ "$SKIP_BUILD" != "1" ]; then
+        PHP_SHA="$(get_dockerhub_latest_sha "library/php" 1 "$PHP_VERSION-${PHP_VARIANT#-}" | head -c17)"
+    fi
+    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(php:$PHP_VERSION-${PHP_VARIANT#-}@$PHP_SHA)/(IPE:$IPE_VERSION)/(composer:$COMPOSER_VERSION)"
 fi
 
-BUILD_CACHE_KEY="$BUILD_CACHE_KEY/buildfile:$(path_hash $BUILD_DOCKERFILE | head -c10)\
-/buildcontext:$(path_hash $BUILD_CONTEXT | shasum | head -c10)\
-/workflows:$(path_hash $BASE_DIR/.github/workflows | shasum | head -c10)"
+BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(buildfile:$(path_hash $BUILD_DOCKERFILE | head -c10))\
+/(buildcontext:$(path_hash $BUILD_CONTEXT | shasum | head -c10))\
+/(workflows:$(path_hash $BASE_DIR/.github/workflows | shasum | head -c10))"
 
 BUILD_TMP_NAME="localhost:5000/$(path_hash "$BUILD_CACHE_KEY" | head -c10)"
 

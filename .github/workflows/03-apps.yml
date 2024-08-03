@@ -56,8 +56,12 @@ jobs:
           - app-symfony
           - app-wordpress
           - app-yii
+        # include:
+        #   - app: app-laravel
+        #     server: [apache, nginx]
     with:
       app_name: ${{ matrix.app }}
+      server: ${{ matrix.server }}
 
 ################################################################################
 ################################################################################

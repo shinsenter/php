@@ -38,17 +38,23 @@ timestamp() {
 # Function to get remote json
 get_remote_json () {
     echo "Fetching $@" 1>&2
-    curl --retry 3 --retry-delay 5 -ks "$@" | tr -d '[:cntrl:]'
+    if [ ! -z "$TOKEN" ]; then
+        curl --retry 3 --retry-delay 5 -ksL \
+            --header "Authorization: Bearer $TOKEN" \
+            --request GET --url "$@" | tr -d '[:cntrl:]'
+    else
+        curl --retry 3 --retry-delay 5 -ksL "$@" | tr -d '[:cntrl:]'
+    fi
 }
 
 # Function to get metadata from GitHub
 get_github_json () {
-    get_remote_json "https://api.github.com/repos/$1/tags?per_page=10&$2"
+    TOKEN="$GITHUB_TOKEN" get_remote_json "https://api.github.com/repos/$1/tags?per_page=10&$2"
 }
 
 # Function to get metadata from Docker Hub
 get_dockerhub_json () {
-    get_remote_json "https://registry.hub.docker.com/v2/repositories/$1/tags?&page_size=10&status=active&sort=last_updated&$2"
+    TOKEN="$DOCKERHUB_TOKEN" get_remote_json "https://registry.hub.docker.com/v2/repositories/$1/tags?&page_size=10&status=active&sort=last_updated&$2"
 }
 
 # For GitHub

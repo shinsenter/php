@@ -17,6 +17,10 @@ on:
       app_name:
         required: true
         type: string
+      server:
+        required: false
+        type: string
+        default: ""
 
 ################################################################################
 ################################################################################
@@ -30,6 +34,7 @@ jobs:
         os: ["", "alpine"]
         php_version: ["8.4-rc", "8.3", "8.2", "8.1", "8.0", "7.4", "7.3", "7.2", "7.1", "7.0", "5.6"]
     with:
-      app_name: ${{ inputs.app_name }}
-      php_version: ${{ matrix.php_version }}
       os: ${{ matrix.os }}
+      php_version: ${{ matrix.php_version }}
+      app_name: ${{ inputs.app_name }}
+      server: ${{ inputs.server }}

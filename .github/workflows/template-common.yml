@@ -21,6 +21,10 @@ on:
         required: false
         type: string
         default: ""
+      server:
+        required: false
+        type: string
+        default: ""
       os:
         required: false
         type: string
@@ -42,7 +46,7 @@ on:
 
 jobs:
   build:
-    name: ${{ inputs.php_version }} ${{ inputs.app_name }} ${{ inputs.os }}
+    name: ${{ inputs.php_version }} ${{ inputs.app_name }} ${{ inputs.server }} ${{ inputs.os }}
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -70,8 +74,10 @@ jobs:
         if: ${{ !env.SKIP_BUILD }}
         name: Generate build config
         run: |
-          BUILD_TAG_PREFIX=${{ env.BUILD_TAG_PREFIX }}
-          ./build/config.sh "${{ inputs.os }}" "${{ inputs.app_name }}" "${{ inputs.php_version }}"
+          export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          export DOCKERHUB_TOKEN=${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          export BUILD_TAG_PREFIX=${{ env.BUILD_TAG_PREFIX }}
+          ./build/config.sh "${{ inputs.os }}" "${{ inputs.app_name }}" "${{ inputs.php_version }}" "${{ inputs.server }}"
 
       -
         id: cache
