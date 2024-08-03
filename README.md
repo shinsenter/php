@@ -7,6 +7,8 @@
 
 [![shinsenter/php](https://repository-images.githubusercontent.com/458053748/24e848e1-c0fc-4893-b2b9-f7dbfad263f3)](https://docker.shin.company/php)
 
+[![Daily build](https://github.com/shinsenter/php/actions/workflows/build-all.yml/badge.svg)](https://github.com/shinsenter/php/actions/workflows/build-all.yml)
+
 ## Introduction
 
 Our PHP Docker images are based on the [official PHP Docker images](https://hub.docker.com/_/php).
