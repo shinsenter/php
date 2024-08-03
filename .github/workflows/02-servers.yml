@@ -2,65 +2,44 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-name: Publish PHP Docker Images
+name: Publish PHP Servers
 
 ################################################################################
 ################################################################################
 
 on:
+  workflow_call:
   workflow_dispatch:
-  # push:
-  #   branches:
-  #     - 5.x
-  #   paths:
-  #     - .github/workflows/*.yml
-  #     - README.md
-  #     - src/**
-  schedule:
-    - cron: "0 0 * * *"
+  workflow_run:
+    workflows: [Publish PHP]
+    types:
+      - completed
 
 ################################################################################
 ################################################################################
 
 jobs:
 
-  ##############################################################################
-  # PHP images
-  ##############################################################################
-
-  main:
+  php-servers:
+    # See: https://docs.github.com/en/webhooks/webhook-events-and-payloads#workflow_run
+    if: ${{ github.event.workflow_run.conclusion == '' || github.event.workflow_run.conclusion == 'success' }}
+    uses: ./.github/workflows/template-php.yml
+    secrets: inherit
     strategy:
+      max-parallel: 11
       matrix:
         app:
-          - "cli"
-          - "fpm"
-          - "zts"
-        os:
-          - ""
-          - "alpine"
-        php_version:
-          - "5.6"
-          - "7.0"
-          - "7.1"
-          - "7.2"
-          - "7.3"
-          - "7.4"
-          - "8.0"
-          - "8.1"
-          - "8.2"
-          - "8.3"
-          - "8.4-rc"
-    uses: ./.github/workflows/build-template.yml
+          - with-apache
+          - with-nginx
+          - with-roadrunner
+          - with-f8p
+          - with-unit
     with:
       app_name: ${{ matrix.app }}
-      php_version: ${{ matrix.php_version }}
-      os: ${{ matrix.os }}
-      os_version: latest
-    secrets: inherit
 
 ################################################################################
 ################################################################################

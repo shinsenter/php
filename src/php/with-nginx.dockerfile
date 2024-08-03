@@ -13,6 +13,12 @@ ARG  PHP_VARIANT=${PHP_VARIANT:-fpm-alpine}
 
 FROM ./base-php AS php
 
+# ARG  BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-shinsenter/php}
+# ARG  PHP_VERSION=${PHP_VERSION:-8.3}
+# ARG  PHP_VARIANT=${PHP_VARIANT:-fpm-alpine}
+
+# FROM ${BUILD_FROM_IMAGE}:${PHP_VERSION}-${PHP_VARIANT}
+
 ################################################################################
 
 INCLUDE ./with-nginx/nginx-install

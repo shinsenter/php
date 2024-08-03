@@ -97,7 +97,7 @@ env-default 'alias ll="ls -alh"'
 env-default '# Environment variables for OS'
 env-default DEBIAN_FRONTEND $DEBIAN_FRONTEND
 env-default DEBCONF_NOWARNINGS $DEBCONF_NOWARNINGS
-env-default HISTCONTROL 'ignoredups:ignorespace'
+env-default HISTCONTROL 'ignoreboth'
 env-default HISTFILESIZE '2000'
 env-default HISTSIZE '1000'
 env-default LANG 'C.UTF-8'
@@ -130,9 +130,7 @@ mkcert -days 3652 -install \
     localhost
 
 # backup entrypoint
-if [ -f $DOCKER_ENTRYPOINT ]; then
-    mv $DOCKER_ENTRYPOINT /init
-fi
+if [ -f $DOCKER_ENTRYPOINT ]; then mv $DOCKER_ENTRYPOINT /init; fi
 
 EOF
 

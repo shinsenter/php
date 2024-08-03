@@ -9,12 +9,6 @@
 # S6 variables
 ARG S6_VERSION=${S6_VERSION:-}
 ARG S6_PATH=${S6_PATH:-}
-ARG S6_SRC_URL="https://github.com/just-containers/s6-overlay/releases/download"
-ARG FALLBACK_ENTRYPOINT=/usr/local/bin/fallback-entrypoint
-
-################################################################################
-
-ADD --link ./common/shell-s6/ "${S6_PATH}/usr/local/sbin/"
 
 ################################################################################
 
@@ -22,7 +16,8 @@ RUN <<'EOF'
 echo 'Configure s6-overlay'
 
 if [ -n "$S6_VERSION" ]; then
-    SOURCE=${S6_SRC_URL}/${S6_VERSION}
+    SOURCE="https://github.com/just-containers/s6-overlay/releases/download/${S6_VERSION}"
+    FALLBACK_ENTRYPOINT="/usr/local/bin/fallback-entrypoint"
 
     set -e
 
@@ -70,14 +65,8 @@ if [ -n "$S6_VERSION" ]; then
 
     # inject legacy entrypoint
     if [ -x $FALLBACK_ENTRYPOINT ]; then
-        env-default FALLBACK_ENTRYPOINT $FALLBACK_ENTRYPOINT
-        sed -i "s|^exec |\n# CAUTION: this may crash s6-overlay\n# if [ \$# -eq 0 ]; then set -- $FALLBACK_ENTRYPOINT \"\$@\"; fi\n\nexec |" /init
+        sed -i "s|^exec |\nif [ \$# -gt 0 ]; then set -- $FALLBACK_ENTRYPOINT \"\$@\"; fi\n\nexec |" /init
     fi
-
-    # add setuid bit
-    chmod u+s "${S6_PATH}/usr/local/sbin/s6-"*
-else
-    rm -rf "${S6_PATH}/usr/local/sbin/s6-"*
 fi
 EOF
 

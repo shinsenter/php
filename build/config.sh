@@ -3,7 +3,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -126,6 +126,7 @@ with-nginx)
     ALLOW_RC=1
     ;;
 with-unit)
+    verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
     unit_version="$(get_github_latest_tag nginx/unit)"
     PREFIX="unit"
     BUILD_NAME="shinsenter/unit-php"
@@ -134,9 +135,9 @@ with-unit)
     BUILD_CACHE_KEY="unit@$(echo "$unit_version" | head -c17)"
     PHP_VARIANT="zts$SUFFIX"
     ALLOW_RC=1
-    verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
     ;;
 with-f8p)
+    verlt "$PHP_VERSION" "8.2" && SKIP_BUILD=1
     PREFIX="frankenphp"
     BUILD_NAME="shinsenter/frankenphp"
     BUILD_SOURCE_IMAGE="dunglas/frankenphp:1-php$PHP_VERSION$SUFFIX"
@@ -144,18 +145,17 @@ with-f8p)
     BUILD_PLATFORM="linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8"
     BUILD_CACHE_KEY="frankenphp@$(get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php$PHP_VERSION$SUFFIX" | head -c17)"
     PHP_VARIANT="zts$SUFFIX"
-    verlt "$PHP_VERSION" "8.2" && SKIP_BUILD=1
     ;;
 with-roadrunner)
+    verlt "$PHP_VERSION" "8.0" && SKIP_BUILD=1
     # https://docs.roadrunner.dev/docs/general/install
     PREFIX="roadrunner"
     BUILD_NAME="shinsenter/roadrunner"
     BUILD_DOCKERFILE=$BASE_DIR/src/php/with-roadrunner.dockerfile
-    PHP_VARIANT="zts$SUFFIX"
+    PHP_VARIANT="cli$SUFFIX"
     BUILD_PLATFORM="linux/amd64,linux/arm64"
     BUILD_CACHE_KEY="roadrunner@$(get_github_latest_tag "roadrunner-server/roadrunner" | head -c17)"
     ALLOW_RC=1
-    verlt "$PHP_VERSION" "8.0" && SKIP_BUILD=1
     ;;
 app-*)
     # implement later
@@ -278,34 +278,35 @@ app-*)
     ;;
 esac
 
+# skip build if the latest supported PHP version is less than the build version
+if [ "$ALLOW_RC" != "1" ]; then
+    verlt "$LATEST_PHP" "$PHP_VERSION" && SKIP_BUILD=1
+fi
+
 # skip build if the PHP version is earlier than 7.1 and the OS is not Debian
 if [ ! -z "$PHP_VERSION" ] && verlt "$PHP_VERSION" "7.1" && [ "$OS_BASE" != "debian" ]; then
     BUILD_DOCKERFILE=
+    SKIP_BUILD=1
 fi
 
 # lazy load the latest Composer version when necessary
-if [ "$COMPOSER_VERSION" = "latest" ]; then
+if [ "$SKIP_BUILD" != "1" ] && [ "$COMPOSER_VERSION" = "latest" ]; then
     COMPOSER_VERSION="$(get_github_latest_tag "composer/composer" 1)"
 fi
 
 # lazy load the latest IPE version when necessary
-if [ "$IPE_VERSION" = "latest" ]; then
+if [ "$SKIP_BUILD" != "1" ] && [ "$IPE_VERSION" = "latest" ]; then
     IPE_VERSION="$(get_github_latest_tag "mlocati/docker-php-extension-installer" 1)"
 fi
 
 # lazy load the latest s6-overlay version when necessary
-if [ "$S6_VERSION" = "latest" ]; then
+if [ "$SKIP_BUILD" != "1" ] && [ "$S6_VERSION" = "latest" ]; then
     LATEST_S6=$(get_github_latest_tag "just-containers/s6-overlay" 1)
     if [ -z "$LATEST_S6" ]; then
         echo "Failed to get latest s6-overlay version" >&2
         exit 1
     fi
     S6_VERSION="$LATEST_S6"
-fi
-
-# skip build if the latest supported PHP version is less than the build version
-if [ "$ALLOW_RC" != "1" ]; then
-    verlt "$LATEST_PHP" "$PHP_VERSION" && SKIP_BUILD=1
 fi
 
 ################################################################################
@@ -347,24 +348,24 @@ if [ ! -z "$PHP_VERSION" ]; then
         fi
         case $APP in
         with-apache)
-            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-fpm-apache" "$BUILD_TAGS")"
             BUILD_TAGS="$(append_tags "$BUILD_NAME:latest" "$DEFAULT_BUILD_NAME:fpm-apache" "$BUILD_TAGS")"
+            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-fpm-apache" "$BUILD_TAGS")"
             ;;
         with-nginx)
-            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-fpm-nginx" "$BUILD_TAGS")"
             BUILD_TAGS="$(append_tags "$BUILD_NAME:latest" "$DEFAULT_BUILD_NAME:fpm-nginx" "$BUILD_TAGS")"
+            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-fpm-nginx" "$BUILD_TAGS")"
             ;;
         with-roadrunner)
-            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-roadrunner" "$BUILD_TAGS")"
             BUILD_TAGS="$(append_tags "$BUILD_NAME:latest" "$DEFAULT_BUILD_NAME:roadrunner" "$BUILD_TAGS")"
+            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-roadrunner" "$BUILD_TAGS")"
             ;;
         with-f8p)
-            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-frankenphp" "$BUILD_TAGS")"
             BUILD_TAGS="$(append_tags "$BUILD_NAME:latest" "$DEFAULT_BUILD_NAME:frankenphp" "$BUILD_TAGS")"
+            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-frankenphp" "$BUILD_TAGS")"
             ;;
         with-unit)
-            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-unit-php" "$BUILD_TAGS")"
             BUILD_TAGS="$(append_tags "$BUILD_NAME:latest" "$DEFAULT_BUILD_NAME:unit-php" "$BUILD_TAGS")"
+            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-unit-php" "$BUILD_TAGS")"
             ;;
         esac
     elif [ "${APP:0:4}" = "app-" ]; then
@@ -373,6 +374,25 @@ if [ ! -z "$PHP_VERSION" ]; then
             BUILD_TAGS="$BUILD_TAGS,$BUILD_NAME:latest$SUFFIX"
         fi
     fi
+
+    case "$PHP_VERSION" in
+    "5.6")
+        BUILD_TAGS="$(append_tags ":php$PHP_VERSION" ":php5" "$BUILD_TAGS")"
+        BUILD_TAGS="$(append_tags ":$PHP_VERSION" ":5" "$BUILD_TAGS")"
+        ;;
+    "7.4")
+        BUILD_TAGS="$(append_tags ":php$PHP_VERSION" ":php7" "$BUILD_TAGS")"
+        BUILD_TAGS="$(append_tags ":$PHP_VERSION" ":7" "$BUILD_TAGS")"
+        ;;
+    "8.3")
+        BUILD_TAGS="$(append_tags ":php$PHP_VERSION" ":php8" "$BUILD_TAGS")"
+        BUILD_TAGS="$(append_tags ":$PHP_VERSION" ":8" "$BUILD_TAGS")"
+        ;;
+    "$LATEST_PHP")
+        BUILD_TAGS="$(append_tags ":php$PHP_VERSION" ":php${PHP_VERSION%%.*}" "$BUILD_TAGS")"
+        BUILD_TAGS="$(append_tags ":$PHP_VERSION" ":${PHP_VERSION%%.*}" "$BUILD_TAGS")"
+        ;;
+    esac
 elif [ "$APP" = "base-s6" ]; then
     BUILD_TAGS="$BUILD_NAME:$S6_VERSION,$BUILD_NAME:latest"
 else
@@ -381,6 +401,11 @@ fi
 
 # remove -rc from build tags
 BUILD_TAGS=${BUILD_TAGS//-rc/}
+
+# apply tag prefix for development branch
+if [ ! -z "$BUILD_TAG_PREFIX" ]; then
+    BUILD_TAGS=${BUILD_TAGS//:/:$BUILD_TAG_PREFIX}
+fi
 
 # check if build tags are empty
 if [ -z "$BUILD_TAGS" ]; then
@@ -443,8 +468,8 @@ fi
 if [ ! -z "$BUILD_README" ] && [ -f "$BUILD_README" ]; then
     BUILD_DESC="$(sed '3q;d' $BUILD_README)"
 
-    # update readme on latest tag
-    if [[ "$BUILD_TAGS" == *'latest'* ]]; then
+    # update readme on latest tag and not dev branch
+    if [[ "$BUILD_TAGS" == *'latest'* ]] && [ -z "$BUILD_TAG_PREFIX" ]; then
         UPDATE_README=1
     fi
 else
@@ -471,11 +496,11 @@ if [ ! -e "$BUILD_CACHE_PATH" ]; then
     mkdir -p "${BUILD_CACHE_PATH}-new" 2>&1
 fi
 
-if [ ! -z "$PHP_VERSION" ]; then
+if [ "$SKIP_BUILD" != "1" ] && [ ! -z "$PHP_VERSION" ]; then
     PHP_SHA="$(get_dockerhub_latest_sha "library/php" 1 "$PHP_VERSION-$PHP_VARIANT" | head -c17)"
 fi
 
-if [ ! -z "$OS_BASE" ]; then
+if [ "$SKIP_BUILD" != "1" ] && [ ! -z "$OS_BASE" ]; then
     OS_SHA="$(get_dockerhub_latest_sha "library/$OS_BASE" 1 "$OS_VERSION" | head -c17)"
 fi
 
@@ -517,6 +542,15 @@ if [ ! -z "$PHP_VERSION" ] && verlt "$PHP_VERSION" "7.1"; then
     BUILD_PLATFORM="linux/amd64,linux/arm/v7"
 elif [ "$OS_BASE" = "debian" ] && [ ! -z "$PHP_VERSION" ] && verlt "$PHP_VERSION" "7.3"; then
     BUILD_PLATFORM="$(remove_platform "$BUILD_PLATFORM" '386' 'ppc64le' 's390x')"
+fi
+
+################################################################################
+# Fix image name for RC versions
+################################################################################
+
+# remove -rc from PHP_VERSION
+if [ "$BUILD_FROM_IMAGE" != "php" ]; then
+    PHP_VERSION=${PHP_VERSION//-rc/}
 fi
 
 ################################################################################

@@ -9,9 +9,15 @@
 
 ARG  BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-php}
 ARG  PHP_VERSION=${PHP_VERSION:-8.3}
-ARG  PHP_VARIANT=${PHP_VARIANT:-zts}
+ARG  PHP_VARIANT=${PHP_VARIANT:-zts-alpine}
 
 FROM ./base-php AS php
+
+# ARG  BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-shinsenter/php}
+# ARG  PHP_VERSION=${PHP_VERSION:-8.3}
+# ARG  PHP_VARIANT=${PHP_VARIANT:-zts-alpine}
+
+# FROM ${BUILD_FROM_IMAGE}:${PHP_VERSION}-${PHP_VARIANT}
 
 ################################################################################
 

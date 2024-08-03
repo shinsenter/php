@@ -28,12 +28,12 @@ web-cmd root pecl "$(command -v pecl)"
 # Set IPE default settings
 env-default '# Environment variables for IPE'
 env-default IPE_DEBUG '$(is-debug && echo 1 || echo 0)'
-env-default IPE_ASPELL_LANGUAGES 'en'
-env-default IPE_GD_WITHOUTAVIF '1'
-env-default IPE_ICU_EN_ONLY '1'
-env-default IPE_INSTANTCLIENT_BASIC '1'
-env-default IPE_KEEP_SYSPKG_CACHE '0'
-env-default IPE_LZF_BETTERCOMPRESSION '1'
+env-default IPE_ASPELL_LANGUAGES        'en'
+env-default IPE_GD_WITHOUTAVIF          '1'
+env-default IPE_ICU_EN_ONLY             '1'
+env-default IPE_INSTANTCLIENT_BASIC     '1'
+env-default IPE_KEEP_SYSPKG_CACHE       '0'
+env-default IPE_LZF_BETTERCOMPRESSION   '1'
 
 # Install PHP modules
 phpaddmod @fix_letsencrypt \

@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.2.0] - 2024-08-10
+
+We have restructured the workflows to build stable Docker images and development Docker images (with tags starting with `dev-`) separately.
+Additionally, we will try different approaches to minimize the build time, making the build process faster and saving community resources.
+
 ## [5.1.0] - 2024-08-01
 
 We have updated the behavior of the environment variables used to change PHP configurations to enhance container performance:

@@ -3,7 +3,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -48,6 +48,7 @@ for version; do
 done
 
 # build examples
+# PLATFORM=arm64 DOCKERTAG=s6 DOCKERFILE=php/base-s6.dockerfile ./tests/squash-test.sh latest
 # PLATFORM=arm64 DOCKERTAG=nginx DOCKERFILE=php/with-nginx.dockerfile PHP_VARIANT=fpm-alpine ./tests/squash-test.sh 5.6 8.4-rc
 # PLATFORM=arm64 DOCKERTAG=apache DOCKERFILE=php/with-apache.dockerfile PHP_VARIANT=fpm ./tests/squash-test.sh 5.6 8.4-rc
 # PLATFORM=arm64 DOCKERTAG=f8p DOCKERFILE=php/with-f8p.dockerfile PHP_VARIANT=zts ./tests/squash-test.sh 8.3

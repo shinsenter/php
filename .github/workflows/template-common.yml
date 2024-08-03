@@ -2,7 +2,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -20,12 +20,15 @@ on:
       php_version:
         required: false
         type: string
+        default: ""
       os:
         required: false
         type: string
+        default: alpine
       os_version:
         required: false
         type: string
+        default: latest
     secrets:
       DOCKER_HUB_ACCESS_TOKEN:
         required: true
@@ -39,6 +42,7 @@ on:
 
 jobs:
   build:
+    name: ${{ inputs.php_version }} ${{ inputs.app_name }} ${{ inputs.os }}
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -54,13 +58,17 @@ jobs:
       USE_BUILD_CACHE: "0"
     steps:
       -
+        if: ${{ !env.SKIP_BUILD }}
         uses: actions/checkout@v4
         with:
           submodules: 'true'
 
       -
+        if: ${{ !env.SKIP_BUILD }}
         name: Generate build config
-        run: ./build/config.sh "${{ inputs.os }}" "${{ inputs.app_name }}" "${{ inputs.php_version }}"
+        run: |
+          BUILD_TAG_PREFIX=${{ env.BUILD_TAG_PREFIX }}
+          ./build/config.sh "${{ inputs.os }}" "${{ inputs.app_name }}" "${{ inputs.php_version }}"
 
       -
         id: cache
