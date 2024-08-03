@@ -558,7 +558,6 @@ fi
 # Export Git action environment variables
 ################################################################################
 
-github_env DOCKER_BUILDKIT 1
 github_env DOCKER_ULIMIT "nofile=65536:65536"
 github_env BUILD_CACHE_KEY $BUILD_CACHE_KEY
 github_env BUILD_CACHE_PATH $BUILD_CACHE_PATH
