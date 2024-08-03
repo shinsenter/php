@@ -63,7 +63,7 @@ if ! has-s6 && [ ! -z "$S6_VERSION" ]; then
         env-default S6_KILL_GRACETIME 3000
         env-default S6_LOGGING 0
         env-default S6_SERVICES_GRACETIME 3000
-        env-default S6_VERBOSITY 1
+        env-default S6_VERBOSITY '$(is-debug && echo 2 || echo 0)'
         env-default S6_VERSION $S6_VERSION
     fi
 
