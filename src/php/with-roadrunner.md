@@ -3,7 +3,7 @@
 🌏 (PHP) PHP + RoadRunner docker containers for both production and development.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/roadrunner
-- GitHub Packages: https://github.com/shinsenter/php/pkgs/container/roadrunner
+- GitHub Packages: https://code.shin.company/php/pkgs/container/roadrunner
 
 ## Introduction
 
@@ -81,7 +81,7 @@ Check our [Docker Hub](https://hub.docker.com/r/shinsenter/roadrunner/tags) for 
 
 ## Stable Image Tags
 
-The release versions on this GitHub repository don't guarantee
+The release versions on [this GitHub repository](https://code.shin.company/php) don't guarantee
 that Docker images built from the same source code will always be identical.
 
 We build new Docker images daily to ensure they stay up-to-date
@@ -90,7 +90,7 @@ The images in this repo are regularly updated under the same tag names.
 
 But you can pull the image from `shinsenter/roadrunner:latest`,
 and tag it with a name that indicates its stability,
-such as `shinsenter/roadrunner:stable` using the below commands:
+such as `your-repo/roadrunner:stable` using the below commands:
 
 ```shell
 docker pull shinsenter/roadrunner:latest
@@ -103,7 +103,7 @@ Then use the image `your-repo/roadrunner:stable` as a base image to build contai
 ## Contributing
 
 If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter)
-or opening an issue on [GitHub](https://github.com/shinsenter/php/issues/new).
+or opening an issue on [GitHub](https://code.shin.company/php/issues/new).
 
 Your support helps maintain and improve these images for the community.
 

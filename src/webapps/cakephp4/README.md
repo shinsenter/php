@@ -3,7 +3,7 @@
 🔋 (PHP / CakePHP) Production-ready container with automatic CakePHP installer.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/cakephp4
-- GitHub Packages: https://github.com/shinsenter/php/pkgs/container/cakephp4
+- GitHub Packages: https://code.shin.company/php/pkgs/container/cakephp4
 
 ## Introduction
 
@@ -105,7 +105,7 @@ services:
 
 ## Stable Image Tags
 
-The release versions on this GitHub repository don't guarantee
+The release versions on [this GitHub repository](https://code.shin.company/php) don't guarantee
 that Docker images built from the same source code will always be identical.
 
 We build new Docker images daily to ensure they stay up-to-date
@@ -114,7 +114,7 @@ The images in this repo are regularly updated under the same tag names.
 
 But you can pull the image from `shinsenter/cakephp4:latest`,
 and tag it with a name that indicates its stability,
-such as `shinsenter/cakephp4:stable` using the below commands:
+such as `your-repo/cakephp4:stable` using the below commands:
 
 ```shell
 docker pull shinsenter/cakephp4:latest
@@ -126,7 +126,7 @@ Then use the image `your-repo/cakephp4:stable` as a base image to build containe
 
 ## Contributing
 
-If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://github.com/shinsenter/php/issues/new).
+If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://code.shin.company/php/issues/new).
 
 Your support helps maintain and improve these images for the community.
 

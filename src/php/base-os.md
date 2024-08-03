@@ -11,17 +11,17 @@ Combine official [Ubuntu](http://hub.docker.com/_/ubuntu), [Debian](http://hub.d
 #### Ubuntu
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/ubuntu-s6
-- GitHub Packages: https://github.com/shinsenter/php/pkgs/container/ubuntu-s6
+- GitHub Packages: https://code.shin.company/php/pkgs/container/ubuntu-s6
 
 #### Debian
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/debian-s6
-- GitHub Packages: https://github.com/shinsenter/php/pkgs/container/debian-s6
+- GitHub Packages: https://code.shin.company/php/pkgs/container/debian-s6
 
 #### Alpine
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/alpine-s6
-- GitHub Packages: https://github.com/shinsenter/php/pkgs/container/alpine-s6
+- GitHub Packages: https://code.shin.company/php/pkgs/container/alpine-s6
 
 ## Usage
 
@@ -185,7 +185,7 @@ These Docker images include additional environment variables for fine-tuning con
 ## Contributing
 
 If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter)
-or opening an issue on [GitHub](https://github.com/shinsenter/php/issues/new).
+or opening an issue on [GitHub](https://code.shin.company/php/issues/new).
 
 Your support helps maintain and improve these images for the community.
 

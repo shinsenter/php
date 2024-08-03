@@ -3,7 +3,7 @@
 🔋 (PHP / Slim) Production-ready container with automatic Slim installer.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/slim
-- GitHub Packages: https://github.com/shinsenter/php/pkgs/container/slim
+- GitHub Packages: https://code.shin.company/php/pkgs/container/slim
 
 ## Introduction
 
@@ -105,7 +105,7 @@ services:
 
 ## Stable Image Tags
 
-The release versions on this GitHub repository don't guarantee
+The release versions on [this GitHub repository](https://code.shin.company/php) don't guarantee
 that Docker images built from the same source code will always be identical.
 
 We build new Docker images daily to ensure they stay up-to-date
@@ -114,7 +114,7 @@ The images in this repo are regularly updated under the same tag names.
 
 But you can pull the image from `shinsenter/slim:latest`,
 and tag it with a name that indicates its stability,
-such as `shinsenter/slim:stable` using the below commands:
+such as `your-repo/slim:stable` using the below commands:
 
 ```shell
 docker pull shinsenter/slim:latest
@@ -126,7 +126,7 @@ Then use the image `your-repo/slim:stable` as a base image to build containers f
 
 ## Contributing
 
-If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://github.com/shinsenter/php/issues/new).
+If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://code.shin.company/php/issues/new).
 
 Your support helps maintain and improve these images for the community.
 

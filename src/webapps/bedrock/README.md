@@ -3,7 +3,7 @@
 🔋 (PHP / Wordpress) Production-ready container with automatic Bedrock Wordpress installer.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/bedrock
-- GitHub Packages: https://github.com/shinsenter/php/pkgs/container/bedrock
+- GitHub Packages: https://code.shin.company/php/pkgs/container/bedrock
 
 ## Introduction
 
@@ -108,7 +108,7 @@ services:
 
 ## Stable Image Tags
 
-The release versions on this GitHub repository don't guarantee
+The release versions on [this GitHub repository](https://code.shin.company/php) don't guarantee
 that Docker images built from the same source code will always be identical.
 
 We build new Docker images daily to ensure they stay up-to-date
@@ -117,7 +117,7 @@ The images in this repo are regularly updated under the same tag names.
 
 But you can pull the image from `shinsenter/bedrock:latest`,
 and tag it with a name that indicates its stability,
-such as `shinsenter/bedrock:stable` using the below commands:
+such as `your-repo/bedrock:stable` using the below commands:
 
 ```shell
 docker pull shinsenter/bedrock:latest
@@ -129,7 +129,7 @@ Then use the image `your-repo/bedrock:stable` as a base image to build container
 
 ## Contributing
 
-If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://github.com/shinsenter/php/issues/new).
+If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://code.shin.company/php/issues/new).
 
 Your support helps maintain and improve these images for the community.
 

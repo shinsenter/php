@@ -3,11 +3,11 @@
 📦 Simplified PHP Docker images for effortless customization and extension setup.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/php
-- GitHub Packages: https://github.com/shinsenter/php/pkgs/container/php
+- GitHub Packages: https://code.shin.company/php/pkgs/container/php
 
 [![shinsenter/php](https://repository-images.githubusercontent.com/458053748/24e848e1-c0fc-4893-b2b9-f7dbfad263f3)](https://docker.shin.company/php)
 
-[![Daily build](https://github.com/shinsenter/php/actions/workflows/build-all.yml/badge.svg)](https://github.com/shinsenter/php/actions/workflows/build-all.yml)
+[![Daily build](https://code.shin.company/php/actions/workflows/build-all.yml/badge.svg)](https://code.shin.company/php/actions/workflows/build-all.yml)
 
 ## Introduction
 
@@ -404,7 +404,7 @@ Check our [Docker Hub](https://hub.docker.com/r/shinsenter/php/tags) for all ava
 
 ## Stable Image Tags
 
-The release versions on this GitHub repository don't guarantee
+The release versions on [this GitHub repository](https://code.shin.company/php) don't guarantee
 that Docker images built from the same source code will always be identical.
 
 We build new Docker images daily to ensure they stay up-to-date
@@ -422,7 +422,7 @@ providing both the latest code and production stability.
 ## Contributing
 
 If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter)
-or opening an issue on [GitHub](https://github.com/shinsenter/php/issues/new).
+or opening an issue on [GitHub](https://code.shin.company/php/issues/new).
 
 Your support helps maintain and improve these images for the community.
 
