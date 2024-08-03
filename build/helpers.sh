@@ -38,7 +38,7 @@ timestamp() {
 # Function to get remote json
 get_remote_json () {
     echo "Fetching $@" 1>&2
-    curl --retry 2 -ks "$@" | tr -d '[:cntrl:]'
+    curl --retry 3 --retry-delay 5 -ks "$@" | tr -d '[:cntrl:]'
 }
 
 # Function to get metadata from GitHub
