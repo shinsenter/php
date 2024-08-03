@@ -29,6 +29,7 @@ ENV PRESQUASH_SCRIPTS="cleanup"
 ################################################################################
 
 ADD --link ./common/rootfs/ /
+ONBUILD RUN if [ -x /startup/99-greeting ]; then /startup/99-greeting; fi
 
 ################################################################################
 
