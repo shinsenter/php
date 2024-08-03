@@ -32,12 +32,11 @@ fi
 # create s6 services
 if has-cmd s6-service; then
     s6-service frankenphp longrun '#!/usr/bin/env sh
+export APP_PATH="$(app-path)"
+export APP_ROOT="$(app-root)"
+if [ -f /etc/caddy/envvars ]; then source /etc/caddy/envvars; fi
 
-if [ -f /etc/caddy/envvars ]; then
-    source /etc/caddy/envvars
-fi
-
-cd "$(app-path)"
+cd $APP_PATH
 exec frankenphp run --config /etc/caddy/Caddyfile --adapter caddyfile
 '
 fi

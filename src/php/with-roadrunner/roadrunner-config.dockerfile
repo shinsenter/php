@@ -15,7 +15,10 @@ RUN <<'EOF'
 # create s6 services
 if has-cmd s6-service; then
     s6-service roadrunner longrun '#!/usr/bin/env sh
-cd "$(app-path)"
+export APP_PATH="$(app-path)"
+export APP_ROOT="$(app-root)"
+
+cd $APP_PATH
 exec /usr/local/bin/rr -w "$(app-path)" \
     -o rpc.listen=tcp://127.0.0.1:6001 \
     -o http.address=0.0.0.0:80 \
