@@ -6,6 +6,7 @@
 # Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
+if ! has-cmd crond; then exit 0; fi
 
 APP_USER="${APP_USER:-root}"
 CRONTAB="/var/spool/cron/crontabs/$APP_USER"

@@ -58,6 +58,6 @@ done
 
 # run examples
 # PLATFORM=arm64 DOCKERTAG=apache DOCKERFILE=php/with-apache.dockerfile PHP_VARIANT=fpm ./tests/squash-test.sh 5.6 8.3
-# docker run --rm -p 443:443 -p 80:80 -e S6_VERBOSITY=3 docker-php-5.6-apache:squashed
-# docker run --rm -p 443:443 -p 80:80 -e S6_VERBOSITY=3 docker-php-8.3-apache:squashed
-# docker run --rm -p 443:443 -p 80:80 -e S6_VERBOSITY=3 shinsenter/php-archives:20240731-8.3-fpm-apache
+# docker run --rm -p 443:443 -p 80:80 -e DEBUG=1 -e ENABLE_CRONTAB=1 -e S6_VERBOSITY=3 docker-php-5.6-apache:squashed
+# docker run --rm -p 443:443 -p 80:80 -e DEBUG=1 -e ENABLE_CRONTAB=1 -e S6_VERBOSITY=3 docker-php-8.3-apache:squashed
+# docker run --rm -p 443:443 -p 80:80 -e DEBUG=1 -e ENABLE_CRONTAB=1 -e S6_VERBOSITY=3 shinsenter/php-archives:20240731-8.3-fpm-apache
