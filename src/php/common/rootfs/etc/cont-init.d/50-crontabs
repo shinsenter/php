@@ -21,7 +21,7 @@ set -e
 mkdir -p "$(dirname $CRONTAB)" $CRONTAB_DIR
 
 if is-debug; then
-    echo '* * * * * debug-echo -w "DEBUG: Crontab is running as $(whoami)." | tee /tmp/cron-debug.txt' >$CRONTAB_DIR/debug
+    echo '*  *  *  *  *  echo "DEBUG: Crontab is running as $(whoami)." | tee /tmp/cron-debug.txt' >$CRONTAB_DIR/debug
 fi
 
 cat <<CRONTAB >$CRONTAB

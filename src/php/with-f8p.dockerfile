@@ -43,6 +43,11 @@ HEALTHCHECK CMD curl -sf http://localhost:2019/metrics || exit 1
 
 ################################################################################
 
+INCLUDE ./meta
+
 ARG   BUILD_SOURCE_IMAGE
 LABEL build_from="$BUILD_SOURCE_IMAGE"
+
+################################################################################
+
 LABEL traefik.enable=true
