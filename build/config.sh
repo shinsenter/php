@@ -168,7 +168,6 @@ app-*)
     case $APP_NAME in
     cakephp4)
         # https://book.cakephp.org/4/en/installation.html
-        LATEST_PHP="8.2"
         verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
         ;;
     cakephp5)
@@ -196,7 +195,7 @@ app-*)
         ;;
     fuelphp)
         # https://fuelphp.com/docs/installation/instructions.html
-        LATEST_PHP="7.4"
+        LATEST_PHP="8.0"
         ;;
     grav)
         # https://learn.getgrav.org/17/basics/installation
@@ -226,7 +225,6 @@ app-*)
         ;;
     mautic)
         # https://docs.mautic.org/en/5.x/getting_started/how_to_install_mautic.html#installing-with-composer
-        LATEST_PHP="8.1"
         verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
         ;;
     phpixie)
