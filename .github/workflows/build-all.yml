@@ -41,7 +41,7 @@ jobs:
   php-servers:
     uses: ./.github/workflows/02-servers.yml
     secrets: inherit
-    # needs: [php]
+    needs: [php]
 
   php-apps:
     uses: ./.github/workflows/03-apps.yml

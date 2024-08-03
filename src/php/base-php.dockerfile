@@ -22,7 +22,6 @@ ENV PHP_VARIANT=$PHP_VARIANT
 ################################################################################
 
 INCLUDE ./common/os-base
-INCLUDE ./common/os-s6-overlay
 INCLUDE ./common/os-crontab
 INCLUDE ./common/php-extensions
 INCLUDE ./common/php-composer
