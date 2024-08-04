@@ -453,9 +453,9 @@ else
 fi
 
 # find tag contains "-alpine" and appends tags with "tidy"
-if [ "$OS_BASE" = "alpine" ]; then
-    BUILD_TAGS="$(append_tags "-$OS_BASE" "-tidy" "$BUILD_TAGS")"
-fi
+# if [ "$OS_BASE" = "alpine" ]; then
+#     BUILD_TAGS="$(append_tags "-$OS_BASE" "-tidy" "$BUILD_TAGS")"
+# fi
 
 # also publish to ghcr.io
 if [ "$PUBLISH_TO_GHCR" == "1" ]; then

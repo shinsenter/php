@@ -48,9 +48,6 @@ Explore all available tags on our [Docker Hub](https://hub.docker.com/r/shinsent
 
 For stable versions suitable for production, we also offer version tags on [another repository](https://hub.docker.com/r/shinsenter/php-archives/tags).
 
-> 💡 Hint: Docker image tags ending in `-alpine` or `-tidy` indicate images built on the Alpine Linux base OS.
-> These images are lightweight, speeding up builds and saving bandwidth for your CI/CD pipelines.
-
 ### Examples
 
 You can easily run a container by copying and pasting one of these `docker run` commands:
@@ -368,6 +365,19 @@ services:
       - DEBUG=1
 ```
 
+## Customize Supervisor command
+
+We can set a `$SUPERVISOR_PHP_COMMAND` environment variable to the service definition in your application's `docker-compose.yml` file.
+This environment variable will contain the command that the container will use to serve your application using another process instead of the default process.
+
+```yml
+services:
+  web:
+    image: shinsenter/php:8.3
+    environment:
+      SUPERVISOR_PHP_COMMAND: "php -S 127.0.0.1:80 /var/www/html/index.php"
+```
+
 ## Other System Settings
 
 These Docker images include additional environment variables for fine-tuning container behavior:
@@ -398,9 +408,6 @@ These Docker images include additional environment variables for fine-tuning con
 ## Supported Platforms
 
 Check our [Docker Hub](https://hub.docker.com/r/shinsenter/php/tags) for all available platforms.
-
-> 💡 Hint: Docker image tags ending in `-alpine` or `-tidy` indicate images built on the Alpine Linux base OS.
-> These images are lightweight, speeding up builds and saving bandwidth for your CI/CD pipelines.
 
 ## Stable Image Tags
 

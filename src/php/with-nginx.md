@@ -83,9 +83,6 @@ The config files here will be loaded into the Nginx's default server.
 
 Check our [Docker Hub](https://hub.docker.com/r/shinsenter/phpfpm-nginx/tags) for all available platforms.
 
-> Docker image tags ending in `-alpine` or `-tidy` indicate Docker images built on the Alpine Linux base operating system.
-> These Docker images are lightweight, helping to speed up builds and save bandwidth for your CI/CD pipelines.
-
 ## Stable Image Tags
 
 The release versions on [this GitHub repository](https://code.shin.company/php) don't guarantee

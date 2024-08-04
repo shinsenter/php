@@ -4,8 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [5.2.0] - 2024-08-10
 
-We have restructured the workflows to build stable Docker images and development Docker images (with tags starting with `dev-`) separately.
-Additionally, we will try different approaches to minimize the build time, making the build process faster and saving community resources.
+The Docker images with `-tidy` tags are no longer supported. Please use the `-alpine` images instead if you are using `-tidy` images.
+
+We are also trying new methods to speed up the build process and save resources.
+
+We changed our workflows to create two types of Docker images: stable images and development images (with `dev-` tags).
 
 ## [5.1.0] - 2024-08-01
 

@@ -17,9 +17,6 @@ enabling you to start projects quickly without additional installations.
 > 💡 Hint: WP-CLI, available as the `wp` command, lets you update plugins,
 configure multisite installations and much more, without using a web browser.
 
-> 💡 Hint: Docker image tags ending in `-alpine` or `-tidy` indicate images built on the Alpine Linux base OS.
-> These images are lightweight, speeding up builds and saving bandwidth for your CI/CD pipelines.
-
 ## Usage
 
 [![shinsenter/php](https://repository-images.githubusercontent.com/458053748/24e848e1-c0fc-4893-b2b9-f7dbfad263f3)](https://docker.shin.company/php)
