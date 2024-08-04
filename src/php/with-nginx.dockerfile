@@ -18,6 +18,7 @@ ARG  PHP_VERSION=${PHP_VERSION:-8.3}
 ARG  PHP_VARIANT=${PHP_VARIANT:-fpm-alpine}
 
 FROM ${BUILD_FROM_IMAGE}:${PHP_VERSION}-${PHP_VARIANT}
+ONBUILD RUN if has-cmd greeting; then greeting; fi
 
 ################################################################################
 
