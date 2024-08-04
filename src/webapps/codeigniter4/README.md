@@ -1,9 +1,13 @@
 # shinsenter/codeigniter4
 
-🔋 (PHP / CodeIgniter) Production-ready container with automatic CodeIgniter installer.
+🔋 (PHP / CodeIgniter) Production-ready Docker images with automatic CodeIgniter installer.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/codeigniter4
 - GitHub Packages: https://code.shin.company/php/pkgs/container/codeigniter4
+
+The Docker images are available for both Debian and Alpine versions.
+
+> ℹ️ Note: We no longer maintain the `-tidy` tag names. If you are using Docker images with this tag, please replace them with the `-alpine` variant.
 
 ## Introduction
 

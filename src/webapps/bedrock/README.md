@@ -1,9 +1,13 @@
 # shinsenter/bedrock
 
-🔋 (PHP / Wordpress) Production-ready container with automatic Bedrock Wordpress installer.
+🔋 (PHP / Wordpress) Production-ready Docker images with automatic Bedrock Wordpress installer.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/bedrock
 - GitHub Packages: https://code.shin.company/php/pkgs/container/bedrock
+
+The Docker images are available for both Debian and Alpine versions.
+
+> ℹ️ Note: We no longer maintain the `-tidy` tag names. If you are using Docker images with this tag, please replace them with the `-alpine` variant.
 
 ## Introduction
 
