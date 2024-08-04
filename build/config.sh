@@ -339,7 +339,7 @@ fi
 # lazy load the latest s6-overlay version when necessary
 if [ "$SKIP_BUILD" != "1" ] && [ "$S6_VERSION" = "latest" ]; then
     LATEST_S6=$(get_github_latest_tag "just-containers/s6-overlay" 1)
-    if [ -z "$LATEST_S6" ]; then
+    if [ "$LATEST_S6" == "" ]; then
         echo "Failed to get latest s6-overlay version" >&2
         exit 1
     fi
@@ -445,7 +445,7 @@ if [ "$BUILD_TAG_PREFIX" != "" ]; then
 fi
 
 # check if build tags are empty
-if [ -z "$BUILD_TAGS" ]; then
+if [ "$BUILD_TAGS" == "" ]; then
     echo "Failed to generate build tags" 1>&2
     exit 1
 else
@@ -506,7 +506,7 @@ if [ "$BUILD_README" == "1" ] && [ -f "$BUILD_README" ]; then
     BUILD_DESC="$(sed '3q;d' $BUILD_README)"
 
     # update readme on latest tag and not dev branch
-    if [[ "$BUILD_TAGS" == *'latest'* ]] && [ -z "$BUILD_TAG_PREFIX" ]; then
+    if [[ "$BUILD_TAGS" == *'latest'* ]] && [ "$BUILD_TAG_PREFIX" == "" ]; then
         UPDATE_README=1
     fi
 else
@@ -515,12 +515,12 @@ else
 fi
 
 # skip build if no dockerfile files
-if [ -z "$BUILD_DOCKERFILE" ]; then
+if [ "$BUILD_DOCKERFILE" == "" ]; then
     SKIP_BUILD=1
 fi
 
 # skip squash if no dockerfile
-if [ -z "$BUILD_DOCKERFILE_SQUASHED" ]; then
+if [ "$BUILD_DOCKERFILE_SQUASHED" == "" ]; then
     SKIP_SQUASH=1
 fi
 

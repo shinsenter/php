@@ -38,7 +38,7 @@ timestamp() {
 # Function to get remote json
 get_remote_json () {
     echo "Fetching $@" 1>&2
-    if [ ! -z "$TOKEN" ]; then
+    if [ "$TOKEN" != "" ]; then
         curl --retry 3 --retry-delay 5 -ksL \
             --header "Authorization: Bearer $TOKEN" \
             --request GET --url "$@" | tr -d '[:cntrl:]'
@@ -81,7 +81,7 @@ github_env() {
 ################################################################################
 
 path_hash() {
-    if [ -z "$1" ]; then
+    if [ "$1" == "" ]; then
         echo -n "" | shasum
         return
     fi
