@@ -344,6 +344,43 @@ services:
       - DISABLE_AUTORUN_SCRIPTS=1
 ```
 
+## Using Cron Jobs
+
+To enable cron jobs in containers, you can start the container with `ENABLE_CRONTAB=1`.
+This setting activates the Crontab service, which loads settings from the directory specified by `$CRONTAB_DIR` (default is `/etc/crontab.d`).
+
+The cron jobs will run as the user defined by `$APP_USER:$APP_GROUP`, which by default is `www-data:www-data`,
+and with the home directory set by `$CRONTAB_HOME` (default is `/var/www/html`).
+
+Here is an example Dockerfile to add a crontab:
+
+```Dockerfile
+FROM shinsenter/php:latest
+
+ENV ENABLE_CRONTAB=1
+
+# create crontab entry via RUN instruction
+RUN echo '* * * * * echo Hello world!' >> /etc/crontab.d/sample1;
+
+# or copy crontab entries via ADD instruction
+ADD ./sample2 /etc/crontab.d/
+```
+
+The format of a crontab entry is as follows:
+
+```
+# Job definition:
+# .---------------- minute (0 - 59)
+# |  .------------- hour (0 - 23)
+# |  |  .---------- day of month (1 - 31)
+# |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...
+# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
+# |  |  |  |  |
+# *  *  *  *  *  command to be executed
+```
+
+For more information on environment variables for cron jobs, refer to the [Other System Settings](#other-system-settings) section below.
+
 ## Debug Mode
 
 Enable "debug mode" for more verbose logging by setting `DEBUG=1` as an environment variable.
@@ -363,19 +400,6 @@ services:
     image: shinsenter/php:8.3-fpm-nginx
     environment:
       - DEBUG=1
-```
-
-## Customize Supervisor command
-
-We can set a `$SUPERVISOR_PHP_COMMAND` environment variable to the service definition in your application's `docker-compose.yml` file.
-This environment variable will contain the command that the container will use to serve your application using another process instead of the default process.
-
-```yml
-services:
-  web:
-    image: shinsenter/php:8.3
-    environment:
-      SUPERVISOR_PHP_COMMAND: "php -S 127.0.0.1:80 /var/www/html/index.php"
 ```
 
 ## Other System Settings
