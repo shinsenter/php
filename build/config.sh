@@ -242,11 +242,13 @@ app-*)
         ;;
     spiral)
         # https://spiral.dev/docs/start-installation/current/en
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/roadrunner"
         BUILD_PLATFORM="linux/amd64,linux/arm64"
         verlt "$PHP_VERSION" "8.1" && SKIP_BUILD=1
         ;;
     statamic)
         # https://statamic.dev/installing
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.2" && SKIP_BUILD=1
         ;;
     symfony)
