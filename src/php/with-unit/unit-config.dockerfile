@@ -33,9 +33,11 @@ else
     unitd="$(command -v unitd)"
 fi
 
-rm -f $UNIT_CONTROL_PID
+export APP_PATH="$(app-path)"
+export APP_ROOT="$(app-root)"
 
-cd "$(app-path)"
+cd $APP_PATH
+rm -rf $UNIT_CONTROL_PID
 exec "$unitd" --no-daemon \
     --user ${APP_USER:-www-data} \
     --group ${APP_GROUP:-www-data} \

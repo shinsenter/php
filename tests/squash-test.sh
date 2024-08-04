@@ -3,7 +3,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -48,8 +48,10 @@ for version; do
 done
 
 # build examples
-# PLATFORM=arm64 DOCKERTAG=nginx DOCKERFILE=php/with-nginx.dockerfile PHP_VARIANT=fpm-alpine ./tests/squash-test.sh 5.6 8.4-rc
-# PLATFORM=arm64 DOCKERTAG=apache DOCKERFILE=php/with-apache.dockerfile PHP_VARIANT=fpm ./tests/squash-test.sh 5.6 8.4-rc
+# PLATFORM=arm64 DOCKERTAG=s6 DOCKERFILE=php/base-s6.dockerfile ./tests/squash-test.sh latest
+# PLATFORM=arm64 DOCKERTAG=cli DOCKERFILE=php/base-php.dockerfile PHP_VARIANT=cli ./tests/squash-test.sh 8.3
+# PLATFORM=arm64 DOCKERTAG=nginx DOCKERFILE=php/with-nginx.dockerfile PHP_VARIANT=fpm-alpine ./tests/squash-test.sh 5.6 8.3
+# PLATFORM=arm64 DOCKERTAG=apache DOCKERFILE=php/with-apache.dockerfile PHP_VARIANT=fpm ./tests/squash-test.sh 5.6 8.3
 # PLATFORM=arm64 DOCKERTAG=f8p DOCKERFILE=php/with-f8p.dockerfile PHP_VARIANT=zts ./tests/squash-test.sh 8.3
 # PLATFORM=arm64 DOCKERTAG=unit DOCKERFILE=php/with-unit.dockerfile PHP_VARIANT=zts ./tests/squash-test.sh 8.2
 # PLATFORM=arm64 DOCKERTAG=roadrunner DOCKERFILE=php/with-roadrunner.dockerfile PHP_VARIANT=zts-alpine ./tests/squash-test.sh 8.0 8.3
@@ -57,6 +59,6 @@ done
 
 # run examples
 # PLATFORM=arm64 DOCKERTAG=apache DOCKERFILE=php/with-apache.dockerfile PHP_VARIANT=fpm ./tests/squash-test.sh 5.6 8.3
-# docker run --rm -p 443:443 -p 80:80 -e S6_VERBOSITY=3 docker-php-5.6-apache:squashed
-# docker run --rm -p 443:443 -p 80:80 -e S6_VERBOSITY=3 docker-php-8.3-apache:squashed
-# docker run --rm -p 443:443 -p 80:80 -e S6_VERBOSITY=3 shinsenter/php-archives:20240731-8.3-fpm-apache
+# docker run --rm -p 443:443 -p 80:80 -e DEBUG=1 -e ENABLE_CRONTAB=1 -e S6_VERBOSITY=3 docker-php-5.6-apache:squashed
+# docker run --rm -p 443:443 -p 80:80 -e DEBUG=1 -e ENABLE_CRONTAB=1 -e S6_VERBOSITY=3 docker-php-8.3-apache:squashed
+# docker run --rm -p 443:443 -p 80:80 -e DEBUG=1 -e ENABLE_CRONTAB=1 -e S6_VERBOSITY=3 shinsenter/php-archives:20240731-8.3-fpm-apache

@@ -25,7 +25,7 @@ fi
 # install dependencies
 APK_PACKAGES="openssl-dev" \
 APT_PACKAGES="libssl-dev" \
-pkg-add
+pkg-add $PHPIZE_DEPS
 
 # extract Unit source
 mkdir -p /tmp/unit

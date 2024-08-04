@@ -3,7 +3,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -19,19 +19,21 @@ set -e
 
 # Show usage if no arguments are passed
 if [ $# -eq 0 ]; then
-    echo "Usage: ${0##*/} <os> <app_name> <php_version>" >&2
+    echo "Usage: ${0##*/} <os> <app_name> <php_version> [server]" >&2
     exit 1
 fi
 
 OS=$1
 APP=$2
 PHP_VERSION=$3
+USE_SERVER=$4
 
 ################################################################################
 # Build environment variables
 ################################################################################
 
-DEFAULT_BUILD_NAME="shinsenter/php"
+DEFAULT_REPO="shinsenter"
+DEFAULT_BUILD_NAME="$DEFAULT_REPO/php"
 DEFAULT_README="$BASE_DIR/README.md"
 UPDATE_README=0
 
@@ -50,7 +52,7 @@ COMPOSER_VERSION="${COMPOSER_VERSION:-latest}"
 BUILD_NAME="$DEFAULT_BUILD_NAME"
 BUILD_DATE="$(date +%Y-%m-%dT%T%z)"
 BUILD_REVISION="$(git rev-parse HEAD)"
-BUILD_FROM_IMAGE=php
+BUILD_FROM_IMAGE=$DEFAULT_BUILD_NAME
 BUILD_SOURCE_IMAGE=
 BUILD_CONTEXT=
 BUILD_DOCKERFILE=
@@ -70,12 +72,12 @@ SKIP_SQUASH=${SKIP_SQUASH:-}
 PREFIX="${APP//app-/}"
 SUFFIX=
 
-if [ ! -z "$OS" ]; then
+if [ "$OS" != "" ]; then
     SUFFIX="-$OS"
     OS_BASE="$OS"
 fi
 
-if [ ! -z "$DEBUG" ] && [ "$DEBUG" != "0" ]; then
+if [ "$DEBUG" == "1" ]; then
     SKIP_BUILD=1
 fi
 
@@ -85,7 +87,7 @@ fi
 
 case $APP in
 base-os)
-    BUILD_NAME="shinsenter/$OS_BASE-s6"
+    BUILD_NAME="$DEFAULT_REPO/$OS_BASE-s6"
     BUILD_DOCKERFILE=$BASE_DIR/src/php/base-os.dockerfile
     PHP_VERSION=
     IPE_VERSION=
@@ -101,7 +103,7 @@ base-os)
 base-s6)
     # only build on alpine
     if [ "$OS_BASE" = "alpine" ]; then
-        BUILD_NAME="shinsenter/s6-overlay"
+        BUILD_NAME="$DEFAULT_REPO/s6-overlay"
         S6_PATH=/s6
         BUILD_DOCKERFILE=$BASE_DIR/src/php/base-s6.dockerfile
         PHP_VERSION=
@@ -113,62 +115,61 @@ base-s6)
     ;;
 with-apache)
     PREFIX="fpm-apache"
-    BUILD_NAME="shinsenter/phpfpm-apache"
+    BUILD_NAME="$DEFAULT_REPO/phpfpm-apache"
     BUILD_DOCKERFILE=$BASE_DIR/src/php/with-apache.dockerfile
     PHP_VARIANT="fpm$SUFFIX"
     ALLOW_RC=1
     ;;
 with-nginx)
     PREFIX="fpm-nginx"
-    BUILD_NAME="shinsenter/phpfpm-nginx"
+    BUILD_NAME="$DEFAULT_REPO/phpfpm-nginx"
     BUILD_DOCKERFILE=$BASE_DIR/src/php/with-nginx.dockerfile
     PHP_VARIANT="fpm$SUFFIX"
     ALLOW_RC=1
     ;;
 with-unit)
+    verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
     unit_version="$(get_github_latest_tag nginx/unit)"
     PREFIX="unit"
-    BUILD_NAME="shinsenter/unit-php"
+    BUILD_NAME="$DEFAULT_REPO/unit-php"
     BUILD_DOCKERFILE=$BASE_DIR/src/php/with-unit.dockerfile
     BUILD_SOURCE_IMAGE="https://codeload.github.com/nginx/unit/tar.gz/refs/tags/$unit_version"
-    BUILD_CACHE_KEY="unit@$(echo "$unit_version" | head -c17)"
+    BUILD_CACHE_KEY="(unit@$(echo "$unit_version" | head -c17))"
     PHP_VARIANT="zts$SUFFIX"
     ALLOW_RC=1
-    verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
     ;;
 with-f8p)
+    verlt "$PHP_VERSION" "8.2" && SKIP_BUILD=1
     PREFIX="frankenphp"
-    BUILD_NAME="shinsenter/frankenphp"
+    BUILD_NAME="$DEFAULT_REPO/frankenphp"
     BUILD_SOURCE_IMAGE="dunglas/frankenphp:1-php$PHP_VERSION$SUFFIX"
     BUILD_DOCKERFILE=$BASE_DIR/src/php/with-f8p.dockerfile
     BUILD_PLATFORM="linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8"
-    BUILD_CACHE_KEY="frankenphp@$(get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php$PHP_VERSION$SUFFIX" | head -c17)"
+    BUILD_CACHE_KEY="(frankenphp@$(get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php$PHP_VERSION$SUFFIX" | head -c17))"
     PHP_VARIANT="zts$SUFFIX"
-    verlt "$PHP_VERSION" "8.2" && SKIP_BUILD=1
     ;;
 with-roadrunner)
+    verlt "$PHP_VERSION" "8.0" && SKIP_BUILD=1
     # https://docs.roadrunner.dev/docs/general/install
     PREFIX="roadrunner"
-    BUILD_NAME="shinsenter/roadrunner"
+    BUILD_NAME="$DEFAULT_REPO/roadrunner"
     BUILD_DOCKERFILE=$BASE_DIR/src/php/with-roadrunner.dockerfile
-    PHP_VARIANT="zts$SUFFIX"
+    PHP_VARIANT="cli$SUFFIX"
     BUILD_PLATFORM="linux/amd64,linux/arm64"
-    BUILD_CACHE_KEY="roadrunner@$(get_github_latest_tag "roadrunner-server/roadrunner" | head -c17)"
+    BUILD_CACHE_KEY="(roadrunner@$(get_github_latest_tag "roadrunner-server/roadrunner" | head -c17))"
     ALLOW_RC=1
-    verlt "$PHP_VERSION" "8.0" && SKIP_BUILD=1
     ;;
 app-*)
     # implement later
     APP_NAME="${APP//app-/}"
-    BUILD_FROM_IMAGE="shinsenter/phpfpm-apache"
-    BUILD_NAME="shinsenter/$APP_NAME"
+    BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-apache"
+    BUILD_NAME="$DEFAULT_REPO/$APP_NAME"
     BUILD_DOCKERFILE=$BASE_DIR/src/webapps/$APP_NAME/$APP_NAME.dockerfile
     PHP_VARIANT="$SUFFIX"
 
     case $APP_NAME in
     cakephp4)
         # https://book.cakephp.org/4/en/installation.html
-        LATEST_PHP="8.2"
         verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
         ;;
     cakephp5)
@@ -182,7 +183,7 @@ app-*)
     crater)
         # https://docs.craterapp.com/installation.html
         LATEST_PHP="8.1"
-        BUILD_FROM_IMAGE="shinsenter/phpfpm-nginx"
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
         ;;
     drupal)
@@ -191,12 +192,12 @@ app-*)
         ;;
     flarum)
         # https://docs.flarum.org/install/
-        BUILD_FROM_IMAGE="shinsenter/phpfpm-nginx"
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.3" && SKIP_BUILD=1
         ;;
     fuelphp)
         # https://fuelphp.com/docs/installation/instructions.html
-        LATEST_PHP="7.4"
+        LATEST_PHP="8.0"
         ;;
     grav)
         # https://learn.getgrav.org/17/basics/installation
@@ -205,7 +206,7 @@ app-*)
     hyperf)
         # https://hyperf.wiki/3.1/#/en/quick-start/install
         BUILD_PLATFORM="linux/amd64,linux/arm/v7,linux/arm64/v8"
-        BUILD_FROM_IMAGE="shinsenter/phpfpm-nginx"
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.2" && SKIP_BUILD=1
         if verlte "8.3" "$PHP_VERSION"; then
             BUILD_PLATFORM="linux/amd64,linux/arm64/v8"
@@ -217,24 +218,24 @@ app-*)
         ;;
     laminas)
         # https://docs.laminas.dev/tutorials/getting-started/skeleton-application/
-        BUILD_FROM_IMAGE="shinsenter/phpfpm-nginx"
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.3" && SKIP_BUILD=1
         ;;
     laravel)
         # https://laravel.com/docs/master/installation
-        BUILD_FROM_IMAGE="shinsenter/phpfpm-nginx"
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         ;;
     mautic)
         # https://docs.mautic.org/en/5.x/getting_started/how_to_install_mautic.html#installing-with-composer
-        LATEST_PHP="8.1"
         verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
         ;;
     phpixie)
         # https://phpixie.com/quickstart.html
+        LATEST_PHP="7.4"
         ;;
     phpmyadmin)
         # https://docs.phpmyadmin.net/en/latest/setup.html
-        BUILD_FROM_IMAGE="shinsenter/phpfpm-nginx"
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         ;;
     slim)
         # https://www.slimframework.com/docs/v4/start/installation.html
@@ -266,46 +267,83 @@ app-*)
         ;;
     esac
 
-    BUILD_CACHE_KEY="$BUILD_FROM_IMAGE@$(get_dockerhub_latest_sha "$BUILD_FROM_IMAGE" 1 "php$PHP_VERSION$PHP_VARIANT" | head -c17)"
+    # override the default server variant
+    case "$USE_SERVER" in
+        httpd|apache*)
+            if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/phpfpm-apache" ]; then
+                SUFFIX="-apache${SUFFIX}"
+                BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-apache"
+            fi
+            ;;
+        nginx)
+            if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/phpfpm-nginx" ]; then
+                SUFFIX="-nginx${SUFFIX}"
+                BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
+            fi
+            ;;
+        unit)
+            if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/unit-php" ]; then
+                SUFFIX="-unit${SUFFIX}"
+                BUILD_FROM_IMAGE="$DEFAULT_REPO/unit-php"
+            fi
+            ;;
+        f8p|frankenphp)
+            if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/frankenphp" ]; then
+                SUFFIX="-frankenphp${SUFFIX}"
+                BUILD_FROM_IMAGE="$DEFAULT_REPO/frankenphp"
+            fi
+            ;;
+        rr|roadrunner)
+            if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/roadrunner" ]; then
+                SUFFIX="-roadrunner${SUFFIX}"
+                BUILD_FROM_IMAGE="$DEFAULT_REPO/roadrunner"
+            fi
+            ;;
+    esac
+
+    # get checksum of the base image
+    BUILD_CACHE_KEY="($BUILD_FROM_IMAGE@$(get_dockerhub_latest_sha "$BUILD_FROM_IMAGE" 1 "php$PHP_VERSION" | head -c17))"
     ;;
 
 *)
     # default
     S6_VERSION=
+    BUILD_FROM_IMAGE=php
     BUILD_DOCKERFILE=$BASE_DIR/src/php/base-php.dockerfile
     PHP_VARIANT="$APP$SUFFIX"
     ALLOW_RC=1
     ;;
 esac
 
+# skip build if the latest supported PHP version is less than the build version
+if [ "$ALLOW_RC" != "1" ]; then
+    verlt "$LATEST_PHP" "$PHP_VERSION" && SKIP_BUILD=1
+fi
+
 # skip build if the PHP version is earlier than 7.1 and the OS is not Debian
-if [ ! -z "$PHP_VERSION" ] && verlt "$PHP_VERSION" "7.1" && [ "$OS_BASE" != "debian" ]; then
+if [ "$PHP_VERSION" != "" ] && verlt "$PHP_VERSION" "7.1" && [ "$OS_BASE" != "debian" ]; then
     BUILD_DOCKERFILE=
+    SKIP_BUILD=1
 fi
 
 # lazy load the latest Composer version when necessary
-if [ "$COMPOSER_VERSION" = "latest" ]; then
+if [ "$SKIP_BUILD" != "1" ] && [ "$COMPOSER_VERSION" = "latest" ]; then
     COMPOSER_VERSION="$(get_github_latest_tag "composer/composer" 1)"
 fi
 
 # lazy load the latest IPE version when necessary
-if [ "$IPE_VERSION" = "latest" ]; then
+if [ "$SKIP_BUILD" != "1" ] && [ "$IPE_VERSION" = "latest" ]; then
     IPE_VERSION="$(get_github_latest_tag "mlocati/docker-php-extension-installer" 1)"
 fi
 
 # lazy load the latest s6-overlay version when necessary
-if [ "$S6_VERSION" = "latest" ]; then
+if [ "$SKIP_BUILD" != "1" ] && [ "$S6_VERSION" = "latest" ]; then
     LATEST_S6=$(get_github_latest_tag "just-containers/s6-overlay" 1)
-    if [ -z "$LATEST_S6" ]; then
+    if [ "$LATEST_S6" == "" ]; then
         echo "Failed to get latest s6-overlay version" >&2
         exit 1
     fi
     S6_VERSION="$LATEST_S6"
-fi
-
-# skip build if the latest supported PHP version is less than the build version
-if [ "$ALLOW_RC" != "1" ]; then
-    verlt "$LATEST_PHP" "$PHP_VERSION" && SKIP_BUILD=1
 fi
 
 ################################################################################
@@ -328,7 +366,7 @@ append_tags() {
 }
 
 # generate build tags
-if [ ! -z "$PHP_VERSION" ]; then
+if [ "$PHP_VERSION" != "" ]; then
     if [ "$BUILD_NAME" = "$DEFAULT_BUILD_NAME" ]; then
         BUILD_TAGS="$BUILD_NAME:$PHP_VERSION-$PREFIX$SUFFIX"
         if [ "$PHP_VERSION" = "$LATEST_PHP" ]; then
@@ -347,24 +385,24 @@ if [ ! -z "$PHP_VERSION" ]; then
         fi
         case $APP in
         with-apache)
-            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-fpm-apache" "$BUILD_TAGS")"
             BUILD_TAGS="$(append_tags "$BUILD_NAME:latest" "$DEFAULT_BUILD_NAME:fpm-apache" "$BUILD_TAGS")"
+            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-fpm-apache" "$BUILD_TAGS")"
             ;;
         with-nginx)
-            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-fpm-nginx" "$BUILD_TAGS")"
             BUILD_TAGS="$(append_tags "$BUILD_NAME:latest" "$DEFAULT_BUILD_NAME:fpm-nginx" "$BUILD_TAGS")"
+            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-fpm-nginx" "$BUILD_TAGS")"
             ;;
         with-roadrunner)
-            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-roadrunner" "$BUILD_TAGS")"
             BUILD_TAGS="$(append_tags "$BUILD_NAME:latest" "$DEFAULT_BUILD_NAME:roadrunner" "$BUILD_TAGS")"
+            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-roadrunner" "$BUILD_TAGS")"
             ;;
         with-f8p)
-            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-frankenphp" "$BUILD_TAGS")"
             BUILD_TAGS="$(append_tags "$BUILD_NAME:latest" "$DEFAULT_BUILD_NAME:frankenphp" "$BUILD_TAGS")"
+            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-frankenphp" "$BUILD_TAGS")"
             ;;
         with-unit)
-            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-unit-php" "$BUILD_TAGS")"
             BUILD_TAGS="$(append_tags "$BUILD_NAME:latest" "$DEFAULT_BUILD_NAME:unit-php" "$BUILD_TAGS")"
+            BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-unit-php" "$BUILD_TAGS")"
             ;;
         esac
     elif [ "${APP:0:4}" = "app-" ]; then
@@ -373,6 +411,25 @@ if [ ! -z "$PHP_VERSION" ]; then
             BUILD_TAGS="$BUILD_TAGS,$BUILD_NAME:latest$SUFFIX"
         fi
     fi
+
+    case "$PHP_VERSION" in
+    "5.6")
+        BUILD_TAGS="$(append_tags ":php$PHP_VERSION" ":php5" "$BUILD_TAGS")"
+        BUILD_TAGS="$(append_tags ":$PHP_VERSION" ":5" "$BUILD_TAGS")"
+        ;;
+    "7.4")
+        BUILD_TAGS="$(append_tags ":php$PHP_VERSION" ":php7" "$BUILD_TAGS")"
+        BUILD_TAGS="$(append_tags ":$PHP_VERSION" ":7" "$BUILD_TAGS")"
+        ;;
+    "8.3")
+        BUILD_TAGS="$(append_tags ":php$PHP_VERSION" ":php8" "$BUILD_TAGS")"
+        BUILD_TAGS="$(append_tags ":$PHP_VERSION" ":8" "$BUILD_TAGS")"
+        ;;
+    "$LATEST_PHP")
+        BUILD_TAGS="$(append_tags ":php$PHP_VERSION" ":php${PHP_VERSION%%.*}" "$BUILD_TAGS")"
+        BUILD_TAGS="$(append_tags ":$PHP_VERSION" ":${PHP_VERSION%%.*}" "$BUILD_TAGS")"
+        ;;
+    esac
 elif [ "$APP" = "base-s6" ]; then
     BUILD_TAGS="$BUILD_NAME:$S6_VERSION,$BUILD_NAME:latest"
 else
@@ -382,8 +439,13 @@ fi
 # remove -rc from build tags
 BUILD_TAGS=${BUILD_TAGS//-rc/}
 
+# apply tag prefix for development branch
+if [ "$BUILD_TAG_PREFIX" != "" ]; then
+    BUILD_TAGS=${BUILD_TAGS//:/:$BUILD_TAG_PREFIX}
+fi
+
 # check if build tags are empty
-if [ -z "$BUILD_TAGS" ]; then
+if [ "$BUILD_TAGS" == "" ]; then
     echo "Failed to generate build tags" 1>&2
     exit 1
 else
@@ -391,17 +453,17 @@ else
 fi
 
 # find tag contains "-alpine" and appends tags with "tidy"
-if [ "$OS_BASE" = "alpine" ]; then
-    BUILD_TAGS="$(append_tags "-$OS_BASE" "-tidy" "$BUILD_TAGS")"
-fi
+# if [ "$OS_BASE" = "alpine" ]; then
+#     BUILD_TAGS="$(append_tags "-$OS_BASE" "-tidy" "$BUILD_TAGS")"
+# fi
 
 # also publish to ghcr.io
-if [ ! -z "$PUBLISH_TO_GHCR" ]; then
-    BUILD_TAGS="$(append_tags "shinsenter" "ghcr.io/shinsenter" "$BUILD_TAGS")"
+if [ "$PUBLISH_TO_GHCR" == "1" ]; then
+    BUILD_TAGS="$(append_tags "$DEFAULT_REPO" "ghcr.io/$DEFAULT_REPO" "$BUILD_TAGS")"
 fi
 
 # also push a copy to archived repo
-if [ ! -z "$ARCHIVES_REPO" ]; then
+if [ "$ARCHIVES_REPO" != "" ]  && [ "$BUILD_TAG_PREFIX" == "" ]; then
     unique_id="$(date +%Y%m%d)"
     BUILD_TAGS="$(append_tags "${DEFAULT_BUILD_NAME}:" "${ARCHIVES_REPO}:${unique_id}-" "$BUILD_TAGS")"
 fi
@@ -410,12 +472,12 @@ fi
 # Build context, readme, description etc.
 ################################################################################
 
-if [ ! -z "$DUMMY" ]; then
+if [ "$DUMMY" == "1" ]; then
     BUILD_DOCKERFILE="$BASE_DIR/src/dummy.dockerfile"
-    BUILD_CACHE_KEY="dummy@$BUILD_REVISION"
+    BUILD_CACHE_KEY="(dummy@$BUILD_REVISION)"
 fi
 
-if [ ! -z "$BUILD_DOCKERFILE" ] && [ -f $BUILD_DOCKERFILE ]; then
+if [ "$BUILD_DOCKERFILE" != "" ] && [ -f $BUILD_DOCKERFILE ]; then
     BUILD_DOCKERFILE_SQUASHED="/tmp/squashed-$(basename $BUILD_DOCKERFILE)"
     BUILD_CONTEXT=$(dirname $BUILD_DOCKERFILE)
 
@@ -440,11 +502,11 @@ if [ "$BUILD_NAME" = "$DEFAULT_BUILD_NAME" ] && [ "$APP" = "cli" ] && [ "$PHP_VE
 fi
 
 # parse description from README.md
-if [ ! -z "$BUILD_README" ] && [ -f "$BUILD_README" ]; then
+if [ "$BUILD_README" == "1" ] && [ -f "$BUILD_README" ]; then
     BUILD_DESC="$(sed '3q;d' $BUILD_README)"
 
-    # update readme on latest tag
-    if [[ "$BUILD_TAGS" == *'latest'* ]]; then
+    # update readme on latest tag and not dev branch
+    if [[ "$BUILD_TAGS" == *'latest'* ]] && [ "$BUILD_TAG_PREFIX" == "" ]; then
         UPDATE_README=1
     fi
 else
@@ -453,12 +515,12 @@ else
 fi
 
 # skip build if no dockerfile files
-if [ -z "$BUILD_DOCKERFILE" ]; then
+if [ "$BUILD_DOCKERFILE" == "" ]; then
     SKIP_BUILD=1
 fi
 
 # skip squash if no dockerfile
-if [ -z "$BUILD_DOCKERFILE_SQUASHED" ]; then
+if [ "$BUILD_DOCKERFILE_SQUASHED" == "" ]; then
     SKIP_SQUASH=1
 fi
 
@@ -471,23 +533,30 @@ if [ ! -e "$BUILD_CACHE_PATH" ]; then
     mkdir -p "${BUILD_CACHE_PATH}-new" 2>&1
 fi
 
-if [ ! -z "$PHP_VERSION" ]; then
-    PHP_SHA="$(get_dockerhub_latest_sha "library/php" 1 "$PHP_VERSION-$PHP_VARIANT" | head -c17)"
+
+BUILD_CACHE_KEY="($APP@$BUILD_NAME)${BUILD_CACHE_KEY:+/}$BUILD_CACHE_KEY"
+
+if [ "$S6_VERSION" != "" ]; then
+    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(s6@$S6_VERSION)"
 fi
 
-if [ ! -z "$OS_BASE" ]; then
-    OS_SHA="$(get_dockerhub_latest_sha "library/$OS_BASE" 1 "$OS_VERSION" | head -c17)"
+if [ "$OS_BASE" != "" ]; then
+    if [ "$SKIP_BUILD" != "1" ]; then
+        OS_SHA="$(get_dockerhub_latest_sha "library/$OS_BASE" 1 "$OS_VERSION" | head -c17)"
+    fi
+    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/($OS_BASE:$OS_VERSION@$OS_SHA)"
 fi
 
-BUILD_CACHE_KEY="$BUILD_CACHE_KEY${BUILD_CACHE_KEY:+/}$APP@$BUILD_NAME/$OS_BASE:$OS_VERSION@$OS_SHA/s6@$S6_VERSION"
-
-if [ ! -z "$PHP_VERSION" ]; then
-    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/php:$PHP_VERSION-$PHP_VARIANT@$PHP_SHA/IPE:$IPE_VERSION/composer:$COMPOSER_VERSION"
+if [ "$PHP_VERSION" != "" ]; then
+    if [ "$SKIP_BUILD" != "1" ]; then
+        PHP_SHA="$(get_dockerhub_latest_sha "library/php" 1 "$PHP_VERSION-${PHP_VARIANT#-}" | head -c17)"
+    fi
+    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(php:$PHP_VERSION-${PHP_VARIANT#-}@$PHP_SHA)/(IPE:$IPE_VERSION)/(composer:$COMPOSER_VERSION)"
 fi
 
-BUILD_CACHE_KEY="$BUILD_CACHE_KEY/buildfile:$(path_hash $BUILD_DOCKERFILE | head -c10)\
-/buildcontext:$(path_hash $BUILD_CONTEXT | shasum | head -c10)\
-/workflows:$(path_hash $BASE_DIR/.github/workflows | shasum | head -c10)"
+BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(buildfile:$(path_hash $BUILD_DOCKERFILE | head -c10))\
+/(buildcontext:$(path_hash $BUILD_CONTEXT | shasum | head -c10))\
+/(workflows:$(path_hash $BASE_DIR/.github/workflows | shasum | head -c10))"
 
 BUILD_TMP_NAME="localhost:5000/$(path_hash "$BUILD_CACHE_KEY" | head -c10)"
 
@@ -513,17 +582,27 @@ remove_platform() {
 }
 
 # remove some platforms for older PHP versions
-if [ ! -z "$PHP_VERSION" ] && verlt "$PHP_VERSION" "7.1"; then
-    BUILD_PLATFORM="linux/amd64,linux/arm/v7"
-elif [ "$OS_BASE" = "debian" ] && [ ! -z "$PHP_VERSION" ] && verlt "$PHP_VERSION" "7.3"; then
-    BUILD_PLATFORM="$(remove_platform "$BUILD_PLATFORM" '386' 'ppc64le' 's390x')"
+if [ "$PHP_VERSION" != "" ]; then
+    if verlt "$PHP_VERSION" "7.1"; then
+        BUILD_PLATFORM="linux/amd64,linux/arm/v7"
+    elif [ "$OS_BASE" = "debian" ] && verlt "$PHP_VERSION" "7.3"; then
+        BUILD_PLATFORM="$(remove_platform "$BUILD_PLATFORM" '386' 'ppc64le' 's390x')"
+    fi
+fi
+
+################################################################################
+# Fix image name for RC versions
+################################################################################
+
+# remove -rc from PHP_VERSION
+if [ "$BUILD_FROM_IMAGE" != "php" ]; then
+    PHP_VERSION=${PHP_VERSION//-rc/}
 fi
 
 ################################################################################
 # Export Git action environment variables
 ################################################################################
 
-github_env DOCKER_BUILDKIT 1
 github_env DOCKER_ULIMIT "nofile=65536:65536"
 github_env BUILD_CACHE_KEY $BUILD_CACHE_KEY
 github_env BUILD_CACHE_PATH $BUILD_CACHE_PATH

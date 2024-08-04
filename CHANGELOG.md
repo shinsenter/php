@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.2.0] - 2024-08-10
+
+The Docker images with `-tidy` tags are no longer supported. Please use the `-alpine` images instead if you are using `-tidy` images.
+
+We are also trying new methods to speed up the build process and save resources.
+
+We changed our workflows to create two types of Docker images: stable images and development images (with `dev-` tags).
+
 ## [5.1.0] - 2024-08-01
 
 We have updated the behavior of the environment variables used to change PHP configurations to enhance container performance:
@@ -55,7 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Contributing
 
-If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://github.com/shinsenter/php/issues/new).
+If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://code.shin.company/php/issues/new).
 
 Your support helps maintain and improve these images for the community.
 

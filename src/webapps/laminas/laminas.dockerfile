@@ -15,8 +15,6 @@ FROM ${BUILD_FROM_IMAGE}:php${PHP_VERSION}${PHP_VARIANT}
 
 ################################################################################
 
-INCLUDE ./meta
-
 ADD --link ./rootfs/ /
 
 ################################################################################
@@ -25,5 +23,9 @@ ADD --link ./rootfs/ /
 ENV DOCUMENT_ROOT="/public"
 ENV INITIAL_PROJECT="laminas/laminas-mvc-skeleton"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
+
+################################################################################
+
+INCLUDE ./meta
 
 ################################################################################

@@ -18,10 +18,10 @@ fi
 
 # activity logging
 touch /var/log/startup.log
-echo "$(date) $(whoami)@$(hostname):$(pwd)\$ $0 $@" >>/var/log/startup.log
+echo "$(date) $(whoami)@$(hostname):$(pwd)\$ $0 $SUPERVISOR_PHP_COMMAND $@" >>/var/log/startup.log
 
 # load the $ENV in ~/.bashrc
-ENV_CHECK="if [ -x "\$ENV" ]; then source \$ENV; fi"
+ENV_CHECK='if [ -x "$ENV" ]; then source "$ENV"; fi'
 touch ~/.bashrc
 if ! grep -qF "$ENV_CHECK" ~/.bashrc; then echo "
 # load environment variables for PHP
@@ -29,31 +29,29 @@ $ENV_CHECK
 " >> ~/.bashrc; fi
 
 # export all env variables for PHP
-if is-true $ALLOW_RUNTIME_PHP_ENVVARS && has-cmd php-envvars; then
-    php-envvars export_envvars 2>&1
-fi
+if is-true $ALLOW_RUNTIME_PHP_ENVVARS && has-cmd php-envvars; then php-envvars export_envvars 2>&1; fi
 
-# run scripts in the /etc/cont-init.d directory
-if ! has-cmd /command/s6-env && [ -d /etc/cont-init.d ]; then
-    autorun /etc/cont-init.d/ 2>&1
-fi
-
-# run custom command defined in $SUPERVISOR_PHP_COMMAND
-if [ ! -z "$SUPERVISOR_PHP_COMMAND" ]; then
-    set -- "$SUPERVISOR_PHP_COMMAND" "$@"
-fi
-
-# fallback for docker-php-entrypoint
-if [ -x "/init" ]; then
-    set -- /init "$@"
-fi
-
-# fallback empty entrypoint
-if [ $# -eq 0 ]; then
-    set -- /bin/sh
-fi
-
-# start container with command
-debug-echo "Start container with command $@"
+# change working directory
 if [ -d "$(app-path)" ]; then cd "$(app-path)"; fi
-exec with-env "$@"
+
+if [ ! -z "$SUPERVISOR_PHP_COMMAND" ]; then
+    # run scripts in the /etc/cont-init.d directory
+    if [ -d /etc/cont-init.d ]; then autorun /etc/cont-init.d/ 2>&1; fi
+
+    # run custom command defined in $SUPERVISOR_PHP_COMMAND
+    exec with-env $SUPERVISOR_PHP_COMMAND "$@"
+else
+    # run scripts in the /etc/cont-init.d directory
+    if ! has-s6 && [ -d /etc/cont-init.d ]; then autorun /etc/cont-init.d/ 2>&1; fi
+
+    # fallback for docker-php-entrypoint
+    if [ -x "/init" ]; then set -- /init "$@"; fi
+
+    # fallback empty entrypoint
+    if [ $# -eq 0 ]; then set -- /bin/sh; fi
+
+    # start container with command
+    debug-echo "Start container with command $@"
+    exec with-env "$@"
+fi
+

@@ -1,0 +1,68 @@
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  SHIN Company <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+name: Daily build
+
+################################################################################
+################################################################################
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+  release:
+    types: [released]
+  pull_request:
+    types: [opened]
+    # branches: [5.x]
+    # paths: [src/**]
+
+################################################################################
+################################################################################
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      tag_prefix: ${{ (github.ref_type == 'tag' || github.ref == 'refs/heads/main') && '' || 'dev-' }}
+    steps:
+      - run: |
+          echo "${{ github.event_name }}"
+          echo "${{ github.ref_type }}"
+          echo "${{ github.ref }}"
+
+  s6:
+    uses: ./.github/workflows/00-s6-overlay.yml
+    secrets: inherit
+    needs: [prepare]
+    with:
+      tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
+
+  php:
+    uses: ./.github/workflows/01-php.yml
+    secrets: inherit
+    needs: [prepare]
+    with:
+      tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
+
+  php-servers:
+    uses: ./.github/workflows/02-servers.yml
+    secrets: inherit
+    needs: [prepare, php]
+    with:
+      tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
+
+  php-apps:
+    uses: ./.github/workflows/03-apps.yml
+    secrets: inherit
+    needs: [prepare, php-servers]
+    with:
+      tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
+
+################################################################################
+################################################################################

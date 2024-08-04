@@ -1,4 +1,3 @@
-# syntax = devthefuture/dockerfile-x
 ################################################################################
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
@@ -7,29 +6,40 @@
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-ARG  BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-shinsenter/phpfpm-apache}
-ARG  PHP_VERSION=${PHP_VERSION:-8.3}
-ARG  PHP_VARIANT=${PHP_VARIANT:-}
-
-FROM ${BUILD_FROM_IMAGE}:php${PHP_VERSION}${PHP_VARIANT}
+name: Build Template PHP
 
 ################################################################################
-
-ADD --link ./rootfs/ /
-
 ################################################################################
 
-# https://codeigniter.com/user_guide/installation/index.html
-ENV DOCUMENT_ROOT="/public"
-ENV INITIAL_PROJECT="codeigniter4/appstarter"
-ENV DISABLE_AUTORUN_GENERATING_INDEX=1
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        required: true
+        type: string
+      server:
+        required: false
+        type: string
+        default: ""
+      tag_prefix:
+        required: false
+        type: string
+        default: ""
 
 ################################################################################
-
-RUN web-cmd spark 'php $(app-path)/spark'
-
 ################################################################################
 
-INCLUDE ./meta
-
-################################################################################
+jobs:
+  build:
+    uses: ./.github/workflows/template-common.yml
+    secrets: inherit
+    strategy:
+      matrix:
+        os: ["", "alpine"]
+        php_version: ["8.4-rc", "8.3", "8.2", "8.1", "8.0", "7.4", "7.3", "7.2", "7.1", "7.0", "5.6"]
+    with:
+      os: ${{ matrix.os }}
+      php_version: ${{ matrix.php_version }}
+      app_name: ${{ inputs.app_name }}
+      server: ${{ inputs.server }}
+      tag_prefix: ${{ inputs.tag_prefix }}

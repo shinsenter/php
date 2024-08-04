@@ -56,12 +56,16 @@ if nginx-test 'http3';  then rm -f /etc/nginx/custom.d/http3.conf;  fi
 # create s6 services
 if has-cmd s6-service; then
     s6-service php-fpm longrun '#!/usr/bin/env sh
+cd "$(app-path)"
 exec php-fpm -y /usr/local/etc/php-fpm.d/zz-generated-settings.conf --nodaemonize -d clear_env=no'
 
     s6-service nginx depends php-fpm
     s6-service nginx longrun '#!/usr/bin/env sh
-rm -f ${NGINX_PID:-/run/nginx.pid}
-cd "$(app-path)"
+export APP_PATH="$(app-path)"
+export APP_ROOT="$(app-root)"
+
+cd $APP_PATH
+rm -rf ${NGINX_PID:-/run/nginx.pid}
 exec nginx -g "daemon off;"
 '
 fi

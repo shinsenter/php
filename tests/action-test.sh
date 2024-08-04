@@ -3,7 +3,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -29,11 +29,11 @@ fi
 
 ################################################################################
 
-# export DOCKER_HOST=$(docker context inspect --format '{{.Endpoints.docker.Host}}')
+export DOCKER_HOST=$(docker context inspect --format '{{.Endpoints.docker.Host}}')
 
 set -xe
 act --bind --network host --use-gitignore=false --reuse=false --rm=true \
-    --workflows "$BASE_DIR/.github/workflows/${ACTION_WORKFLOW:-php-main-images.yml}" \
+    --workflows "$BASE_DIR/.github/workflows/${ACTION_WORKFLOW:-02-servers.yml}" \
     --platform "ubuntu-latest=catthehacker/ubuntu:act-22.04" \
     --secret-file "$BASE_DIR/build/.secrets" \
     --env "TESTING=1" \
@@ -42,3 +42,9 @@ act --bind --network host --use-gitignore=false --reuse=false --rm=true \
     --env "DEBUG=${DEBUG:-}" \
     --env "PUBLISH_TO_GHCR=${PUBLISH_TO_GHCR:-}" \
     "$@"
+
+# Exmaples
+# ACTION_WORKFLOW=00-s6-overlay.yml ./tests/action-test.sh --job debian-s6
+# ACTION_WORKFLOW=01-php.yml ./tests/action-test.sh --job php --matrix "app:fpm"
+# ACTION_WORKFLOW=02-servers.yml ./tests/action-test.sh --job php-servers --matrix "app:with-apache"
+# ACTION_WORKFLOW=03-apps.yml ./tests/action-test.sh --job php-apps --matrix "app:app-laravel"

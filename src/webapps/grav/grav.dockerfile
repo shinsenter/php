@@ -15,8 +15,6 @@ FROM ${BUILD_FROM_IMAGE}:php${PHP_VERSION}${PHP_VARIANT}
 
 ################################################################################
 
-INCLUDE ./meta
-
 ADD --link ./rootfs/ /
 
 ################################################################################
@@ -32,3 +30,9 @@ ENV COMPOSER_REQUIRES_GIT=1
 RUN web-cmd grav   'php $(app-path)/bin/grav'
 RUN web-cmd gpm    'php $(app-path)/bin/gpm'
 RUN web-cmd plugin 'php $(app-path)/bin/plugin'
+
+################################################################################
+
+INCLUDE ./meta
+
+################################################################################

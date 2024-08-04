@@ -15,8 +15,6 @@ FROM ${BUILD_FROM_IMAGE}:php${PHP_VERSION}${PHP_VARIANT}
 
 ################################################################################
 
-INCLUDE ./meta
-
 ADD --link ./rootfs/ /
 
 ################################################################################
@@ -48,3 +46,9 @@ env-default WORDPRESS_DEBUG     '$(is-debug && echo 1 || echo 0)'
 php -r "copy('$WPCLI_URL', '$WPCLI_PATH');" && chmod +xr $WPCLI_PATH
 web-cmd wp "$WPCLI_PATH --allow-root --path=\"\$(app-path)\""
 EOF
+
+################################################################################
+
+INCLUDE ./meta
+
+################################################################################

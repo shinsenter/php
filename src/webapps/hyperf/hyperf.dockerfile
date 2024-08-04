@@ -14,8 +14,6 @@ FROM shinsenter/phpfpm-nginx:php${PHP_VERSION}${PHP_VARIANT}
 
 ################################################################################
 
-INCLUDE ./meta
-
 ADD --link ./rootfs/ /
 
 ################################################################################
@@ -38,9 +36,18 @@ env-default PHP_SWOOLE_USE_SHORTNAME 'off'
 if has-cmd s6-service; then
     s6-service nginx depends hyperf
     s6-service hyperf longrun '#!/usr/bin/env sh
-cd "$(app-path)"
-exec php $(app-path)/bin/hyperf.php start
+export APP_PATH="$(app-path)"
+export APP_ROOT="$(app-root)"
+
+cd $APP_PATH
+exec php $APP_PATH/bin/hyperf.php start
 '
 fi
 
 EOF
+
+################################################################################
+
+INCLUDE ./meta
+
+################################################################################
