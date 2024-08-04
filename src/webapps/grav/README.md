@@ -1,9 +1,13 @@
 # shinsenter/grav
 
-🔋 (PHP / Grav) Production-ready container with automatic Grav installer.
+🔋 (PHP / Grav) Production-ready Docker images with automatic Grav installer.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/grav
 - GitHub Packages: https://code.shin.company/php/pkgs/container/grav
+
+The Docker images are available for both Debian and Alpine versions.
+
+> ℹ️ Note: We no longer maintain the `-tidy` tag names. If you are using Docker images with this tag, please replace them with the `-alpine` variant.
 
 ## Introduction
 

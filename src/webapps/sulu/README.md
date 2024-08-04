@@ -1,9 +1,13 @@
 # shinsenter/sulu
 
-🔋 (PHP / Sulu) Production-ready container with automatic Sulu installer.
+🔋 (PHP / Sulu) Production-ready Docker images with automatic Sulu installer.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/sulu
 - GitHub Packages: https://code.shin.company/php/pkgs/container/sulu
+
+The Docker images are available for both Debian and Alpine versions.
+
+> ℹ️ Note: We no longer maintain the `-tidy` tag names. If you are using Docker images with this tag, please replace them with the `-alpine` variant.
 
 ## Introduction
 
