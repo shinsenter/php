@@ -1,0 +1,73 @@
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+# Author:  SHIN Company <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+name: Publish PHP Apps
+
+################################################################################
+################################################################################
+
+on:
+  workflow_call:
+    inputs:
+      tag_prefix:
+        required: false
+        type: string
+        default: ""
+  workflow_dispatch:
+  workflow_run:
+    workflows: [Publish PHP Servers]
+    types:
+      - completed
+
+################################################################################
+################################################################################
+
+jobs:
+
+  php-apps:
+    # See: https://docs.github.com/en/webhooks/webhook-events-and-payloads#workflow_run
+    if: ${{ github.event.workflow_run.conclusion == '' || github.event.workflow_run.conclusion == 'success' }}
+    uses: ./.github/workflows/template-php.yml
+    secrets: inherit
+    strategy:
+      max-parallel: 11
+      matrix:
+        app:
+          - app-bedrock
+          - app-cakephp4
+          - app-cakephp5
+          - app-codeigniter4
+          - app-crater
+          - app-drupal
+          - app-flarum
+          - app-fuelphp
+          - app-grav
+          - app-hyperf
+          - app-kirby
+          - app-laminas
+          - app-laravel
+          - app-mautic
+          - app-phpixie
+          - app-phpmyadmin
+          - app-slim
+          - app-spiral
+          - app-statamic
+          - app-sulu
+          - app-symfony
+          - app-wordpress
+          - app-yii
+        # include:
+        #   - app: app-laravel
+        #     server: [apache, nginx]
+    with:
+      app_name: ${{ matrix.app }}
+      server: ${{ matrix.server }}
+      tag_prefix: ${{ inputs.tag_prefix }}
+
+################################################################################
+################################################################################

@@ -3,9 +3,11 @@
 📦 Simplified PHP Docker images for effortless customization and extension setup.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/php
-- GitHub Packages: https://github.com/shinsenter/php/pkgs/container/php
+- GitHub Packages: https://code.shin.company/php/pkgs/container/php
 
 [![shinsenter/php](https://repository-images.githubusercontent.com/458053748/24e848e1-c0fc-4893-b2b9-f7dbfad263f3)](https://docker.shin.company/php)
+
+[![Daily build](https://code.shin.company/php/actions/workflows/build-all.yml/badge.svg)](https://code.shin.company/php/actions/workflows/build-all.yml)
 
 ## Introduction
 
@@ -45,9 +47,6 @@ Examples:
 Explore all available tags on our [Docker Hub](https://hub.docker.com/r/shinsenter/php/tags).
 
 For stable versions suitable for production, we also offer version tags on [another repository](https://hub.docker.com/r/shinsenter/php-archives/tags).
-
-> 💡 Hint: Docker image tags ending in `-alpine` or `-tidy` indicate images built on the Alpine Linux base OS.
-> These images are lightweight, speeding up builds and saving bandwidth for your CI/CD pipelines.
 
 ### Examples
 
@@ -345,6 +344,43 @@ services:
       - DISABLE_AUTORUN_SCRIPTS=1
 ```
 
+## Using Cron Jobs
+
+To enable cron jobs in containers, you can start the container with `ENABLE_CRONTAB=1`.
+This setting activates the Crontab service, which loads settings from the directory specified by `$CRONTAB_DIR` (default is `/etc/crontab.d`).
+
+The cron jobs will run as the user defined by `$APP_USER:$APP_GROUP`, which by default is `www-data:www-data`,
+and with the home directory set by `$CRONTAB_HOME` (default is `/var/www/html`).
+
+Here is an example Dockerfile to add a crontab:
+
+```Dockerfile
+FROM shinsenter/php:latest
+
+ENV ENABLE_CRONTAB=1
+
+# create crontab entry via RUN instruction
+RUN echo '* * * * * echo Hello world!' >> /etc/crontab.d/sample1;
+
+# or copy crontab entries via ADD instruction
+ADD ./sample2 /etc/crontab.d/
+```
+
+The format of a crontab entry is as follows:
+
+```
+# Job definition:
+# .---------------- minute (0 - 59)
+# |  .------------- hour (0 - 23)
+# |  |  .---------- day of month (1 - 31)
+# |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...
+# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
+# |  |  |  |  |
+# *  *  *  *  *  command to be executed
+```
+
+For more information on environment variables for cron jobs, refer to the [Other System Settings](#other-system-settings) section below.
+
 ## Debug Mode
 
 Enable "debug mode" for more verbose logging by setting `DEBUG=1` as an environment variable.
@@ -397,12 +433,9 @@ These Docker images include additional environment variables for fine-tuning con
 
 Check our [Docker Hub](https://hub.docker.com/r/shinsenter/php/tags) for all available platforms.
 
-> 💡 Hint: Docker image tags ending in `-alpine` or `-tidy` indicate images built on the Alpine Linux base OS.
-> These images are lightweight, speeding up builds and saving bandwidth for your CI/CD pipelines.
-
 ## Stable Image Tags
 
-The release versions on this GitHub repository don't guarantee
+The release versions on [this GitHub repository](https://code.shin.company/php) don't guarantee
 that Docker images built from the same source code will always be identical.
 
 We build new Docker images daily to ensure they stay up-to-date
@@ -420,7 +453,7 @@ providing both the latest code and production stability.
 ## Contributing
 
 If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter)
-or opening an issue on [GitHub](https://github.com/shinsenter/php/issues/new).
+or opening an issue on [GitHub](https://code.shin.company/php/issues/new).
 
 Your support helps maintain and improve these images for the community.
 

@@ -3,7 +3,7 @@
 🔋 (PHP / Wordpress) Production-ready container with automatic Wordpress installer.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/wordpress
-- GitHub Packages: https://github.com/shinsenter/php/pkgs/container/wordpress
+- GitHub Packages: https://code.shin.company/php/pkgs/container/wordpress
 
 ## Introduction
 
@@ -16,9 +16,6 @@ enabling you to start projects quickly without additional installations.
 
 > 💡 Hint: WP-CLI, available as the `wp` command, lets you update plugins,
 configure multisite installations and much more, without using a web browser.
-
-> 💡 Hint: Docker image tags ending in `-alpine` or `-tidy` indicate images built on the Alpine Linux base OS.
-> These images are lightweight, speeding up builds and saving bandwidth for your CI/CD pipelines.
 
 ## Usage
 
@@ -108,7 +105,7 @@ services:
 
 ## Stable Image Tags
 
-The release versions on this GitHub repository don't guarantee
+The release versions on [this GitHub repository](https://code.shin.company/php) don't guarantee
 that Docker images built from the same source code will always be identical.
 
 We build new Docker images daily to ensure they stay up-to-date
@@ -117,7 +114,7 @@ The images in this repo are regularly updated under the same tag names.
 
 But you can pull the image from `shinsenter/wordpress:latest`,
 and tag it with a name that indicates its stability,
-such as `shinsenter/wordpress:stable` using the below commands:
+such as `your-repo/wordpress:stable` using the below commands:
 
 ```shell
 docker pull shinsenter/wordpress:latest
@@ -129,7 +126,7 @@ Then use the image `your-repo/wordpress:stable` as a base image to build contain
 
 ## Contributing
 
-If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://github.com/shinsenter/php/issues/new).
+If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://code.shin.company/php/issues/new).
 
 Your support helps maintain and improve these images for the community.
 

@@ -14,7 +14,6 @@ FROM ${OS_BASE}:${OS_VERSION}
 
 ################################################################################
 
-INCLUDE ./meta
 INCLUDE ./common/os-base
 INCLUDE ./common/os-s6-overlay
 INCLUDE ./common/os-crontab
@@ -24,3 +23,9 @@ RUN echo $(source /etc/os-release && echo $NAME $VERSION) >/etc/welcome.txt
 ################################################################################
 
 ENTRYPOINT /usr/local/bin/docker-php-entrypoint
+
+################################################################################
+
+INCLUDE ./meta
+
+################################################################################

@@ -11,17 +11,17 @@ Combine official [Ubuntu](http://hub.docker.com/_/ubuntu), [Debian](http://hub.d
 #### Ubuntu
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/ubuntu-s6
-- GitHub Packages: https://github.com/shinsenter/php/pkgs/container/ubuntu-s6
+- GitHub Packages: https://code.shin.company/php/pkgs/container/ubuntu-s6
 
 #### Debian
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/debian-s6
-- GitHub Packages: https://github.com/shinsenter/php/pkgs/container/debian-s6
+- GitHub Packages: https://code.shin.company/php/pkgs/container/debian-s6
 
 #### Alpine
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/alpine-s6
-- GitHub Packages: https://github.com/shinsenter/php/pkgs/container/alpine-s6
+- GitHub Packages: https://code.shin.company/php/pkgs/container/alpine-s6
 
 ## Usage
 
@@ -141,6 +141,43 @@ services:
       - DISABLE_AUTORUN_SCRIPTS=1
 ```
 
+## Using Cron Jobs
+
+To enable cron jobs in containers, you can start the container with `ENABLE_CRONTAB=1`.
+This setting activates the Crontab service, which loads settings from the directory specified by `$CRONTAB_DIR` (default is `/etc/crontab.d`).
+
+The cron jobs will run as the user defined by `$APP_USER:$APP_GROUP`, which by default is `www-data:www-data`,
+and with the home directory set by `$CRONTAB_HOME` (default is `/var/www/html`).
+
+Here is an example Dockerfile to add a crontab:
+
+```Dockerfile
+FROM shinsenter/php:latest
+
+ENV ENABLE_CRONTAB=1
+
+# create crontab entry via RUN instruction
+RUN echo '* * * * * echo Hello world!' >> /etc/crontab.d/sample1;
+
+# or copy crontab entries via ADD instruction
+ADD ./sample2 /etc/crontab.d/
+```
+
+The format of a crontab entry is as follows:
+
+```
+# Job definition:
+# .---------------- minute (0 - 59)
+# |  .------------- hour (0 - 23)
+# |  |  .---------- day of month (1 - 31)
+# |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...
+# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
+# |  |  |  |  |
+# *  *  *  *  *  command to be executed
+```
+
+For more information on environment variables for cron jobs, refer to the [Other System Settings](#other-system-settings) section below.
+
 ## Debug Mode
 
 Enable "debug mode" for more verbose logging by setting `DEBUG=1` as an environment variable.
@@ -185,7 +222,7 @@ These Docker images include additional environment variables for fine-tuning con
 ## Contributing
 
 If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter)
-or opening an issue on [GitHub](https://github.com/shinsenter/php/issues/new).
+or opening an issue on [GitHub](https://code.shin.company/php/issues/new).
 
 Your support helps maintain and improve these images for the community.
 
