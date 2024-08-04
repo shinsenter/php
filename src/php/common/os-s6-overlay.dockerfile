@@ -21,9 +21,11 @@ if ! has-s6 && [ ! -z "$S6_VERSION" ]; then
     FALLBACK_ENTRYPOINT="/usr/local/bin/fallback-entrypoint"
 
     # install deps
-    APK_PACKAGES='xz' \
-    APT_PACKAGES='xz-utils' \
-    pkg-add
+    if [ ! -x "$(command -v xz)" ] || [ ! -x "$(command -v tar)" ]; then
+        APK_PACKAGES="tar xz" \
+        APT_PACKAGES="xz-utils" \
+        pkg-add
+    fi
 
     # backup existing entrypoint
     if [ -x /init ]; then mv -f /init $FALLBACK_ENTRYPOINT; fi
