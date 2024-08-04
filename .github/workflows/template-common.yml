@@ -2,7 +2,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -20,12 +20,23 @@ on:
       php_version:
         required: false
         type: string
+        default: ""
+      server:
+        required: false
+        type: string
+        default: ""
       os:
         required: false
         type: string
+        default: alpine
       os_version:
         required: false
         type: string
+        default: latest
+      tag_prefix:
+        required: false
+        type: string
+        default: ""
     secrets:
       DOCKER_HUB_ACCESS_TOKEN:
         required: true
@@ -39,6 +50,7 @@ on:
 
 jobs:
   build:
+    name: ${{ inputs.php_version }} ${{ inputs.app_name }} ${{ inputs.server }} ${{ inputs.os }}
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -50,17 +62,26 @@ jobs:
           - '5000:5000'
     env:
       ARCHIVES_REPO: "shinsenter/php-archives"
+      DOCKER_BUILD_RECORD_UPLOAD: false
+      DOCKER_BUILD_SUMMARY: false
+      DOCKER_BUILDKIT: "1"
       PUBLISH_TO_GHCR: "1"
       USE_BUILD_CACHE: "0"
     steps:
       -
+        if: ${{ !env.SKIP_BUILD }}
         uses: actions/checkout@v4
         with:
           submodules: 'true'
 
       -
+        if: ${{ !env.SKIP_BUILD }}
         name: Generate build config
-        run: ./build/config.sh "${{ inputs.os }}" "${{ inputs.app_name }}" "${{ inputs.php_version }}"
+        run: |
+          export GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
+          export DOCKERHUB_TOKEN="${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}"
+          export BUILD_TAG_PREFIX="${{ inputs.tag_prefix }}"
+          ./build/config.sh "${{ inputs.os }}" "${{ inputs.app_name }}" "${{ inputs.php_version }}" "${{ inputs.server }}"
 
       -
         id: cache
@@ -144,8 +165,8 @@ jobs:
             PHP_VERSION=${{ env.PHP_VERSION }}
             S6_PATH=${{ env.S6_PATH }}
             S6_VERSION=${{ env.S6_VERSION }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # cache-from: type=gha
+          # cache-to: type=gha,mode=max
           # cache-from: type=local,src=${{ env.BUILD_CACHE_PATH }}
           # cache-to: type=local,dest=${{ env.BUILD_CACHE_PATH }}-new,mode=max
 
@@ -182,8 +203,8 @@ jobs:
             PHP_VERSION=${{ env.PHP_VERSION }}
             S6_PATH=${{ env.S6_PATH }}
             S6_VERSION=${{ env.S6_VERSION }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # cache-from: type=gha
+          # cache-to: type=gha,mode=max
           # cache-from: type=local,src=${{ env.BUILD_CACHE_PATH }}
           # cache-to: type=local,dest=${{ env.BUILD_CACHE_PATH }}-new,mode=max
 

@@ -15,8 +15,6 @@ FROM ${BUILD_FROM_IMAGE}:php${PHP_VERSION}${PHP_VARIANT}
 
 ################################################################################
 
-INCLUDE ./meta
-
 ADD --link ./rootfs/ /
 
 ################################################################################
@@ -51,3 +49,9 @@ php -r "copy('$WPCLI_URL', '$WPCLI_PATH');" && chmod +xr $WPCLI_PATH
 web-cmd wp "$WPCLI_PATH --allow-root --path=\"\$(app-path)/web/wp\""
 wp package install aaemnnosttv/wp-cli-dotenv-command:^2.0
 EOF
+
+################################################################################
+
+INCLUDE ./meta
+
+################################################################################

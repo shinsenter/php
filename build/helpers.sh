@@ -3,7 +3,7 @@
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
-# Author:  Mai Nhut Tan <shin@shin.company>
+# Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -38,17 +38,23 @@ timestamp() {
 # Function to get remote json
 get_remote_json () {
     echo "Fetching $@" 1>&2
-    curl --retry 2 -ks "$@" | tr -d '[:cntrl:]'
+    if [ "$TOKEN" != "" ]; then
+        curl --retry 3 --retry-delay 5 -ksL \
+            --header "Authorization: Bearer $TOKEN" \
+            --request GET --url "$@" | tr -d '[:cntrl:]'
+    else
+        curl --retry 3 --retry-delay 5 -ksL "$@" | tr -d '[:cntrl:]'
+    fi
 }
 
 # Function to get metadata from GitHub
 get_github_json () {
-    get_remote_json "https://api.github.com/repos/$1/tags?per_page=10&$2"
+    TOKEN="$GITHUB_TOKEN" get_remote_json "https://api.github.com/repos/$1/tags?per_page=10&$2"
 }
 
 # Function to get metadata from Docker Hub
 get_dockerhub_json () {
-    get_remote_json "https://registry.hub.docker.com/v2/repositories/$1/tags?&page_size=10&status=active&sort=last_updated&$2"
+    TOKEN="$DOCKERHUB_TOKEN" get_remote_json "https://registry.hub.docker.com/v2/repositories/$1/tags?&page_size=10&status=active&sort=last_updated&$2"
 }
 
 # For GitHub
@@ -75,7 +81,7 @@ github_env() {
 ################################################################################
 
 path_hash() {
-    if [ -z "$1" ]; then
+    if [ "$1" == "" ]; then
         echo -n "" | shasum
         return
     fi

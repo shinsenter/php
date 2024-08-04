@@ -15,8 +15,6 @@ FROM shinsenter/phpfpm-nginx:php${PHP_VERSION}${PHP_VARIANT}
 
 ################################################################################
 
-INCLUDE ./meta
-
 ADD --link ./rootfs/ /
 
 ################################################################################
@@ -30,3 +28,9 @@ ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 
 RUN web-cmd artisan 'php $(app-path)/artisan'
 RUN web-cmd please  'php $(app-path)/please'
+
+################################################################################
+
+INCLUDE ./meta
+
+################################################################################

@@ -7,16 +7,23 @@
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-ARG  BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-php}
-ARG  PHP_VERSION=${PHP_VERSION:-8.3}
-ARG  PHP_VARIANT=${PHP_VARIANT:-zts}
+# ARG  BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-php}
+# ARG  PHP_VERSION=${PHP_VERSION:-8.3}
+# ARG  PHP_VARIANT=${PHP_VARIANT:-zts-alpine}
 
-FROM ./base-php AS php
+# FROM ./base-php AS php
+
+ARG  BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-shinsenter/php}
+ARG  PHP_VERSION=${PHP_VERSION:-8.3}
+ARG  PHP_VARIANT=${PHP_VARIANT:-zts-alpine}
+
+FROM ${BUILD_FROM_IMAGE}:${PHP_VERSION}-${PHP_VARIANT}
 
 ################################################################################
 
 INCLUDE ./with-unit/unit-install
 INCLUDE ./with-unit/unit-config
+INCLUDE ./common/os-s6-overlay
 
 RUN unitd --version
 
@@ -27,6 +34,10 @@ EXPOSE 443
 EXPOSE 443/udp
 
 CMD []
+
+################################################################################
+
+INCLUDE ./meta
 
 ################################################################################
 

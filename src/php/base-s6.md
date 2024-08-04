@@ -3,7 +3,7 @@
 🗂 Unpacked s6-overlay version 3 as a multi-platform build stage.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/s6-overlay
-- GitHub Packages: https://github.com/shinsenter/php/pkgs/container/s6-overlay
+- GitHub Packages: https://code.shin.company/php/pkgs/container/s6-overlay
 
 ## Introduction
 
@@ -39,7 +39,7 @@ ENTRYPOINT ["/init"]
 ## Contributing
 
 If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter)
-or opening an issue on [GitHub](https://github.com/shinsenter/php/issues/new).
+or opening an issue on [GitHub](https://code.shin.company/php/issues/new).
 
 Your support helps maintain and improve these images for the community.
 

@@ -14,8 +14,6 @@ FROM shinsenter/roadrunner:php${PHP_VERSION}${PHP_VARIANT}
 
 ################################################################################
 
-INCLUDE ./meta
-
 ADD --link ./rootfs/ /
 
 ################################################################################
@@ -25,5 +23,9 @@ ENV DOCUMENT_ROOT="/public"
 ENV INITIAL_PROJECT="spiral/app"
 ENV DISABLE_AUTORUN_COPYING_SOURCE=1
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
+
+################################################################################
+
+INCLUDE ./meta
 
 ################################################################################

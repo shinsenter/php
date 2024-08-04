@@ -9,22 +9,23 @@
 # S6 variables
 ARG S6_VERSION=${S6_VERSION:-}
 ARG S6_PATH=${S6_PATH:-}
-ARG S6_SRC_URL="https://github.com/just-containers/s6-overlay/releases/download"
-ARG FALLBACK_ENTRYPOINT=/usr/local/bin/fallback-entrypoint
-
-################################################################################
-
-ADD --link ./common/shell-s6/ "${S6_PATH}/usr/local/sbin/"
 
 ################################################################################
 
 RUN <<'EOF'
-echo 'Configure s6-overlay'
-
-if [ -n "$S6_VERSION" ]; then
-    SOURCE=${S6_SRC_URL}/${S6_VERSION}
-
+if ! has-s6 && [ ! -z "$S6_VERSION" ]; then
+    echo 'Configure s6-overlay'
     set -e
+
+    SOURCE="https://github.com/just-containers/s6-overlay/releases/download/${S6_VERSION}"
+    FALLBACK_ENTRYPOINT="/usr/local/bin/fallback-entrypoint"
+
+    # install deps
+    if [ ! -x "$(command -v xz)" ] || [ ! -x "$(command -v tar)" ]; then
+        APK_PACKAGES="tar xz" \
+        APT_PACKAGES="xz-utils" \
+        pkg-add
+    fi
 
     # backup existing entrypoint
     if [ -x /init ]; then mv -f /init $FALLBACK_ENTRYPOINT; fi
@@ -46,7 +47,7 @@ if [ -n "$S6_VERSION" ]; then
         local url="$1"
         local path="${2:-$S6_PATH}/"
         if [ ! -e $path ]; then mkdir -p $path; fi
-        curl --retry 2 -ksL "$url" | tar Jxp -C $path
+        curl --retry 3 --retry-delay 5 -ksL "$url" | tar Jxp -C $path
     }
 
     # and install the right version of s6-overlay
@@ -64,20 +65,14 @@ if [ -n "$S6_VERSION" ]; then
         env-default S6_KILL_GRACETIME 3000
         env-default S6_LOGGING 0
         env-default S6_SERVICES_GRACETIME 3000
-        env-default S6_VERBOSITY 1
+        env-default S6_VERBOSITY '$(is-debug && echo 2 || echo 0)'
         env-default S6_VERSION $S6_VERSION
     fi
 
     # inject legacy entrypoint
     if [ -x $FALLBACK_ENTRYPOINT ]; then
-        env-default FALLBACK_ENTRYPOINT $FALLBACK_ENTRYPOINT
-        sed -i "s|^exec |\n# CAUTION: this may crash s6-overlay\n# if [ \$# -eq 0 ]; then set -- $FALLBACK_ENTRYPOINT \"\$@\"; fi\n\nexec |" /init
+        sed -i "s|^exec |\nif [ \$# -gt 0 ]; then set -- $FALLBACK_ENTRYPOINT \"\$@\"; fi\n\nexec |" /init
     fi
-
-    # add setuid bit
-    chmod u+s "${S6_PATH}/usr/local/sbin/s6-"*
-else
-    rm -rf "${S6_PATH}/usr/local/sbin/s6-"*
 fi
 EOF
 
