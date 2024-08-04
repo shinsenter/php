@@ -61,6 +61,7 @@ BUILD_README=
 BUILD_DESC=
 BUILD_TAG=
 BUILD_TAGS=
+BUILD_TAG_PREFIX=${BUILD_TAG_PREFIX:-}
 BUILD_TMP_NAME=
 BUILD_CACHE_KEY=
 BUILD_CACHE_PATH="/tmp/.buildx-cache"
@@ -444,6 +445,10 @@ BUILD_TAGS=${BUILD_TAGS//-rc/}
 # apply tag prefix for development branch
 if [ "$BUILD_TAG_PREFIX" != "" ]; then
     BUILD_TAGS=${BUILD_TAGS//:/:$BUILD_TAG_PREFIX}
+
+    if [ "$BUILD_FROM_IMAGE" != "php" ]; then
+        BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE//:/:$BUILD_TAG_PREFIX}
+    fi
 fi
 
 # check if build tags are empty
@@ -536,7 +541,7 @@ if [ ! -e "$BUILD_CACHE_PATH" ]; then
 fi
 
 
-BUILD_CACHE_KEY="($APP@$BUILD_NAME)${BUILD_CACHE_KEY:+/}$BUILD_CACHE_KEY"
+BUILD_CACHE_KEY="($APP@$BUILD_TAG)${BUILD_CACHE_KEY:+/}$BUILD_CACHE_KEY"
 
 if [ "$S6_VERSION" != "" ]; then
     BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(s6@$S6_VERSION)"
@@ -605,7 +610,6 @@ fi
 # Export Git action environment variables
 ################################################################################
 
-github_env DOCKER_ULIMIT "nofile=65536:65536"
 github_env BUILD_CACHE_KEY $BUILD_CACHE_KEY
 github_env BUILD_CACHE_PATH $BUILD_CACHE_PATH
 github_env BUILD_CONTEXT $BUILD_CONTEXT
@@ -620,6 +624,7 @@ github_env BUILD_README $BUILD_README
 github_env BUILD_REVISION $BUILD_REVISION
 github_env BUILD_SOURCE_IMAGE $BUILD_SOURCE_IMAGE
 github_env BUILD_TAG $BUILD_TAG
+github_env BUILD_TAG_PREFIX $BUILD_TAG_PREFIX
 github_env BUILD_TAGS $BUILD_TAGS
 github_env BUILD_TMP_NAME $BUILD_TMP_NAME
 github_env LATEST_PHP $LATEST_PHP

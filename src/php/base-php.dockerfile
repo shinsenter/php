@@ -8,10 +8,12 @@
 ################################################################################
 
 ARG  BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-php}
+ARG  BUILD_TAG_PREFIX=${BUILD_TAG_PREFIX:-}
+
 ARG  PHP_VERSION=${PHP_VERSION:-8.3}
 ARG  PHP_VARIANT=${PHP_VARIANT:-fpm-alpine}
 
-FROM ${BUILD_FROM_IMAGE}:${PHP_VERSION}-${PHP_VARIANT}
+FROM ${BUILD_FROM_IMAGE}:${BUILD_TAG_PREFIX}${PHP_VERSION}-${PHP_VARIANT}
 
 # set PHP variables
 ARG PHP_VERSION=${PHP_VERSION:-8.3}
