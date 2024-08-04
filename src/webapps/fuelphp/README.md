@@ -1,9 +1,13 @@
 # shinsenter/fuelphp
 
-🔋 (PHP / FuelPHP) Production-ready container with automatic FuelPHP installer.
+🔋 (PHP / FuelPHP) Production-ready Docker images with automatic FuelPHP installer.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/fuelphp
 - GitHub Packages: https://code.shin.company/php/pkgs/container/fuelphp
+
+The Docker images are available for both Debian and Alpine versions.
+
+> ℹ️ Note: We no longer maintain the `-tidy` tag names. If you are using Docker images with this tag, please replace them with the `-alpine` variant.
 
 ## Introduction
 

@@ -2,14 +2,17 @@
 
 📦 Simplified PHP Docker images for effortless customization and extension setup.
 
+Our Docker images cover PHP versions from 5.6 to 8.4, available in CLI, ZTS, FPM, FPM/Apache2, FPM/Nginx, RoadRunner, FrankenPHP, and Nginx Unit variants. The Docker images are available for both Debian and Alpine versions.
+
 - Docker Hub: https://hub.docker.com/r/shinsenter/php
 - GitHub Packages: https://code.shin.company/php/pkgs/container/php
 
-[![shinsenter/php](https://repository-images.githubusercontent.com/458053748/24e848e1-c0fc-4893-b2b9-f7dbfad263f3)](https://docker.shin.company/php)
-
 [![Daily build](https://code.shin.company/php/actions/workflows/build-all.yml/badge.svg)](https://code.shin.company/php/actions/workflows/build-all.yml)
 
+
 ## Introduction
+
+[![shinsenter/php](https://repository-images.githubusercontent.com/458053748/24e848e1-c0fc-4893-b2b9-f7dbfad263f3)](https://docker.shin.company/php)
 
 Our PHP Docker images are based on the [official PHP Docker images](https://hub.docker.com/_/php).
 These images facilitate the easy adjustment of PHP and PHP-FPM settings using environment variables,
@@ -24,10 +27,12 @@ This setup allows for faster project initiation without additional installations
 > This optimization improves download times and resource usage without sacrificing functionality,
 > thanks to the [docker-squash](https://code.shin.company/docker-squash) project.
 
-## Image Variants
+## Docker Image Variants
 
 Our image tags cover PHP versions from 5.6 to 8.4<sup>(*)</sup>,
-available in `cli`, `zts`, `fpm`, `fpm-nginx`, `fpm-apache`, `roadrunner`<sup>(1)</sup>, `frankenphp`<sup>(2)</sup>, and `unit-php`<sup>(3)</sup> variants.
+available in `cli`, `zts`, `fpm`, `fpm-nginx`, `fpm-apache`, `roadrunner`<sup>(1)</sup>, `frankenphp`<sup>(2)</sup>, and `unit-php`<sup>(3)</sup> variants. The Docker images are available for both Debian and Alpine versions.
+
+> ℹ️ Note: We no longer maintain the `-tidy` tag names. If you are using Docker images with this tag, please replace them with the `-alpine` variant.
 
 Examples:
 - `shinsenter/php:7.2-cli`
@@ -431,7 +436,9 @@ These Docker images include additional environment variables for fine-tuning con
 
 ## Supported Platforms
 
-Check our [Docker Hub](https://hub.docker.com/r/shinsenter/php/tags) for all available platforms.
+Check our [Docker Hub](https://hub.docker.com/r/shinsenter/php/tags) for all available platforms. The Docker images are available for both Debian and Alpine versions.
+
+> ℹ️ Note: We no longer maintain the `-tidy` tag names. If you are using Docker images with this tag, please replace them with the `-alpine` variant.
 
 ## Stable Image Tags
 

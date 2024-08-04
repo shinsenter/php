@@ -1,9 +1,13 @@
 # shinsenter/wordpress
 
-🔋 (PHP / Wordpress) Production-ready container with automatic Wordpress installer.
+🔋 (PHP / Wordpress) Production-ready Docker images with automatic Wordpress installer.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/wordpress
 - GitHub Packages: https://code.shin.company/php/pkgs/container/wordpress
+
+The Docker images are available for both Debian and Alpine versions.
+
+> ℹ️ Note: We no longer maintain the `-tidy` tag names. If you are using Docker images with this tag, please replace them with the `-alpine` variant.
 
 ## Introduction
 

@@ -1,9 +1,13 @@
 # shinsenter/laravel
 
-🔋 (PHP / Laravel) Production-ready container with automatic Laravel installer.
+🔋 (PHP / Laravel) Production-ready Docker images with automatic Laravel installer.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/laravel
 - GitHub Packages: https://code.shin.company/php/pkgs/container/laravel
+
+The Docker images are available for both Debian and Alpine versions.
+
+> ℹ️ Note: We no longer maintain the `-tidy` tag names. If you are using Docker images with this tag, please replace them with the `-alpine` variant.
 
 ## Introduction
 

@@ -147,14 +147,15 @@ jobs:
           build-args: |
             BUILD_CACHE_KEY=${{ env.BUILD_CACHE_KEY }}
             BUILD_CACHE_PATH=${{ env.BUILD_CACHE_PATH }}
-            BUILD_FROM_IMAGE=${{ env.BUILD_FROM_IMAGE }}
             BUILD_CONTEXT=${{ env.BUILD_CONTEXT }}
             BUILD_DATE=${{ env.BUILD_DATE }}
             BUILD_DESC=${{ env.BUILD_DESC }}
+            BUILD_FROM_IMAGE=${{ env.BUILD_FROM_IMAGE }}
             BUILD_NAME=${{ env.BUILD_NAME }}
             BUILD_PLATFORM=${{ env.BUILD_PLATFORM }}
             BUILD_REVISION=${{ env.BUILD_REVISION }}
             BUILD_SOURCE_IMAGE=${{ env.BUILD_SOURCE_IMAGE }}
+            BUILD_TAG_PREFIX=${{ env.BUILD_TAG_PREFIX }}
             BUILD_TAG=${{ env.BUILD_TAG }}
             BUILD_TAGS=${{ env.BUILD_TAGS }}
             LATEST_PHP=${{ env.LATEST_PHP }}
@@ -185,14 +186,15 @@ jobs:
           build-args: |
             BUILD_CACHE_KEY=${{ env.BUILD_CACHE_KEY }}
             BUILD_CACHE_PATH=${{ env.BUILD_CACHE_PATH }}
-            BUILD_FROM_IMAGE=${{ env.BUILD_FROM_IMAGE }}
             BUILD_CONTEXT=${{ env.BUILD_CONTEXT }}
             BUILD_DATE=${{ env.BUILD_DATE }}
             BUILD_DESC=${{ env.BUILD_DESC }}
+            BUILD_FROM_IMAGE=${{ env.BUILD_FROM_IMAGE }}
             BUILD_NAME=${{ env.BUILD_NAME }}
             BUILD_PLATFORM=${{ env.BUILD_PLATFORM }}
             BUILD_REVISION=${{ env.BUILD_REVISION }}
             BUILD_SOURCE_IMAGE=${{ env.BUILD_SOURCE_IMAGE }}
+            BUILD_TAG_PREFIX=${{ env.BUILD_TAG_PREFIX }}
             BUILD_TAG=${{ env.BUILD_TAG }}
             BUILD_TAGS=${{ env.BUILD_TAGS }}
             LATEST_PHP=${{ env.LATEST_PHP }}
