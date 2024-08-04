@@ -33,6 +33,10 @@ on:
         required: false
         type: string
         default: latest
+      tag_prefix:
+        required: false
+        type: string
+        default: ""
     secrets:
       DOCKER_HUB_ACCESS_TOKEN:
         required: true
@@ -74,9 +78,9 @@ jobs:
         if: ${{ !env.SKIP_BUILD }}
         name: Generate build config
         run: |
-          export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          export DOCKERHUB_TOKEN=${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-          export BUILD_TAG_PREFIX=${{ env.BUILD_TAG_PREFIX }}
+          export GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
+          export DOCKERHUB_TOKEN="${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}"
+          export BUILD_TAG_PREFIX="${{ inputs.tag_prefix }}"
           ./build/config.sh "${{ inputs.os }}" "${{ inputs.app_name }}" "${{ inputs.php_version }}" "${{ inputs.server }}"
 
       -

@@ -13,6 +13,11 @@ name: Publish PHP Apps
 
 on:
   workflow_call:
+    inputs:
+      tag_prefix:
+        required: false
+        type: string
+        default: ""
   workflow_dispatch:
   workflow_run:
     workflows: [Publish PHP Servers]

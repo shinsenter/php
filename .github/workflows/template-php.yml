@@ -21,6 +21,10 @@ on:
         required: false
         type: string
         default: ""
+      tag_prefix:
+        required: false
+        type: string
+        default: ""
 
 ################################################################################
 ################################################################################
@@ -38,3 +42,4 @@ jobs:
       php_version: ${{ matrix.php_version }}
       app_name: ${{ inputs.app_name }}
       server: ${{ inputs.server }}
+      tag_prefix: ${{ inputs.tag_prefix }}

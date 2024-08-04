@@ -29,24 +29,40 @@ env:
   BUILD_TAG_PREFIX: ${{ (github.ref_type == 'tag' || github.ref == 'refs/heads/main') && '' || 'dev-' }}
 
 jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "${{ github.event_name }}"
+          echo "${{ github.ref_type }}"
+          echo "${{ github.ref }}"
+          echo "${{ env.BUILD_TAG_PREFIX }}"
 
   s6:
     uses: ./.github/workflows/00-s6-overlay.yml
     secrets: inherit
+    with:
+      tag_prefix: ${{ env.BUILD_TAG_PREFIX }}
 
   php:
     uses: ./.github/workflows/01-php.yml
     secrets: inherit
+    with:
+      tag_prefix: ${{ env.BUILD_TAG_PREFIX }}
 
   php-servers:
     uses: ./.github/workflows/02-servers.yml
     secrets: inherit
     needs: [php]
+    with:
+      tag_prefix: ${{ env.BUILD_TAG_PREFIX }}
 
   php-apps:
     uses: ./.github/workflows/03-apps.yml
     secrets: inherit
     needs: [php-servers]
+    with:
+      tag_prefix: ${{ env.BUILD_TAG_PREFIX }}
 
 ################################################################################
 ################################################################################

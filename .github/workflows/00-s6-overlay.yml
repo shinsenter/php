@@ -13,6 +13,11 @@ name: Publish S6
 
 on:
   workflow_call:
+    inputs:
+      tag_prefix:
+        required: false
+        type: string
+        default: ""
   workflow_dispatch:
 
 ################################################################################
