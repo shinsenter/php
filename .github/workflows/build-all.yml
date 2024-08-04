@@ -25,44 +25,44 @@ on:
 ################################################################################
 ################################################################################
 
-env:
-  BUILD_TAG_PREFIX: ${{ (github.ref_type == 'tag' || github.ref == 'refs/heads/main') && '' || 'dev-' }}
-
 jobs:
-  debug:
+  prepare:
     runs-on: ubuntu-latest
+    outputs:
+      tag_prefix: ${{ (github.ref_type == 'tag' || github.ref == 'refs/heads/main') && '' || 'dev-' }}
     steps:
       - run: |
           echo "${{ github.event_name }}"
           echo "${{ github.ref_type }}"
           echo "${{ github.ref }}"
-          echo "${{ env.BUILD_TAG_PREFIX }}"
 
   s6:
     uses: ./.github/workflows/00-s6-overlay.yml
     secrets: inherit
+    needs: [prepare]
     with:
-      tag_prefix: ${{ env.BUILD_TAG_PREFIX }}
+      tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
 
   php:
     uses: ./.github/workflows/01-php.yml
     secrets: inherit
+    needs: [prepare]
     with:
-      tag_prefix: ${{ env.BUILD_TAG_PREFIX }}
+      tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
 
   php-servers:
     uses: ./.github/workflows/02-servers.yml
     secrets: inherit
-    needs: [php]
+    needs: [prepare, php]
     with:
-      tag_prefix: ${{ env.BUILD_TAG_PREFIX }}
+      tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
 
   php-apps:
     uses: ./.github/workflows/03-apps.yml
     secrets: inherit
-    needs: [php-servers]
+    needs: [prepare, php-servers]
     with:
-      tag_prefix: ${{ env.BUILD_TAG_PREFIX }}
+      tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
 
 ################################################################################
 ################################################################################
