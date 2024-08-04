@@ -72,12 +72,12 @@ SKIP_SQUASH=${SKIP_SQUASH:-}
 PREFIX="${APP//app-/}"
 SUFFIX=
 
-if [ ! -z "$OS" ]; then
+if [ "$OS" != "" ]; then
     SUFFIX="-$OS"
     OS_BASE="$OS"
 fi
 
-if [ ! -z "$DEBUG" ] && [ "$DEBUG" != "0" ]; then
+if [ "$DEBUG" == "1" ]; then
     SKIP_BUILD=1
 fi
 
@@ -321,7 +321,7 @@ if [ "$ALLOW_RC" != "1" ]; then
 fi
 
 # skip build if the PHP version is earlier than 7.1 and the OS is not Debian
-if [ ! -z "$PHP_VERSION" ] && verlt "$PHP_VERSION" "7.1" && [ "$OS_BASE" != "debian" ]; then
+if [ "$PHP_VERSION" != "" ] && verlt "$PHP_VERSION" "7.1" && [ "$OS_BASE" != "debian" ]; then
     BUILD_DOCKERFILE=
     SKIP_BUILD=1
 fi
@@ -366,7 +366,7 @@ append_tags() {
 }
 
 # generate build tags
-if [ ! -z "$PHP_VERSION" ]; then
+if [ "$PHP_VERSION" != "" ]; then
     if [ "$BUILD_NAME" = "$DEFAULT_BUILD_NAME" ]; then
         BUILD_TAGS="$BUILD_NAME:$PHP_VERSION-$PREFIX$SUFFIX"
         if [ "$PHP_VERSION" = "$LATEST_PHP" ]; then
@@ -440,7 +440,7 @@ fi
 BUILD_TAGS=${BUILD_TAGS//-rc/}
 
 # apply tag prefix for development branch
-if [ ! -z "$BUILD_TAG_PREFIX" ]; then
+if [ "$BUILD_TAG_PREFIX" != "" ]; then
     BUILD_TAGS=${BUILD_TAGS//:/:$BUILD_TAG_PREFIX}
 fi
 
@@ -458,12 +458,12 @@ if [ "$OS_BASE" = "alpine" ]; then
 fi
 
 # also publish to ghcr.io
-if [ ! -z "$PUBLISH_TO_GHCR" ]; then
+if [ "$PUBLISH_TO_GHCR" == "1" ]; then
     BUILD_TAGS="$(append_tags "$DEFAULT_REPO" "ghcr.io/$DEFAULT_REPO" "$BUILD_TAGS")"
 fi
 
 # also push a copy to archived repo
-if [ ! -z "$ARCHIVES_REPO" ]; then
+if [ "$ARCHIVES_REPO" != "" ]; then
     unique_id="$(date +%Y%m%d)"
     BUILD_TAGS="$(append_tags "${DEFAULT_BUILD_NAME}:" "${ARCHIVES_REPO}:${unique_id}-" "$BUILD_TAGS")"
 fi
@@ -472,12 +472,12 @@ fi
 # Build context, readme, description etc.
 ################################################################################
 
-if [ ! -z "$DUMMY" ]; then
+if [ "$DUMMY" == "1" ]; then
     BUILD_DOCKERFILE="$BASE_DIR/src/dummy.dockerfile"
     BUILD_CACHE_KEY="(dummy@$BUILD_REVISION)"
 fi
 
-if [ ! -z "$BUILD_DOCKERFILE" ] && [ -f $BUILD_DOCKERFILE ]; then
+if [ "$BUILD_DOCKERFILE" != "" ] && [ -f $BUILD_DOCKERFILE ]; then
     BUILD_DOCKERFILE_SQUASHED="/tmp/squashed-$(basename $BUILD_DOCKERFILE)"
     BUILD_CONTEXT=$(dirname $BUILD_DOCKERFILE)
 
@@ -502,7 +502,7 @@ if [ "$BUILD_NAME" = "$DEFAULT_BUILD_NAME" ] && [ "$APP" = "cli" ] && [ "$PHP_VE
 fi
 
 # parse description from README.md
-if [ ! -z "$BUILD_README" ] && [ -f "$BUILD_README" ]; then
+if [ "$BUILD_README" == "1" ] && [ -f "$BUILD_README" ]; then
     BUILD_DESC="$(sed '3q;d' $BUILD_README)"
 
     # update readme on latest tag and not dev branch
@@ -536,18 +536,18 @@ fi
 
 BUILD_CACHE_KEY="($APP@$BUILD_NAME)${BUILD_CACHE_KEY:+/}$BUILD_CACHE_KEY"
 
-if [ ! -z "$S6_VERSION" ]; then
+if [ "$S6_VERSION" != "" ]; then
     BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(s6@$S6_VERSION)"
 fi
 
-if [ ! -z "$OS_BASE" ]; then
+if [ "$OS_BASE" != "" ]; then
     if [ "$SKIP_BUILD" != "1" ]; then
         OS_SHA="$(get_dockerhub_latest_sha "library/$OS_BASE" 1 "$OS_VERSION" | head -c17)"
     fi
-    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/($OS_BASE:$OS_VERSION@$OS_SHA)/(s6@$S6_VERSION)"
+    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/($OS_BASE:$OS_VERSION@$OS_SHA)"
 fi
 
-if [ ! -z "$PHP_VERSION" ]; then
+if [ "$PHP_VERSION" != "" ]; then
     if [ "$SKIP_BUILD" != "1" ]; then
         PHP_SHA="$(get_dockerhub_latest_sha "library/php" 1 "$PHP_VERSION-${PHP_VARIANT#-}" | head -c17)"
     fi
@@ -582,10 +582,12 @@ remove_platform() {
 }
 
 # remove some platforms for older PHP versions
-if [ ! -z "$PHP_VERSION" ] && verlt "$PHP_VERSION" "7.1"; then
-    BUILD_PLATFORM="linux/amd64,linux/arm/v7"
-elif [ "$OS_BASE" = "debian" ] && [ ! -z "$PHP_VERSION" ] && verlt "$PHP_VERSION" "7.3"; then
-    BUILD_PLATFORM="$(remove_platform "$BUILD_PLATFORM" '386' 'ppc64le' 's390x')"
+if [ "$PHP_VERSION" != "" ]; then
+    if verlt "$PHP_VERSION" "7.1"; then
+        BUILD_PLATFORM="linux/amd64,linux/arm/v7"
+    elif [ "$OS_BASE" = "debian" ] && verlt "$PHP_VERSION" "7.3"; then
+        BUILD_PLATFORM="$(remove_platform "$BUILD_PLATFORM" '386' 'ppc64le' 's390x')"
+    fi
 fi
 
 ################################################################################
