@@ -1,9 +1,13 @@
 # shinsenter/phpixie
 
-🔋 (PHP / PHPixie) Production-ready container with automatic PHPixie installer.
+🔋 (PHP / PHPixie) Production-ready Docker images with automatic PHPixie installer.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/phpixie
 - GitHub Packages: https://code.shin.company/php/pkgs/container/phpixie
+
+The Docker images are available for both Debian and Alpine versions.
+
+> ℹ️ Note: We no longer maintain the `-tidy` tag names. If you are using Docker images with this tag, please replace them with the `-alpine` variant.
 
 ## Introduction
 

@@ -1,9 +1,13 @@
 # shinsenter/slim
 
-🔋 (PHP / Slim) Production-ready container with automatic Slim installer.
+🔋 (PHP / Slim) Production-ready Docker images with automatic Slim installer.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/slim
 - GitHub Packages: https://code.shin.company/php/pkgs/container/slim
+
+The Docker images are available for both Debian and Alpine versions.
+
+> ℹ️ Note: We no longer maintain the `-tidy` tag names. If you are using Docker images with this tag, please replace them with the `-alpine` variant.
 
 ## Introduction
 

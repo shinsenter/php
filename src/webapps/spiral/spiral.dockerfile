@@ -8,10 +8,12 @@
 ################################################################################
 
 ARG  BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-shinsenter/roadrunner}
+ARG  BUILD_TAG_PREFIX=${BUILD_TAG_PREFIX:-}
+
 ARG  PHP_VERSION=${PHP_VERSION:-8.3}
 ARG  PHP_VARIANT=${PHP_VARIANT:-}
 
-FROM ${BUILD_FROM_IMAGE}:php${PHP_VERSION}${PHP_VARIANT}
+FROM ${BUILD_FROM_IMAGE}:${BUILD_TAG_PREFIX}php${PHP_VERSION}${PHP_VARIANT}
 ONBUILD RUN if has-cmd greeting; then greeting; fi
 
 ################################################################################

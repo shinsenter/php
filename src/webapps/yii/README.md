@@ -1,9 +1,13 @@
 # shinsenter/yii
 
-🔋 (PHP / Yii) Production-ready container with automatic Yii installer.
+🔋 (PHP / Yii) Production-ready Docker images with automatic Yii installer.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/yii
 - GitHub Packages: https://code.shin.company/php/pkgs/container/yii
+
+The Docker images are available for both Debian and Alpine versions.
+
+> ℹ️ Note: We no longer maintain the `-tidy` tag names. If you are using Docker images with this tag, please replace them with the `-alpine` variant.
 
 ## Introduction
 
