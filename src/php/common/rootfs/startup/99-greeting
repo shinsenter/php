@@ -1,25 +1,2 @@
 #!/usr/bin/env sh
-if ! is-true $DISABLE_GREETING; then
-    WELCOME_TXT=/etc/welcome.txt
-    LICENSE_TXT=/license
-    APP_USER="${APP_USER:=www-data}"
-    APP_GROUP="${APP_GROUP:=www-data}"
-
-    echo "
-$([ -f $WELCOME_TXT ] && cat $WELCOME_TXT | sed "s#%PATH%#$WELCOME_TXT#g")
-
----------------
-Container     : ${DOCKER_NAME:-shinsenter/php} (built: ${DOCKER_DATE:-$(date +'%Y-%m-%dT%T%z')})
-Distro        : $(source /etc/os-release && echo ${PRETTY_NAME:-Unknown})
-Timezone      : $(date +'%Z') (GMT$(date +'%z'))
-UID / GID     : $APP_USER:$APP_GROUP ($(id -u $APP_USER):$(id -g $APP_USER))
-App Root      : $(app-path)
-Document Root : $(app-root)
----------------
-
-$([ -f $LICENSE_TXT ] && cat $LICENSE_TXT | sed "s#%EMAIL%#${MAINTAINER:-shin@shin.company}#g" | sed "s#%YEAR%#$(date +'%Y')#g")
-
-$(if has-cmd php-fpm;  then php-fpm -v; elif has-cmd php; then php -v; fi)
-$(if has-cmd composer; then composer -V 2>&1 | head -n1; fi)
-"
-fi
+if ! is-true $DISABLE_GREETING && has-cmd greeting; then greeting; fi
