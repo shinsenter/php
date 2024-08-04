@@ -463,7 +463,7 @@ if [ "$PUBLISH_TO_GHCR" == "1" ]; then
 fi
 
 # also push a copy to archived repo
-if [ "$ARCHIVES_REPO" != "" ]; then
+if [ "$ARCHIVES_REPO" != "" ]  && [ "$BUILD_TAG_PREFIX" == "" ]; then
     unique_id="$(date +%Y%m%d)"
     BUILD_TAGS="$(append_tags "${DEFAULT_BUILD_NAME}:" "${ARCHIVES_REPO}:${unique_id}-" "$BUILD_TAGS")"
 fi
