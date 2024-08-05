@@ -166,8 +166,8 @@ jobs:
             PHP_VERSION=${{ env.PHP_VERSION }}
             S6_PATH=${{ env.S6_PATH }}
             S6_VERSION=${{ env.S6_VERSION }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ env.BUILD_TAG_PREFIX }}build-${{ inputs.php_version }}@${{ inputs.os }}
+          cache-to: type=gha,mode=max,scope=${{ env.BUILD_TAG_PREFIX }}build-${{ inputs.php_version }}@${{ inputs.os }}
           # cache-from: type=local,src=${{ env.BUILD_CACHE_PATH }}
           # cache-to: type=local,dest=${{ env.BUILD_CACHE_PATH }}-new,mode=max
 
@@ -205,8 +205,8 @@ jobs:
             PHP_VERSION=${{ env.PHP_VERSION }}
             S6_PATH=${{ env.S6_PATH }}
             S6_VERSION=${{ env.S6_VERSION }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ env.BUILD_TAG_PREFIX }}build-${{ inputs.php_version }}@${{ inputs.os }}
+          cache-to: type=gha,mode=max,scope=${{ env.BUILD_TAG_PREFIX }}build-${{ inputs.php_version }}@${{ inputs.os }}
           # cache-from: type=local,src=${{ env.BUILD_CACHE_PATH }}
           # cache-to: type=local,dest=${{ env.BUILD_CACHE_PATH }}-new,mode=max
 
