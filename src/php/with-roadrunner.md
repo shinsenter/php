@@ -1,6 +1,6 @@
 # shinsenter/roadrunner
 
-🌏 (PHP) PHP + RoadRunner docker containers for both production and development.
+🌏 (PHP) PHP + RoadRunner Docker images for both production and development.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/roadrunner
 - GitHub Packages: https://code.shin.company/php/pkgs/container/roadrunner

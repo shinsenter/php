@@ -1,6 +1,6 @@
 # shinsenter/phpfpm-apache
 
-🌏 (PHP) PHP-FPM + Apache2 docker containers for both production and development.
+🌏 (PHP) PHP-FPM + Apache2 Docker images for both production and development.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/phpfpm-apache
 - GitHub Packages: https://code.shin.company/php/pkgs/container/phpfpm-apache

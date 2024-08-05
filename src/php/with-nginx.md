@@ -1,6 +1,6 @@
 # shinsenter/phpfpm-nginx
 
-🌏 (PHP) PHP + Nginx docker containers for both production and development.
+🌏 (PHP) PHP + Nginx Docker images for both production and development.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/phpfpm-nginx
 - GitHub Packages: https://code.shin.company/php/pkgs/container/phpfpm-nginx

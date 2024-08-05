@@ -1,6 +1,6 @@
 # shinsenter/frankenphp
 
-🌏 (PHP) FrankenPHP docker containers for both production and development.
+🌏 (PHP) FrankenPHP Docker images for both production and development.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/frankenphp
 - GitHub Packages: https://code.shin.company/php/pkgs/container/frankenphp
