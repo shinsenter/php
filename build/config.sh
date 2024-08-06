@@ -509,7 +509,7 @@ if [ "$BUILD_NAME" = "$DEFAULT_BUILD_NAME" ] && [ "$APP" = "cli" ] && [ "$PHP_VE
 fi
 
 # parse description from README.md
-if [ "$BUILD_README" == "1" ] && [ -f "$BUILD_README" ]; then
+if [ "$BUILD_README" != "" ] && [ -f "$BUILD_README" ]; then
     BUILD_DESC="$(sed '3q;d' $BUILD_README)"
 
     # update readme on latest tag and not dev branch
