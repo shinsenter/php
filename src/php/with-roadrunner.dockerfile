@@ -7,6 +7,13 @@
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
+# Enable SBOM attestations
+# See: https://docs.docker.com/build/attestations/sbom/
+ARG  BUILDKIT_SBOM_SCAN_CONTEXT=true
+ARG  BUILDKIT_SBOM_SCAN_STAGE=true
+
+################################################################################
+
 # ARG  BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-php}
 # ARG  PHP_VERSION=${PHP_VERSION:-8.3}
 # ARG  PHP_VARIANT=${PHP_VARIANT:-cli-alpine}
