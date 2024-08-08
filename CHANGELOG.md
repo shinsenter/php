@@ -10,6 +10,8 @@ We are also trying new methods to speed up the build process and save resources.
 
 We changed our workflows to create two types of Docker images: stable images and development images (with `dev-` tags).
 
+We will no longer maintain Docker images for Crater, FuelPHP, and PHPixie, as their development seems to have been inactive for a long time.
+
 ## [5.1.0] - 2024-08-01
 
 We have updated the behavior of the environment variables used to change PHP configurations to enhance container performance:
