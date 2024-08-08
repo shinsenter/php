@@ -21,10 +21,12 @@ ARG  BUILDKIT_SBOM_SCAN_STAGE=true
 # FROM ./base-php AS php
 
 ARG  BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-shinsenter/php}
+ARG  BUILD_TAG_PREFIX=${BUILD_TAG_PREFIX:-}
+
 ARG  PHP_VERSION=${PHP_VERSION:-8.3}
 ARG  PHP_VARIANT=${PHP_VARIANT:-fpm-alpine}
 
-FROM ${BUILD_FROM_IMAGE}:${PHP_VERSION}-${PHP_VARIANT}
+FROM ${BUILD_FROM_IMAGE}:${BUILD_TAG_PREFIX}${PHP_VERSION}-${PHP_VARIANT}
 ONBUILD RUN if has-cmd autorun; then autorun /etc/onbuild.d/; fi
 
 ################################################################################
