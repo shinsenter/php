@@ -4,11 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [5.2.0] - 2024-08-10
 
-The Docker images with `-tidy` tags are no longer supported. Please use the `-alpine` images instead if you are using `-tidy` images.
-
-We are also trying new methods to speed up the build process and save resources.
-
-We changed our workflows to create two types of Docker images: stable images and development images (with `dev-` tags).
+- The Docker images with `-tidy` tags are no longer supported. Please switch to `-alpine` images.
+- We’re working on improving build speed and resource efficiency.
+- Our new workflow creates two types of Docker images: stable images and development images (with `dev-` tags).
+- We’ve stopped maintaining Docker images for Crater, FuelPHP, and PHPixie due to their inactive development.
 
 ## [5.1.0] - 2024-08-01
 

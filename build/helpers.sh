@@ -88,9 +88,8 @@ path_hash() {
 
     local target="$1"
     if [ -d $target ]; then
-        find "$target" -type f \
-        | grep -v '\.(DS_Store|git)' \
-        | sort -zn | xargs -r shasum 2>/dev/null
+        find "$target" -type f -not -name '.*' \
+        | sort -dbfi | xargs -r shasum 2>/dev/null
     elif [ -f $target ]; then
         shasum $target 2>/dev/null
     else

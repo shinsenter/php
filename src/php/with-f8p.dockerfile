@@ -1,4 +1,4 @@
-# syntax = devthefuture/dockerfile-x
+# syntax = devthefuture/dockerfile-x:1.4.2
 ################################################################################
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
@@ -29,7 +29,7 @@ ARG  BUILD_SOURCE_IMAGE=${BUILD_SOURCE_IMAGE:-dunglas/frankenphp:1-php${PHP_VERS
 
 FROM ${BUILD_SOURCE_IMAGE} AS frankenphp
 FROM ${BUILD_FROM_IMAGE}:${PHP_VERSION}-${PHP_VARIANT}
-ONBUILD RUN if has-cmd greeting; then greeting; fi
+ONBUILD RUN if has-cmd autorun; then autorun /etc/onbuild.d/; fi
 
 ################################################################################
 

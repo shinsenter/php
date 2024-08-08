@@ -1,4 +1,4 @@
-# syntax = devthefuture/dockerfile-x
+# syntax = devthefuture/dockerfile-x:1.4.2
 ################################################################################
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.

@@ -181,12 +181,6 @@ app-*)
         # https://codeigniter.com/user_guide/installation/index.html
         verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
         ;;
-    crater)
-        # https://docs.craterapp.com/installation.html
-        LATEST_PHP="8.1"
-        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
-        verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
-        ;;
     drupal)
         # https://www.drupal.org/docs/getting-started/system-requirements/php-requirements
         verlt "$PHP_VERSION" "8.0" && SKIP_BUILD=1
@@ -195,10 +189,6 @@ app-*)
         # https://docs.flarum.org/install/
         BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.3" && SKIP_BUILD=1
-        ;;
-    fuelphp)
-        # https://fuelphp.com/docs/installation/instructions.html
-        LATEST_PHP="8.0"
         ;;
     grav)
         # https://learn.getgrav.org/17/basics/installation
@@ -229,10 +219,6 @@ app-*)
     mautic)
         # https://docs.mautic.org/en/5.x/getting_started/how_to_install_mautic.html#installing-with-composer
         verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
-        ;;
-    phpixie)
-        # https://phpixie.com/quickstart.html
-        LATEST_PHP="7.4"
         ;;
     phpmyadmin)
         # https://docs.phpmyadmin.net/en/latest/setup.html
@@ -268,6 +254,23 @@ app-*)
     yii)
         # https://www.yiiframework.com/doc/guide/2.0/en/start-installation
         ;;
+
+    ## Inactive frameworks
+    # crater)
+    #     # https://docs.craterapp.com/installation.html
+    #     LATEST_PHP="8.1"
+    #     BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
+    #     verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
+    #     ;;
+    # fuelphp)
+    #     # https://fuelphp.com/docs/installation/instructions.html
+    #     LATEST_PHP="8.0"
+    #     ;;
+    # phpixie)
+    #     # https://phpixie.com/quickstart.html
+    #     LATEST_PHP="7.4"
+    #     ;;
+
     esac
 
     # override the default server variant
@@ -639,3 +642,14 @@ github_env SKIP_BUILD $SKIP_BUILD
 github_env SKIP_SQUASH $SKIP_SQUASH
 github_env SQUASH_CMD $SQUASH_CMD
 github_env UPDATE_README $UPDATE_README
+
+################################################################################
+# Debug
+################################################################################
+
+if [ "$SKIP_BUILD" != "1" ]; then
+    echo "🐧 Debug:"
+    path_hash "$BUILD_CONTEXT"
+    path_hash "$BUILD_DOCKERFILE"
+    path_hash "$BASE_DIR/.github/workflows"
+fi

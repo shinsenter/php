@@ -1,13 +1,16 @@
-# shinsenter/fuelphp
+# shinsenter/crater
 
-🔋 (PHP / FuelPHP) Production-ready Docker images with automatic FuelPHP installer.
+🔋 (PHP / Crater) Production-ready Docker images with automatic Crater installer.
 
-- Docker Hub: https://hub.docker.com/r/shinsenter/fuelphp
-- GitHub Packages: https://code.shin.company/php/pkgs/container/fuelphp
+- Docker Hub: https://hub.docker.com/r/shinsenter/crater
+- GitHub Packages: https://code.shin.company/php/pkgs/container/crater
 
 The Docker images are available for both Debian and Alpine versions.
 
-> ℹ️ Note: We no longer maintain the `-tidy` tag names. If you are using Docker images with this tag, please replace them with the `-alpine` variant.
+<!-- > ℹ️ Note: We no longer maintain the `-tidy` tag names. If you are using Docker images with this tag, please replace them with the `-alpine` variant. -->
+
+> <font color="orange">ℹ️ Note: These Docker images won’t be updated anymore since it looks like the framework hasn't been active in a long time.
+> You can still use the old Docker images. If you hear about any updates to the framework, please let us know.</font>
 
 ## Introduction
 
@@ -41,7 +44,7 @@ mkdir myproject
 ```shell
 docker run -p 80:80 -p 443:443 -p 443:443/udp \
     -v ./myproject:/var/www/html \
-    shinsenter/fuelphp:latest
+    shinsenter/crater:latest
 ```
 
 The container will detect the empty directory mounted to `/var/www/html` and clone the framework source code into it.
@@ -71,7 +74,7 @@ to enable true HTTPS for your production website.
 #### Using Dockerfile
 
 ```Dockerfile
-FROM shinsenter/fuelphp:latest
+FROM shinsenter/crater:latest
 
 # Copy your own certs into the container
 COPY my_domain.crt /etc/ssl/site/server.crt
@@ -89,7 +92,7 @@ docker run -p 80:80 -p 443:443 -p 443:443/udp \
     -v ./myproject:/var/www/html \
     -v ./my_domain.crt:/etc/ssl/site/server.crt \
     -v ./my_domain.key:/etc/ssl/site/server.key \
-    shinsenter/fuelphp:latest
+    shinsenter/crater:latest
 ```
 
 #### Using docker-compose
@@ -97,7 +100,7 @@ docker run -p 80:80 -p 443:443 -p 443:443/udp \
 ```yml
 services:
   web:
-    image: shinsenter/fuelphp:latest
+    image: shinsenter/crater:latest
     volumes:
       - ./myproject:/var/www/html
       - ./my_domain.crt:/etc/ssl/site/server.crt
@@ -113,17 +116,17 @@ We build new Docker images daily to ensure they stay up-to-date
 with the latest upstream updates for PHP, base OS, Composer, etc.
 The images in this repo are regularly updated under the same tag names.
 
-But you can pull the image from `shinsenter/fuelphp:latest`,
+But you can pull the image from `shinsenter/crater:latest`,
 and tag it with a name that indicates its stability,
-such as `your-repo/fuelphp:stable` using the below commands:
+such as `your-repo/crater:stable` using the below commands:
 
 ```shell
-docker pull shinsenter/fuelphp:latest
-docker tag  shinsenter/fuelphp:latest your-repo/fuelphp:stable
-docker push your-repo/fuelphp:stable
+docker pull shinsenter/crater:latest
+docker tag  shinsenter/crater:latest your-repo/crater:stable
+docker push your-repo/crater:stable
 ```
 
-Then use the image `your-repo/fuelphp:stable` as a base image to build containers for production.
+Then use the image `your-repo/crater:stable` as a base image to build containers for production.
 
 ## Contributing
 

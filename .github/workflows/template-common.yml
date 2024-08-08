@@ -75,7 +75,6 @@ jobs:
           submodules: 'true'
 
       -
-        if: ${{ !env.SKIP_BUILD }}
         name: Generate build config
         run: |
           export GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
@@ -96,6 +95,16 @@ jobs:
         if: ${{ !env.SKIP_BUILD && env.USE_BUILD_CACHE != '1' && steps.cache.outputs.cache-hit == 'true' }}
         name: Skip building ${{ env.BUILD_TAG }}
         run: echo "SKIP_BUILD=1" >> $GITHUB_ENV
+
+      -
+        if: ${{ !env.SKIP_BUILD }}
+        name: Cleanup before building ${{ env.BUILD_TAG }}
+        run: |
+          docker system prune -a --volumes -f
+          sudo swapoff -a || true
+          sudo rm -f /mnt/swapfile || true
+          free -h
+          df -h
 
       -
         if: ${{ !env.SKIP_BUILD }}
@@ -121,16 +130,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      -
-        if: ${{ !env.SKIP_BUILD }}
-        name: Cleanup before building ${{ env.BUILD_TAG }}
-        run: |
-          # docker system prune -a --volumes -f
-          sudo swapoff -a || true
-          sudo rm -f /mnt/swapfile || true
-          free -h
-          df -h
 
       -
         if: ${{ !env.SKIP_BUILD && env.SKIP_SQUASH == '1' }}

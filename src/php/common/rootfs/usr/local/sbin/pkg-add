@@ -13,7 +13,7 @@ alpine() {
         apk update | debug-echo -l
         for pkg; do
             if [ "$pkg" = "upgrade" ]; then
-                apk upgrade | debug-echo -l
+                apk upgrade --available | debug-echo -l
             else
                 debug-echo -i "\nInstall $pkg"
                 apk add $pkg | debug-echo -l
