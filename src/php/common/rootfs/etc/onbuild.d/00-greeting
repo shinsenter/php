@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+if has-cmd greeting; then greeting; fi

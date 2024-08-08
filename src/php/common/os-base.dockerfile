@@ -29,7 +29,7 @@ ENV PRESQUASH_SCRIPTS="cleanup"
 ################################################################################
 
 ADD --link ./common/rootfs/ /
-ONBUILD RUN if has-cmd greeting; then greeting; fi
+ONBUILD RUN if has-cmd autorun; then autorun /etc/onbuild.d/; fi
 
 ################################################################################
 
@@ -39,7 +39,7 @@ ONBUILD RUN if has-cmd greeting; then greeting; fi
 # https://github.com/mlocati/docker-php-extension-installer/pull/724
 # https://github.com/mlocati/docker-php-extension-installer/pull/737
 RUN --mount=type=bind,from=mlocati/php-extension-installer:latest,source=/usr/bin/install-php-extensions,target=/tmp/install-php-extensions \
-    /tmp/install-php-extensions @fix_letsencrypt || true
+    /tmp/install-php-extensions @fix_letsencrypt | grep -vF StandWith | debug-echo -l
 
 ################################################################################
 
@@ -132,6 +132,9 @@ mkcert -days 3652 -install \
 
 # backup entrypoint
 if [ -f $DOCKER_ENTRYPOINT ]; then mv $DOCKER_ENTRYPOINT /init; fi
+
+# create application directory
+web-mkdir $APP_PATH
 
 EOF
 

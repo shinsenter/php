@@ -639,3 +639,14 @@ github_env SKIP_BUILD $SKIP_BUILD
 github_env SKIP_SQUASH $SKIP_SQUASH
 github_env SQUASH_CMD $SQUASH_CMD
 github_env UPDATE_README $UPDATE_README
+
+################################################################################
+# Debug
+################################################################################
+
+if [ "$SKIP_BUILD" != "1" ]; then
+    echo "🐧 Debug:"
+    path_hash "$BUILD_CONTEXT"
+    path_hash "$BUILD_DOCKERFILE"
+    path_hash "$BASE_DIR/.github/workflows"
+fi
