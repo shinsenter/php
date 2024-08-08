@@ -46,7 +46,7 @@ initial() {
     unit-conf $CERT_PATH "certificates/default"
 
     # enabled sites
-    for json in $(find /etc/unit/sites-enabled -type f -name "*.json" | sort -n); do
+    for json in $(find /etc/unit/sites-enabled -type f -name "*.json" | sort -dbfi); do
         unit-conf $json
     done
 
