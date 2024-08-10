@@ -10,7 +10,6 @@
 # Enable SBOM attestations
 # See: https://docs.docker.com/build/attestations/sbom/
 ARG  BUILDKIT_SBOM_SCAN_CONTEXT=true
-ARG  BUILDKIT_SBOM_SCAN_STAGE=true
 
 ################################################################################
 
@@ -21,6 +20,7 @@ ARG  BUILDKIT_SBOM_SCAN_STAGE=true
 
 # FROM $BUILD_SOURCE_IMAGE AS frankenphp
 # FROM ./base-php AS php
+# ARG  BUILDKIT_SBOM_SCAN_STAGE=true
 
 ARG  BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-shinsenter/php}
 ARG  BUILD_TAG_PREFIX=${BUILD_TAG_PREFIX:-}
@@ -31,6 +31,7 @@ ARG  BUILD_SOURCE_IMAGE=${BUILD_SOURCE_IMAGE:-dunglas/frankenphp:1-php${PHP_VERS
 
 FROM ${BUILD_SOURCE_IMAGE} AS frankenphp
 FROM ${BUILD_FROM_IMAGE}:${BUILD_TAG_PREFIX}${PHP_VERSION}-${PHP_VARIANT}
+ARG  BUILDKIT_SBOM_SCAN_STAGE=true
 ONBUILD RUN if has-cmd autorun; then autorun /etc/onbuild.d/; fi
 
 ################################################################################
