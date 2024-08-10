@@ -98,15 +98,6 @@ jobs:
 
       -
         if: ${{ !env.SKIP_BUILD }}
-        name: Cleanup before building ${{ env.BUILD_TAG }}
-        run: |
-          sudo swapoff -a || true
-          sudo rm -f /mnt/swapfile || true
-          free -h
-          df -h
-
-      -
-        if: ${{ !env.SKIP_BUILD }}
         uses: docker/setup-qemu-action@v3
 
       -

@@ -1,10 +1,12 @@
 .env
 .env.*
 *.dockerfile
+*.md
 *.squashed
 **/.DS_Store
 **/.git
 **/*.dockerfile
+**/*.md
 **/*.squashed
 **/*.working
 **/Dockerfile
