@@ -161,7 +161,7 @@ FROM shinsenter/php:latest
 ENV ENABLE_CRONTAB=1
 
 # create crontab entry via RUN instruction
-RUN echo '* * * * * echo Hello world!' >> /etc/crontab.d/sample1;
+RUN echo '* * * * * echo "echo This line will run every minute!" | tee /tmp/cron-every-minute.txt' >> /etc/crontab.d/sample1;
 
 # or copy crontab entries via ADD instruction
 ADD ./sample2 /etc/crontab.d/
@@ -178,6 +178,20 @@ The format of a crontab entry is as follows:
 # |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
 # |  |  |  |  |
 # *  *  *  *  *  command to be executed
+```
+
+You can also easily set up cron jobs through the `$CRONTAB_SETTINGS` environment variable in the `docker-compose.yml` file.
+When the container starts, these settings are loaded into crontab, giving you more flexibility to change them later.
+
+```yml
+services:
+  web:
+    image: shinsenter/php:8.3-fpm-nginx
+    environment:
+      ENABLE_CRONTAB: "1"
+      CRONTAB_SETTINGS: |
+        0 0 * * * echo "Hello new day!" | tee /tmp/cron-daily.txt
+        * * * * * echo "This line will run every minute!" | tee /tmp/cron-every-minute.txt
 ```
 
 For more information on environment variables for cron jobs, refer to the [Other System Settings](#other-system-settings) section below.
@@ -220,6 +234,7 @@ These Docker images include additional environment variables for fine-tuning con
 | `CRONTAB_HOME`                     | `$APP_PATH`      | Specifies the `$HOME` directory for cron jobs.                                                                                        | `/path/for/crontab` |
 | `CRONTAB_MAILTO`                   | Not set          | Email address to which cron job logs are sent.                                                                                        | `admin@example.com` |
 | `CRONTAB_PATH`                     | `$PATH`          | Sets the directory paths for executing cron jobs.                                                                                     | `/path/for/crontab/bin` |
+| `CRONTAB_SETTINGS`                 | Not set          | Allows you to configure cron jobs directly in the docker-compose.yml file, making it easy to manage and update scheduled tasks within your Docker container. | `0 0 * * * echo "Hello new day!"` |
 | `CRONTAB_SHELL`                    | `/bin/sh`        | Sets the default shell for cron jobs.                                                                                                 | `/bin/bash` |
 | `CRONTAB_TZ`                       | `$TZ`            | Sets the default timezone for cron jobs. [Full list](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).                   | `Asia/Tokyo` |
 
