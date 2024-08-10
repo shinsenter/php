@@ -25,7 +25,7 @@ export PATH="$NEW_PATH"
 fi
 
 if [ $# -eq 0 ]; then
-    source $conf_path && env | sort -dbfi
+    source $conf_path && env -0 | sort -dbfiz | tr '\0' '\n'
     exit
 fi
 
