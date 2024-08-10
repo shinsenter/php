@@ -20,10 +20,10 @@ fi
 if [ "$ENV" != "$DEFAULT_ENV" ] && [ -x "$DEFAULT_ENV" ]; then source "$DEFAULT_ENV"; fi
 if [ -x "$ENV" ]; then source "$ENV"; fi
 
-# set the default command
 if [ $# -eq 0 ]; then
-    set -- "$(command -v env)"
+    # print the environment variables when no command is given
+    exec env -0 | sort -dbfiz | tr '\0' '\n'
+else
+    # execute the command
+    exec "$@"
 fi
-
-# run the command with loaded env variables
-exec "$@"

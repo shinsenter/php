@@ -150,7 +150,7 @@ final class DockerPHP
         }
 
         // Cache environment variables
-        run('mkdir -p /etc/default && with-env | sort >/etc/default/locale');
+        run('mkdir -p /etc/default && with-env >/etc/default/locale');
     }
 
     public function write_static_config()
