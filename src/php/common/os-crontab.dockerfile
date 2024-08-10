@@ -11,13 +11,12 @@ RUN <<'EOF'
 echo 'Configure base crontab'
 set -e
 
+env-default CRONTAB_SHELL  '/bin/sh'
+env-default CRONTAB_MAILTO '$APP_ADMIN'
+
 if ! has-cmd crond; then
     pkg-add cron
     ln -nsf $(command -v cron) /usr/sbin/crond
-fi
-
-if ! has-s6; then
-    sed -i 's|^exec |\nif ! has-s6 \&\& has-cmd crond \&\& is-true $ENABLE_CRONTAB; then with-env crond $CRONTAB_OPTIONS; fi\n\nexec |' $DOCKER_ENTRYPOINT
 fi
 
 if has-cmd s6-service; then
