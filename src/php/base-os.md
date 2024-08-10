@@ -189,9 +189,7 @@ services:
     image: shinsenter/php:8.3-fpm-nginx
     environment:
       ENABLE_CRONTAB: "1"
-      CRONTAB_SETTINGS: |
-        0 0 * * * echo "Hello new day!" | tee /tmp/cron-daily.txt
-        * * * * * echo "This line will run every minute!" | tee /tmp/cron-every-minute.txt
+      CRONTAB_SETTINGS: "* * * * * echo 'This line will run every minute!' | tee /tmp/cron-every-minute.txt"
 ```
 
 For more information on environment variables for cron jobs, refer to the [Other System Settings](#other-system-settings) section below.
