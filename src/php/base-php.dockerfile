@@ -10,7 +10,6 @@
 # Enable SBOM attestations
 # See: https://docs.docker.com/build/attestations/sbom/
 ARG  BUILDKIT_SBOM_SCAN_CONTEXT=true
-ARG  BUILDKIT_SBOM_SCAN_STAGE=true
 
 ################################################################################
 
@@ -19,6 +18,7 @@ ARG  PHP_VERSION=${PHP_VERSION:-8.3}
 ARG  PHP_VARIANT=${PHP_VARIANT:-fpm-alpine}
 
 FROM ${BUILD_FROM_IMAGE}:${PHP_VERSION}-${PHP_VARIANT}
+ARG  BUILDKIT_SBOM_SCAN_STAGE=true
 
 # set PHP variables
 ARG PHP_VERSION=${PHP_VERSION:-8.3}
