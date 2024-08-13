@@ -185,6 +185,10 @@ app-*)
         # https://www.drupal.org/docs/getting-started/system-requirements/php-requirements
         verlt "$PHP_VERSION" "8.0" && SKIP_BUILD=1
         ;;
+    espocrm)
+        # https://docs.espocrm.com/administration/installation/
+        verlt "$PHP_VERSION" "8.1" && SKIP_BUILD=1
+        ;;
     flarum)
         # https://docs.flarum.org/install/
         BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"

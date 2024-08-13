@@ -34,15 +34,17 @@ env-default APACHE_START_SERVERS '2'
 env-default APACHE_THREADS_PER_CHILD '25'
 
 CONF_FILE=/etc/apache2/apache2.conf
+MODS_FILE=/etc/apache2/modules.conf
 
 if [ -e $CONF_FILE ]; then
     # detect available modules
     if [ -e /etc/apache2/modules ]; then
+        echo -e "# Begin Modules\n# End Modules" >$MODS_FILE
         for module_path in /etc/apache2/modules/*.so ; do
             module="${module_path##*mod_}"
             module="${module/.so/_module}"
             echo "Found ${module} at ${module_path}"
-            sed -i "s|^# End Modules|#LoadModule ${module} ${module_path}\n# End Modules|" $CONF_FILE 2>&1 >/dev/null
+            sed -i "s|^# End Modules|#LoadModule ${module} ${module_path}\n# End Modules|" $MODS_FILE 2>&1 >/dev/null
         done
     fi
 
@@ -55,6 +57,9 @@ fi
 # create folders
 mkdir -p /etc/apache2 \
     /etc/apache2/custom.d \
+    /etc/apache2/conf-enabled \
+    /etc/apache2/mods-enabled \
+    /etc/apache2/sites-enabled \
     /run/apache2 \
     /var/lib/apache2 \
     /var/log/apache2 \
