@@ -31,8 +31,8 @@ ADD --link ./rootfs/ /
 
 # https://getkirby.com/docs/cookbook/setup/composer
 ENV DOCUMENT_ROOT=""
-ENV INITIAL_PROJECT="getkirby/starterkit"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
+RUN env-default INITIAL_PROJECT "getkirby/starterkit"
 
 ################################################################################
 

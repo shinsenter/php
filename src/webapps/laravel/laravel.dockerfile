@@ -31,8 +31,8 @@ ADD --link ./rootfs/ /
 
 # https://laravel.com/docs/master/installation
 ENV DOCUMENT_ROOT="/public"
-ENV INITIAL_PROJECT="laravel/laravel"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
+RUN env-default INITIAL_PROJECT "laravel/laravel"
 
 ################################################################################
 

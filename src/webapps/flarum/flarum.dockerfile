@@ -31,8 +31,8 @@ ADD --link ./rootfs/ /
 
 # https://docs.flarum.org/install/
 ENV DOCUMENT_ROOT="/public"
-ENV INITIAL_PROJECT="flarum/flarum"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
+RUN env-default INITIAL_PROJECT "flarum/flarum"
 
 ################################################################################
 

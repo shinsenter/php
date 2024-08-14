@@ -31,8 +31,8 @@ ADD --link ./rootfs/ /
 
 # https://hyperf.wiki/3.1/#/en/quick-start/install
 ENV DOCUMENT_ROOT=""
-ENV INITIAL_PROJECT="hyperf/hyperf-skeleton"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
+RUN env-default INITIAL_PROJECT "hyperf/hyperf-skeleton"
 
 ################################################################################
 

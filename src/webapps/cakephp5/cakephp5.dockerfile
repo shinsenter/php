@@ -31,8 +31,8 @@ ADD --link ./rootfs/ /
 
 # https://book.cakephp.org/5/en/installation.html
 ENV DOCUMENT_ROOT="/webroot"
-ENV INITIAL_PROJECT="cakephp/app:~5.0"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
+RUN env-default INITIAL_PROJECT "cakephp/app:~5.0"
 
 ################################################################################
 

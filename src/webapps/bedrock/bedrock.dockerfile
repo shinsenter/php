@@ -31,8 +31,8 @@ ADD --link ./rootfs/ /
 
 # https://bedrock.org/documentation/category/installation/
 ENV DOCUMENT_ROOT="/web"
-ENV INITIAL_PROJECT="roots/bedrock"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
+RUN env-default INITIAL_PROJECT "roots/bedrock"
 
 ################################################################################
 

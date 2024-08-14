@@ -31,7 +31,6 @@ ADD --link ./rootfs/ /
 
 # https://github.com/espocrm/espocrm/tree/stable
 ENV DOCUMENT_ROOT="/public"
-ENV INITIAL_PROJECT="https://github.com/espocrm/espocrm/archive/refs/heads/stable.zip"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 
 # https://docs.espocrm.com/administration/server-configuration/#setting-up-crontab
@@ -51,6 +50,9 @@ ENV PHP_UPLOAD_MAX_FILESIZE="50M"
 RUN <<'EOF'
 # install zmq php extension
 phpaddmod zmq
+
+# automatically detect the latest version of EspoCRM
+env-default INITIAL_PROJECT '$(curl --retry 3 --retry-delay 5 -ksL https://api.github.com/repos/espocrm/espocrm/releases/latest | grep "browser_download_url.*EspoCRM.*zip" | cut -d " -f 4)'
 
 # enable preload
 # see: https://docs.espocrm.com/administration/performance-tweaking/#preloading

@@ -31,8 +31,8 @@ ADD --link ./rootfs/ /
 
 # https://codeigniter.com/user_guide/installation/index.html
 ENV DOCUMENT_ROOT="/public"
-ENV INITIAL_PROJECT="codeigniter4/appstarter"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
+RUN env-default INITIAL_PROJECT "codeigniter4/appstarter"
 
 ################################################################################
 
