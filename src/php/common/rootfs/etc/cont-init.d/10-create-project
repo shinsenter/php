@@ -46,37 +46,61 @@ web-mkdir "$APP_PATH" "$COMPOSER_HOME"
 cd "$APP_PATH"
 
 if [ -z "$(ls -A "$APP_PATH")" ]; then
-    # create project
+    # pull project from source
     if ! is-true $DISABLE_AUTORUN_CREATING_PROJECT && [ ! -z "$INITIAL_PROJECT" ] && has-cmd composer; then
-        composer create-project $COMPOSER_CREATE_OPTIONS \
-            -n --no-secure-http --no-install --no-scripts \
-            -- "$INITIAL_PROJECT" "$APP_PATH"
-
-        if [ -e "$CONF_PATH" ]; then
-            install_deps
-            composer config -n --no-plugins "allow-plugins.*/*" true
-
-            if grep -qF '"post-root-package-install"' $CONF_PATH; then
-                composer run post-root-package-install
+        case "$INITIAL_PROJECT" in
+        http*.tar.gz)
+            curl --retry 3 --retry-delay 5 -kL "$INITIAL_PROJECT" | tar -xzv --strip-components=1 -C "$APP_PATH"
+            ;;
+        http*.zip)
+            filename="/tmp/${INITIAL_PROJECT##*/}"
+            temp="/tmp/$(php -r 'echo uniqid();')"
+            rm -rf "$temp" && mkdir -p "$temp"
+            curl -o "$filename" --retry 3 --retry-delay 5 -kL "$INITIAL_PROJECT"
+            unzip "$filename" -d "$temp"
+            if [ "$(ls -1 "$temp" | wc -l)" == "1" ]; then
+                temp="$temp/$(ls -1 "$temp")"
             fi
-
-            composer update -n -W $COMPOSER_UPDATE_OPTIONS
-
-            if grep -qF '"post-create-project-cmd"' $CONF_PATH; then
-                composer run post-create-project-cmd
+            if [ -d "$temp" ]; then
+                cp -rpn "$temp"/. "$APP_PATH"/ 2>&1 >/dev/null
+            else
+                cp -pn "$temp" "$APP_PATH"/ 2>&1 >/dev/null
             fi
-
-            composer config -n --unset "allow-plugins.*/*"
-            web-chown "Project $INITIAL_PROJECT created in $APP_PATH."
-        else
-            debug-echo "Skip composer install because $CONF_PATH is missing."
-        fi
+            ;;
+        *)
+            composer create-project $COMPOSER_CREATE_OPTIONS \
+                -n --no-secure-http --no-install --no-scripts \
+                -- "$INITIAL_PROJECT" "$APP_PATH"
+            ;;
+        esac
+        web-chown "Project $INITIAL_PROJECT created in $APP_PATH."
     fi
 
-    # copy from source
+    # copy from source directory
     if ! is-true $DISABLE_AUTORUN_COPYING_SOURCE && [ -d /source/ ]; then
-        cp -rpf /source/. "$APP_PATH"/ 2>&1 >/dev/null
+        cp -rpn /source/. "$APP_PATH"/ 2>&1 >/dev/null
         web-chown "Copied files from /source/ to $APP_PATH"
+    fi
+
+    # update packages if the project has composer.json
+    if [ -e "$CONF_PATH" ]; then
+        install_deps
+        composer config -n --no-plugins "allow-plugins.*/*" true
+
+        if grep -qF '"post-root-package-install"' $CONF_PATH; then
+            composer run post-root-package-install
+        fi
+
+        composer update -n -W $COMPOSER_UPDATE_OPTIONS
+
+        if grep -qF '"post-create-project-cmd"' $CONF_PATH; then
+            composer run post-create-project-cmd
+        fi
+
+        composer config -n --unset "allow-plugins.*/*"
+        web-chown "Required packages in $APP_PATH were updated."
+    else
+        debug-echo "Skip composer install because $CONF_PATH is missing."
     fi
 else
     debug-echo "Skip project creation because $APP_PATH is not empty."
@@ -99,9 +123,9 @@ if ! is-true $DISABLE_AUTORUN_COMPOSER_INSTALL && has-cmd composer; then
         vendor_dir="$APP_PATH/$(composer config vendor-dir 2>/dev/null)"
         if [ ! -d "$vendor_dir" ] || [ ! -e "$vendor_dir/composer/ClassLoader.php" ]; then
             install_deps
-            composer config  -n --no-plugins "allow-plugins.*/*" true
+            composer config -n --no-plugins "allow-plugins.*/*" true
             composer install -n $COMPOSER_INSTALL_OPTIONS
-            composer config  -n --unset "allow-plugins.*/*"
+            composer config -n --unset "allow-plugins.*/*"
             web-chown "Composer packages were installed in $APP_PATH"
         fi
     else

@@ -7,7 +7,7 @@
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-config="${1:-/etc/apache2/custom.d/mpm_tuning.conf}"
+config="${1:-/etc/apache2/conf-enabled/mpm_tuning.conf}"
 
 # Gather system information
 cpu_cores=$(grep -c ^processor /proc/cpuinfo)

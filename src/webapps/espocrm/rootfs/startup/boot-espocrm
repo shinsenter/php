@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+APP_PATH="$(app-path)"
+APP_ROOT="$(app-root)"
+
+debug-echo "Your web application must be in {$APP_PATH}."
+
+if ! is-true $ENABLE_ESPOCRM_WEBSOCKET; then
+    rm -rf /etc/apache2/custom.d/espocrm-websocket.conf
+fi
+
+# cd "$APP_PATH"
+# find . -type d -exec chmod 755 {} + && find . -type f -exec chmod 644 {} +
+# find data custom client/custom -type d -exec chmod 775 {} + && find data custom client/custom -type f -exec chmod 664 {} +
+# chmod 775 application/Espo/Modules client/modules
+# chmod 754 bin/command

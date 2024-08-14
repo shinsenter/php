@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.2.1] - 2024-08-20
+
+- Allow downloading the source code if the value of `$INITIAL_PROJECT` is a URL to a `*.zip` or `*.tar.gz` file.
+- Added Docker images for [EspoCRM](http://hub.docker.com/r/shinsenter/espocrm).
+
 ## [5.2.0] - 2024-08-10
 
 - The Docker images with `-tidy` tags are no longer supported. Please switch to `-alpine` images.
