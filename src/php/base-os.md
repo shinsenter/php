@@ -186,7 +186,7 @@ When the container starts, these settings are loaded into crontab, giving you mo
 ```yml
 services:
   web:
-    image: shinsenter/php:8.3-fpm-nginx
+    image: shinsenter/php:8.4-fpm-nginx
     environment:
       ENABLE_CRONTAB: "1"
       CRONTAB_SETTINGS: "* * * * * echo 'This line will run every minute!' | tee /tmp/cron-every-minute.txt"

@@ -11,5 +11,5 @@ conf_dir=/etc/nginx
 disable="$([ "${1:0:1}" = "#" ] && echo "# " || echo "")"
 name="${1/#/}"; shift
 if [ -d $conf_dir ]; then
-    grep -lr "^ *#* *${name} " $conf_dir | grep '\.conf$' | xargs -r sed -i "s~^ *#* *${name}  *.*\$~${disable}${name} $@;~g" 2>&1 >/dev/null
+    grep -lr "^ *#* *${name} " $conf_dir | grep '\.conf$' | xargs -r sed -i "s~^ *#* *${name}  *.*\$~${disable}${name} $@;~g" &>/dev/null
 fi

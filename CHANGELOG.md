@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 
 - Allow downloading the source code if the value of `$INITIAL_PROJECT` is a URL to a `*.zip` or `*.tar.gz` file.
 - Added Docker images for [EspoCRM](http://hub.docker.com/r/shinsenter/espocrm).
+- Added the `$SUPERVISOR_PHP_COMMAND` variable to allow a custom command that the container will use to serve your application.
+- Various minor improvements.
 
 ## [5.2.0] - 2024-08-10
 

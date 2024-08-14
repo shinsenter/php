@@ -13,6 +13,6 @@ if [ -d "${PHP_INI_DIR}/conf.d" ]; then
         PATTERN="/^extension *= *$MODULE/s/^/;/g"
         shift
         debug-echo -e "Disable PHP module $MODULE"
-        sed -i "$PATTERN" "${PHP_INI_DIR}/conf.d"/*.ini 2>&1 >/dev/null
+        sed -i "$PATTERN" "${PHP_INI_DIR}/conf.d"/*.ini &>/dev/null
     done
 fi

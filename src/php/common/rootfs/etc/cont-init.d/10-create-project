@@ -62,9 +62,9 @@ if [ -z "$(ls -A "$APP_PATH")" ]; then
                 temp="$temp/$(ls -1 "$temp")"
             fi
             if [ -d "$temp" ]; then
-                cp -rpn "$temp"/. "$APP_PATH"/ 2>&1 >/dev/null
+                cp -rpn "$temp"/. "$APP_PATH"/ &>/dev/null
             else
-                cp -pn "$temp" "$APP_PATH"/ 2>&1 >/dev/null
+                cp -pn "$temp" "$APP_PATH"/ &>/dev/null
             fi
             ;;
         *)
@@ -78,7 +78,7 @@ if [ -z "$(ls -A "$APP_PATH")" ]; then
 
     # copy from source directory
     if ! is-true $DISABLE_AUTORUN_COPYING_SOURCE && [ -d /source/ ]; then
-        cp -rpn /source/. "$APP_PATH"/ 2>&1 >/dev/null
+        cp -rpn /source/. "$APP_PATH"/ &>/dev/null
         web-chown "Copied files from /source/ to $APP_PATH"
     fi
 
