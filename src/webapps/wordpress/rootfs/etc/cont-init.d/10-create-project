@@ -30,5 +30,5 @@ fi
 
 if [ ! -f "$APP_PATH/wp-config.php" ]; then
     php -r "copy('$WPCONFIG_URL', '$APP_PATH/wp-config.php');"
-    web-chown fix "$APP_PATH/wp-config.php" 2>&1 >/dev/null
+    web-chown fix "$APP_PATH/wp-config.php" &>/dev/null
 fi

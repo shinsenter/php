@@ -167,12 +167,11 @@ final class DockerPHP
     {
         $defaults = self::PHP_DEFAULTS;
 
-        $php_conf = array_merge(['[PHP]'], $this->build_conf($this->php_settings, $defaults, $dynamic));
-        $fpm_conf = [];
-
+        $php_conf = array_merge(['[PHP]'], $this->build_conf($this->php_settings, $defaults, $dynamic), ['']);
         save($this->php_conf_path, $php_conf);
         unset($php_conf);
 
+        $fpm_conf = [];
         foreach ($this->fpm_settings as $scope => $settings) {
             if ($dynamic && 'www' == $scope) {
                 $fpm_conf[] = '[${PHP_POOL_NAME}]';
@@ -180,8 +179,7 @@ final class DockerPHP
                 $fpm_conf[] = "[$scope]";
             }
 
-            $fpm_conf   = array_merge($fpm_conf, $this->build_conf($settings, $defaults, $dynamic));
-            $fpm_conf[] = '';
+            $fpm_conf = array_merge($fpm_conf, $this->build_conf($settings, $defaults, $dynamic), ['']);
         }
 
         save($this->fpm_conf_path, $fpm_conf);

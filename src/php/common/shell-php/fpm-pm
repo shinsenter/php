@@ -24,7 +24,7 @@ pm_max_requests=500
 # Modify configuration file
 mkdir -p "$(dirname $config_file)"
 touch $config_file
-sed -i '/^; Tuning PM/,$d' $config_file 2>&1 >/dev/null
+sed -i '/^; Tuning PM/,$d' $config_file &>/dev/null
 cat <<EOF >>$config_file
 ; Tuning PM
 [\${PHP_POOL_NAME}]

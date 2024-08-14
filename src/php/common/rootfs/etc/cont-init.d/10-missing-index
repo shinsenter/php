@@ -24,7 +24,7 @@ if ((bool) trim((string) shell_exec('is-debug && echo 1 || echo 0'))) {
     echo 'It works!';
 }
 PHP
-    web-chown fix "$index_path" 2>&1 >/dev/null
+    web-chown fix "$index_path" &>/dev/null
 }
 
 ################################################################################

@@ -7,8 +7,10 @@
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
+APP_PATH="$(app-path)"
+
 debug-echo "Initialize container"
-web-mkdir "$(app-path)"
+mkdir -p "$APP_PATH"
 
 # set timezone
 export TZ="${TZ:=UTC}"
@@ -32,7 +34,7 @@ $ENV_CHECK
 if is-true $ALLOW_RUNTIME_PHP_ENVVARS && has-cmd php-envvars; then php-envvars export_envvars 2>&1; fi
 
 # change working directory
-if [ -d "$(app-path)" ]; then cd "$(app-path)"; fi
+if [ -d "$APP_PATH" ]; then cd "$APP_PATH"; fi
 
 if [ ! -z "$SUPERVISOR_PHP_COMMAND" ]; then
     # run scripts in the /etc/cont-init.d directory

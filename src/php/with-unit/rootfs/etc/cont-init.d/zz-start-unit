@@ -38,7 +38,7 @@ initial() {
 
     # wait for socket
     while [ ! -e "$UNIT_CONTROL_SOCKET" ]; do sleep 0.5; done
-    configtest >&2 >/dev/null
+    configtest &>/dev/null
 
     # SSL bundle
     CERT_PATH="/etc/ssl/site/server_${PHP_POOL_NAME:-www}.pem"
@@ -64,5 +64,5 @@ if is-debug; then
     debug-echo -w "🐞 Nginx Unit is in DEBUG MODE 🐞"
     initial || true
 else
-    initial 2>&1 >/dev/null || true
+    initial &>/dev/null || true
 fi

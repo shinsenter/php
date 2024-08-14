@@ -1,2 +1,17 @@
 #!/usr/bin/env sh
-if has-cmd greeting; then greeting; fi
+if [[ "$DOCKER_NAME" != 'shinsenter/'* ]]; then
+echo "
+
+░█░█░█▀█░█▀▄░█▀█░▀█▀░█▀█░█▀▀░█░█░█
+░█▄█░█▀█░█▀▄░█░█░░█░░█░█░█░█░▀░▀░▀
+░▀░▀░▀░▀░▀░▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀
+
+The Docker image you're using is a modified version
+of shinsenter/php images. Use it at your own risk.
+
+You can find the original Docker images from:
+Docker Hub:      https://hub.docker.com/u/shinsenter
+GitHub Packages: https://github.com/shinsenter?tab=packages
+
+"
+elif has-cmd greeting; then greeting; fi

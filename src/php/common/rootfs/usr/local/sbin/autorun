@@ -9,8 +9,9 @@
 
 for dir; do
     if [ ! -z "$dir" ] && [ -d "$dir" ]; then
-        debug-echo "\nScanning autorun scripts in $dir"
-        find $dir -type f -name '*.sh' | xargs -r chmod +x 2>&1 >/dev/null
+        dir="$(realpath -s $dir)"
+        debug-echo "\nScanning autorun scripts in $dir/"
+        find $dir -type f -name '*.sh' | xargs -r chmod +x &>/dev/null
 
         if ! has-cmd run-parts; then
             for script in $(find $dir -type f -perm -111 | sort -dbfi); do
@@ -20,7 +21,7 @@ for dir; do
                 fi
             done
         else
-            with-env run-parts "$dir"
+            with-env run-parts --new-session "$dir"
         fi
     fi
 done
