@@ -97,8 +97,8 @@ services:
   web:
     image: shinsenter/ubuntu-s6:latest
     environment:
-      - APP_USER=myapp
-      - APP_UID=5000
+      APP_USER: "myapp"
+      APP_UID: "5000"
 ```
 
 ## Autorun Scripts
@@ -142,7 +142,7 @@ services:
   web:
     image: shinsenter/ubuntu-s6:latest
     environment:
-      - DISABLE_AUTORUN_SCRIPTS=1
+      DISABLE_AUTORUN_SCRIPTS: "1"
 ```
 
 ## Using Cron Jobs
@@ -212,7 +212,7 @@ services:
   web:
     image: shinsenter/ubuntu-s6:latest
     environment:
-      - DEBUG=1
+      DEBUG: "1"
 ```
 
 ## Other System Settings

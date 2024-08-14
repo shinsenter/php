@@ -261,8 +261,8 @@ services:
   web:
     image: shinsenter/php:8.3-fpm-nginx
     environment:
-      - APP_USER=myapp
-      - APP_UID=5000
+      APP_USER: "myapp"
+      APP_UID: "5000"
 ```
 
 ## Autorun Scripts
@@ -346,7 +346,7 @@ services:
   web:
     image: shinsenter/ubuntu-s6:latest
     environment:
-      - DISABLE_AUTORUN_SCRIPTS=1
+      DISABLE_AUTORUN_SCRIPTS: "1"
 ```
 
 ## Using Cron Jobs
@@ -416,7 +416,7 @@ services:
   web:
     image: shinsenter/php:8.3-fpm-nginx
     environment:
-      - DEBUG=1
+      DEBUG: "1"
 ```
 
 ## Other System Settings
@@ -429,7 +429,7 @@ These Docker images include additional environment variables for fine-tuning con
 | `DEBUG` or `DEBUG_MODE`            | Not set          | Activates debug mode with more verbose logs when set to `1`.                                                                          | 1 |
 | `TZ`                               | `UTC`            | Sets the default timezone for the container. [Full list](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).               | `Asia/Tokyo` |
 | `ALLOW_RUNTIME_PHP_ENVVARS`        | Not set          | Enables the use of `$PHP_*` environment variables to dynamically change configurations when running PHP commands in the container.    | 1 |
-| `INITIAL_PROJECT`                  | Not set          | Specifies a project for Composer to create in the app directory when it is empty.                                                     | `laravel/laravel` |
+| `INITIAL_PROJECT`                  | Not set          | Specifies a project for Composer to create in the app directory when it is empty.<br>※ If the value is a URL ending in `*.zip` or `*.tar.gz`, the container will download and extract the source code to the app directory. | `laravel/laravel` |
 | `DISABLE_AUTORUN_CREATING_PROJECT` | Not set          | Prevents the creation of a new project when set to `1`. By default, Composer creates a project if `$INITIAL_PROJECT` is set and the app directory is empty. | 0 |
 | `DISABLE_AUTORUN_COMPOSER_INSTALL` | Not set          | Disables `composer install` at startup when set to `1`. By default, `composer install` runs at startup if `composer.json` is present but packages are missing. | 0 |
 | `DISABLE_AUTORUN_GENERATING_INDEX` | Not set          | Prevents the creation of `index.php` when set to `1`. By default, an `index.php` is created in the `$DOCUMENT_ROOT` directory if it doesn't exist. | 0 |

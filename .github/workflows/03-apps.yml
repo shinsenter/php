@@ -43,6 +43,7 @@ jobs:
           - app-cakephp5
           - app-codeigniter4
           - app-drupal
+          - app-espocrm
           - app-flarum
           - app-grav
           - app-hyperf

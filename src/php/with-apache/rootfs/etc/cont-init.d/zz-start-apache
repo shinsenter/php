@@ -19,7 +19,7 @@ Timeout ${PHP_MAX_EXECUTION_TIME}
 <IfModule proxy_module>
     ProxyTimeout ${PHP_MAX_EXECUTION_TIME}
 </IfModule>
-" >/etc/apache2/custom.d/timeout.conf
+" >/etc/apache2/conf-enabled/timeout.conf
 fi
 
 if ! is-true $DISABLE_GREETING && has-cmd apache2; then
