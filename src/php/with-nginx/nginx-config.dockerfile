@@ -17,8 +17,8 @@ ENV PHP_LISTEN='/run/php-fpm.sock'
 RUN <<'EOF'
 echo 'Configure Nginx'
 
-usermod -G $APP_GROUP,nginx nginx     2>&1 >/dev/null
-usermod -G $APP_GROUP,nginx $APP_USER 2>&1 >/dev/null
+usermod -G $APP_GROUP,nginx nginx     >/dev/null 2>&1
+usermod -G $APP_GROUP,nginx $APP_USER >/dev/null 2>&1
 
 env-default '# Disable PHP-FPM logging to stdout'
 env-default PHP_ACCESS_LOG '/var/log/php-fpm.log'
@@ -44,7 +44,7 @@ fi
 
 # fix deprecated listen http2 directive for Nginx 1.25.1
 if nginx-test 'use the "http2" directive'; then
-    sed -i 's/listen \(.\+\?\) http2/listen \1/g' /etc/nginx/sites-enabled/*.conf 2>&1 >/dev/null
+    sed -i 's/listen \(.\+\?\) http2/listen \1/g' /etc/nginx/sites-enabled/*.conf >/dev/null 2>&1
     echo "http2 on;" >/etc/nginx/custom.d/http2.conf
 fi
 

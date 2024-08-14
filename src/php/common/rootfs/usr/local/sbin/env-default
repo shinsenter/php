@@ -43,5 +43,5 @@ fi
 
 name="$1"; shift
 set -- "$(echo "$@" | sed -e 's/\([\\"]\)/\\\1/g')"
-sed -i "/$name=/d" $conf_path 2>&1 >/dev/null
+sed -i "/$name=/d" $conf_path &>/dev/null
 echo "if [ -z \${${name}+x} ]; then export $name=\"$@\"; fi" >>$conf_path

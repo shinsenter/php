@@ -8,7 +8,7 @@
 ################################################################################
 
 debug-echo "Initialize container"
-web-mkdir "$(app-path)"
+mkdir -p "$(app-path)"
 
 # set timezone
 export TZ="${TZ:=UTC}"

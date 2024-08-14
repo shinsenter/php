@@ -290,11 +290,9 @@ RUN chmod +x /startup/00-migration
 > 👉🏻 Info: The startup directory already includes a script called `99-greeting` that prints a welcome message when the container starts.
 
 ```
-      _    _                      _                _       _
- ___ | |_ |_| ___  ___  ___  ___ | |_  ___  ___   / | ___ | |_  ___
-|_ -||   || ||   ||_ -|| -_||   ||  _|| -_||  _| / / | . ||   || . |
-|___||_|_||_||_|_||___||___||_|_||_|  |___||_|  |_/  |  _||_|_||  _|
-                                                     |_|       |_|
+░█▀▀░█░█░▀█▀░█▀█░█▀▀░█▀▀░█▀█░▀█▀░█▀▀░█▀▄░░░█░█▀█░█░█░█▀█
+░▀▀█░█▀█░░█░░█░█░▀▀█░█▀▀░█░█░░█░░█▀▀░█▀▄░▄▀░░█▀▀░█▀█░█▀▀
+░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀▀▀░▀░▀░░▀░░▀▀▀░▀░▀░▀░░░▀░░░▀░▀░▀░░
 
 If you find my Docker images useful, consider donating via PayPal:
  -> https://www.paypal.me/shinsenter
@@ -302,7 +300,7 @@ If you find my Docker images useful, consider donating via PayPal:
 (To edit this welcome message, add your text to /etc/welcome.txt)
 
 ---------------
-Container     : shinsenter/php (built: 2024-08-01T00:00:00+0000)
+Container     : shinsenter/php (built: 2024-08-20T00:00:00+0000)
 Distro        : Debian GNU/Linux 12 (bookworm)
 Timezone      : UTC (GMT+0000)
 UID / GID     : www-data:www-data (33:33)
@@ -322,9 +320,9 @@ To get support, please contact: SHIN Company <shin@shin.company>
 Docker Hub:      https://hub.docker.com/u/shinsenter
 GitHub Packages: https://github.com/shinsenter?tab=packages
 
-PHP 8.3.9 (cli) (built: Jul 23 2024 06:02:10) (NTS)
+PHP 8.3.10 (cli) (built: Aug 13 2024 02:04:08) (NTS)
 Copyright (c) The PHP Group
-Zend Engine v4.3.9, Copyright (c) Zend Technologies
+Zend Engine v4.3.10, Copyright (c) Zend Technologies
     with Zend OPcache v8.3.9, Copyright (c), by Zend Technologies
 Composer version 2.7.7 2024-06-10 22:11:12
 ```
