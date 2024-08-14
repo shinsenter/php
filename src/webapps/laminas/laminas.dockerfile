@@ -31,8 +31,8 @@ ADD --link ./rootfs/ /
 
 # https://docs.laminas.dev/tutorials/getting-started/skeleton-application/
 ENV DOCUMENT_ROOT="/public"
-ENV INITIAL_PROJECT="laminas/laminas-mvc-skeleton"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
+RUN env-default INITIAL_PROJECT "laminas/laminas-mvc-skeleton"
 
 ################################################################################
 

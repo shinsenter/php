@@ -31,8 +31,8 @@ ADD --link ./rootfs/ /
 
 # https://phpixie.com/quickstart.html
 ENV DOCUMENT_ROOT="/web"
-ENV INITIAL_PROJECT="phpixie/project"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
+RUN env-default INITIAL_PROJECT "phpixie/project"
 
 ################################################################################
 

@@ -31,9 +31,9 @@ ADD --link ./rootfs/ /
 
 # https://learn.getgrav.org/17/basics/installation
 ENV DOCUMENT_ROOT=""
-ENV INITIAL_PROJECT="getgrav/grav"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 ENV COMPOSER_REQUIRES_GIT=1
+RUN env-default INITIAL_PROJECT "getgrav/grav"
 
 ################################################################################
 
