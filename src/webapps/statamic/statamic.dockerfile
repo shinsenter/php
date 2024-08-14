@@ -31,8 +31,8 @@ ADD --link ./rootfs/ /
 
 # https://statamic.dev/installing
 ENV DOCUMENT_ROOT="/public"
-ENV INITIAL_PROJECT="statamic/statamic"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
+RUN env-default INITIAL_PROJECT "statamic/statamic"
 
 ################################################################################
 
