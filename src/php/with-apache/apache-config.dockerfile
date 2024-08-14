@@ -44,7 +44,7 @@ if [ -e $CONF_FILE ]; then
             module="${module_path##*mod_}"
             module="${module/.so/_module}"
             echo "Found ${module} at ${module_path}"
-            sed -i "s|^# End Modules|#LoadModule ${module} ${module_path}\n# End Modules|" $MODS_FILE 2>&1 >/dev/null
+            sed -i "s|^# End Modules|#LoadModule ${module} ${module_path}\n# End Modules|" $MODS_FILE >/dev/null 2>&1
         done
     fi
 

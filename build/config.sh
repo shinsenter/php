@@ -69,6 +69,7 @@ BUILD_PLATFORM="linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8,linux/ppc64le,
 # BUILD_PLATFORM="linux/amd64,linux/arm/v7,linux/arm64/v8"
 SKIP_BUILD=${SKIP_BUILD:-}
 SKIP_SQUASH=${SKIP_SQUASH:-}
+USE_BUILD_CACHE=${USE_BUILD_CACHE:-1}
 
 PREFIX="${APP//app-/}"
 SUFFIX=
@@ -167,6 +168,9 @@ app-*)
     BUILD_NAME="$DEFAULT_REPO/$APP_NAME"
     BUILD_DOCKERFILE=$BASE_DIR/src/webapps/$APP_NAME/$APP_NAME.dockerfile
     PHP_VARIANT="$SUFFIX"
+
+    # disable cache because there are too many useless cache keys
+    USE_BUILD_CACHE=0
 
     case $APP_NAME in
     cakephp4)
@@ -617,6 +621,7 @@ fi
 # Export Git action environment variables
 ################################################################################
 
+github_env USE_BUILD_CACHE $USE_BUILD_CACHE
 github_env BUILD_CACHE_KEY $BUILD_CACHE_KEY
 github_env BUILD_CACHE_PATH $BUILD_CACHE_PATH
 github_env BUILD_CONTEXT $BUILD_CONTEXT

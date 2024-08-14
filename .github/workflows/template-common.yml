@@ -66,7 +66,6 @@ jobs:
       DOCKER_BUILD_SUMMARY: false
       DOCKER_BUILDKIT: "1"
       PUBLISH_TO_GHCR: "1"
-      USE_BUILD_CACHE: "0"
     steps:
       -
         if: ${{ !env.SKIP_BUILD }}
@@ -84,7 +83,7 @@ jobs:
 
       -
         id: cache
-        if: ${{ !env.SKIP_BUILD }}
+        if: ${{ !env.SKIP_BUILD && env.USE_BUILD_CACHE == '1' }}
         uses: actions/cache@v4
         with:
           path: ${{ env.BUILD_CACHE_PATH }}
@@ -92,7 +91,7 @@ jobs:
           # restore-keys: ${{ runner.os }}-
 
       -
-        if: ${{ !env.SKIP_BUILD && env.USE_BUILD_CACHE != '1' && steps.cache.outputs.cache-hit == 'true' }}
+        if: ${{ !env.SKIP_BUILD && env.USE_BUILD_CACHE == '1' && steps.cache.outputs.cache-hit == 'true' }}
         name: Skip building ${{ env.BUILD_TAG }}
         run: echo "SKIP_BUILD=1" >> $GITHUB_ENV
 
