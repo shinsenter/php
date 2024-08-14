@@ -31,8 +31,8 @@ ADD --link ./rootfs/ /
 
 # https://fuelphp.com/docs/installation/instructions.html
 ENV DOCUMENT_ROOT="/public"
-ENV INITIAL_PROJECT="fuel/fuel"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
+RUN env-default INITIAL_PROJECT "fuel/fuel"
 
 ################################################################################
 
