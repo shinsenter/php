@@ -12,7 +12,7 @@ Our Docker images cover PHP versions from 5.6 to 8.4, available in CLI, ZTS, FPM
 
 ## Introduction
 
-[![shinsenter/php](https://repository-images.githubusercontent.com/458053748/24e848e1-c0fc-4893-b2b9-f7dbfad263f3)](https://docker.shin.company/php)
+[![shinsenter/php](https://repository-images.githubusercontent.com/458053748/17acf331-c504-4105-b692-1c0c02337085)](https://docker.shin.company/php)
 
 Our PHP Docker images are based on the [official PHP Docker images](https://hub.docker.com/_/php).
 These images facilitate the easy adjustment of PHP and PHP-FPM settings using environment variables,
@@ -61,26 +61,26 @@ You can easily run a container by copying and pasting one of these `docker run` 
 
 ```shell
 # non-interactive
-docker run --rm shinsenter/php:8.3-cli php -m
+docker run --rm shinsenter/php:8.4-cli php -m
 
 # interactive
-docker run -it -v ./myproject:/var/www/html shinsenter/php:8.3-cli
+docker run -it -v ./myproject:/var/www/html shinsenter/php:8.4-cli
 ```
 
 #### PHP-FPM
 
 ```shell
-docker run -v ./myproject:/var/www/html -p 9000:9000 shinsenter/php:8.3-fpm
+docker run -v ./myproject:/var/www/html -p 9000:9000 shinsenter/php:8.4-fpm
 ```
 
 #### PHP-FPM + Nginx (or Apache, RoadRunner, FrankenPHP, Nginx Unit)
 
 ```shell
 # with Nginx
-docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.3-fpm-nginx
+docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.4-fpm-nginx
 
 # with Apache
-docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.3-fpm-apache
+docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.4-fpm-apache
 
 # with RoadRunner
 docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.3-roadrunner
@@ -123,15 +123,15 @@ docker run \
     -e PHP_POST_MAX_SIZE='100M' \
     -e PHP_UPLOAD_MAX_FILESIZE='100M' \
     -e PHP_SESSION_COOKIE_HTTPONLY='1' \
-    shinsenter/php:8.3 php -i
+    shinsenter/php:8.4 php -i
 ```
 
-#### docker-compose.yml
+#### With docker-compose.yml
 
 ```yaml
 services:
   web:
-    image: shinsenter/php:8.3-fpm-nginx
+    image: shinsenter/php:8.4-fpm-nginx
     environment:
       PHP_DISPLAY_ERRORS: "1"
       PHP_POST_MAX_SIZE: "100M"
@@ -177,8 +177,8 @@ zip
 
 > 👉🏻 Info: The pre-installed PHP extensions from the official Docker images are excluded from this list.
 
-> 💡 Hint: Run `docker run --rm shinsenter/php:8.3-cli php -m` in the container
-to get a list of extensions (you can replace `8.3` with a specific PHP version).
+> 💡 Hint: Run `docker run --rm shinsenter/php:8.4-cli php -m` in the container
+to get a list of extensions (you can replace `8.4` with a specific PHP version).
 
 ## Adding PHP Extensions
 
@@ -190,7 +190,7 @@ or manually edit the `php.ini` file; `phpaddmod` handles the installation and co
 For example, in your `Dockerfile`:
 
 ```Dockerfile
-FROM shinsenter/php:8.3-fpm-nginx
+FROM shinsenter/php:8.4-fpm-nginx
 
 # Install imagick, swoole and xdebug
 RUN phpaddmod imagick swoole xdebug
@@ -214,7 +214,7 @@ The default application directory is `/var/www/html` and can be customized via t
 docker run -p 80:80 -p 443:443 -p 443:443/udp \
     -v "$PWD":/app \
     -e APP_PATH=/app \
-    shinsenter/php:8.3-fpm-nginx
+    shinsenter/php:8.4-fpm-nginx
 ```
 
 This changes the web application directory to `/app`.
@@ -228,7 +228,7 @@ docker run -p 80:80 -p 443:443 -p 443:443/udp \
     -v "$PWD":/app \
     -e APP_PATH=/app \
     -e DOCUMENT_ROOT=/public \
-    shinsenter/php:8.3-fpm-nginx
+    shinsenter/php:8.4-fpm-nginx
 ```
 
 This would change the document root path to `/app/public`.
@@ -252,14 +252,14 @@ For example, to run a container as user `myapp` with UID `5000`:
 docker run -p 80:80 -p 443:443 -p 443:443/udp \
     -e APP_USER=myapp \
     -e APP_UID=5000 \
-    shinsenter/php:8.3-fpm-nginx
+    shinsenter/php:8.4-fpm-nginx
 ```
 
 Or in a `docker-compose.yml`:
 ```yaml
 services:
   web:
-    image: shinsenter/php:8.3-fpm-nginx
+    image: shinsenter/php:8.4-fpm-nginx
     environment:
       APP_USER: "myapp"
       APP_UID: "5000"
@@ -277,7 +277,7 @@ Copy a script called `00-migration` into `/startup/` via a Dockerfile:
 > Note: Ensure the script has executable permissions.
 
 ```Dockerfile
-FROM shinsenter/php:8.3-cli
+FROM shinsenter/php:8.4-cli
 
 ADD ./autorun/00-migration /startup/00-migration
 RUN chmod +x /startup/00-migration
@@ -320,10 +320,10 @@ To get support, please contact: SHIN Company <shin@shin.company>
 Docker Hub:      https://hub.docker.com/u/shinsenter
 GitHub Packages: https://github.com/shinsenter?tab=packages
 
-PHP 8.3.10 (cli) (built: Aug 13 2024 02:04:08) (NTS)
+PHP 8.4.0alpha4 (cli) (built: Aug 13 2024 01:32:10) (NTS)
 Copyright (c) The PHP Group
-Zend Engine v4.3.10, Copyright (c) Zend Technologies
-    with Zend OPcache v8.3.9, Copyright (c), by Zend Technologies
+Zend Engine v4.4.0-dev, Copyright (c) Zend Technologies
+    with Zend OPcache v8.4.0alpha4, Copyright (c), by Zend Technologies
 Composer version 2.7.7 2024-06-10 22:11:12
 ```
 
@@ -388,13 +388,37 @@ When the container starts, these settings are loaded into crontab, giving you mo
 ```yml
 services:
   web:
-    image: shinsenter/php:8.3-fpm-nginx
+    image: shinsenter/php:8.4-fpm-nginx
     environment:
       ENABLE_CRONTAB: "1"
       CRONTAB_SETTINGS: "* * * * * echo 'This line will run every minute!' | tee /tmp/cron-every-minute.txt"
 ```
 
 For more information on environment variables for cron jobs, refer to the [Other System Settings](#other-system-settings) section below.
+
+## Customize Supervisor command
+
+We can set a `$SUPERVISOR_PHP_COMMAND` environment variable to the service definition in your application's `docker-compose.yml` file.
+This environment variable will contain the command that the container will use to serve your application using another process instead of the default process.
+
+
+#### Command Line
+
+```shell
+docker run \
+    -e SUPERVISOR_PHP_COMMAND='php -S localhost:80 index.php' \
+    shinsenter/php:8.3
+```
+
+#### With docker-compose.yml
+
+```yml
+services:
+  web:
+    image: shinsenter/php:8.3
+    environment:
+      SUPERVISOR_PHP_COMMAND: "php -S localhost:80 index.php"
+```
 
 ## Debug Mode
 
@@ -404,15 +428,15 @@ This can be used both with `docker run` and in `docker-compose.yml`.
 #### Command Line
 
 ```shell
-docker run -e DEBUG=1 shinsenter/php:8.3-fpm-nginx
+docker run -e DEBUG=1 shinsenter/php:8.4-fpm-nginx
 ```
 
-#### docker-compose.yml
+#### With docker-compose.yml
 
 ```yml
 services:
   web:
-    image: shinsenter/php:8.3-fpm-nginx
+    image: shinsenter/php:8.4-fpm-nginx
     environment:
       DEBUG: "1"
 ```
@@ -442,6 +466,7 @@ These Docker images include additional environment variables for fine-tuning con
 | `CRONTAB_TZ`                       | `$TZ`            | Sets the default timezone for cron jobs. [Full list](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).                   | `Asia/Tokyo` |
 | `ENABLE_TUNING_FPM`                | Not enabled      | Enables auto-tuning of PM control settings when set to `1`.                                                                           | 0 |
 | `ENABLE_TUNING_MPM`                | Not enabled      | Enables auto-tuning of Apache MPM settings when set to `1`.                                                                           | 0 |
+| `SUPERVISOR_PHP_COMMAND`           | Not set          | Contains the command that the container will use to serve your application instead of the default entrypoint command. | `php -S localhost:80 index.php` |
 | `FIX_APP_PATH_PERMISSION`          | Not set          | Corrects ownership of the app directory when set to `1`.                                                                              | 1 |
 | `DISABLE_GREETING`                 | Not set          | Disables the welcome message at container startup when set to `1`.                                                                    | 0 |
 
