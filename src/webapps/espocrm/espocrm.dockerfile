@@ -52,7 +52,7 @@ RUN <<'EOF'
 phpaddmod zmq
 
 # automatically detect the latest version of EspoCRM
-env-default INITIAL_PROJECT '$(curl --retry 3 --retry-delay 5 -ksL https://api.github.com/repos/espocrm/espocrm/releases/latest | grep "browser_download_url.*EspoCRM.*zip" | cut -d " -f 4)'
+env-default INITIAL_PROJECT "$(curl --retry 3 --retry-delay 5 -ksL https://api.github.com/repos/espocrm/espocrm/releases/latest | grep "browser_download_url.*EspoCRM.*zip" | cut -d \" -f 4)"
 
 # enable preload
 # see: https://docs.espocrm.com/administration/performance-tweaking/#preloading
