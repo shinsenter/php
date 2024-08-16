@@ -36,7 +36,8 @@ ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 # https://docs.espocrm.com/administration/server-configuration/#setting-up-crontab
 ENV ENABLE_CRONTAB=1
 ENV CRONTAB_SETTINGS='* * * * * php -f $(app-path)/cron.php >/dev/null 2>&1'
-ENV ENABLE_ESPOCRM_WEBSOCKET=0
+ENV ESPOCRM_CONFIG_USE_WEB_SOCKET=0
+RUN env-default INITIAL_PROJECT "$(curl --retry 3 --retry-delay 5 -ksL https://api.github.com/repos/espocrm/espocrm/releases/latest | grep "browser_download_url.*EspoCRM.*zip" | cut -d \" -f 4)"
 
 # https://docs.espocrm.com/administration/server-configuration/#php-requirements
 ENV PHP_MAX_EXECUTION_TIME="180"
@@ -48,11 +49,11 @@ ENV PHP_UPLOAD_MAX_FILESIZE="50M"
 ################################################################################
 
 RUN <<'EOF'
+echo 'Configure EspoCRM'
+set -e
+
 # install zmq php extension
 phpaddmod zmq
-
-# automatically detect the latest version of EspoCRM
-env-default INITIAL_PROJECT "$(curl --retry 3 --retry-delay 5 -ksL https://api.github.com/repos/espocrm/espocrm/releases/latest | grep "browser_download_url.*EspoCRM.*zip" | cut -d \" -f 4)"
 
 # enable preload
 # see: https://docs.espocrm.com/administration/performance-tweaking/#preloading
@@ -67,9 +68,15 @@ fi
 # create WebSocket services
 if has-cmd s6-service; then
     s6-service espocrm-websocket longrun '#!/usr/bin/env sh
-if is-true $ENABLE_ESPOCRM_WEBSOCKET; then
+if is-true $ESPOCRM_CONFIG_USE_WEB_SOCKET; then
     export APP_PATH="$(app-path)"
     export APP_ROOT="$(app-root)"
+    export ESPOCRM_CONFIG_USE_WEB_SOCKET="true"
+    export ESPOCRM_CONFIG_WEB_SOCKET_DEBUG_MODE="$(is-debug && echo 1 || echo 0)"
+    export ESPOCRM_CONFIG_WEB_SOCKET_SSL_ALLOW_SELF_SIGNED="true"
+    export ESPOCRM_CONFIG_WEB_SOCKET_URL="ws://localhost:8080"
+    export ESPOCRM_CONFIG_WEB_SOCKET_ZERO_M_Q_SUBMISSION_DSN="tcp://espocrm-websocket:5555"
+    export ESPOCRM_CONFIG_WEB_SOCKET_ZERO_M_Q_SUBSCRIBER_DSN="tcp://*:5555"
     cd $APP_PATH && exec php $APP_PATH/websocket.php
 else
     exec s6-svc -Od .
