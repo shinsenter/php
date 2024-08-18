@@ -45,13 +45,13 @@ fi
 # fix deprecated listen http2 directive for Nginx 1.25.1
 if nginx-test 'use the "http2" directive'; then
     sed -i 's/listen \(.\+\?\) http2/listen \1/g' /etc/nginx/sites-enabled/*.conf >/dev/null 2>&1
-    echo "http2 on;" >/etc/nginx/custom.d/http2.conf
+    echo "http2 on;" >/etc/nginx/custom.d/00-ext-http2.conf
 fi
 
 # customize extensions
-if nginx-test 'brotli'; then rm -f /etc/nginx/custom.d/brotli.conf; fi
-if nginx-test 'gzip';   then rm -f /etc/nginx/custom.d/gzip.conf;   fi
-if nginx-test 'http3';  then rm -f /etc/nginx/custom.d/http3.conf;  fi
+if nginx-test 'brotli'; then rm -f /etc/nginx/custom.d/*brotli.conf; fi
+if nginx-test 'gzip';   then rm -f /etc/nginx/custom.d/*gzip.conf;   fi
+if nginx-test 'http3';  then rm -f /etc/nginx/custom.d/*http3.conf;  fi
 
 # create s6 services
 if has-cmd s6-service; then
