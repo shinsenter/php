@@ -183,7 +183,6 @@ phpaddmod @fix_letsencrypt \
         # zmq \
         # zookeeper \
         # zstd \
-    || true
+    && php -m
 
-php -m
 EOF
