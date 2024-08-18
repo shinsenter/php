@@ -48,6 +48,8 @@ cd "$APP_PATH"
 if [ -z "$(ls -A "$APP_PATH")" ]; then
     # pull project from source
     if ! is-true $DISABLE_AUTORUN_CREATING_PROJECT && [ ! -z "$INITIAL_PROJECT" ] && has-cmd composer; then
+        hook pre-create-project
+
         case "$INITIAL_PROJECT" in
         http*.tar.gz)
             curl --retry 3 --retry-delay 5 -kL "$INITIAL_PROJECT" | tar -xzv --strip-components=1 -C "$APP_PATH"
@@ -97,6 +99,7 @@ if [ -z "$(ls -A "$APP_PATH")" ]; then
             composer run post-create-project-cmd
         fi
 
+        hook post-create-project
         composer config -n --unset "allow-plugins.*/*"
         web-chown "Required packages in $APP_PATH were updated."
     else

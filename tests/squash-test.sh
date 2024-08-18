@@ -44,6 +44,7 @@ for version; do
         --build-arg S6_VERSION=$s6_version \
         --build-arg PHP_VERSION=$version \
         --build-arg PHP_VARIANT=$variant \
+        --build-arg BUILD_TAG_PREFIX=$BUILD_TAG_PREFIX \
         2>&1 | tee "$BASE_DIR/tests/logs/squash-$version-${DOCKERTAG:-$variant}.txt" &
 done
 
