@@ -28,7 +28,7 @@ ARG  PHP_VARIANT=${PHP_VARIANT:-cli-alpine}
 
 FROM ${BUILD_FROM_IMAGE}:${BUILD_TAG_PREFIX}${PHP_VERSION}-${PHP_VARIANT}
 ARG  BUILDKIT_SBOM_SCAN_STAGE=true
-ONBUILD RUN if has-cmd autorun; then autorun /etc/onbuild.d/; fi
+ONBUILD RUN if has-cmd hook; then hook onbuild; fi
 
 ################################################################################
 

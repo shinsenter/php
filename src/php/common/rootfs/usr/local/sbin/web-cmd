@@ -28,6 +28,7 @@ if [ "$allow_root" = "1" ]; then
 if [ -d \$(app-path) ]; then cd \$(app-path); fi
 exec with-env $@ \"\$@\"
 " >$command
+    chmod 4755 $command
 else
     command="/usr/local/sbin/$command"
     mkdir -p "$(dirname $command)"

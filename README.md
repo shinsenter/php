@@ -163,6 +163,7 @@ gd
 gettext
 igbinary
 intl
+mcrypt
 msgpack
 mysqli
 opcache
@@ -170,6 +171,7 @@ pcntl
 pdo_mysql
 pdo_pgsql
 redis
+sodium
 uuid
 yaml
 zip
@@ -320,10 +322,10 @@ To get support, please contact: SHIN Company <shin@shin.company>
 Docker Hub:      https://hub.docker.com/u/shinsenter
 GitHub Packages: https://github.com/shinsenter?tab=packages
 
-PHP 8.4.0alpha4 (cli) (built: Aug 13 2024 01:32:10) (NTS)
+PHP 8.4.0beta3 (cli) (built: Aug 16 2024 21:48:04) (NTS)
 Copyright (c) The PHP Group
 Zend Engine v4.4.0-dev, Copyright (c) Zend Technologies
-    with Zend OPcache v8.4.0alpha4, Copyright (c), by Zend Technologies
+    with Zend OPcache v8.4.0beta3, Copyright (c), by Zend Technologies
 Composer version 2.7.7 2024-06-10 22:11:12
 ```
 
