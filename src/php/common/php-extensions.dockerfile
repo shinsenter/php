@@ -89,7 +89,7 @@ phpaddmod @fix_letsencrypt \
         # lzf \
         # mailparse \
         # maxminddb \
-        # mcrypt \
+        mcrypt \
         # memcache \
         # memcached \
         # memprof \
@@ -143,7 +143,7 @@ phpaddmod @fix_letsencrypt \
         # snuffleupagus \
         # soap \
         # sockets \
-        # sodium \
+        sodium \
         # solr \
         # sourceguardian \
         # spx \

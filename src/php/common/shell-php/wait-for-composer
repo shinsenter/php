@@ -1,5 +1,0 @@
-#!/usr/bin/env sh
-cd "$(app-path)"
-vendor_dir=$(composer config vendor-dir)
-if [ -z "$vendor_dir" ]; then vendor_dir=vendor; fi
-while [ ! -f "$vendor_dir/composer/ClassLoader.php" ]; do sleep 0.5; done

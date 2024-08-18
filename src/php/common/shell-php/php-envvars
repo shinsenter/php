@@ -6,10 +6,8 @@
 # Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
-if [ -d "$PHP_INI_DIR" ]; then
-    find "$PHP_INI_DIR"* -type f -name *generated-settings* -delete
-fi
+if ! has-cmd php; then exit 0; fi
+if [ -d "$PHP_INI_DIR" ]; then find "$PHP_INI_DIR"* -type f -name *generated-settings* -delete; fi
 
 with-env php -d variables_order=EGPCS -- "$@" <<'DockerPHP'
 <?php

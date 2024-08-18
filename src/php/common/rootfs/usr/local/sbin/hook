@@ -6,18 +6,4 @@
 # Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-if ! has-cmd php; then exit 0; fi
-
-if has-cmd php-envvars; then
-    debug-echo "Generate PHP config"
-    if is-true $ALLOW_RUNTIME_PHP_ENVVARS; then
-        php-envvars write_dynamic_config 2>&1
-    else
-        php-envvars write_static_config 2>&1
-    fi
-fi
-
-if is-true $ENABLE_TUNING_FPM && has-cmd fpm-pm; then
-    debug-echo -w "Tune PHP-FPM performance"
-    fpm-pm
-fi
+for hook; do autorun "/etc/hooks/$hook" 2>&1; done

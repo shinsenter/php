@@ -37,14 +37,14 @@ if is-true $ALLOW_RUNTIME_PHP_ENVVARS && has-cmd php-envvars; then php-envvars e
 if [ -d "$APP_PATH" ]; then cd "$APP_PATH"; fi
 
 if [ ! -z "$SUPERVISOR_PHP_COMMAND" ]; then
-    # run scripts in the /etc/cont-init.d directory
-    if [ -d /etc/cont-init.d ]; then autorun /etc/cont-init.d/ 2>&1; fi
+    # run onboot hook to initialize the container
+    hook onboot
 
     # run custom command defined in $SUPERVISOR_PHP_COMMAND
     exec with-env $SUPERVISOR_PHP_COMMAND "$@"
 else
-    # run scripts in the /etc/cont-init.d directory
-    if ! has-s6 && [ -d /etc/cont-init.d ]; then autorun /etc/cont-init.d/ 2>&1; fi
+    # run onboot hook to initialize the container
+    if ! has-s6; then hook onboot; fi
 
     # fallback for docker-php-entrypoint
     if [ -x "/init" ]; then set -- /init "$@"; fi

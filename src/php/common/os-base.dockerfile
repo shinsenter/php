@@ -29,7 +29,7 @@ ENV PRESQUASH_SCRIPTS="cleanup"
 ################################################################################
 
 ADD --link ./common/rootfs/ /
-ONBUILD RUN if has-cmd autorun; then autorun /etc/onbuild.d/; fi
+ONBUILD RUN if has-cmd hook; then hook onbuild; fi
 
 ################################################################################
 
@@ -48,7 +48,7 @@ echo 'Configure OS middlewares'
 set -e
 
 # setuid bit
-chmod 4755 /usr/local/bin/web-*
+chmod 4755 $(which autorun) /usr/local/sbin/web-*
 
 # install common packages
 APK_PACKAGES='run-parts shadow su-exec tar unzip xz' \
@@ -141,5 +141,4 @@ EOF
 ################################################################################
 
 # add new entrypoint
-COPY --link ./common/docker-php-entrypoint $DOCKER_ENTRYPOINT
-RUN chmod 4755 $DOCKER_ENTRYPOINT
+COPY --chmod=4755 --link ./common/docker-php-entrypoint $DOCKER_ENTRYPOINT
