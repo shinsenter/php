@@ -50,6 +50,7 @@ jobs:
           - app-kirby
           - app-laminas
           - app-laravel
+          - app-magento
           - app-mautic
           - app-phpmyadmin
           - app-slim

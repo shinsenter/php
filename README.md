@@ -163,7 +163,6 @@ gd
 gettext
 igbinary
 intl
-mcrypt
 msgpack
 mysqli
 opcache
