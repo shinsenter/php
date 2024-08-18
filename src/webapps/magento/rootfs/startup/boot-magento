@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+APP_PATH="$(app-path)"
+APP_ROOT="$(app-root)"
+
+debug-echo "Your web application must be in {$APP_PATH}."

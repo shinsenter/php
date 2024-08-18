@@ -224,6 +224,11 @@ app-*)
         # https://laravel.com/docs/master/installation
         BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         ;;
+    magento)
+        # https://experienceleague.adobe.com/en/docs/commerce-operations/installation-guide/system-requirements
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
+        verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
+        ;;
     mautic)
         # https://docs.mautic.org/en/5.x/getting_started/how_to_install_mautic.html#installing-with-composer
         verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
