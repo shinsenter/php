@@ -89,7 +89,7 @@ phpaddmod @fix_letsencrypt \
         # lzf \
         # mailparse \
         # maxminddb \
-        mcrypt \
+        # mcrypt \
         # memcache \
         # memcached \
         # memprof \
