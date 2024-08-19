@@ -24,6 +24,7 @@ rand_id() { echo "$((RANDOM % 500 + 499))"; }
 
 ################################################################################
 
+# create user and group
 debug-echo "Verify group $APP_GROUP"
 if [ "$APP_GROUP" != "$DEFAULT_GROUP" ]; then
     APP_GID="${APP_GID:=$(rand_id)}"
@@ -51,6 +52,16 @@ else
     fi
 fi
 
+################################################################################
+
+# create application directories
 debug-echo "Create $APP_PATH if not exists"
 web-mkdir  "$APP_PATH" "$LOG_PATH" &>/dev/null
 chmod 4755 "$APP_PATH"
+
+################################################################################
+
+# call the onboot hook
+# all the scripts in this hook will be executed
+# even when the autorun feature is disabled
+hook onboot
