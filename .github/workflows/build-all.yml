@@ -47,7 +47,7 @@ jobs:
     needs: [prepare]
     with:
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
-      build_all: ${{ needs.prepare.outputs.build_all }}
+      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
 
   php:
     uses: ./.github/workflows/01-php.yml
@@ -55,7 +55,7 @@ jobs:
     needs: [prepare]
     with:
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
-      build_all: ${{ needs.prepare.outputs.build_all }}
+      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
 
   php-servers:
     uses: ./.github/workflows/02-servers.yml
@@ -63,7 +63,7 @@ jobs:
     needs: [prepare, php]
     with:
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
-      build_all: ${{ needs.prepare.outputs.build_all }}
+      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
 
   php-apps:
     uses: ./.github/workflows/03-apps.yml
@@ -71,7 +71,7 @@ jobs:
     needs: [prepare, php-servers]
     with:
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
-      build_all: ${{ needs.prepare.outputs.build_all }}
+      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
 
 ################################################################################
 ################################################################################
