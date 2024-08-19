@@ -18,6 +18,10 @@ on:
         required: false
         type: string
         default: ""
+      build_all:
+        required: false
+        type: boolean
+        default: false
   workflow_dispatch:
 
 ################################################################################
@@ -26,6 +30,7 @@ on:
 jobs:
 
   s6-overlay:
+    if: ${{ inputs.build_all }}
     uses: ./.github/workflows/template-common.yml
     secrets: inherit
     with:
