@@ -31,12 +31,15 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       tag_prefix: ${{ (github.ref_type != 'tag' && github.ref != 'refs/heads/main') && 'dev-' || '' }}
+      build_all: ${{ github.event_name != 'schedule' }}
     steps:
       - run: |
+          # For debugging purposes
           echo "github.event_name = ${{ github.event_name }}"
-          echo "github.ref_type = ${{ github.ref_type }}"
-          echo "github.ref = ${{ github.ref }}"
-          echo "tag_prefix = ${{ (github.ref_type != 'tag' && github.ref != 'refs/heads/main') && 'dev-' || '' }}"
+          echo "github.ref_type   = ${{ github.ref_type }}"
+          echo "github.ref        = ${{ github.ref }}"
+          echo "tag_prefix        = ${{ (github.ref_type != 'tag' && github.ref != 'refs/heads/main') && 'dev-' || '' }}"
+          echo "build_all         = ${{ github.event_name != 'schedule' && 'yes, includes outdated versions' || 'no, only maintained versions' }}"
 
   s6:
     uses: ./.github/workflows/00-s6-overlay.yml
@@ -44,6 +47,7 @@ jobs:
     needs: [prepare]
     with:
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
+      build_all: ${{ needs.prepare.outputs.build_all }}
 
   php:
     uses: ./.github/workflows/01-php.yml
@@ -51,6 +55,7 @@ jobs:
     needs: [prepare]
     with:
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
+      build_all: ${{ needs.prepare.outputs.build_all }}
 
   php-servers:
     uses: ./.github/workflows/02-servers.yml
@@ -58,6 +63,7 @@ jobs:
     needs: [prepare, php]
     with:
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
+      build_all: ${{ needs.prepare.outputs.build_all }}
 
   php-apps:
     uses: ./.github/workflows/03-apps.yml
@@ -65,6 +71,7 @@ jobs:
     needs: [prepare, php-servers]
     with:
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
+      build_all: ${{ needs.prepare.outputs.build_all }}
 
 ################################################################################
 ################################################################################

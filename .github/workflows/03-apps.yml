@@ -18,6 +18,10 @@ on:
         required: false
         type: string
         default: ""
+      build_all:
+        required: false
+        type: boolean
+        default: false
   workflow_dispatch:
   workflow_run:
     workflows: [Publish PHP Servers]
@@ -67,6 +71,7 @@ jobs:
       app_name: ${{ matrix.app }}
       server: ${{ matrix.server }}
       tag_prefix: ${{ inputs.tag_prefix }}
+      build_all: ${{ inputs.build_all }}
 
 ################################################################################
 ################################################################################

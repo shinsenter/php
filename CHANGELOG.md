@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [5.3.0] - 2024-08-20
 
+- Only updating Docker images for maintained PHP versions to save resources on scheduled builds.
 - Allow downloading the source code if the value of `$INITIAL_PROJECT` is a URL to a `*.zip` or `*.tar.gz` file.
 - Added Docker images for [EspoCRM](http://hub.docker.com/r/shinsenter/espocrm), [Magento Open Source](http://hub.docker.com/r/shinsenter/magento).
 - Added the `$SUPERVISOR_PHP_COMMAND` variable to allow a custom command that the container will use to serve your application.
