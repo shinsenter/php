@@ -17,18 +17,21 @@ web-mkdir "$APP_PATH" "$WP_CLI_DIR" "$WP_CLI_CACHE_DIR" "$WP_CLI_PACKAGES_DIR"
 if ! is-true $DISABLE_AUTORUN_CREATING_PROJECT; then
     if [ -z "$(ls -A "$APP_PATH")" ]; then
         debug-echo -w "Install Wordpress to $APP_PATH"
+        hook pre-create-project
+
         cd "$APP_PATH"
         wp core download \
             --locale="${WORDPRESS_LOCALE:-en_US}" \
             --force
 
+        if [ ! -f "$APP_PATH/wp-config.php" ]; then
+            php -r "copy('$WPCONFIG_URL', '$APP_PATH/wp-config.php');"
+            web-chown fix "$APP_PATH/wp-config.php" &>/dev/null
+        fi
+
+        hook post-create-project
         web-chown "Wordpress core downloaded to $APP_PATH."
     else
         debug-echo "Skip creating project because $APP_PATH is not empty."
     fi
-fi
-
-if [ ! -f "$APP_PATH/wp-config.php" ]; then
-    php -r "copy('$WPCONFIG_URL', '$APP_PATH/wp-config.php');"
-    web-chown fix "$APP_PATH/wp-config.php" &>/dev/null
 fi

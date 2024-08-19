@@ -15,6 +15,15 @@ APP_ROOT="$(app-root)"
 # cache environment variables for other processes
 mkdir -p /etc/default && with-env >/etc/default/locale
 
+# log the timestamp of the first run, then call the hook
+# this is convenient for running migration scripts etc.
+if [ ! -e /etc/.first-run ]; then
+    echo "$(date)" >/etc/.first-run
+    hook onfirstrun
+fi
+
+################################################################################
+
 # fix .htaccess to allow uri path after index.php
 if [ -f "$APP_ROOT/.htaccess" ]; then
     debug-echo "Fix .htaccess to allow uri path after index.php"

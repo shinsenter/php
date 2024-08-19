@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - Allow downloading the source code if the value of `$INITIAL_PROJECT` is a URL to a `*.zip` or `*.tar.gz` file.
 - Added Docker images for [EspoCRM](http://hub.docker.com/r/shinsenter/espocrm), [Magento Open Source](http://hub.docker.com/r/shinsenter/magento).
 - Added the `$SUPERVISOR_PHP_COMMAND` variable to allow a custom command that the container will use to serve your application.
+- Added a mechanism called "hooks", to trigger shell scripts during specific events. It will be useful, allowing users to add custom scripts such as migration scripts when the container starts, or after a project is newly created by Composer. I will document it in a later release.
 - Various minor improvements.
 
 ## [5.2.0] - 2024-08-10
