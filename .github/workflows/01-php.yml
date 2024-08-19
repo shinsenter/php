@@ -18,6 +18,10 @@ on:
         required: false
         type: string
         default: ""
+      build_all:
+        required: false
+        type: boolean
+        default: false
   workflow_dispatch:
 
 ################################################################################
@@ -40,6 +44,7 @@ jobs:
     with:
       app_name: ${{ matrix.app }}
       tag_prefix: ${{ inputs.tag_prefix }}
+      build_all: ${{ inputs.build_all }}
 
 ################################################################################
 ################################################################################
