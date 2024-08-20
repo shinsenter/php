@@ -51,7 +51,7 @@ set -e
 chmod 4755 $(which autorun) /usr/local/sbin/web-*
 
 # install common packages
-APK_PACKAGES='run-parts shadow su-exec tar unzip xz' \
+APK_PACKAGES='run-parts shadow su-exec tar tzdata unzip xz' \
 APT_PACKAGES='procps xz-utils' \
 pkg-add bash ca-certificates coreutils curl htop less openssl
 pkg-add upgrade
