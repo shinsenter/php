@@ -32,7 +32,7 @@ ARG  BUILD_SOURCE_IMAGE=${BUILD_SOURCE_IMAGE:-dunglas/frankenphp:1-php${PHP_VERS
 FROM ${BUILD_SOURCE_IMAGE} AS frankenphp
 FROM ${BUILD_FROM_IMAGE}:${BUILD_TAG_PREFIX}${PHP_VERSION}-${PHP_VARIANT}
 ARG  BUILDKIT_SBOM_SCAN_STAGE=true
-ONBUILD RUN if has-cmd hook; then hook onbuild; fi
+ONBUILD RUN hook onbuild
 
 ################################################################################
 

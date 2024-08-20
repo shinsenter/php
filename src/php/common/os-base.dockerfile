@@ -29,7 +29,7 @@ ENV PRESQUASH_SCRIPTS="cleanup"
 ################################################################################
 
 ADD --link ./common/rootfs/ /
-ONBUILD RUN if has-cmd hook; then hook onbuild; fi
+ONBUILD RUN hook onbuild
 
 ################################################################################
 
