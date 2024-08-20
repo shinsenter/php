@@ -28,7 +28,7 @@ ARG  PHP_VARIANT=${PHP_VARIANT:-fpm-alpine}
 
 FROM ${BUILD_FROM_IMAGE}:${BUILD_TAG_PREFIX}${PHP_VERSION}-${PHP_VARIANT}
 ARG  BUILDKIT_SBOM_SCAN_STAGE=true
-ONBUILD RUN if has-cmd hook; then hook onbuild; fi
+ONBUILD RUN hook onbuild
 
 ################################################################################
 

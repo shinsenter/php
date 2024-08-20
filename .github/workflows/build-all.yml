@@ -33,7 +33,8 @@ jobs:
       tag_prefix: ${{ (github.ref_type != 'tag' && github.ref != 'refs/heads/main') && 'dev-' || '' }}
       build_all: ${{ github.event_name != 'schedule' }}
     steps:
-      - run: |
+      - name: pre-build debug
+        run: |
           # For debugging purposes
           echo "github.event_name = ${{ github.event_name }}"
           echo "github.ref_type   = ${{ github.ref_type }}"
@@ -47,7 +48,6 @@ jobs:
     needs: [prepare]
     with:
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
-      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
 
   php:
     uses: ./.github/workflows/01-php.yml

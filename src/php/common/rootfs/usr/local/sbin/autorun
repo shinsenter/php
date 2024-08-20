@@ -8,8 +8,10 @@
 ################################################################################
 
 run_cmd() {
-    debug-echo "\nAutorun script $1"
-    with-env "$@"
+    if [ -x "$script" ]; then
+        debug-echo "\nAutorun script $1"
+        with-env "$@"
+    fi
 }
 
 for dir; do
@@ -18,15 +20,13 @@ for dir; do
         if [ -d "$dir" ]; then
             find $dir -type f -name '*.sh' | xargs -r chmod +x &>/dev/null
             if has-cmd run-parts; then
-                with-env run-parts --new-session "$dir";
+                with-env run-parts --new-session "$dir"
             else
                 for script in $(find $dir -type f -perm -111 | sort -dbfi); do
-                    if [ -x "$script" ]; then
-                        run_cmd "$script"
-                    fi
+                    run_cmd "$script"
                 done
             fi
-        elif [ -x "$dir" ]; then
+        else
             run_cmd "$dir"
         fi
     fi
