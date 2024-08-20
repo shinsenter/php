@@ -206,6 +206,7 @@ jobs:
           docker pull "${{ env.BUILD_TMP_NAME }}"
           DEBUG= ${{ env.SQUASH_CMD }} "${{ env.BUILD_TMP_NAME }}" -p >"${{ env.BUILD_DOCKERFILE_SQUASHED }}"
           cat "${{ env.BUILD_DOCKERFILE_SQUASHED }}"
+          docker images
           df -h
 
       -
