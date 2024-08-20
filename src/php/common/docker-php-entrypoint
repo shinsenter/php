@@ -16,6 +16,7 @@ mkdir -p "$APP_PATH"
 export TZ="${TZ:=UTC}"
 if [ ! -z "$TZ" ] && [ -e /usr/share/zoneinfo/$TZ ]; then
     ln -nsf /usr/share/zoneinfo/$TZ /etc/localtime
+    echo $TZ >/etc/timezone
 fi
 
 # activity logging
