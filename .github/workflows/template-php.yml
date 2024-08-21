@@ -35,7 +35,6 @@ on:
 
 jobs:
   maintained:
-    name: Maintained ${{ inputs.app_name }} ${{ inputs.server }}
     uses: ./.github/workflows/template-common.yml
     secrets: inherit
     strategy:
@@ -51,7 +50,6 @@ jobs:
 
   outdated:
     if: ${{ inputs.build_all }}
-    name: Outdated ${{ inputs.app_name }} ${{ inputs.server }}
     uses: ./.github/workflows/template-common.yml
     secrets: inherit
     strategy:
