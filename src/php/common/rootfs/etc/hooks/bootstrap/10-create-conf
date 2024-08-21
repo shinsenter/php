@@ -6,9 +6,8 @@
 # Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-if ! has-cmd php-fpm; then exit 0; fi
 
-if has-cmd php-envvars; then
+if has-cmd php && has-cmd php-envvars; then
     debug-echo "Generate PHP config"
     if is-true $ALLOW_RUNTIME_PHP_ENVVARS; then
         php-envvars write_dynamic_config 2>&1
@@ -17,7 +16,7 @@ if has-cmd php-envvars; then
     fi
 fi
 
-if is-true $ENABLE_TUNING_FPM; then
+if has-cmd php-fpm && is-true $ENABLE_TUNING_FPM; then
     debug-echo -w "Tune PHP-FPM performance"
     config_file="${PHP_INI_DIR}-fpm.d/zz-generated-settings.conf"
 
