@@ -56,6 +56,11 @@ APT_PACKAGES='procps xz-utils' \
 pkg-add bash ca-certificates coreutils curl htop less openssl
 pkg-add upgrade
 
+# patch su-exec
+if has-cmd su-exec; then
+    chmod u+s $(command -v su-exec)
+fi
+
 # patch sh binary if bash exists
 if has-cmd bash; then
     if has-cmd sh; then
