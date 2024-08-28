@@ -39,7 +39,7 @@ ONBUILD RUN hook onbuild
 # https://github.com/mlocati/docker-php-extension-installer/pull/724
 # https://github.com/mlocati/docker-php-extension-installer/pull/737
 RUN --mount=type=bind,from=mlocati/php-extension-installer:latest,source=/usr/bin/install-php-extensions,target=/tmp/install-php-extensions \
-    /tmp/install-php-extensions @fix_letsencrypt | grep -vF StandWith
+    /tmp/install-php-extensions @fix_letsencrypt | grep -vF StandWith || true
 
 ################################################################################
 
