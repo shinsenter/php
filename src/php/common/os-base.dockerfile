@@ -47,19 +47,11 @@ RUN <<'EOF'
 echo 'Configure OS middlewares'
 set -e
 
-# setuid bit
-chmod 4755 $(which autorun) /usr/local/sbin/web-*
-
 # install common packages
-APK_PACKAGES='run-parts shadow su-exec tar tzdata unzip xz' \
+APK_PACKAGES='run-parts shadow tar tzdata unzip xz' \
 APT_PACKAGES='procps xz-utils' \
 pkg-add bash ca-certificates coreutils curl htop less openssl
 pkg-add upgrade
-
-# patch su-exec
-if has-cmd su-exec; then
-    chmod u+s $(command -v su-exec)
-fi
 
 # patch sh binary if bash exists
 if has-cmd bash; then
@@ -75,15 +67,29 @@ if [ ! -e /sbin/nologin ] && has-cmd nologin; then
     ln -nsf "$(command -v nologin)" /sbin/nologin
 fi
 
-# Check if the group exists
+# check if the group exists
 if ! getent group $APP_GROUP >/dev/null 2>&1; then
     addgroup --system $APP_GROUP
 fi
 
-# Check if the user exists
+# check if the user exists
 if ! getent passwd $APP_USER >/dev/null 2>&1; then
     adduser --system --no-create-home --ingroup $APP_GROUP $APP_USER
 fi
+
+# install su-exec
+SU_EXEC_PATH=/sbin/su-exec
+SU_EXEC_URL=https://github.com/songdongsheng/su-exec/releases/download/1.3/su-exec-musl-static
+curl -o "$SU_EXEC_PATH" --retry 3 --retry-delay 5 -kLRJ "$SU_EXEC_URL"
+chmod 4755 "$SU_EXEC_PATH"
+
+if ! has-cmd su-exec || [ "$(su-exec $APP_USER:$APP_GROUP whoami)" != "$APP_USER" ]; then
+    echo 'Failed to install su-exec'
+    exit 1
+fi
+
+# setuid bit
+chmod 4755 $(which autorun) /usr/local/sbin/web-*
 
 EOF
 

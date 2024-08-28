@@ -1,27 +1,32 @@
 #!/usr/bin/env sh
-# colors
-NC='\033[0m' # no color
+
+NC='\033[0m'
 case "$1" in
-    -e|--error)   CL='\033[0;31m'; shift ;;
-    -s|--success) CL='\033[0;32m'; shift ;;
-    -w|--warn)    CL='\033[0;33m'; shift ;;
-    -i|--info)    CL='\033[0;34m'; shift ;;
-    -l|--log)     CL='\033[0;90m'; shift ;;
-    *) if ! is-debug; then exit 0; else CL='\033[0;90m'; fi ;;
+    -c|--critical)  CL='\033[0;31m'; shift ;;
+    -e|--error)     CL='\033[0;31m'; shift ;;
+    -s|--success)   CL='\033[0;32m'; shift ;;
+    -w|--warn)      CL='\033[0;33m'; shift ;;
+    -i|--info)      CL='\033[0;34m'; shift ;;
+    -l|--log)       CL='\033[0;90m'; shift ;;
+    *)              CL='\033[0;90m'; if ! is-debug; then exit 0; fi ;;
 esac
 
+if [ ! -t 1 ]; then NC=; CL=; fi
+
 colorize() {
-    if [ -t 1 ] && [ ! -z "$CL" ]; then
-        echo -e "${CL}$@${NC}"
-    else
-        echo -e "$@"
+    if [ -n "$@" ]; then
+        if [ -z "$CL" ]; then
+            echo "$@"
+        else
+            echo -e "${CL}$@${NC}"
+        fi
     fi
 }
 
-if [ -t 0 ]; then
-    colorize "$@" >&2
-else
-    while read line; do
+colorize "$@"
+
+if [ ! -t 0 ]; then
+    while IFS= read -r line; do
         colorize "$line"
     done
 fi
