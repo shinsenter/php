@@ -7,7 +7,7 @@
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-conf_path="${ENV:=/etc/docker-envvars}"
+conf_path="${ENV:=/etc/.docker-env}"
 
 if [ ! -f $conf_path ]; then
     mkdir -p "$(dirname $conf_path)"

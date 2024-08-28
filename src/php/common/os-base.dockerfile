@@ -21,7 +21,7 @@ ENV APP_USER="$APP_USER"
 ENV APP_GROUP="$APP_GROUP"
 
 # set OS variables
-ENV ENV="/etc/docker-envvars"
+ENV ENV="/etc/.docker-env"
 ENV PATH="/usr/local/aliases:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 ENV PS1="\\u@\\h:\\w\\$ "
 ENV PRESQUASH_SCRIPTS="cleanup"
@@ -39,7 +39,7 @@ ONBUILD RUN hook onbuild
 # https://github.com/mlocati/docker-php-extension-installer/pull/724
 # https://github.com/mlocati/docker-php-extension-installer/pull/737
 RUN --mount=type=bind,from=mlocati/php-extension-installer:latest,source=/usr/bin/install-php-extensions,target=/tmp/install-php-extensions \
-    /tmp/install-php-extensions @fix_letsencrypt | grep -vF StandWith | debug-echo -l
+    /tmp/install-php-extensions @fix_letsencrypt | grep -vF StandWith
 
 ################################################################################
 
@@ -80,7 +80,7 @@ fi
 # install su-exec
 SU_EXEC_PATH=/sbin/su-exec
 SU_EXEC_URL=https://github.com/songdongsheng/su-exec/releases/download/1.3/su-exec-musl-static
-curl -o "$SU_EXEC_PATH" --retry 3 --retry-delay 5 -kLRJ "$SU_EXEC_URL"
+curl -o "$SU_EXEC_PATH" --retry 3 --retry-delay 5 -ksLRJ "$SU_EXEC_URL"
 chmod 4755 "$SU_EXEC_PATH"
 
 if ! has-cmd su-exec || [ "$(su-exec $APP_USER:$APP_GROUP whoami)" != "$APP_USER" ]; then
