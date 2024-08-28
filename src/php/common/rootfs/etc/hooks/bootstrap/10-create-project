@@ -102,8 +102,6 @@ if [ -z "$(ls -A "$APP_PATH")" ]; then
         hook post-create-project
         composer config -n --unset "allow-plugins.*/*"
         web-chown "Required packages in $APP_PATH were updated."
-    else
-        debug-echo "Skip composer install because $CONF_PATH is missing."
     fi
 else
     debug-echo "Skip project creation because $APP_PATH is not empty."
