@@ -6,6 +6,7 @@
 # Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
+if [ "$(id -u)" != "0" ]; then echo "Please run this container as the root user." >&2; exit 1; fi
 
 APP_PATH="$(app-path)"
 
@@ -57,4 +58,3 @@ else
     debug-echo "Start container with command $@"
     exec with-env "$@"
 fi
-

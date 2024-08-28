@@ -22,9 +22,7 @@ ARG  BUILDKIT_SBOM_SCAN_STAGE=true
 
 # set PHP variables
 ARG PHP_VERSION=${PHP_VERSION:-8.4}
-ARG PHP_VARIANT=${PHP_VARIANT:-fpm}
 ENV PHP_VERSION=${PHP_VERSION//-rc/}
-ENV PHP_VARIANT=$PHP_VARIANT
 
 ################################################################################
 
