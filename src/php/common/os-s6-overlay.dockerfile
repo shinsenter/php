@@ -47,7 +47,7 @@ if ! has-s6 && [ ! -z "$S6_VERSION" ]; then
         local url="$1"
         local path="${2:-$S6_PATH}/"
         if [ ! -e $path ]; then mkdir -p $path; fi
-        curl --retry 3 --retry-delay 5 -ksL "$url" | tar Jxp -C $path
+        curl --retry 3 --retry-delay 5 -ksLRJ "$url" | tar Jxp -C $path
     }
 
     # and install the right version of s6-overlay

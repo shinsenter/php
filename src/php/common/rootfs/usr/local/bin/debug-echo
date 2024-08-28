@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 NC='\033[0m'
 case "$1" in
@@ -14,12 +14,9 @@ esac
 if [ ! -t 1 ]; then NC=; CL=; fi
 
 colorize() {
-    if [ -n "$@" ]; then
-        if [ -z "$CL" ]; then
-            echo "$@"
-        else
-            echo -e "${CL}$@${NC}"
-        fi
+    local msg="$@"
+    if [ ! -z "$msg" ]; then
+        echo -e "${CL}${msg}${NC}"
     fi
 }
 
