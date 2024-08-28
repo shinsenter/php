@@ -6,7 +6,7 @@
 # Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-if [ "$(id -u)" != "0" ]; then echo "Please run this container as the root user." >&2; exit 1; fi
+if [ "$(id -u)" != "0" ]; then debug-echo -e "!!! Please run this container as the root user !!!" >&2; exit 1; fi
 
 APP_PATH="$(app-path)"
 
@@ -33,7 +33,10 @@ $ENV_CHECK
 " >> ~/.bashrc; fi
 
 # export all env variables for PHP
-if is-true $ALLOW_RUNTIME_PHP_ENVVARS && has-cmd php-envvars; then php-envvars export_envvars 2>&1; fi
+if is-true $ALLOW_RUNTIME_PHP_ENVVARS && has-cmd php && has-cmd php-envvars; then
+    debug-echo "Export all env variables for PHP"
+    php-envvars export_envvars 2>&1
+fi
 
 # change working directory
 if [ -d "$APP_PATH" ]; then cd "$APP_PATH"; fi
@@ -43,6 +46,7 @@ if [ ! -z "$SUPERVISOR_PHP_COMMAND" ]; then
     hook bootstrap
 
     # run custom command defined in $SUPERVISOR_PHP_COMMAND
+    debug-echo "Start container with the command: $SUPERVISOR_PHP_COMMAND $@"
     exec with-env $SUPERVISOR_PHP_COMMAND "$@"
 else
     # run bootstrap hook to initialize the container
@@ -55,6 +59,6 @@ else
     if [ $# -eq 0 ]; then set -- /bin/sh; fi
 
     # start container with command
-    debug-echo "Start container with command $@"
+    debug-echo "Start container with the command: $@"
     exec with-env "$@"
 fi
