@@ -82,7 +82,7 @@ fi
 if has-cmd s6-service; then
     s6-service php-fpm longrun '#!/usr/bin/env sh
 cd "$(app-path)"
-exec php-fpm -y /usr/local/etc/php-fpm.d/zz-generated-settings.conf --nodaemonize -d clear_env=no'
+exec php-fpm -y /usr/local/etc/php-fpm.d/zz-generated-settings.conf --nodaemonize --allow-to-run-as-root -d clear_env=no'
 
     s6-service apache depends php-fpm
     s6-service apache longrun '#!/usr/bin/env sh
