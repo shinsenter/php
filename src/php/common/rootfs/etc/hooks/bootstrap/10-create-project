@@ -111,10 +111,10 @@ fi
 if [ ! -e "$ENV_PATH" ]; then
     if [ -f "$ENV_PATH.example" ]; then
         cp -p "$ENV_PATH.example" "$ENV_PATH"
-        web-chown "Copied .env.example to .env"
+        debug-echo "Copied .env.example to .env"
     elif [ -f "$ENV_PATH.sample" ]; then
         cp -p "$ENV_PATH.sample" "$ENV_PATH"
-        web-chown "Copied .env.sample to .env"
+        debug-echo "Copied .env.sample to .env"
     fi
 fi
 
