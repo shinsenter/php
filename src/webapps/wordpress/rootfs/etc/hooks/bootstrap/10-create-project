@@ -26,7 +26,6 @@ if ! is-true $DISABLE_AUTORUN_CREATING_PROJECT; then
 
         if [ ! -f "$APP_PATH/wp-config.php" ]; then
             php -r "copy('$WPCONFIG_URL', '$APP_PATH/wp-config.php');"
-            web-chown fix "$APP_PATH/wp-config.php" &>/dev/null
         fi
 
         hook post-create-project

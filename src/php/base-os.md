@@ -225,8 +225,8 @@ These Docker images include additional environment variables for fine-tuning con
 | `DEBUG` or `DEBUG_MODE`            | Not set          | Activates debug mode with more verbose logs when set to "1".                                                                          | 1 |
 | `TZ`                               | `UTC`            | Sets the default timezone for the container. [Full list](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).               | `Asia/Tokyo` |
 | `DISABLE_AUTORUN_SCRIPTS`          | Not set          | Disables all autorun scripts when set to "1".                                                                                         | 0 |
+| `DISABLE_AUTORUN_FIX_OWNER_GROUP`  | Not set          | Disables automatic ownership correction of the application directory when set to "1".                                                 | 1 |
 | `DISABLE_GREETING`                 | Not set          | Disables the welcome message at container startup when set to "1".                                                                    | 0 |
-| `FIX_APP_PATH_PERMISSION`          | Not set          | Corrects ownership of the app directory when set to "1".                                                                              | 1 |
 | `ENABLE_CRONTAB`                   | Not set          | Enables the Crontab service when set to "1", loading settings from the directory defined by `CRONTAB_DIR` (default is `/etc/crontab.d`). | 1 |
 | `CRONTAB_DIR`                      | `/etc/crontab.d` | Specifies the directory containing cron job settings. Cron jobs are run as the user defined by `$APP_USER`.                           | `/path/for/crontab/schedules` |
 | `CRONTAB_HOME`                     | `$APP_PATH`      | Specifies the `$HOME` directory for cron jobs.                                                                                        | `/path/for/crontab` |
