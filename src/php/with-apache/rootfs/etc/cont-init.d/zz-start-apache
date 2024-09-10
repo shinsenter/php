@@ -9,9 +9,7 @@
 
 export APP_PATH="$(app-path)"
 export APP_ROOT="$(app-root)"
-
-apache-conf 'DocumentRoot' "$(app-root)"
-apache-conf 'PidFile'      "${APACHE_PID:-/run/apache2.pid}"
+export APACHE_PID="${APACHE_PID:-/run/apache2.pid}"
 
 if [ ! -z "$PHP_MAX_EXECUTION_TIME" ] && [ "$PHP_MAX_EXECUTION_TIME" -gt "0" ]; then
     echo "
