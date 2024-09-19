@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.4.0] - XXXX-XX-XX
+
+- Added Docker images for [InvoiceShelf](http://hub.docker.com/r/shinsenter/invoiceshelf).
+- Various minor improvements.
+
 ## [5.3.0] - 2024-08-20
 
 - Only updating Docker images for maintained PHP versions to save resources on scheduled builds.
