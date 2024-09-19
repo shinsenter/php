@@ -51,6 +51,7 @@ jobs:
           - app-flarum
           - app-grav
           - app-hyperf
+          - app-invoiceshelf
           - app-kirby
           - app-laminas
           - app-laravel
