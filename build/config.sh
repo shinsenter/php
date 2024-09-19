@@ -211,6 +211,11 @@ app-*)
             BUILD_PLATFORM="linux/amd64,linux/arm64/v8"
         fi
         ;;
+    invoiceshelf)
+        # https://docs.invoiceshelf.com/install/manual.html
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
+        verlt "$PHP_VERSION" "8.1" && SKIP_BUILD=1
+        ;;
     kirby)
         # https://getkirby.com/docs/cookbook/setup/composer
         verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
