@@ -30,17 +30,28 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
-      tag_prefix: ${{ (github.ref_type != 'tag' && github.ref != 'refs/heads/main') && 'dev-' || '' }}
-      build_all: ${{ github.event_name != 'schedule' }}
+      tag_prefix: ${{ steps.init.outputs.tag_prefix }}
+      build_all: ${{ steps.init.outputs.build_all == '1' }}
     steps:
       - name: pre-build debug
+        id: init
         run: |
+          the_day=$(date -u +"%d")
+          event_name=${{ github.event_name }}
+          ref_type=${{ github.ref_type }}
+          ref=${{ github.ref }}
+          tag_prefix=$(if [[ $ref_type != 'tag' ]] && [[ $ref != 'refs/heads/main' ]]; then echo 'dev-'; fi)
+          build_all=$(if [[ $event_name != 'schedule' ]] || [[ $the_day == '01' ]]; then echo '1'; fi)
+
           # For debugging purposes
-          echo "github.event_name = ${{ github.event_name }}"
-          echo "github.ref_type   = ${{ github.ref_type }}"
-          echo "github.ref        = ${{ github.ref }}"
-          echo "tag_prefix        = ${{ (github.ref_type != 'tag' && github.ref != 'refs/heads/main') && 'dev-' || '' }}"
-          echo "build_all         = ${{ github.event_name != 'schedule' && 'yes, includes outdated versions' || 'no, only maintained versions' }}"
+          echo "the_day=$the_day" >> "$GITHUB_OUTPUT"
+          echo "tag_prefix=$tag_prefix" >> "$GITHUB_OUTPUT"
+          echo "build_all=$build_all" >> "$GITHUB_OUTPUT"
+          echo "github.event_name = $event_name"
+          echo "github.ref_type   = $ref_type"
+          echo "github.ref        = $ref"
+          echo "tag_prefix        = $tag_prefix"
+          echo "build_all         = $(if [ ! -z "$build_all" ]; then echo 'yes, includes outdated versions'; else echo 'no, only maintained versions'; fi)"
 
   s6:
     uses: ./.github/workflows/00-s6-overlay.yml
