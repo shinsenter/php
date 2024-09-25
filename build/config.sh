@@ -378,10 +378,11 @@ append_tags() {
     local search=$1
     local replace=$2
     local csv_string=$3
+    local exclude=${4:-dummy}
     local new_string=""
     for item in ${csv_string//,/ }; do
         new_string+="${new_string:+,}$item"
-        if [[ $item == *"$search"* ]]; then
+        if echo "$item"| grep -v "$exclude" | grep -Eq "$search"; then
             local new_item=${item/$search/$replace}
             new_string+="${new_string:+,}$new_item"
         fi
@@ -485,6 +486,11 @@ fi
 #     BUILD_TAGS="$(append_tags "-$OS_BASE" "-tidy" "$BUILD_TAGS")"
 # fi
 
+# also tag 'dev-' variants when the tag prefix is empty
+if [ "$BUILD_TAG_PREFIX" == "" ]; then
+    BUILD_TAGS="$(append_tags ":" ":dev-" "$BUILD_TAGS")"
+fi
+
 # also publish to ghcr.io
 if [ "$PUBLISH_TO_GHCR" == "1" ]; then
     BUILD_TAGS="$(append_tags "$DEFAULT_REPO" "ghcr.io/$DEFAULT_REPO" "$BUILD_TAGS")"
@@ -493,7 +499,7 @@ fi
 # also push a copy to archived repo
 if [ "$ARCHIVES_REPO" != "" ]  && [ "$BUILD_TAG_PREFIX" == "" ]; then
     unique_id="$(date +%Y%m%d)"
-    BUILD_TAGS="$(append_tags "${DEFAULT_BUILD_NAME}:" "${ARCHIVES_REPO}:${unique_id}-" "$BUILD_TAGS")"
+    BUILD_TAGS="$(append_tags "${DEFAULT_BUILD_NAME}:" "${ARCHIVES_REPO}:${unique_id}-" "$BUILD_TAGS" ":dev-")"
 fi
 
 ################################################################################
@@ -584,7 +590,7 @@ fi
 
 BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(buildfile:$(path_hash $BUILD_DOCKERFILE | head -c10))\
 /(buildcontext:$(path_hash $BUILD_CONTEXT | shasum | head -c10))\
-/(workflows:$(path_hash $BASE_DIR/.github/workflows | shasum | head -c10))"
+/(workflows:$(path_hash $BASE_DIR/.github/workflows/template-* | shasum | head -c10))"
 
 BUILD_TMP_NAME="localhost:5000/$(path_hash "$BUILD_CACHE_KEY" | head -c10)"
 
@@ -668,7 +674,7 @@ github_env UPDATE_README $UPDATE_README
 
 if [ "$SKIP_BUILD" != "1" ]; then
     echo "🐧 Debug:"
-    path_hash "$BUILD_CONTEXT"
-    path_hash "$BUILD_DOCKERFILE"
-    path_hash "$BASE_DIR/.github/workflows"
+    path_hash $BUILD_CONTEXT
+    path_hash $BUILD_DOCKERFILE
+    path_hash $BASE_DIR/.github/workflows/template-*
 fi
