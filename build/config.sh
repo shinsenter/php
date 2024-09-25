@@ -170,7 +170,7 @@ app-*)
     PHP_VARIANT="$SUFFIX"
 
     # disable cache because there are too many useless cache keys
-    USE_BUILD_CACHE=0
+    # USE_BUILD_CACHE=0
 
     case $APP_NAME in
     cakephp4)
