@@ -81,20 +81,23 @@ github_env() {
 ################################################################################
 
 path_hash() {
-    if [ "$1" == "" ]; then
+    if [ $# -eq 0 ]; then
         echo -n "" | shasum
         return
     fi
 
-    local target="$1"
-    if [ -d $target ]; then
-        find "$target" -type f -not -name '.*' \
-        | sort -dbfi | xargs -r shasum 2>/dev/null
-    elif [ -f $target ]; then
-        shasum $target 2>/dev/null
-    else
-        echo -n "$@" | shasum 2>/dev/null
-    fi
+    for target; do
+        if [ ! -z "$target" ]; then
+            if [ -d "$target" ]; then
+                find "$target" -type f -not -name '.*' \
+                | sort -dbfi | xargs -r shasum 2>/dev/null
+            elif [ -f "$target" ]; then
+                shasum "$target" 2>/dev/null
+            else
+                echo -n "$@" | shasum 2>/dev/null
+            fi
+        fi
+    done
 }
 
 ################################################################################
@@ -109,3 +112,4 @@ path_hash() {
 # get_dockerhub_latest_sha "library/alpine"
 # get_dockerhub_latest_sha "library/ubuntu"
 # get_dockerhub_latest_sha "library/debian"
+# path_hash ./.github/workflows/template-*
