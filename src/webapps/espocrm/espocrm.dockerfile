@@ -35,7 +35,7 @@ ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 
 # https://docs.espocrm.com/administration/server-configuration/#setting-up-crontab
 ENV ENABLE_CRONTAB=1
-ENV CRONTAB_SETTINGS='* * * * * php -f $(app-path)/cron.php >/dev/null 2>&1'
+ENV CRONTAB_SETTINGS='* * * * * php -f $(app-path)/cron.php &>/dev/null'
 ENV ESPOCRM_CONFIG_USE_WEB_SOCKET=0
 RUN env-default INITIAL_PROJECT "$(curl --retry 3 --retry-delay 5 -ksLRJ https://api.github.com/repos/espocrm/espocrm/releases/latest | grep "browser_download_url.*EspoCRM.*zip" | cut -d \" -f 4)"
 

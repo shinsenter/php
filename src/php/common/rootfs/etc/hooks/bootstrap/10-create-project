@@ -40,6 +40,18 @@ install_deps() {
     fi
 }
 
+copy_env() {
+    if [ ! -e "$ENV_PATH" ]; then
+        if [ -f "$ENV_PATH.example" ]; then
+            cp -p "$ENV_PATH.example" "$ENV_PATH"
+            debug-echo "Copied .env.example to .env"
+        elif [ -f "$ENV_PATH.sample" ]; then
+            cp -p "$ENV_PATH.sample" "$ENV_PATH"
+            debug-echo "Copied .env.sample to .env"
+        fi
+    fi
+}
+
 ################################################################################
 
 web-mkdir "$APP_PATH" "$COMPOSER_HOME"
@@ -75,6 +87,8 @@ if [ -z "$(ls -A "$APP_PATH")" ]; then
                 -- "$INITIAL_PROJECT" "$APP_PATH"
             ;;
         esac
+
+        hook post-create-project
         web-chown "Project $INITIAL_PROJECT created in $APP_PATH."
     fi
 
@@ -84,23 +98,31 @@ if [ -z "$(ls -A "$APP_PATH")" ]; then
         web-chown "Copied files from /source/ to $APP_PATH"
     fi
 
+    # copy .env.example to .env
+    copy_env
+
     # update packages if the project has composer.json
     if [ -e "$CONF_PATH" ]; then
+        hook pre-package-update
+
         install_deps
         composer config -n --no-plugins "allow-plugins.*/*" true
 
         if grep -qF '"post-root-package-install"' $CONF_PATH; then
             composer run post-root-package-install
+            hook post-root-package-install
         fi
 
         composer update -n -W $COMPOSER_UPDATE_OPTIONS
 
         if grep -qF '"post-create-project-cmd"' $CONF_PATH; then
             composer run post-create-project-cmd
+            hook post-create-project-cmd
         fi
 
-        hook post-create-project
         composer config -n --unset "allow-plugins.*/*"
+
+        hook post-package-update
         web-chown "Required packages in $APP_PATH were updated."
     fi
 else
@@ -108,25 +130,21 @@ else
 fi
 
 # copy .env.example to .env
-if [ ! -e "$ENV_PATH" ]; then
-    if [ -f "$ENV_PATH.example" ]; then
-        cp -p "$ENV_PATH.example" "$ENV_PATH"
-        debug-echo "Copied .env.example to .env"
-    elif [ -f "$ENV_PATH.sample" ]; then
-        cp -p "$ENV_PATH.sample" "$ENV_PATH"
-        debug-echo "Copied .env.sample to .env"
-    fi
-fi
+copy_env
 
 # run composer install when vendor directory or ClassLoader.php is missing
 if ! is-true $DISABLE_AUTORUN_COMPOSER_INSTALL && has-cmd composer; then
     if [ -e "$CONF_PATH" ]; then
         vendor_dir="$APP_PATH/$(composer config vendor-dir 2>/dev/null)"
         if [ ! -d "$vendor_dir" ] || [ ! -e "$vendor_dir/composer/ClassLoader.php" ]; then
+            hook pre-package-install
+
             install_deps
             composer config -n --no-plugins "allow-plugins.*/*" true
             composer install -n $COMPOSER_INSTALL_OPTIONS
             composer config -n --unset "allow-plugins.*/*"
+
+            hook post-package-install
             web-chown "Composer packages were installed in $APP_PATH"
         fi
     else
