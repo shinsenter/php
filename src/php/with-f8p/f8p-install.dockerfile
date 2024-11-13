@@ -7,6 +7,7 @@
 ################################################################################
 
 # Copy files from the official image
+COPY --link --from=frankenphp /usr/local/lib/libwatcher* /usr/local/lib/
 COPY --link --from=frankenphp /usr/local/bin/frankenphp /usr/local/bin/frankenphp
 
 ################################################################################
@@ -17,14 +18,18 @@ echo 'Install FrankenPHP'
 
 set -e
 
+# install common packages
+APK_PACKAGES='libstdc++ mailcap libcap' \
+APT_PACKAGES='libstdc++6 mailcap libcap2-bin' \
+pkg-add && ldconfig /usr/local/lib
+
+mkdir -p /config/caddy /data/caddy /etc/caddy
+
 if ! has-cmd frankenphp; then
     exit 1
 fi
 
-if has-cmd setcap; then
-    setcap cap_net_bind_service=+ep "$(command -v frankenphp)"
-fi
-
+setcap cap_net_bind_service=+ep "$(command -v frankenphp)"
 ln -nsf "$(command -v frankenphp)" /usr/local/sbin/caddy
 
 EOF
