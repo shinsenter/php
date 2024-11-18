@@ -56,7 +56,7 @@ initial() {
     fi
 
     # stop Unit daemon after initial configuration
-    kill -TERM $(cat ${UNIT_CONTROL_PID:-/run/unit.pid})
+    kill -TERM $(cat ${UNIT_CONTROL_PID:-/run/unit.pid}) &>/dev/null
     while [ -e "$UNIT_CONTROL_SOCKET" ]; do sleep 0.5; done
 }
 

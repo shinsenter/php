@@ -55,6 +55,6 @@ debug-echo -i "\nCron is running as $APP_USER.\n\n### Config:\n$(crontab -u $APP
 if ! has-s6 && has-cmd crond; then
     export APP_PATH="$(app-path)"
     export APP_ROOT="$(app-root)"
-    if [ -f /var/run/crond.pid ]; then kill -9 $(cat /var/run/crond.pid); fi
+    if [ -f /var/run/crond.pid ]; then kill -9 $(cat /var/run/crond.pid) &>/dev/null; fi
     cd $APP_PATH && with-env crond $CRONTAB_OPTIONS;
 fi
