@@ -40,7 +40,7 @@ jobs:
     strategy:
       matrix:
         os: ["", "alpine"]
-        php_version: ["8.4-rc", "8.3", "8.2", "8.1"]
+        php_version: ["8.4", "8.3", "8.2", "8.1"]
     with:
       os: ${{ matrix.os }}
       php_version: ${{ matrix.php_version }}
