@@ -19,14 +19,14 @@ if [ ! -f "$config_file" ]; then
     exit 1
 fi
 
+set -e
+
 shift
 config_path="$@"
 
 if [ -z "$config_path" ]; then
     config_path="config/"
 fi
-
-set -e
 
 envsubst() {
     while IFS= read -r line; do

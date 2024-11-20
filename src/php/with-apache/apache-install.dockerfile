@@ -11,8 +11,7 @@ ENV APACHE_PID=/run/apache2.pid
 # Install Apache2
 RUN <<'EOF'
 echo 'Install Apache2'
-
-set -e
+[ -z "$DEBUG" ] || set -ex && set -e
 
 # install apache
 APK_PACKAGES="apache2 apache2-proxy apache2-ssl apache2-utils" \
