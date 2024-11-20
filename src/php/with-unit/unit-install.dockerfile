@@ -16,7 +16,7 @@ ENV UNIT_CONTROL_SOCKET=/run/control.unit.sock
 # Install Nginx
 RUN <<'EOF'
 echo 'Install Nginx Unit'
-set -e
+[ -z "$DEBUG" ] || set -ex && set -e
 
 if [ ! -f "/tmp/unit.tar.gz" ]; then
     exit 1

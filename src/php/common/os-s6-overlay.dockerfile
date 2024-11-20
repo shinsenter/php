@@ -15,7 +15,7 @@ ARG S6_PATH=${S6_PATH:-}
 RUN <<'EOF'
 if ! has-s6 && [ ! -z "$S6_VERSION" ]; then
     echo 'Configure s6-overlay'
-    set -e
+    [ -z "$DEBUG" ] || set -ex && set -e
 
     SOURCE="https://github.com/just-containers/s6-overlay/releases/download/${S6_VERSION}"
     FALLBACK_ENTRYPOINT="/usr/local/bin/fallback-entrypoint"

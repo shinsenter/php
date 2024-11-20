@@ -44,7 +44,7 @@ Examples:
 - `shinsenter/php:8.3-frankenphp` <sup>(2)</sup>
 - `shinsenter/php:8.4-unit-php` <sup>(3)</sup>
 
-> <sup>(*)</sup>: The latest stable version is 8.3.<br>
+> <sup>(*)</sup>: The latest stable version.<br>
 > <sup>(1)</sup>: PHP with RoadRunner server. The `roadrunner` variant supports PHP >= 8.0.<br>
 > <sup>(2)</sup>: FrankenPHP is still in BETA. The `frankenphp` variant supports PHP >= 8.2.<br>
 > <sup>(3)</sup>: PHP with Nginx Unit server. The `unit-php` variant supports PHP >= 7.4.
@@ -408,7 +408,7 @@ This environment variable will contain the command that the container will use t
 ```shell
 docker run \
     -e SUPERVISOR_PHP_COMMAND='php -S localhost:80 index.php' \
-    shinsenter/php:8.3
+    shinsenter/php:8.4
 ```
 
 #### With docker-compose.yml
@@ -416,7 +416,7 @@ docker run \
 ```yml
 services:
   web:
-    image: shinsenter/php:8.3
+    image: shinsenter/php:8.4
     environment:
       SUPERVISOR_PHP_COMMAND: "php -S localhost:80 index.php"
 ```

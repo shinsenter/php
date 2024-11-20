@@ -352,6 +352,11 @@ final class DockerPHP
                     if (array_key_exists($env_key, $_ENV)) {
                         $val = $this->clean_val($_ENV[$env_key]);
                     }
+
+                    if (strstr((string) $val, '=')) {
+                        $val = '"' . addcslashes((string) $val, '"=') . '"';
+                    }
+
                     $conf[] = "{$key} = {$val}";
                 }
             }

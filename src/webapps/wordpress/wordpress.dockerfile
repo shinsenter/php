@@ -41,8 +41,7 @@ ARG WPCLI_PATH=/usr/local/bin/wp-cli
 
 RUN <<'EOF'
 echo 'Install WP-CLI'
-
-set -e
+[ -z "$DEBUG" ] || set -ex && set -e
 
 web-mkdir "/.wp-cli"
 

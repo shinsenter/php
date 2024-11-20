@@ -8,6 +8,7 @@
 ################################################################################
 
 UNIT_CONTROL_SOCKET="${UNIT_CONTROL_SOCKET:-/run/control.unit.sock}"
+UNIT_CONTROL_PID="${UNIT_CONTROL_PID:-/run/unit.pid}"
 
 set -e
 
@@ -56,7 +57,7 @@ initial() {
     fi
 
     # stop Unit daemon after initial configuration
-    kill -TERM $(cat ${UNIT_CONTROL_PID:-/run/unit.pid}) &>/dev/null
+    kill -TERM $(cat $UNIT_CONTROL_PID) &>/dev/null || rm -f $UNIT_CONTROL_PID
     while [ -e "$UNIT_CONTROL_SOCKET" ]; do sleep 0.5; done
 }
 

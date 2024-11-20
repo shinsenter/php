@@ -9,7 +9,7 @@
 # install crontab
 RUN <<'EOF'
 echo 'Configure base crontab'
-set -e
+[ -z "$DEBUG" ] || set -ex && set -e
 
 env-default CRONTAB_SHELL  '/bin/sh'
 env-default CRONTAB_MAILTO '$APP_ADMIN'

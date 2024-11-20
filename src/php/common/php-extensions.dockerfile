@@ -19,7 +19,7 @@ ADD --link ./common/shell-php/ /usr/local/sbin/
 
 RUN <<'EOF'
 echo 'Configure PHP extensions'
-set -e
+[ -z "$DEBUG" ] || set -ex && set -e
 
 # Make alias for php with env
 web-cmd root php  "$(command -v php)"

@@ -11,8 +11,7 @@ ENV NGINX_PID=/run/nginx.pid
 # Install Nginx
 RUN <<'EOF'
 echo 'Install Nginx'
-
-set -e
+[ -z "$DEBUG" ] || set -ex && set -e
 
 # install nginx
 pkg-add nginx
