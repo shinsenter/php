@@ -38,7 +38,8 @@ RUN env-default INITIAL_PROJECT "magento/community-edition"
 ################################################################################
 
 RUN <<'EOF'
-set -e
+echo 'Install PHP extensions'
+[ -z "$DEBUG" ] || set -ex && set -e
 
 # install PHP modules
 phpaddmod soap sodium sockets xsl

@@ -37,7 +37,7 @@ DEFAULT_BUILD_NAME="$DEFAULT_REPO/php"
 DEFAULT_README="$BASE_DIR/README.md"
 UPDATE_README=0
 
-LATEST_PHP="8.3"
+LATEST_PHP="8.4"
 LATEST_S6=
 ALLOW_RC=0
 
@@ -446,7 +446,7 @@ if [ "$PHP_VERSION" != "" ]; then
         BUILD_TAGS="$(append_tags ":php$PHP_VERSION" ":php7" "$BUILD_TAGS")"
         BUILD_TAGS="$(append_tags ":$PHP_VERSION" ":7" "$BUILD_TAGS")"
         ;;
-    "8.3")
+    "8.4")
         BUILD_TAGS="$(append_tags ":php$PHP_VERSION" ":php8" "$BUILD_TAGS")"
         BUILD_TAGS="$(append_tags ":$PHP_VERSION" ":8" "$BUILD_TAGS")"
         ;;

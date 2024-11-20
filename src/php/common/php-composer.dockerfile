@@ -15,7 +15,7 @@ ENV COMPOSER_HOME="/.composer"
 
 RUN <<'EOF'
 echo 'Configure Composer'
-set -e
+[ -z "$DEBUG" ] || set -ex && set -e
 
 # Set Composer default settings
 env-default '# Environment variables for Composer'
