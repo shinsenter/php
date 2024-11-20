@@ -45,7 +45,7 @@ RUN --mount=type=bind,from=mlocati/php-extension-installer:latest,source=/usr/bi
 
 RUN <<'EOF'
 echo 'Configure OS middlewares'
-set -e
+[ -z "$DEBUG" ] || set -ex && set -e
 
 # install common packages
 APK_PACKAGES='run-parts shadow tar tzdata unzip xz' \
@@ -97,7 +97,7 @@ EOF
 
 RUN <<'EOF'
 echo 'Configure base OS'
-set -e
+[ -z "$DEBUG" ] || set -ex && set -e
 
 # Set aliases for common commands
 env-default '# Aliases for common commands'

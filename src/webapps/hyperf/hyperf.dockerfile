@@ -37,7 +37,8 @@ RUN env-default INITIAL_PROJECT "hyperf/hyperf-skeleton"
 ################################################################################
 
 RUN <<'EOF'
-set -e
+echo 'Install PHP extensions'
+[ -z "$DEBUG" ] || set -ex && set -e
 
 phpaddmod protobuf swoole
 
