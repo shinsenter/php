@@ -301,7 +301,7 @@ If you find my Docker images useful, consider donating via PayPal:
 (To edit this welcome message, add your text to /etc/welcome.txt)
 
 ---------------
-Container     : shinsenter/php (built: 2024-08-20T00:00:00+0000)
+Container     : shinsenter/php (built: 2024-11-22T00:00:00+0000)
 Distro        : Debian GNU/Linux 12 (bookworm)
 Timezone      : UTC (GMT+0000)
 UID / GID     : www-data:www-data (33:33)
@@ -321,11 +321,12 @@ To get support, please contact: SHIN Company <shin@shin.company>
 Docker Hub:      https://hub.docker.com/u/shinsenter
 GitHub Packages: https://github.com/shinsenter?tab=packages
 
-PHP 8.4.0beta3 (cli) (built: Aug 16 2024 21:48:04) (NTS)
+PHP 8.4.1 (cli) (built: Nov 21 2024 17:55:46) (NTS)
 Copyright (c) The PHP Group
-Zend Engine v4.4.0-dev, Copyright (c) Zend Technologies
-    with Zend OPcache v8.4.0beta3, Copyright (c), by Zend Technologies
-Composer version 2.7.7 2024-06-10 22:11:12
+Built by https://github.com/docker-library/php
+Zend Engine v4.4.1, Copyright (c) Zend Technologies
+    with Zend OPcache v8.4.1, Copyright (c), by Zend Technologies
+Composer version 2.8.3 2024-11-17 13:13:04
 ```
 
 #### Disable Autorun Scripts
