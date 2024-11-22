@@ -46,7 +46,7 @@ Examples:
 
 > <sup>(*)</sup>: The latest stable version.<br>
 > <sup>(1)</sup>: PHP with RoadRunner server. The `roadrunner` variant supports PHP >= 8.0.<br>
-> <sup>(2)</sup>: FrankenPHP is still in BETA. The `frankenphp` variant supports PHP >= 8.2.<br>
+> <sup>(2)</sup>: FrankenPHP is still in BETA. The `frankenphp` variant supports PHP 8.2 and 8.3.<br>
 > <sup>(3)</sup>: PHP with Nginx Unit server. The `unit-php` variant supports PHP >= 7.4.
 
 Explore all available tags on our [Docker Hub](https://hub.docker.com/r/shinsenter/php/tags).
