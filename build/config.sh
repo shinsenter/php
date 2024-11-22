@@ -142,6 +142,7 @@ with-unit)
     ;;
 with-f8p)
     verlt "$PHP_VERSION" "8.2" && SKIP_BUILD=1
+    verlte "8.4" "$PHP_VERSION" && SKIP_BUILD=1
     PREFIX="frankenphp"
     BUILD_NAME="$DEFAULT_REPO/frankenphp"
     BUILD_SOURCE_IMAGE="dunglas/frankenphp:1-php$PHP_VERSION$SUFFIX"
