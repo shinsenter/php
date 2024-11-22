@@ -94,17 +94,17 @@ base-os)
     PHP_VERSION=
     IPE_VERSION=
     COMPOSER_VERSION=
-    if [ "$OS_BASE" = "ubuntu" ]; then
+    if [ "$OS_BASE" == "ubuntu" ]; then
         BUILD_PLATFORM="linux/amd64,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x"
-    elif [ "$OS_BASE" = "debian" ]; then
+    elif [ "$OS_BASE" == "debian" ]; then
         BUILD_PLATFORM="linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x"
-    elif [ "$OS_BASE" = "alpine" ]; then
+    elif [ "$OS_BASE" == "alpine" ]; then
         BUILD_PLATFORM="linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x"
     fi
     ;;
 base-s6)
     # only build on alpine
-    if [ "$OS_BASE" = "alpine" ]; then
+    if [ "$OS_BASE" == "alpine" ]; then
         BUILD_NAME="$DEFAULT_REPO/s6-overlay"
         S6_PATH=/s6
         BUILD_DOCKERFILE=$BASE_DIR/src/php/base-s6.dockerfile
@@ -351,17 +351,17 @@ if [ "$PHP_VERSION" != "" ] && verlt "$PHP_VERSION" "7.1" && [ "$OS_BASE" != "de
 fi
 
 # lazy load the latest Composer version when necessary
-if [ "$SKIP_BUILD" != "1" ] && [ "$COMPOSER_VERSION" = "latest" ]; then
+if [ "$SKIP_BUILD" != "1" ] && [ "$COMPOSER_VERSION" == "latest" ]; then
     COMPOSER_VERSION="$(get_github_latest_tag "composer/composer" 1)"
 fi
 
 # lazy load the latest IPE version when necessary
-if [ "$SKIP_BUILD" != "1" ] && [ "$IPE_VERSION" = "latest" ]; then
+if [ "$SKIP_BUILD" != "1" ] && [ "$IPE_VERSION" == "latest" ]; then
     IPE_VERSION="$(get_github_latest_tag "mlocati/docker-php-extension-installer" 1)"
 fi
 
 # lazy load the latest s6-overlay version when necessary
-if [ "$SKIP_BUILD" != "1" ] && [ "$S6_VERSION" = "latest" ]; then
+if [ "$SKIP_BUILD" != "1" ] && [ "$S6_VERSION" == "latest" ]; then
     LATEST_S6=$(get_github_latest_tag "just-containers/s6-overlay" 1)
     if [ "$LATEST_S6" == "" ]; then
         echo "Failed to get latest s6-overlay version" >&2
@@ -392,20 +392,20 @@ append_tags() {
 
 # generate build tags
 if [ "$PHP_VERSION" != "" ]; then
-    if [ "$BUILD_NAME" = "$DEFAULT_BUILD_NAME" ]; then
+    if [ "$BUILD_NAME" == "$DEFAULT_BUILD_NAME" ]; then
         BUILD_TAGS="$BUILD_NAME:$PHP_VERSION-$PREFIX$SUFFIX"
-        if [ "$PHP_VERSION" = "$LATEST_PHP" ]; then
+        if [ "$PHP_VERSION" == "$LATEST_PHP" ]; then
             BUILD_TAGS="$BUILD_TAGS,$BUILD_NAME:$PREFIX$SUFFIX"
         fi
-        if [ "$PREFIX" = "cli" ]; then
+        if [ "$PREFIX" == "cli" ]; then
             BUILD_TAGS="$BUILD_TAGS,$BUILD_NAME:$PHP_VERSION$SUFFIX"
-            if [ "$PHP_VERSION" = "$LATEST_PHP" ]; then
+            if [ "$PHP_VERSION" == "$LATEST_PHP" ]; then
                 BUILD_TAGS="$BUILD_TAGS,$BUILD_NAME:latest$SUFFIX"
             fi
         fi
-    elif [ "${APP:0:5}" = "with-" ]; then
+    elif [ "${APP:0:5}" == "with-" ]; then
         BUILD_TAGS="$BUILD_NAME:php$PHP_VERSION$SUFFIX"
-        if [ "$PHP_VERSION" = "$LATEST_PHP" ]; then
+        if [ "$PHP_VERSION" == "$LATEST_PHP" ]; then
             BUILD_TAGS="$BUILD_TAGS,$BUILD_NAME:latest$SUFFIX"
         fi
         case $APP in
@@ -430,9 +430,9 @@ if [ "$PHP_VERSION" != "" ]; then
             BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-unit-php" "$BUILD_TAGS")"
             ;;
         esac
-    elif [ "${APP:0:4}" = "app-" ]; then
+    elif [ "${APP:0:4}" == "app-" ]; then
         BUILD_TAGS="$BUILD_NAME:php$PHP_VERSION$SUFFIX"
-        if [ "$PHP_VERSION" = "$LATEST_PHP" ]; then
+        if [ "$PHP_VERSION" == "$LATEST_PHP" ]; then
             BUILD_TAGS="$BUILD_TAGS,$BUILD_NAME:latest$SUFFIX"
         fi
     fi
@@ -455,7 +455,7 @@ if [ "$PHP_VERSION" != "" ]; then
         BUILD_TAGS="$(append_tags ":$PHP_VERSION" ":${PHP_VERSION%%.*}" "$BUILD_TAGS")"
         ;;
     esac
-elif [ "$APP" = "base-s6" ]; then
+elif [ "$APP" == "base-s6" ]; then
     BUILD_TAGS="$BUILD_NAME:$S6_VERSION,$BUILD_NAME:latest"
 else
     BUILD_TAGS="$BUILD_NAME:s6-$S6_VERSION,$BUILD_NAME:latest"
@@ -482,7 +482,7 @@ else
 fi
 
 # find tag contains "-alpine" and appends tags with "tidy"
-# if [ "$OS_BASE" = "alpine" ]; then
+# if [ "$OS_BASE" == "alpine" ]; then
 #     BUILD_TAGS="$(append_tags "-$OS_BASE" "-tidy" "$BUILD_TAGS")"
 # fi
 
@@ -531,7 +531,7 @@ else
 fi
 
 # main README.md
-if [ "$BUILD_NAME" = "$DEFAULT_BUILD_NAME" ] && [ "$APP" = "cli" ] && [ "$PHP_VERSION" = "$LATEST_PHP" ]; then
+if [ "$BUILD_NAME" == "$DEFAULT_BUILD_NAME" ] && [ "$APP" == "cli" ] && [ "$PHP_VERSION" == "$LATEST_PHP" ]; then
     BUILD_README=$DEFAULT_README
 fi
 
@@ -619,7 +619,9 @@ remove_platform() {
 if [ "$PHP_VERSION" != "" ]; then
     if verlt "$PHP_VERSION" "7.1"; then
         BUILD_PLATFORM="linux/amd64,linux/arm/v7"
-    elif [ "$OS_BASE" = "debian" ] && verlt "$PHP_VERSION" "7.3"; then
+    elif [ "$OS_BASE" == "debian" ] && [ "$PHP_VERSION" == "8.4" ]; then
+        BUILD_PLATFORM="$(remove_platform "$BUILD_PLATFORM" 's390x')"
+    elif [ "$OS_BASE" == "debian" ] && verlt "$PHP_VERSION" "7.3"; then
         BUILD_PLATFORM="$(remove_platform "$BUILD_PLATFORM" '386' 'ppc64le' 's390x')"
     fi
 fi
