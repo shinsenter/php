@@ -206,7 +206,8 @@ app-*)
         # https://hyperf.wiki/3.1/#/en/quick-start/install
         BUILD_PLATFORM="linux/amd64,linux/arm/v7,linux/arm64/v8"
         BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
-        verlt "$PHP_VERSION" "7.2" && SKIP_BUILD=1
+        verlt "$PHP_VERSION" "7.2"  && SKIP_BUILD=1
+        verlte "8.4" "$PHP_VERSION" && SKIP_BUILD=1
         if verlte "8.3" "$PHP_VERSION"; then
             BUILD_PLATFORM="linux/amd64,linux/arm64/v8"
         fi
