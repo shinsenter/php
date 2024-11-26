@@ -1,8 +1,10 @@
 # Responsible Disclosure Policy
 
+
 ## Reporting Security Vulnerabilities
 
 We take security seriously in our open-source project. If you discover a security vulnerability, please help us by responsibly disclosing it. We appreciate your efforts in keeping our project safe for everyone.
+
 
 ## How to Report a Vulnerability
 
@@ -14,9 +16,11 @@ To report a security vulnerability:
 
 3. **Be responsible**: Please avoid exploiting the vulnerability beyond what is necessary to demonstrate the issue.
 
+
 ## What to Expect
 
 Once we receive your report, we'll acknowledge it promptly. We'll work to assess the reported vulnerability's validity and severity and develop a fix as quickly as possible. We'll keep you updated on our progress throughout the process.
+
 
 ## Legal Safe Harbor
 

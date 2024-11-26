@@ -27,9 +27,10 @@ This setup allows for faster project initiation without additional installations
 > This optimization improves download times and resource usage without sacrificing functionality,
 > thanks to the [docker-squash](https://code.shin.company/docker-squash) project.
 
+
 ## Docker Image Variants
 
-Our image tags cover PHP versions from 5.6 to 8.4<sup>(*)</sup>,
+Our image tags cover PHP versions from 5.6 to 8.4,
 available in `cli`, `zts`, `fpm`, `fpm-nginx`, `fpm-apache`, `roadrunner`<sup>(1)</sup>, `frankenphp`<sup>(2)</sup>, and `unit-php`<sup>(3)</sup> variants. The Docker images are available for both Debian and Alpine versions.
 
 > ℹ️ Note: We no longer maintain the `-tidy` tag names. If you are using Docker images with this tag, please replace them with the `-alpine` variant.
@@ -44,7 +45,6 @@ Examples:
 - `shinsenter/php:8.3-frankenphp` <sup>(2)</sup>
 - `shinsenter/php:8.4-unit-php` <sup>(3)</sup>
 
-> <sup>(*)</sup>: The latest stable version.<br>
 > <sup>(1)</sup>: PHP with RoadRunner server. The `roadrunner` variant supports PHP >= 8.0.<br>
 > <sup>(2)</sup>: FrankenPHP is still in BETA. The `frankenphp` variant supports PHP >= 8.2.<br>
 > <sup>(3)</sup>: PHP with Nginx Unit server. The `unit-php` variant supports PHP >= 7.4.
@@ -92,6 +92,7 @@ docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.3-f
 docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.3-unit-php
 ```
 
+
 ## Customizing Settings via Environment Variables
 
 These images allow customizing PHP and PHP-FPM settings through environment variables instead of rebuilding images.
@@ -110,7 +111,6 @@ This naming convention helps you easily identify which environment variable appl
 > you need to start your container with the `ALLOW_RUNTIME_PHP_ENVVARS=1` environment variable.
 
 > 💡 Hint: Run `php-envvars` in the container to get a full list of default `$PHP_*` environment variables.
-
 
 ### Examples
 
@@ -150,6 +150,7 @@ services:
 
 > 💡 Hint: Run `php-envvars` in the container to get a full list of default `$PHP_*` environment variables.
 
+
 ## Pre-installed PHP Extensions
 
 Popular PHP extensions are pre-installed by default, allowing projects to get started faster without additional installation.
@@ -181,6 +182,7 @@ zip
 > 💡 Hint: Run `docker run --rm shinsenter/php:8.4-cli php -m` in the container
 to get a list of extensions (you can replace `8.4` with a specific PHP version).
 
+
 ## Adding PHP Extensions
 
 These images use a simple command called `phpaddmod` to install PHP extensions.
@@ -206,6 +208,7 @@ which takes care of all required steps to compile and activate the extensions.
 
 > 💡 Hint: If you're having trouble figuring out which extensions can be installed,
 have a look at [their documentation](https://github.com/mlocati/docker-php-extension-installer/blob/master/README.md#supported-php-extensions).
+
 
 ## Application Directory
 
@@ -233,6 +236,7 @@ docker run -p 80:80 -p 443:443 -p 443:443/udp \
 ```
 
 This would change the document root path to `/app/public`.
+
 
 ## Customizing Container User and Group in Docker
 
@@ -265,6 +269,7 @@ services:
       APP_USER: "myapp"
       APP_UID: "5000"
 ```
+
 
 ## Autorun Scripts
 
@@ -349,6 +354,7 @@ services:
       DISABLE_AUTORUN_SCRIPTS: "1"
 ```
 
+
 ## Using Cron Jobs
 
 To enable cron jobs in containers, you can start the container with `ENABLE_CRONTAB=1`.
@@ -398,11 +404,11 @@ services:
 
 For more information on environment variables for cron jobs, refer to the [Other System Settings](#other-system-settings) section below.
 
+
 ## Customize Supervisor command
 
 We can set a `$SUPERVISOR_PHP_COMMAND` environment variable to the service definition in your application's `docker-compose.yml` file.
 This environment variable will contain the command that the container will use to serve your application using another process instead of the default process.
-
 
 #### Command Line
 
@@ -421,6 +427,7 @@ services:
     environment:
       SUPERVISOR_PHP_COMMAND: "php -S localhost:80 index.php"
 ```
+
 
 ## Debug Mode
 
@@ -442,6 +449,7 @@ services:
     environment:
       DEBUG: "1"
 ```
+
 
 ## Other System Settings
 
@@ -472,11 +480,13 @@ These Docker images include additional environment variables for fine-tuning con
 | `ENABLE_TUNING_FPM`                | Not enabled      | Enables auto-tuning of PM control settings when set to `1`.                                                                           | 0 |
 | `ENABLE_TUNING_MPM`                | Not enabled      | Enables auto-tuning of Apache MPM settings when set to `1`.                                                                           | 0 |
 
+
 ## Supported Platforms
 
 Check our [Docker Hub](https://hub.docker.com/r/shinsenter/php/tags) for all available platforms. The Docker images are available for both Debian and Alpine versions.
 
 > ℹ️ Note: We no longer maintain the `-tidy` tag names. If you are using Docker images with this tag, please replace them with the `-alpine` variant.
+
 
 ## Stable Image Tags
 
@@ -495,12 +505,14 @@ we also apply version tags on another repository.
 This way, you get frequently updated images under static tags,
 providing both the latest code and production stability.
 
+
 ## Contributing
 
 If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter)
 or opening an issue on [GitHub](https://code.shin.company/php/issues/new).
 
 Your support helps maintain and improve these images for the community.
+
 
 ## License
 

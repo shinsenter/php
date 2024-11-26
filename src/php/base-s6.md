@@ -5,11 +5,13 @@
 - Docker Hub: https://hub.docker.com/r/shinsenter/s6-overlay
 - GitHub Packages: https://code.shin.company/php/pkgs/container/s6-overlay
 
+
 ## Introduction
 
 Unpacked [s6-overlay](https://github.com/just-containers/s6-overlay) binaries which allow a single Dockerfile to support multiple platform build using techniques like BuildKit.
 
 > 💡 Hint: See [s6-overlay/README.md](https://github.com/just-containers/s6-overlay/blob/master/README.md) to learn more.
+
 
 ## Usage
 
@@ -26,6 +28,7 @@ ADD --from=shinsenter/s6-overlay:$S6_OVERLAY_VERSION / /
 ENTRYPOINT ["/init"]
 ```
 
+
 ## Supported Platforms
 
 - linux/386
@@ -36,12 +39,14 @@ ENTRYPOINT ["/init"]
 - linux/ppc64le
 - linux/s390x
 
+
 ## Contributing
 
 If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter)
 or opening an issue on [GitHub](https://code.shin.company/php/issues/new).
 
 Your support helps maintain and improve these images for the community.
+
 
 ## License
 
