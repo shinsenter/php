@@ -37,8 +37,16 @@ RUN env-default INITIAL_PROJECT "mautic/recommended-project"
 
 ################################################################################
 
-RUN web-cmd console 'php $(app-path)/bin/console'
-RUN web-cmd mautic  'php $(app-path)/bin/console'
+RUN <<'EOF'
+echo 'Install PHP extensions'
+[ -z "$DEBUG" ] || set -ex && set -e
+
+phpaddmod imap
+
+web-cmd console 'php $(app-path)/bin/console'
+web-cmd mautic  'php $(app-path)/bin/console'
+
+EOF
 
 ################################################################################
 

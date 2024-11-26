@@ -175,6 +175,7 @@ app-*)
     case $APP_NAME in
     cakephp4)
         # https://book.cakephp.org/4/en/installation.html
+        LATEST_PHP="8.3"
         verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
         ;;
     cakephp5)
@@ -204,6 +205,7 @@ app-*)
         ;;
     hyperf)
         # https://hyperf.wiki/3.1/#/en/quick-start/install
+        LATEST_PHP="8.3"
         BUILD_PLATFORM="linux/amd64,linux/arm/v7,linux/arm64/v8"
         BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.2"  && SKIP_BUILD=1
@@ -219,10 +221,12 @@ app-*)
         ;;
     kirby)
         # https://getkirby.com/docs/cookbook/setup/composer
+        LATEST_PHP="8.3"
         verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
         ;;
     laminas)
         # https://docs.laminas.dev/tutorials/getting-started/skeleton-application/
+        LATEST_PHP="8.3"
         BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.3" && SKIP_BUILD=1
         ;;
@@ -232,6 +236,7 @@ app-*)
         ;;
     magento)
         # https://experienceleague.adobe.com/en/docs/commerce-operations/installation-guide/system-requirements
+        LATEST_PHP="8.3"
         BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
         ;;
@@ -248,6 +253,7 @@ app-*)
         ;;
     spiral)
         # https://spiral.dev/docs/start-installation/current/en
+        LATEST_PHP="8.3"
         BUILD_FROM_IMAGE="$DEFAULT_REPO/roadrunner"
         BUILD_PLATFORM="linux/amd64,linux/arm64"
         verlt "$PHP_VERSION" "8.1" && SKIP_BUILD=1
