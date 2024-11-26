@@ -620,8 +620,6 @@ remove_platform() {
 if [ "$PHP_VERSION" != "" ]; then
     if verlt "$PHP_VERSION" "7.1"; then
         BUILD_PLATFORM="linux/amd64,linux/arm/v7"
-    elif [ "$OS_BASE" == "debian" ] && [ "$PHP_VERSION" == "8.4" ]; then
-        BUILD_PLATFORM="$(remove_platform "$BUILD_PLATFORM" 's390x')"
     elif [ "$OS_BASE" == "debian" ] && verlt "$PHP_VERSION" "7.3"; then
         BUILD_PLATFORM="$(remove_platform "$BUILD_PLATFORM" '386' 'ppc64le' 's390x')"
     fi

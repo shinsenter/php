@@ -2,9 +2,11 @@
 
 🌏 Latest Linux Docker base images featuring autorun and s6-overlay.
 
+
 ## Introduction
 
 Combine official [Ubuntu](http://hub.docker.com/_/ubuntu), [Debian](http://hub.docker.com/_/debian), and [Alpine Linux](http://hub.docker.com/_/alpine) Docker images with [s6-overlay](https://github.com/just-containers/s6-overlay) and an autorun mechanism. This setup simplifies the process of building portable, production-ready application containers across various architectures.
+
 
 ## Docker Image Variants
 
@@ -26,6 +28,7 @@ The Docker images are available for Debian, Ubuntu and Alpine versions.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/alpine-s6
 - GitHub Packages: https://code.shin.company/php/pkgs/container/alpine-s6
+
 
 ## Usage
 
@@ -61,6 +64,7 @@ FROM shinsenter/alpine-s6:latest
 # ADD --chown=$APP_USER:$APP_GROUP ./myproject/ /var/www/html/
 ```
 
+
 ## Application Directory
 
 The default application directory is `/var/www/html` and can be customized via the `$APP_PATH` environment variable:
@@ -70,6 +74,7 @@ docker run -v "$PWD":/app -e APP_PATH=/app shinsenter/ubuntu-s6:latest
 ```
 
 This changes the web application directory to `/app`.
+
 
 ## Customizing Container User and Group in Docker
 
@@ -100,6 +105,7 @@ services:
       APP_USER: "myapp"
       APP_UID: "5000"
 ```
+
 
 ## Autorun Scripts
 
@@ -144,6 +150,7 @@ services:
     environment:
       DISABLE_AUTORUN_SCRIPTS: "1"
 ```
+
 
 ## Using Cron Jobs
 
@@ -194,6 +201,7 @@ services:
 
 For more information on environment variables for cron jobs, refer to the [Other System Settings](#other-system-settings) section below.
 
+
 ## Debug Mode
 
 Enable "debug mode" for more verbose logging by setting `DEBUG=1` as an environment variable.
@@ -214,6 +222,7 @@ services:
     environment:
       DEBUG: "1"
 ```
+
 
 ## Other System Settings
 
@@ -236,12 +245,14 @@ These Docker images include additional environment variables for fine-tuning con
 | `CRONTAB_SHELL`                    | `/bin/sh`        | Sets the default shell for cron jobs.                                                                                                 | `/bin/bash` |
 | `CRONTAB_TZ`                       | `$TZ`            | Sets the default timezone for cron jobs. [Full list](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).                   | `Asia/Tokyo` |
 
+
 ## Contributing
 
 If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter)
 or opening an issue on [GitHub](https://code.shin.company/php/issues/new).
 
 Your support helps maintain and improve these images for the community.
+
 
 ## License
 

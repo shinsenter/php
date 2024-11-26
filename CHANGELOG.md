@@ -2,10 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+
+## [5.5.0] - XXXX-XX-XX
+
+- Various minor improvements.
+
+
 ## [5.4.0] - 2024-11-21
 
 - Use [PHP 8.4](https://www.php.net/ChangeLog-8.php#PHP_8_4) for the latest tags.
 - Various minor improvements.
+
 
 ## [5.3.0] - 2024-08-20
 
@@ -16,12 +23,14 @@ All notable changes to this project will be documented in this file.
 - Added a mechanism called "hooks", to trigger shell scripts during specific events. It will be useful, allowing users to add custom scripts such as migration scripts when the container starts, or after a project is newly created by Composer. I will document it in a later release.
 - Various minor improvements.
 
+
 ## [5.2.0] - 2024-08-10
 
 - The Docker images with `-tidy` tags are no longer supported. Please switch to `-alpine` images.
 - We’re working on improving build speed and resource efficiency.
 - Our new workflow creates two types of Docker images: stable images and development images (with `dev-` tags).
 - We’ve stopped maintaining Docker images for Crater, FuelPHP, and PHPixie due to their inactive development.
+
 
 ## [5.1.0] - 2024-08-01
 
@@ -43,17 +52,21 @@ Other updates:
 - Enhanced GitHub actions for building Docker images.
 - Various minor improvements.
 
+
 ## [5.0.3] - 2024-03-12
 
 Added Sulu containers, updated descriptions for Docker Hub repositories.
+
 
 ## [5.0.2] - 2024-02-23
 
 Tightened Apache directory permissions to deny access to dotfiles and system directories. This also fixes #59.
 
+
 ## [5.0.1] - 2024-02-16
 
 We have made some minor improvements to the content of debug messages and variable naming.
+
 
 ## [5.0.0] - 2024-02-15
 
@@ -74,11 +87,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 -->
 
+
 ## Contributing
 
 If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://code.shin.company/php/issues/new).
 
 Your support helps maintain and improve these images for the community.
+
 
 ## License
 

@@ -12,6 +12,7 @@ The Docker images are available for both Debian and Alpine versions.
 > <font color="orange">ℹ️ Note: These Docker images won’t be updated anymore since it looks like the framework hasn't been active in a long time.
 > You can still use the old Docker images. If you hear about any updates to the framework, please let us know.</font>
 
+
 ## Introduction
 
 Our PHP Docker images, available on [Docker Hub](https://hub.docker.com/r/shinsenter/php),
@@ -21,11 +22,13 @@ This approach eliminates the need to rebuild images when making configuration ch
 These images also come with the latest version of [Composer](https://getcomposer.org),
 enabling you to start projects quickly without additional installations.
 
+
 ## Usage
 
 [![shinsenter/php](https://repository-images.githubusercontent.com/458053748/17acf331-c504-4105-b692-1c0c02337085)](https://docker.shin.company/php)
 
 Check out [our documentation](https://hub.docker.com/r/shinsenter/php) to learn how to customize these Docker images for your projects.
+
 
 ## Creating a New Project
 
@@ -49,6 +52,7 @@ docker run -p 80:80 -p 443:443 -p 443:443/udp \
 
 The container will detect the empty directory mounted to `/var/www/html` and clone the framework source code into it.
 
+
 ## Using an Existing Project
 
 You can mount your application code from your host machine to the `/var/www/html` directory inside the container.
@@ -57,6 +61,7 @@ Because the source code is mounted as a volume,
 any changes made on the host machine will be reflected inside the container.
 This setup allows you to run builds, tests,
 and other tasks within the container while keeping your code on the host.
+
 
 ## Using HTTPS
 
@@ -107,6 +112,7 @@ services:
       - ./my_domain.key:/etc/ssl/site/server.key
 ```
 
+
 ## Stable Image Tags
 
 The release versions on [this GitHub repository](https://code.shin.company/php) don't guarantee
@@ -128,11 +134,13 @@ docker push your-repo/fuelphp:stable
 
 Then use the image `your-repo/fuelphp:stable` as a base image to build containers for production.
 
+
 ## Contributing
 
 If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://code.shin.company/php/issues/new).
 
 Your support helps maintain and improve these images for the community.
+
 
 ## License
 
