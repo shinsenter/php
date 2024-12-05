@@ -44,6 +44,7 @@ phpaddmod @fix_letsencrypt \
         bcmath \
         # bitset \
         # blackfire \
+        # brotli \
         # bz2 \
         calendar \
         # cassandra \
@@ -120,12 +121,15 @@ phpaddmod @fix_letsencrypt \
         pdo_pgsql \
         # pdo_sqlsrv \
         # pgsql \
+        # phalcon \
         # php_trie \
+        # phpy \
         # pkcs11 \
         # pq \
         # propro \
         # protobuf \
         # pspell \
+        # psr \
         # pthreads \
         # raphf \
         # rdkafka \
@@ -174,6 +178,7 @@ phpaddmod @fix_letsencrypt \
         # xlswriter \
         # xmldiff \
         # xmlrpc \
+        # xpass \
         # xsl \
         # yac \
         yaml \
