@@ -12,8 +12,6 @@ Combine official [Ubuntu](http://hub.docker.com/_/ubuntu), [Debian](http://hub.d
 
 The Docker images are available for Debian, Ubuntu and Alpine versions.
 
-> ℹ️ Note: We no longer maintain the `-tidy` tag names. If you are using Docker images with this tag, please replace them with the `-alpine` variant.
-
 #### Ubuntu
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/ubuntu-s6

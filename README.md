@@ -33,8 +33,6 @@ This setup allows for faster project initiation without additional installations
 Our image tags cover PHP versions from 5.6 to 8.4,
 available in `cli`, `zts`, `fpm`, `fpm-nginx`, `fpm-apache`, `roadrunner`<sup>(1)</sup>, `frankenphp`<sup>(2)</sup>, and `unit-php`<sup>(3)</sup> variants. The Docker images are available for both Debian and Alpine versions.
 
-> ℹ️ Note: We no longer maintain the `-tidy` tag names. If you are using Docker images with this tag, please replace them with the `-alpine` variant.
-
 Examples:
 - `shinsenter/php:7.2-cli`
 - `shinsenter/php:7.3-zts`
@@ -484,8 +482,6 @@ These Docker images include additional environment variables for fine-tuning con
 ## Supported Platforms
 
 Check our [Docker Hub](https://hub.docker.com/r/shinsenter/php/tags) for all available platforms. The Docker images are available for both Debian and Alpine versions.
-
-> ℹ️ Note: We no longer maintain the `-tidy` tag names. If you are using Docker images with this tag, please replace them with the `-alpine` variant.
 
 
 ## Stable Image Tags
