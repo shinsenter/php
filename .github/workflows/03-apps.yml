@@ -46,6 +46,7 @@ jobs:
           - app-cakephp4
           - app-cakephp5
           - app-codeigniter4
+          - app-coolify
           - app-drupal
           - app-espocrm
           - app-flarum
