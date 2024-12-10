@@ -1,9 +1,9 @@
-# shinsenter/laravel
+# shinsenter/coolify
 
-🔋 (PHP / Laravel) Production-ready Docker images with automatic Laravel installer.
+🔋 (PHP / Coolify) Production-ready Docker images with automatic Coolify installer.
 
-- Docker Hub: https://hub.docker.com/r/shinsenter/laravel
-- GitHub Packages: https://code.shin.company/php/pkgs/container/laravel
+- Docker Hub: https://hub.docker.com/r/shinsenter/coolify
+- GitHub Packages: https://code.shin.company/php/pkgs/container/coolify
 
 The Docker images are available for both Debian and Alpine versions.
 
@@ -42,7 +42,7 @@ mkdir myproject
 ```shell
 docker run -p 80:80 -p 443:443 -p 443:443/udp \
     -v ./myproject:/var/www/html \
-    shinsenter/laravel:latest
+    shinsenter/coolify:latest
 ```
 
 The container will detect the empty directory mounted to `/var/www/html` and clone the framework source code into it.
@@ -74,7 +74,7 @@ to enable true HTTPS for your production website.
 #### Using Dockerfile
 
 ```Dockerfile
-FROM shinsenter/laravel:latest
+FROM shinsenter/coolify:latest
 
 # Copy your own certs into the container
 COPY my_domain.crt /etc/ssl/site/server.crt
@@ -92,7 +92,7 @@ docker run -p 80:80 -p 443:443 -p 443:443/udp \
     -v ./myproject:/var/www/html \
     -v ./my_domain.crt:/etc/ssl/site/server.crt \
     -v ./my_domain.key:/etc/ssl/site/server.key \
-    shinsenter/laravel:latest
+    shinsenter/coolify:latest
 ```
 
 #### Using docker-compose
@@ -100,7 +100,7 @@ docker run -p 80:80 -p 443:443 -p 443:443/udp \
 ```yml
 services:
   web:
-    image: shinsenter/laravel:latest
+    image: shinsenter/coolify:latest
     volumes:
       - ./myproject:/var/www/html
       - ./my_domain.crt:/etc/ssl/site/server.crt
@@ -117,17 +117,17 @@ We build new Docker images daily to ensure they stay up-to-date
 with the latest upstream updates for PHP, base OS, Composer, etc.
 The images in this repo are regularly updated under the same tag names.
 
-But you can pull the image from `shinsenter/laravel:latest`,
+But you can pull the image from `shinsenter/coolify:latest`,
 and tag it with a name that indicates its stability,
-such as `your-repo/laravel:stable` using the below commands:
+such as `your-repo/coolify:stable` using the below commands:
 
 ```shell
-docker pull shinsenter/laravel:latest
-docker tag  shinsenter/laravel:latest your-repo/laravel:stable
-docker push your-repo/laravel:stable
+docker pull shinsenter/coolify:latest
+docker tag  shinsenter/coolify:latest your-repo/coolify:stable
+docker push your-repo/coolify:stable
 ```
 
-Then use the image `your-repo/laravel:stable` as a base image to build containers for production.
+Then use the image `your-repo/coolify:stable` as a base image to build containers for production.
 
 
 ## Contributing
