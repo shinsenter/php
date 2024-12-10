@@ -186,6 +186,11 @@ app-*)
         # https://codeigniter.com/user_guide/installation/index.html
         verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
         ;;
+    coolify)
+        # https://coolify.io/docs/installation
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
+        verlt "$PHP_VERSION" "8.2" && SKIP_BUILD=1
+        ;;
     drupal)
         # https://www.drupal.org/docs/getting-started/system-requirements/php-requirements
         verlt "$PHP_VERSION" "8.0" && SKIP_BUILD=1

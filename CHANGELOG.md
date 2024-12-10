@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 ## [5.5.0] - XXXX-XX-XX
 
+- Added Docker images for [Coolify](http://hub.docker.com/r/shinsenter/coolify).
 - Various minor improvements.
 
 

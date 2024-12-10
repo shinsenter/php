@@ -88,8 +88,6 @@ The config files here will be loaded into the Apache's default virtual host.
 
 Check our [Docker Hub](https://hub.docker.com/r/shinsenter/phpfpm-apache/tags) for all available platforms. The Docker images are available for both Debian and Alpine versions.
 
-> ℹ️ Note: We no longer maintain the `-tidy` tag names. If you are using Docker images with this tag, please replace them with the `-alpine` variant.
-
 
 ## Stable Image Tags
 
