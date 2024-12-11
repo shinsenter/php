@@ -26,7 +26,7 @@ ONBUILD RUN hook onbuild
 ################################################################################
 
 ADD  --link ./rootfs/ /
-COPY --link --chmod=755 --from=minio/mc:latest /usr/bin/mc /usr/bin/mc
+# COPY --link --chmod=755 --from=minio/mc:latest /usr/bin/mc /usr/bin/mc
 
 ################################################################################
 
