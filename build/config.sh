@@ -140,7 +140,7 @@ with-unit)
     PHP_VARIANT="zts$SUFFIX"
     ALLOW_RC=1
     if [ "$OS_BASE" == "alpine" ]; then
-        BUILD_PLATFORM="linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8"
+        BUILD_PLATFORM="linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8"
     fi
     ;;
 with-f8p)
