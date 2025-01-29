@@ -139,9 +139,6 @@ with-unit)
     BUILD_CACHE_KEY="(unit@$(echo "$unit_version" | head -c17))"
     PHP_VARIANT="zts$SUFFIX"
     ALLOW_RC=1
-    if [ "$OS_BASE" == "alpine" ]; then
-        BUILD_PLATFORM="linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8"
-    fi
     ;;
 with-f8p)
     verlt "$PHP_VERSION" "8.2" && SKIP_BUILD=1
