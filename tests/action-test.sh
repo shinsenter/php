@@ -34,7 +34,7 @@ export DOCKER_HOST=$(docker context inspect --format '{{.Endpoints.docker.Host}}
 set -xe
 act --bind --network host --use-gitignore=false --reuse=false --rm=true \
     --workflows "$BASE_DIR/.github/workflows/${ACTION_WORKFLOW:-02-servers.yml}" \
-    --platform "ubuntu-latest=catthehacker/ubuntu:act-22.04" \
+    --platform "ubuntu-22.04=catthehacker/ubuntu:act-22.04" \
     --secret-file "$BASE_DIR/build/.secrets" \
     --env "TESTING=1" \
     --env "SKIP_SQUASH=${SKIP_SQUASH:-1}" \
