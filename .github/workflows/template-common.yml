@@ -51,7 +51,7 @@ on:
 jobs:
   build:
     name: ${{ inputs.php_version }} ${{ inputs.app_name }} ${{ inputs.server }} ${{ inputs.os }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       packages: write
       contents: read
