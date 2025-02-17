@@ -71,6 +71,7 @@ SKIP_BUILD=${SKIP_BUILD:-}
 SKIP_SQUASH=${SKIP_SQUASH:-}
 USE_BUILD_CACHE=${USE_BUILD_CACHE:-1}
 
+MIRROR_REPO="${MIRROR_REPO:-ghcr.io/shinsenter}"
 PREFIX="${APP//app-/}"
 SUFFIX=
 
@@ -304,36 +305,36 @@ app-*)
 
     # override the default server variant
     case "$USE_SERVER" in
-        httpd|apache*)
-            if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/phpfpm-apache" ]; then
-                SUFFIX="-apache${SUFFIX}"
-                BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-apache"
-            fi
-            ;;
-        nginx)
-            if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/phpfpm-nginx" ]; then
-                SUFFIX="-nginx${SUFFIX}"
-                BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
-            fi
-            ;;
-        unit)
-            if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/unit-php" ]; then
-                SUFFIX="-unit${SUFFIX}"
-                BUILD_FROM_IMAGE="$DEFAULT_REPO/unit-php"
-            fi
-            ;;
-        f8p|frankenphp)
-            if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/frankenphp" ]; then
-                SUFFIX="-frankenphp${SUFFIX}"
-                BUILD_FROM_IMAGE="$DEFAULT_REPO/frankenphp"
-            fi
-            ;;
-        rr|roadrunner)
-            if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/roadrunner" ]; then
-                SUFFIX="-roadrunner${SUFFIX}"
-                BUILD_FROM_IMAGE="$DEFAULT_REPO/roadrunner"
-            fi
-            ;;
+    httpd | apache*)
+        if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/phpfpm-apache" ]; then
+            SUFFIX="-apache${SUFFIX}"
+            BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-apache"
+        fi
+        ;;
+    nginx)
+        if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/phpfpm-nginx" ]; then
+            SUFFIX="-nginx${SUFFIX}"
+            BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
+        fi
+        ;;
+    unit)
+        if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/unit-php" ]; then
+            SUFFIX="-unit${SUFFIX}"
+            BUILD_FROM_IMAGE="$DEFAULT_REPO/unit-php"
+        fi
+        ;;
+    f8p | frankenphp)
+        if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/frankenphp" ]; then
+            SUFFIX="-frankenphp${SUFFIX}"
+            BUILD_FROM_IMAGE="$DEFAULT_REPO/frankenphp"
+        fi
+        ;;
+    rr | roadrunner)
+        if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/roadrunner" ]; then
+            SUFFIX="-roadrunner${SUFFIX}"
+            BUILD_FROM_IMAGE="$DEFAULT_REPO/roadrunner"
+        fi
+        ;;
     esac
 
     # get checksum of the base image
@@ -393,7 +394,7 @@ append_tags() {
     local new_string=""
     for item in ${csv_string//,/ }; do
         new_string+="${new_string:+,}$item"
-        if echo "$item"| grep -v "$exclude" | grep -Eq "$search"; then
+        if echo "$item" | grep -v "$exclude" | grep -Eq "$search"; then
             local new_item=${item/$search/$replace}
             new_string+="${new_string:+,}$new_item"
         fi
@@ -508,7 +509,7 @@ if [ "$PUBLISH_TO_GHCR" == "1" ]; then
 fi
 
 # also push a copy to archived repo
-if [ "$ARCHIVES_REPO" != "" ]  && [ "$BUILD_TAG_PREFIX" == "" ]; then
+if [ "$ARCHIVES_REPO" != "" ] && [ "$BUILD_TAG_PREFIX" == "" ]; then
     unique_id="$(date +%Y%m%d)"
     BUILD_TAGS="$(append_tags "${DEFAULT_BUILD_NAME}:" "${ARCHIVES_REPO}:${unique_id}-" "$BUILD_TAGS" ":dev-")"
 fi
@@ -578,7 +579,6 @@ if [ ! -e "$BUILD_CACHE_PATH" ]; then
     mkdir -p "${BUILD_CACHE_PATH}-new" 2>&1
 fi
 
-
 BUILD_CACHE_KEY="($APP@$BUILD_TAG)${BUILD_CACHE_KEY:+/}$BUILD_CACHE_KEY"
 
 if [ "$S6_VERSION" != "" ]; then
@@ -642,6 +642,15 @@ fi
 # remove -rc from PHP_VERSION
 if [ "$BUILD_FROM_IMAGE" != "php" ]; then
     PHP_VERSION=${PHP_VERSION//-rc/}
+fi
+
+################################################################################
+# Fix image name for RC versions
+################################################################################
+
+# use mirror repos for pulling docker images
+if [ "$MIRROR_REPO" != "" ]; then
+    BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE//$DEFAULT_REPO/$MIRROR_REPO}
 fi
 
 ################################################################################
