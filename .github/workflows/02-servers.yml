@@ -39,7 +39,6 @@ jobs:
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
     strategy:
-      max-parallel: 11
       matrix:
         app:
           - with-apache

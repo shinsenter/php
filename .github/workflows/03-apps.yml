@@ -39,7 +39,7 @@ jobs:
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
     strategy:
-      max-parallel: 11
+      max-parallel: 4
       matrix:
         app:
           - app-bedrock
