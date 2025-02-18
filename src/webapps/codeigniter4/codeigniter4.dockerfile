@@ -1,4 +1,4 @@
-# syntax = devthefuture/dockerfile-x:v1
+# syntax = ghcr.io/shinsenter/dockerfile-x:v1
 ################################################################################
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
