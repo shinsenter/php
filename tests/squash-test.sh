@@ -25,6 +25,10 @@ fi
 
 . $BASE_DIR/build/helpers.sh
 
+# docker logout ghcr.io
+# . $BASE_DIR/build/.secrets
+# echo $GITHUB_TOKEN | docker login ghcr.io -u shinsenter --password-stdin
+
 platform="linux/${PLATFORM:-amd64}"
 variant="${PHP_VARIANT:-}"
 dockerfile="$BASE_DIR/src/${DOCKERFILE:-php/base-php.dockerfile}"
