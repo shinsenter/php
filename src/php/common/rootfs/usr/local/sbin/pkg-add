@@ -23,14 +23,15 @@ alpine() {
 }
 
 debian() {
+    local options="-yq --allow-unauthenticated"
     if [ $# -gt 0 ]; then
-        apt-get update -yq | debug-echo -l
+        apt-get update $options | debug-echo -l
         for pkg; do
             if [ "$pkg" = "upgrade" ] || [ "$pkg" = "update" ]; then
-                apt-get upgrade -yq | debug-echo -l
+                apt-get upgrade $options | debug-echo -l
             else
                 debug-echo -i "\nInstall $pkg"
-                apt-get install -yq --no-install-recommends --no-install-suggests $pkg | debug-echo -l
+                apt-get install $options --no-install-recommends --no-install-suggests $pkg | debug-echo -l
             fi
         done
     fi
