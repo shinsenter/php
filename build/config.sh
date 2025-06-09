@@ -338,7 +338,7 @@ app-*)
     esac
 
     # get checksum of the base image
-    BUILD_CACHE_KEY="($BUILD_FROM_IMAGE@$(get_dockerhub_latest_sha "$BUILD_FROM_IMAGE" 1 "php$PHP_VERSION" | head -c17))"
+    # BUILD_CACHE_KEY="($BUILD_FROM_IMAGE@$(get_dockerhub_latest_sha "$BUILD_FROM_IMAGE" 1 "php$PHP_VERSION" | head -c17))"
     ;;
 
 *)
@@ -645,10 +645,9 @@ if [ "$BUILD_FROM_IMAGE" != "php" ]; then
 fi
 
 ################################################################################
-# Fix image name for RC versions
+# Use mirror repos for pulling docker images
 ################################################################################
 
-# use mirror repos for pulling docker images
 if [ "$MIRROR_REPO" != "" ]; then
     BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE//$DEFAULT_REPO/$MIRROR_REPO}
 fi

@@ -43,6 +43,41 @@ jobs:
           tag_prefix=$(if [[ $ref_type != 'tag' ]] && [[ $ref != 'refs/heads/main' ]]; then echo 'dev-'; fi)
           build_all=$(if [[ $event_name != 'schedule' ]] || [[ $the_day == '01' ]]; then echo '1'; fi)
 
+          # Cache requests
+          get_github_latest_tag "composer/composer"
+          get_github_latest_tag "just-containers/s6-overlay"
+          get_github_latest_tag "mlocati/docker-php-extension-installer"
+          get_github_latest_tag "nginx/unit"
+          get_github_latest_tag "roadrunner-server/roadrunner"
+          get_dockerhub_latest_sha "library/debian"
+          get_dockerhub_latest_sha "library/alpine"
+
+          distros=(debian alpine)
+          php_versions=(
+            7.1 7.2 7.3 7.4 8.0
+            8.1 8.2 8.3 8.4
+          )
+          variants=(cli fpm zts)
+
+          for distro in "${distros[@]}"; do
+            echo get_dockerhub_latest_sha "library/$distro"
+            for version in "${php_versions[@]}"; do
+              for variant in "${variants[@]}"; do
+                if [ "$distro" == "debian" ]; then
+                  echo get_dockerhub_latest_sha "library/php" 1 "$version-$variant"
+                  if [ "$variant" == "zts" ]; then
+                    echo get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php$version"
+                  fi
+                else
+                  echo get_dockerhub_latest_sha "library/php" 1 "$version-$variant-$distro"
+                  if [ "$variant" == "zts" ]; then
+                    echo get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php$version-$distro"
+                  fi
+                fi
+              done
+            done
+          done
+
           # For debugging purposes
           echo "the_day=$the_day" >> "$GITHUB_OUTPUT"
           echo "tag_prefix=$tag_prefix" >> "$GITHUB_OUTPUT"
@@ -52,6 +87,11 @@ jobs:
           echo "github.ref        = $ref"
           echo "tag_prefix        = $tag_prefix"
           echo "build_all         = $(if [ ! -z "$build_all" ]; then echo 'yes, includes outdated versions'; else echo 'no, only maintained versions'; fi)"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          overwrite: true
+          path: /tmp/helper_cache/
 
   s6:
     uses: ./.github/workflows/00-s6-overlay.yml

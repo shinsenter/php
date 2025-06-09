@@ -35,26 +35,48 @@ timestamp() {
     date +%s
 }
 
-# Function to get remote json
-get_remote_json () {
-    echo "Fetching $@" 1>&2
-    if [ "$TOKEN" != "" ]; then
-        curl --retry 3 --retry-delay 5 -ksL \
-            --header "Authorization: Bearer $TOKEN" \
-            --request GET --url "$@" | tr -d '[:cntrl:]'
+# Function to fetch and cache remote content
+fetch_with_cache() {
+    local url="$@"
+    local cache_dir="/tmp/helper_cache"
+    local today=$(date +"%Y%m%d")
+    local hash=$(echo -n "$url" | md5sum | awk '{print $1}')
+    local cache_file="${cache_dir}/${today}_${hash}.cache"
+
+    mkdir -p "$cache_dir"
+
+    if [[ -f "$cache_file" ]]; then
+        cat "$cache_file"
     else
-        curl --retry 3 --retry-delay 5 -ksL "$@" | tr -d '[:cntrl:]'
+        echo "Fetching $@" 1>&2
+        content=$(
+            if [ "$TOKEN" != "" ]; then
+                curl --retry 3 --retry-delay 5 -ksL \
+                    --header "Authorization: Bearer $TOKEN" \
+                    --request GET --url "$url"
+            else
+                curl --retry 3 --retry-delay 5 -ksL "$url"
+            fi
+        )
+
+        if [[ $? -eq 0 && -n "$content" ]]; then
+            echo "$content" | tr -d '[:cntrl:]' >"$cache_file"
+            cat "$cache_file"
+        else
+            echo "Failed to fetch content from $url" >&2
+            return 1
+        fi
     fi
 }
 
 # Function to get metadata from GitHub
 get_github_json () {
-    TOKEN="$GITHUB_TOKEN" get_remote_json "https://api.github.com/repos/$1/tags?per_page=10&$2"
+    TOKEN="$GITHUB_TOKEN" fetch_with_cache "https://api.github.com/repos/$1/tags?per_page=10&$2"
 }
 
 # Function to get metadata from Docker Hub
 get_dockerhub_json () {
-    TOKEN="$DOCKERHUB_TOKEN" get_remote_json "https://registry.hub.docker.com/v2/repositories/$1/tags?&page_size=10&status=active&sort=last_updated&$2"
+    TOKEN="$DOCKERHUB_TOKEN" fetch_with_cache "https://registry.hub.docker.com/v2/repositories/$1/tags?&page_size=10&status=active&sort=last_updated&$2"
 }
 
 # For GitHub
@@ -62,8 +84,8 @@ get_github_latest_tag () { get_github_json "$1" | jq -r '.[].name // empty' | he
 get_github_latest_sha () { get_github_json "$1" | jq -r '.[].commit.sha // empty' | head -n ${2:-1}; }
 
 # For Docker Hub
-get_dockerhub_latest_tag () { get_dockerhub_json "$1" "name=${3:-}" | jq -r '.results|.[].name // empty' | head -n ${2:-1}; }
-get_dockerhub_latest_sha () { get_dockerhub_json "$1" "name=${3:-}" | jq -r '.results|.[].digest // empty' | head -n ${2:-1}; }
+get_dockerhub_latest_tag () { get_dockerhub_json "$1" "name=${3:-latest}" | jq -r '.results|.[].name // empty' | head -n ${2:-1}; }
+get_dockerhub_latest_sha () { get_dockerhub_json "$1" "name=${3:-latest}" | jq -r '.results|.[].digest // empty' | head -n ${2:-1}; }
 
 # Function to set environment variables
 github_env() {
