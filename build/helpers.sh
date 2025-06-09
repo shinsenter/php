@@ -35,15 +35,37 @@ timestamp() {
     date +%s
 }
 
-# Function to get remote json
-get_remote_json () {
-    echo "Fetching $@" 1>&2
-    if [ "$TOKEN" != "" ]; then
-        curl --retry 3 --retry-delay 5 -ksL \
-            --header "Authorization: Bearer $TOKEN" \
-            --request GET --url "$@" | tr -d '[:cntrl:]'
+# Function to fetch and cache remote content
+fetch_with_cache() {
+    local url="$@"
+    local cache_dir="/tmp/curl_cache"
+    local today=$(date +"%Y%m%d")
+    local hash=$(echo -n "$url" | md5sum | awk '{print $1}')
+    local cache_file="${cache_dir}/${today}_${hash}.cache"
+
+    mkdir -p "$cache_dir"
+
+    if [[ -f "$cache_file" ]]; then
+        cat "$cache_file"
     else
-        curl --retry 3 --retry-delay 5 -ksL "$@" | tr -d '[:cntrl:]'
+        echo "Fetching $@" 1>&2
+        content=$(
+            if [ "$TOKEN" != "" ]; then
+                curl --retry 3 --retry-delay 5 -ksL \
+                    --header "Authorization: Bearer $TOKEN" \
+                    --request GET --url "$url"
+            else
+                curl --retry 3 --retry-delay 5 -ksL "$url"
+            fi
+        )
+
+        if [[ $? -eq 0 && -n "$content" ]]; then
+            echo "$content" | tr -d '[:cntrl:]' >"$cache_file"
+            cat "$cache_file"
+        else
+            echo "Failed to fetch content from $url" >&2
+            return 1
+        fi
     fi
 }
 
