@@ -33,6 +33,8 @@ jobs:
       tag_prefix: ${{ steps.init.outputs.tag_prefix }}
       build_all: ${{ steps.init.outputs.build_all == '1' }}
     steps:
+      - uses: actions/checkout@v4
+
       - name: pre-build debug
         id: init
         run: |
@@ -44,6 +46,7 @@ jobs:
           build_all=$(if [[ $event_name != 'schedule' ]] || [[ $the_day == '01' ]]; then echo '1'; fi)
 
           # Cache requests
+          . ./build/helpers.sh
           get_github_latest_tag "composer/composer"
           get_github_latest_tag "just-containers/s6-overlay"
           get_github_latest_tag "mlocati/docker-php-extension-installer"
@@ -60,18 +63,18 @@ jobs:
           variants=(cli fpm zts)
 
           for distro in "${distros[@]}"; do
-            echo get_dockerhub_latest_sha "library/$distro"
+            get_dockerhub_latest_sha "library/$distro"
             for version in "${php_versions[@]}"; do
               for variant in "${variants[@]}"; do
                 if [ "$distro" == "debian" ]; then
-                  echo get_dockerhub_latest_sha "library/php" 1 "$version-$variant"
+                  get_dockerhub_latest_sha "library/php" 1 "$version-$variant"
                   if [ "$variant" == "zts" ]; then
-                    echo get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php$version"
+                    get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php$version"
                   fi
                 else
-                  echo get_dockerhub_latest_sha "library/php" 1 "$version-$variant-$distro"
+                  get_dockerhub_latest_sha "library/php" 1 "$version-$variant-$distro"
                   if [ "$variant" == "zts" ]; then
-                    echo get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php$version-$distro"
+                    get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php$version-$distro"
                   fi
                 fi
               done
