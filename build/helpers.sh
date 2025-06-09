@@ -38,7 +38,7 @@ timestamp() {
 # Function to fetch and cache remote content
 fetch_with_cache() {
     local url="$@"
-    local cache_dir="/tmp/curl_cache"
+    local cache_dir="/tmp/helper_cache"
     local today=$(date +"%Y%m%d")
     local hash=$(echo -n "$url" | md5sum | awk '{print $1}')
     local cache_file="${cache_dir}/${today}_${hash}.cache"
@@ -71,12 +71,12 @@ fetch_with_cache() {
 
 # Function to get metadata from GitHub
 get_github_json () {
-    TOKEN="$GITHUB_TOKEN" get_remote_json "https://api.github.com/repos/$1/tags?per_page=10&$2"
+    TOKEN="$GITHUB_TOKEN" fetch_with_cache "https://api.github.com/repos/$1/tags?per_page=10&$2"
 }
 
 # Function to get metadata from Docker Hub
 get_dockerhub_json () {
-    TOKEN="$DOCKERHUB_TOKEN" get_remote_json "https://registry.hub.docker.com/v2/repositories/$1/tags?&page_size=10&status=active&sort=last_updated&$2"
+    TOKEN="$DOCKERHUB_TOKEN" fetch_with_cache "https://registry.hub.docker.com/v2/repositories/$1/tags?&page_size=10&status=active&sort=last_updated&$2"
 }
 
 # For GitHub
@@ -84,8 +84,8 @@ get_github_latest_tag () { get_github_json "$1" | jq -r '.[].name // empty' | he
 get_github_latest_sha () { get_github_json "$1" | jq -r '.[].commit.sha // empty' | head -n ${2:-1}; }
 
 # For Docker Hub
-get_dockerhub_latest_tag () { get_dockerhub_json "$1" "name=${3:-}" | jq -r '.results|.[].name // empty' | head -n ${2:-1}; }
-get_dockerhub_latest_sha () { get_dockerhub_json "$1" "name=${3:-}" | jq -r '.results|.[].digest // empty' | head -n ${2:-1}; }
+get_dockerhub_latest_tag () { get_dockerhub_json "$1" "name=${3:-latest}" | jq -r '.results|.[].name // empty' | head -n ${2:-1}; }
+get_dockerhub_latest_sha () { get_dockerhub_json "$1" "name=${3:-latest}" | jq -r '.results|.[].digest // empty' | head -n ${2:-1}; }
 
 # Function to set environment variables
 github_env() {
