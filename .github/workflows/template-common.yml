@@ -69,6 +69,10 @@ jobs:
     steps:
       -
         if: ${{ !env.SKIP_BUILD }}
+        uses: actions/download-artifact@v4
+
+      -
+        if: ${{ !env.SKIP_BUILD }}
         uses: actions/checkout@v4
         with:
           submodules: 'true'
