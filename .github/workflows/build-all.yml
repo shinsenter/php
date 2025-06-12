@@ -38,6 +38,7 @@ jobs:
       - name: pre-build debug
         id: init
         run: |
+          # Prepare variables
           the_day=$(date -u +"%d")
           event_name=${{ github.event_name }}
           ref_type=${{ github.ref_type }}
@@ -56,11 +57,12 @@ jobs:
           get_dockerhub_latest_sha "library/alpine"
 
           distros=(debian alpine)
-          php_versions=(
-            7.1 7.2 7.3 7.4 8.0
-            8.1 8.2 8.3 8.4
-          )
           variants=(cli fpm zts)
+          php_versions=(8.4 8.3 8.2 8.1)
+
+          if [ ! -z "$build_all" ]; then
+            php_versions+=(8.0 7.4 7.3 7.2 7.1 7.0 5.6)
+          fi
 
           for distro in "${distros[@]}"; do
             get_dockerhub_latest_sha "library/$distro"
