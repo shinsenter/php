@@ -37,6 +37,7 @@ jobs:
     uses: ./.github/workflows/template-common.yml
     secrets: inherit
     strategy:
+      fail-fast: false
       matrix:
         os:
           - ""

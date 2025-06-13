@@ -39,6 +39,7 @@ jobs:
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
     strategy:
+      fail-fast: false
       matrix:
         app:
           - with-apache
