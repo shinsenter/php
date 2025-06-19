@@ -99,34 +99,154 @@ jobs:
           overwrite: true
           path: /tmp/helper_cache/
 
-  s6:
-    uses: ./.github/workflows/00-s6-overlay.yml
+  ##########################################################
+
+  s6-overlay:
+    uses: ./.github/workflows/template-common.yml
+    secrets: inherit
+    with:
+      app_name: "base-s6"
+      os: "alpine"
+
+  linux-s6:
+    name: ${{ matrix.os == '' && 'debian' || matrix.os }}-s6
+    uses: ./.github/workflows/template-common.yml
+    secrets: inherit
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ""
+          - "ubuntu"
+          - "alpine"
+    with:
+      app_name: "base-os"
+      os: ${{ matrix.os }}
+      tag_prefix: ${{ inputs.tag_prefix }}
+
+  ##########################################################
+
+  php-cli:
+    uses: ./.github/workflows/template-php.yml
     secrets: inherit
     needs: [prepare]
     with:
+      app_name: cli
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
+      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
 
-  php:
-    uses: ./.github/workflows/01-php.yml
+  php-fpm:
+    uses: ./.github/workflows/template-php.yml
     secrets: inherit
     needs: [prepare]
     with:
+      app_name: fpm
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
       build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
 
-  php-servers:
-    uses: ./.github/workflows/02-servers.yml
+  php-zts:
+    uses: ./.github/workflows/template-php.yml
     secrets: inherit
-    needs: [prepare, php]
+    needs: [prepare]
     with:
+      app_name: zts
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
       build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
 
-  php-apps:
-    uses: ./.github/workflows/03-apps.yml
+  ##########################################################
+
+  cli-servers:
+    uses: ./.github/workflows/template-php.yml
     secrets: inherit
-    needs: [prepare, php-servers]
+    needs: [prepare, php-cli]
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - with-roadrunner
     with:
+      app_name: ${{ matrix.app }}
+      tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
+      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
+
+  fpm-servers:
+    uses: ./.github/workflows/template-php.yml
+    secrets: inherit
+    needs: [prepare, php-fpm]
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - with-apache
+          - with-nginx
+    with:
+      app_name: ${{ matrix.app }}
+      tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
+      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
+
+  zts-servers:
+    uses: ./.github/workflows/template-php.yml
+    secrets: inherit
+    needs: [prepare, php-zts]
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - with-f8p
+          - with-unit
+    with:
+      app_name: ${{ matrix.app }}
+      tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
+      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
+
+  ##########################################################
+
+  php-frameworks:
+    uses: ./.github/workflows/template-php.yml
+    secrets: inherit
+    needs: [prepare, fpm-servers]
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - app-bedrock
+          - app-cakephp4
+          - app-cakephp5
+          - app-codeigniter4
+          - app-coolify
+          - app-drupal
+          - app-espocrm
+          - app-flarum
+          - app-grav
+          - app-hyperf
+          - app-invoiceshelf
+          - app-kirby
+          - app-laminas
+          - app-laravel
+          - app-magento
+          - app-mautic
+          - app-phpmyadmin
+          - app-slim
+          - app-statamic
+          - app-sulu
+          - app-symfony
+          - app-wordpress
+          - app-yii
+        # include:
+        #   - app: app-laravel
+        #     server: [apache, nginx]
+    with:
+      app_name: ${{ matrix.app }}
+      server: ${{ matrix.server }}
+      tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
+      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
+
+  spiral:
+    uses: ./.github/workflows/template-php.yml
+    secrets: inherit
+    needs: [prepare, cli-servers]
+    with:
+      app_name: app-spiral
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
       build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
 
