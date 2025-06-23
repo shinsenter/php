@@ -132,8 +132,13 @@ jobs:
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
     needs: [prepare]
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - fpm
     with:
-      app_name: fpm
+      app_name: ${{ matrix.app }}
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
       build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
 
@@ -141,8 +146,13 @@ jobs:
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
     needs: [prepare]
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - cli
     with:
-      app_name: cli
+      app_name: ${{ matrix.app }}
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
       build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
 
@@ -150,8 +160,13 @@ jobs:
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
     needs: [prepare]
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - zts
     with:
-      app_name: zts
+      app_name: ${{ matrix.app }}
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
       build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
 
@@ -203,7 +218,8 @@ jobs:
 
   ##########################################################
 
-  php-frameworks:
+  popular-frameworks:
+    name: ${{ matrix.app }}
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
     needs: [prepare, fpm-servers]
@@ -243,12 +259,18 @@ jobs:
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
       build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
 
-  spiral:
+  other-frameworks:
+    name: ${{ matrix.app }}
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
     needs: [prepare, cli-servers]
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - app-spiral
     with:
-      app_name: app-spiral
+      app_name: ${{ matrix.app }}
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
       build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
 
