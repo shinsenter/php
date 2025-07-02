@@ -36,7 +36,7 @@ export APP_PATH="$(app-path)"
 export APP_ROOT="$(app-root)"
 if [ -f /etc/caddy/envvars ]; then source /etc/caddy/envvars; fi
 
-cd $APP_PATH
+cd "$APP_PATH"
 exec frankenphp run --config /etc/caddy/Caddyfile --adapter caddyfile
 '
 fi

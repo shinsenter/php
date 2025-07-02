@@ -58,5 +58,5 @@ if ! has-s6 && has-cmd crond; then
     export APP_ROOT="$(app-root)"
     CROND_PID=/var/run/crond.pid
     if [ -f $CROND_PID ]; then kill -TERM $(cat $CROND_PID) &>/dev/null || rm -f $CROND_PID; fi
-    cd $APP_PATH && with-env crond $CRONTAB_OPTIONS;
+    cd "$APP_PATH" && with-env crond $CRONTAB_OPTIONS;
 fi
