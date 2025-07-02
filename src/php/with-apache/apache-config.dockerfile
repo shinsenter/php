@@ -90,7 +90,7 @@ export APP_PATH="$(app-path)"
 export APP_ROOT="$(app-root)"
 if [ -f /etc/apache2/envvars ]; then source /etc/apache2/envvars; fi
 
-cd $APP_PATH
+cd "$APP_PATH"
 rm -f ${APACHE_PID:-/run/apache2.pid}
 if is-debug; then
     exec apache2 -e error -DFOREGROUND -X

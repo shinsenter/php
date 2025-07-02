@@ -9,6 +9,7 @@
 
 conf_path="${ENV:=/etc/.docker-env}"
 
+# correct path for the container
 if [ ! -f $conf_path ]; then
     mkdir -p "$(dirname $conf_path)"
     echo '#!/bin/sh
@@ -24,6 +25,7 @@ export PATH="$NEW_PATH"
     chmod +x $conf_path
 fi
 
+# print the environment variables when the command argument is empty
 if [ $# -eq 0 ]; then
     source $conf_path && env -0 | sort -dbfiz | tr '\0' '\n'
     exit
@@ -31,16 +33,19 @@ fi
 
 line="$@"
 
+# add a comment if the command argument starts with #
 if [ "${line:0:1}" = "#" ]; then
     echo -e "\n${line}\n# ------------------------------------------------------------ #" >>$conf_path
     exit
 fi
 
+# add a bash alias
 if [ "${line:0:6}" = "alias " ]; then
     echo "$line" >>$conf_path
     exit
 fi
 
+# add an environment variable
 name="$1"; shift
 set -- "$(echo "$@" | sed -e 's/\([\\"]\)/\\\1/g')"
 sed -i "/$name=/d" $conf_path &>/dev/null

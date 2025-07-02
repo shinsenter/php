@@ -108,6 +108,24 @@ services:
 ```
 
 
+## Environment variables
+
+You can optionally set the following environment variables in the container to enable certain services to run alongside the web server.
+
+> 📝 Note: you’ll need to install the required packages and create the necessary configs yourself for features like Pulse or Laravel Horizon.
+
+| Environment Variable           | Description             |
+|--------------------------------|-------------------------|
+| `LARAVEL_ENABLE_QUEUE_WORKER`  | Enables supervisor service for the Laravel queue worker. Set to `1` to start processing jobs. |
+| `LARAVEL_QUEUE_WORKER_OPTIONS` | Defines custom options for the Laravel queue worker (e.g., connection, delay). |
+| `LARAVEL_ENABLE_SCHEDULER`     | Enables supervisor service for the Laravel scheduler. Set to `1` to run scheduled tasks. |
+| `LARAVEL_SCHEDULER_OPTIONS`    | Specifies additional options for the scheduler execution. |
+| `LARAVEL_ENABLE_PULSE`         | Enables supervisor service for Laravel Pulse for application performance monitoring. |
+| `LARAVEL_PULSE_OPTIONS`        | Configuration options for Laravel Pulse (e.g., port, storage). |
+| `LARAVEL_ENABLE_HORIZON`       | Enables supervisor service for Laravel Horizon, a dashboard for managing queues. |
+| `LARAVEL_HORIZON_OPTIONS`      | Options for customizing Horizon behavior (e.g., environment, queue names). |
+
+
 ## Stable Image Tags
 
 The release versions on [this GitHub repository](https://code.shin.company/php) don't guarantee
