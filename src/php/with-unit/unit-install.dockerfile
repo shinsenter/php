@@ -81,7 +81,7 @@ build() {
 build unitd-debug --debug
 build unitd
 
-cd $HOME
+cd "$HOME"
 
 # clean up
 rm -rf /tmp/*

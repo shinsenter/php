@@ -64,7 +64,7 @@ exec php-fpm -y /usr/local/etc/php-fpm.d/zz-generated-settings.conf --nodaemoniz
 export APP_PATH="$(app-path)"
 export APP_ROOT="$(app-root)"
 
-cd $APP_PATH
+cd "$APP_PATH"
 rm -rf ${NGINX_PID:-/run/nginx.pid}
 exec nginx -g "daemon off;"
 '

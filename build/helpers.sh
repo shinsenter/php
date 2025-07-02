@@ -46,6 +46,7 @@ fetch_with_cache() {
     mkdir -p "$cache_dir"
 
     if [[ -f "$cache_file" ]]; then
+        echo "Cache found for $url" 1>&2
         cat "$cache_file"
     else
         echo "Fetching $@" 1>&2

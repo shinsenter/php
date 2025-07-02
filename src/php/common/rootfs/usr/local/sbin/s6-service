@@ -7,19 +7,19 @@
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-# Generate S6 service files
-# See: https://github.com/just-containers/s6-overlay#writing-a-service-script
-
-s6="/etc/s6-overlay/s6-rc.d"
-set -e
-
-name="$1"
-shift
-
-if [ -z "$name" ]; then
-    debug-echo -w "Usage: ${0##*/} <service-name> [longrun|oneshot|depends|finish|down] [exec script]"
+# show usage if no arguments are passed
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; then
+    debug-echo -w "Simple wrapper for adding s6-overlay services"
+    debug-echo -w "  Usage: ${0##*/} [service-name] [longrun|oneshot|needs|finish|down] [script file path|inline script]"
+    debug-echo -w "  For example: ${0##*/} greeting oneshot \"echo 'hello world!'\""
+    debug-echo -w "  For example: ${0##*/} apache longrun /path/to/apache/start.sh"
+    debug-echo -w "  For example: ${0##*/} apache needs php-fpm"
     exit 1
 fi
+
+# s6-overlay service directory
+s6="/etc/s6-overlay/s6-rc.d"
+set -e
 
 ################################################################################
 
@@ -36,24 +36,42 @@ create() {
 
 ################################################################################
 
-# get service type
-type="${1:oneshot}"
-shift
+# get service type and name
+name="$1"; shift
+type="$1"; shift
 
-if [ "$type" = "depends" ]; then
+# default type
+if [ -z "$type" ]; then type="oneshot"; fi
+
+# default name
+if [ -z "$name" ]; then name="00-default"; fi
+
+# get script contents from existing file
+if [ -f "$@" ]; then set -- "$(cat $@)"; fi
+
+################################################################################
+
+# add service dependencies
+if [ "$type" = "depends" ] || [ "$type" = "needs" ]; then
     create "${s6}/${name}/dependencies.d/$1"
     exit $?
 fi
 
-# get script contents
-if [ -f "$@" ]; then set -- "$(cat $@)"; fi
+################################################################################
+
+# throw a warning if service directory already exists
+if [ -d "${s6}/${name}" ]; then
+    debug-echo -w "Service ${name} already exists. Skipping creation."
+    exit 0
+fi
+
+# Generate S6 service files
+# See: https://github.com/just-containers/s6-overlay#writing-a-service-script
 
 if [ "$type" = "down" ] || [ "$type" = "finish" ]; then
     create "${s6}/${name}/${type}" "$@"
     exit $?
 fi
-
-################################################################################
 
 if [ "$type" = "oneshot" ]; then
     create "${s6}/${name}/up" "exec ${s6}/${name}/run"

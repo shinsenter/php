@@ -18,7 +18,7 @@ if has-cmd s6-service; then
 export APP_PATH="$(app-path)"
 export APP_ROOT="$(app-root)"
 
-cd $APP_PATH
+cd "$APP_PATH"
 exec /usr/local/bin/rr -w "$(app-path)" \
     -o http.address=0.0.0.0:80 \
     -o http.ssl.address=0.0.0.0:443 \

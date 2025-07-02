@@ -24,7 +24,7 @@ if has-cmd s6-service; then
 if is-true $ENABLE_CRONTAB; then
     export APP_PATH="$(app-path)"
     export APP_ROOT="$(app-root)"
-    cd $APP_PATH && exec crond -f $CRONTAB_OPTIONS
+    cd "$APP_PATH" && exec crond -f $CRONTAB_OPTIONS
 else
     exec s6-svc -Od .
 fi

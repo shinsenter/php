@@ -51,7 +51,7 @@ if has-cmd s6-service; then
 export APP_PATH="$(app-path)"
 export APP_ROOT="$(app-root)"
 
-cd $APP_PATH
+cd "$APP_PATH"
 exec php $APP_PATH/bin/hyperf.php start
 '
 fi

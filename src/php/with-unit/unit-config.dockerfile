@@ -36,7 +36,7 @@ fi
 export APP_PATH="$(app-path)"
 export APP_ROOT="$(app-root)"
 
-cd $APP_PATH
+cd "$APP_PATH"
 rm -rf $UNIT_CONTROL_PID
 exec "$unitd" --no-daemon \
     --user ${APP_USER:-www-data} \
