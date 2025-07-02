@@ -56,7 +56,7 @@ if has-cmd s6-service; then
 if is-true $COOLIFY_ENABLE_HORIZON; then
     export APP_PATH="$(app-path)"
     export APP_ROOT="$(app-root)"
-    cd $APP_PATH && exec artisan start:horizon
+    cd "$APP_PATH" && exec artisan start:horizon
 else
     exec s6-svc -Od .
 fi

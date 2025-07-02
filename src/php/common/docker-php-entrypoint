@@ -46,7 +46,7 @@ if [ ! -z "$SUPERVISOR_PHP_COMMAND" ]; then
     hook bootstrap
 
     # run custom command defined in $SUPERVISOR_PHP_COMMAND
-    debug-echo "Start container with the command: $SUPERVISOR_PHP_COMMAND $@"
+    debug-echo "Start container with custom user command: $SUPERVISOR_PHP_COMMAND $@"
     exec with-env $SUPERVISOR_PHP_COMMAND "$@"
 else
     # run bootstrap hook to initialize the container

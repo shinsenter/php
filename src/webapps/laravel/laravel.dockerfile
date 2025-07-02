@@ -36,7 +36,59 @@ RUN env-default INITIAL_PROJECT "laravel/laravel"
 
 ################################################################################
 
-RUN web-cmd artisan 'php $(app-path)/artisan'
+RUN <<'EOF'
+echo 'Configure Laravel'
+[ -z "$DEBUG" ] || set -ex && set -e
+
+# make artisan command alias
+web-cmd artisan 'php $(app-path)/artisan'
+
+if has-cmd s6-service; then
+    # create queue service
+    s6-service queue_worker longrun '#!/usr/bin/env sh
+if is-true $LARAVEL_ENABLE_QUEUE_WORKER; then
+    export APP_PATH="$(app-path)"
+    export APP_ROOT="$(app-root)"
+    cd "$APP_PATH" && exec artisan queue:work $LARAVEL_QUEUE_WORKER_OPTIONS
+else
+    exec s6-svc -Od .
+fi
+'
+
+    # create scheduler service
+    s6-service scheduler longrun '#!/usr/bin/env sh
+if is-true $LARAVEL_ENABLE_SCHEDULER; then
+    export APP_PATH="$(app-path)"
+    export APP_ROOT="$(app-root)"
+    cd "$APP_PATH" && exec artisan schedule:work $LARAVEL_SCHEDULER_OPTIONS
+else
+    exec s6-svc -Od .
+fi
+'
+
+    # create Pulse service
+    s6-service pulse longrun '#!/usr/bin/env sh
+if is-true $LARAVEL_ENABLE_PULSE; then
+    export APP_PATH="$(app-path)"
+    export APP_ROOT="$(app-root)"
+    cd "$APP_PATH" && exec artisan pulse:check $LARAVEL_PULSE_OPTIONS
+else
+    exec s6-svc -Od .
+fi
+'
+    # create Horizon service
+    s6-service horizon longrun '#!/usr/bin/env sh
+if is-true $LARAVEL_ENABLE_HORIZON; then
+    export APP_PATH="$(app-path)"
+    export APP_ROOT="$(app-root)"
+    cd "$APP_PATH" && exec artisan horizon $LARAVEL_HORIZON_OPTIONS
+else
+    exec s6-svc -Od .
+fi
+'
+fi
+
+EOF
 
 ################################################################################
 

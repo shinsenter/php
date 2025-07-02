@@ -46,8 +46,19 @@ jobs:
           tag_prefix=$(if [[ $ref_type != 'tag' ]] && [[ $ref != 'refs/heads/main' ]]; then echo 'dev-'; fi)
           build_all=$(if [[ $event_name != 'schedule' ]] || [[ $the_day == '01' ]]; then echo '1'; fi)
 
+          # For debugging purposes
+          echo "the_day=$the_day" >> "$GITHUB_OUTPUT"
+          echo "tag_prefix=$tag_prefix" >> "$GITHUB_OUTPUT"
+          echo "build_all=$build_all" >> "$GITHUB_OUTPUT"
+          echo "github.event_name = $event_name"
+          echo "github.ref_type   = $ref_type"
+          echo "github.ref        = $ref"
+          echo "tag_prefix        = $tag_prefix"
+          echo "build_all         = $(if [ ! -z "$build_all" ]; then echo 'yes, includes outdated versions'; else echo 'no, only maintained versions'; fi)"
+
           # Cache requests
           . ./build/helpers.sh
+          echo "Generating cache keys..."
           get_github_latest_tag "composer/composer"
           get_github_latest_tag "just-containers/s6-overlay"
           get_github_latest_tag "mlocati/docker-php-extension-installer"
@@ -59,6 +70,7 @@ jobs:
           distros=(debian alpine)
           variants=(cli fpm zts)
           php_versions=(8.4 8.3 8.2 8.1)
+          # base_images=(phpfpm-nginx phpfpm-apache unit-php frankenphp roadrunner)
 
           if [ ! -z "$build_all" ]; then
             php_versions+=(8.0 7.4 7.3 7.2 7.1 7.0 5.6)
@@ -69,29 +81,26 @@ jobs:
             for version in "${php_versions[@]}"; do
               for variant in "${variants[@]}"; do
                 if [ "$distro" == "debian" ]; then
-                  get_dockerhub_latest_sha "library/php" 1 "$version-$variant"
+                  get_dockerhub_latest_sha "library/php" 1 "${version}-${variant}"
                   if [ "$variant" == "zts" ]; then
-                    get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php$version"
+                    get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php${version}"
                   fi
                 else
-                  get_dockerhub_latest_sha "library/php" 1 "$version-$variant-$distro"
+                  get_dockerhub_latest_sha "library/php" 1 "${version}-${variant}-${distro}"
                   if [ "$variant" == "zts" ]; then
-                    get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php$version-$distro"
+                    get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php${version}-${distro}"
                   fi
                 fi
               done
+              # for base in "${base_images[@]}"; do
+              #   if [ "$distro" == "debian" ]; then
+              #     get_dockerhub_latest_sha "shinsenter/$base" 1 "${tag_prefix}php${version}"
+              #   else
+              #     get_dockerhub_latest_sha "shinsenter/$base" 1 "${tag_prefix}php${version}-${distro}"
+              #   fi
+              # done
             done
           done
-
-          # For debugging purposes
-          echo "the_day=$the_day" >> "$GITHUB_OUTPUT"
-          echo "tag_prefix=$tag_prefix" >> "$GITHUB_OUTPUT"
-          echo "build_all=$build_all" >> "$GITHUB_OUTPUT"
-          echo "github.event_name = $event_name"
-          echo "github.ref_type   = $ref_type"
-          echo "github.ref        = $ref"
-          echo "tag_prefix        = $tag_prefix"
-          echo "build_all         = $(if [ ! -z "$build_all" ]; then echo 'yes, includes outdated versions'; else echo 'no, only maintained versions'; fi)"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -108,6 +117,7 @@ jobs:
     with:
       app_name: "base-s6"
       os: "alpine"
+      tag_prefix: ${{ inputs.tag_prefix }}
 
   linux-s6:
     name: ${{ matrix.os == '' && 'debian' || matrix.os }}-s6
@@ -175,7 +185,7 @@ jobs:
   fpm-servers:
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
-    needs: [prepare, php-fpm]
+    needs: [prepare, linux-s6, php-fpm]
     strategy:
       fail-fast: false
       matrix:
@@ -190,7 +200,7 @@ jobs:
   zts-servers:
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
-    needs: [prepare, php-zts]
+    needs: [prepare, linux-s6, php-zts]
     strategy:
       fail-fast: false
       matrix:
@@ -205,7 +215,7 @@ jobs:
   cli-servers:
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
-    needs: [prepare, php-cli]
+    needs: [prepare, linux-s6, php-cli]
     strategy:
       fail-fast: false
       matrix:
