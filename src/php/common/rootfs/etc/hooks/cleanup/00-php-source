@@ -6,7 +6,7 @@ if has-cmd composer; then
 fi
 
 if is-true $CLEANUP_PHPDBG && has-cmd phpdbg; then
-    debug-echo -w 'Removing phpdbg binary'
+    debug-echo -w 'Removing phpdbg binary.'
     rm -rf "$(command -v phpdbg)" || true
 fi
 

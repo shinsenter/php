@@ -11,7 +11,7 @@ if ! has-cmd install-php-extensions; then exit 0; fi
 
 # show usage if no arguments are passed
 if [ $# -eq 0 ]; then
-    debug-echo -w "Install and enable PHP modules"
+    debug-echo -w "Install and enable PHP modules."
     debug-echo -w "  Usage: ${0##*/} <module> [module] [...]" >&2
     debug-echo -w "  For example: ${0##*/} gd imagick" >&2
     exit 1
@@ -32,14 +32,14 @@ if [ -z "$NEW_MODS" ]; then
 fi
 
 if ! has-cmd gcc; then
-    debug-echo -i "\nInstall build tools"
+    debug-echo -i "\nInstall build tools."
     APK_PACKAGES="tar xz" \
     APT_PACKAGES="xz-utils" \
     pkg-add $PHPIZE_DEPS curl
 fi
 
 if [ ! -e "/usr/src/php.tar.xz" ] && [ ! -z "$PHP_URL" ]; then
-    debug-echo -i "\nDownload PHP source from $PHP_URL"
+    debug-echo -i "\nDownload PHP source from $PHP_URL."
     curl --retry 3 --retry-delay 5 -ksL "$PHP_URL" -o /usr/src/php.tar.xz
 
     if [ ! -z "$PHP_ASC_URL" ]; then
@@ -50,7 +50,7 @@ fi
 PID=/tmp/$(php -r 'echo md5(uniqid());' || echo "$0-temp")
 
 set -o pipefail
-debug-echo -w "\nInstall PHP modules: $NEW_MODS"
+debug-echo -w "\nInstall PHP modules: $NEW_MODS."
 
 if is-debug; then env-default | grep IPE_ | debug-echo -i; fi
 

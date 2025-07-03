@@ -8,7 +8,7 @@
 ################################################################################
 
 if has-cmd php && has-cmd php-envvars; then
-    debug-echo "Generate PHP config"
+    debug-echo "Generate PHP config."
     if is-true $ALLOW_RUNTIME_PHP_ENVVARS; then
         php-envvars write_dynamic_config 2>&1
     else
@@ -17,7 +17,7 @@ if has-cmd php && has-cmd php-envvars; then
 fi
 
 if has-cmd php-fpm && is-true $ENABLE_TUNING_FPM; then
-    debug-echo -w "Tune PHP-FPM performance"
+    debug-echo -w "Tune PHP-FPM performance."
     config_file="${PHP_INI_DIR}-fpm.d/zz-generated-settings.conf"
 
     # Gather system information

@@ -33,6 +33,14 @@ ADD --link ./rootfs/ /
 ENV DOCUMENT_ROOT=""
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 
+# recommended PHP configuration limits
+ENV PHP_MAX_EXECUTION_TIME="600"
+ENV PHP_MAX_INPUT_TIME="400"
+ENV PHP_MAX_INPUT_VARS="1000"
+ENV PHP_MEMORY_LIMIT="256M"
+ENV PHP_POST_MAX_SIZE="48M"
+ENV PHP_UPLOAD_MAX_FILESIZE="32M"
+
 ################################################################################
 
 # installs wp-cli
@@ -46,6 +54,7 @@ echo 'Install WP-CLI'
 web-mkdir "/.wp-cli"
 
 env-default '# Environment variables for WP-Cli'
+env-default INITIAL_PROJECT     'manual'
 env-default WP_CLI_DIR          '/.wp-cli'
 env-default WP_CLI_CACHE_DIR    '$WP_CLI_DIR/cache/'
 env-default WP_CLI_PACKAGES_DIR '$WP_CLI_DIR/packages/'
