@@ -41,11 +41,15 @@ install_deps() {
 }
 
 allow_plugins() {
-    composer config -n --no-plugins "allow-plugins.*/*" true
+    if [ -e "$CONF_PATH" ]; then
+        composer config -n --no-plugins "allow-plugins.*/*" true
+    fi
 }
 
 unset_allow_plugins() {
-    composer config -n --unset "allow-plugins.*/*"
+    if [ -e "$CONF_PATH" ]; then
+        composer config -n --unset "allow-plugins.*/*"
+    fi
 }
 
 copy_env() {
@@ -68,6 +72,8 @@ cd "$APP_PATH"
 if [ -z "$(ls -A "$APP_PATH")" ]; then
     # pull project from source
     if ! is-true $DISABLE_AUTORUN_CREATING_PROJECT && [ ! -z "$INITIAL_PROJECT" ] && has-cmd composer; then
+        debug-echo "Installing project $INITIAL_PROJECT to $APP_PATH"
+
         hook pre-create-project
 
         case "$INITIAL_PROJECT" in
@@ -107,6 +113,8 @@ if [ -z "$(ls -A "$APP_PATH")" ]; then
 
     # copy from source directory if it is not empty
     if ! is-true $DISABLE_AUTORUN_COPYING_SOURCE && [ -d /source/ ]; then
+        debug-echo "Copying files from /source/ to $APP_PATH"
+
         cp -rpn /source/. "$APP_PATH"/ &>/dev/null
         web-chown "Copied files from /source/ to $APP_PATH"
     fi
@@ -120,6 +128,8 @@ if [ -z "$(ls -A "$APP_PATH")" ]; then
 
     # update packages if the project has composer.json
     if [ -e "$CONF_PATH" ]; then
+        debug-echo "Updating required packages in $APP_PATH"
+
         hook pre-install-packages
         hook pre-update-packages
 
@@ -151,13 +161,17 @@ if ! is-true $DISABLE_AUTORUN_COMPOSER_INSTALL && has-cmd composer; then
     if [ -e "$CONF_PATH" ]; then
         vendor_dir="$APP_PATH/$(composer config vendor-dir 2>/dev/null)"
         if [ ! -d "$vendor_dir" ] || [ ! -e "$vendor_dir/composer/ClassLoader.php" ]; then
+            # install required packages, allow composer plugins
             install_deps
             allow_plugins
+
             hook pre-install-packages
 
             composer install -n $COMPOSER_INSTALL_OPTIONS
 
             hook post-install-packages
+
+            # unset allow composer plugins
             unset_allow_plugins
 
             web-chown "Composer packages were installed in $APP_PATH"
