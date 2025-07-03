@@ -49,7 +49,7 @@ fi
 mkdir -p "$(dirname $CERT)" "$(dirname $KEY)"
 rm -rf $CERT $KEY
 
-debug-echo -w "Generate self-signed CA for $DOMAINS"
+debug-echo -w "Generate self-signed CA for $DOMAINS."
 openssl dhparam -dsaparam -out "$(dirname $CERT)"/dhparam.pem $LENGTH
 openssl req -nodes -x509 -days $DAYS \
     -newkey rsa:$LENGTH -sha256 \

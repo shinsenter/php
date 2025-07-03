@@ -1,0 +1,27 @@
+#!/usr/bin/env sh
+APP_PATH="$(app-path)"
+APP_ROOT="$(app-root)"
+WPCONFIG_URL=https://raw.githubusercontent.com/docker-library/wordpress/master/wp-config-docker.php
+
+debug-echo -w "Install Wordpress to $APP_PATH."
+
+web-mkdir "$APP_PATH" "$WP_CLI_DIR" "$WP_CLI_CACHE_DIR" "$WP_CLI_PACKAGES_DIR"
+cd "$APP_PATH"
+
+wp core download \
+    --locale="${WORDPRESS_LOCALE:-en_US}" \
+    --force
+
+if [ ! -f "$APP_PATH/wp-config.php" ]; then
+    php -r "copy('$WPCONFIG_URL', '$APP_PATH/wp-config.php');"
+fi
+
+# wp core install \
+#     --url=${WORDPRESS_URL:-localhost} \
+#     --title=${WORDPRESS_TITLE:-New Website} \
+#     --admin_user=${WORDPRESS_ADMIN_USER:-admin} \
+#     --admin_password=${WORDPRESS_ADMIN_PASSWORD:-admin} \
+#     --admin_email=${WORDPRESS_ADMIN_EMAIL:-admin@localhost} \
+#     --skip-email --quiet
+
+debug-echo -w "Wordpress $(wp core version) is downloaded to $APP_PATH."
