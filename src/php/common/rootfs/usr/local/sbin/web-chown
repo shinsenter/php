@@ -20,7 +20,7 @@ fix)
 
     for target; do
         if [ ! -z "$target" ] && [ -e "$target" ]; then
-            debug-echo "Fix ownership for $target"
+            debug-echo "Fix ownership for $target."
             chown -R "$APP_USER:$APP_GROUP" "$target" 2>&1 || true
         fi
     done

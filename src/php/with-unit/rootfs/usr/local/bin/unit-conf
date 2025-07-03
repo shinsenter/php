@@ -15,7 +15,7 @@ if [ -z "$config_file" ]; then
 fi
 
 if [ ! -f "$config_file" ]; then
-    debug-echo -e "Error: Invalid config file: $config_file"
+    debug-echo -e "Error: Invalid config file: $config_file."
     exit 1
 fi
 
@@ -59,11 +59,11 @@ if [ ! -z "$output" ]; then
     rm -f "$output"
 fi
 
-debug-echo "$RET"
+debug-echo "$RET."
 
 if [ "$STATUS" != "200" ]; then
-    debug-echo -e "Error: HTTP response status code is '$STATUS'"
+    debug-echo -e "Error: HTTP response status code is '$STATUS'."
     exit 1
 fi
 
-debug-echo -s "OK: HTTP response status code is '$STATUS'"
+debug-echo -s "OK: HTTP response status code is '$STATUS'."
