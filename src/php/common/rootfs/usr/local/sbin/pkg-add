@@ -10,10 +10,10 @@
 alpine() {
     if [ $# -gt 0 ]; then
         rm -rf /var/cache/apk && mkdir /var/cache/apk
-        apk update | debug-echo -l
+        apk update | debug-echo -l || true
         for pkg; do
             if [ "$pkg" = "upgrade" ]; then
-                apk upgrade --available | debug-echo -l
+                apk upgrade --available | debug-echo -l || true
             else
                 debug-echo -i "\nInstall $pkg"
                 apk add $pkg | debug-echo -l
@@ -25,10 +25,10 @@ alpine() {
 debian() {
     local options="-yq --allow-unauthenticated"
     if [ $# -gt 0 ]; then
-        apt-get update $options | debug-echo -l
+        apt-get update $options | debug-echo -l || true
         for pkg; do
             if [ "$pkg" = "upgrade" ] || [ "$pkg" = "update" ]; then
-                apt-get upgrade $options | debug-echo -l
+                apt-get upgrade $options | debug-echo -l || true
             else
                 debug-echo -i "\nInstall $pkg"
                 apt-get install $options --no-install-recommends --no-install-suggests $pkg | debug-echo -l
