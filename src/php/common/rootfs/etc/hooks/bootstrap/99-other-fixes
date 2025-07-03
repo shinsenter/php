@@ -21,6 +21,8 @@ mkdir -p /etc/default && with-env >/etc/default/locale
 if [ ! -e "$FIRST_RUN" ]; then
     echo "$(date)" >"$FIRST_RUN"
     hook first-run
+else
+    hook post-restart
 fi
 
 ################################################################################
