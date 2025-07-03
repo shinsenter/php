@@ -59,12 +59,6 @@ fi
 
 ################################################################################
 
-# throw a warning if service directory already exists
-if [ -d "${s6}/${name}" ]; then
-    debug-echo -w "Service ${name} already exists. Skipping creation."
-    exit 0
-fi
-
 # Generate S6 service files
 # See: https://github.com/just-containers/s6-overlay#writing-a-service-script
 
