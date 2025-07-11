@@ -69,7 +69,7 @@ jobs:
 
           distros=(debian alpine)
           variants=(cli fpm zts)
-          php_versions=(8.4 8.3 8.2 8.1)
+          php_versions=(8.5-rc 8.4 8.3 8.2 8.1)
           # base_images=(phpfpm-nginx phpfpm-apache unit-php frankenphp roadrunner)
 
           if [ ! -z "$build_all" ]; then
