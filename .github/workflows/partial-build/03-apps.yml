@@ -50,6 +50,7 @@ jobs:
           - app-drupal
           - app-espocrm
           - app-flarum
+          - app-flightphp
           - app-grav
           - app-hyperf
           - app-invoiceshelf

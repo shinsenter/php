@@ -29,10 +29,10 @@ ADD --link ./rootfs/ /
 
 ################################################################################
 
-# https://docs.phpmyadmin.net/en/latest/setup.html
+# https://docs.flightphp.com
 ENV DOCUMENT_ROOT=""
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
-RUN env-default INITIAL_PROJECT "phpmyadmin/phpmyadmin"
+RUN env-default INITIAL_PROJECT "flightphp/skeleton"
 
 ################################################################################
 
