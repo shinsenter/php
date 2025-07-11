@@ -30,7 +30,7 @@ ADD --link ./rootfs/ /
 ################################################################################
 
 # https://docs.flightphp.com
-ENV DOCUMENT_ROOT=""
+ENV DOCUMENT_ROOT="/public"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 RUN env-default INITIAL_PROJECT "flightphp/skeleton"
 
