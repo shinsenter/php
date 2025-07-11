@@ -473,7 +473,8 @@ else
     BUILD_TAGS="$BUILD_NAME:s6-$S6_VERSION,$BUILD_NAME:latest"
 fi
 
-# remove -rc from build tags
+# remove alpha or rc versions from build tags
+BUILD_TAGS=${BUILD_TAGS//alpha?/}
 BUILD_TAGS=${BUILD_TAGS//-rc/}
 
 # apply tag prefix for development branch
@@ -641,6 +642,7 @@ fi
 
 # remove -rc from PHP_VERSION
 if [ "$BUILD_FROM_IMAGE" != "php" ]; then
+    PHP_VERSION=${PHP_VERSION//alpha?/}
     PHP_VERSION=${PHP_VERSION//-rc/}
 fi
 
