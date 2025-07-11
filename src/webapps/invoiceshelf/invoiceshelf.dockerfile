@@ -14,7 +14,7 @@ ARG BUILDKIT_SBOM_SCAN_STAGE=true
 
 ################################################################################
 
-ARG  BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-shinsenter/phpfpm-apache}
+ARG  BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-shinsenter/phpfpm-nginx}
 ARG  BUILD_TAG_PREFIX=${BUILD_TAG_PREFIX:-}
 
 ARG  PHP_VERSION=${PHP_VERSION:-8.4}

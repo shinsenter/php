@@ -197,13 +197,18 @@ app-*)
         verlt "$PHP_VERSION" "8.0" && SKIP_BUILD=1
         ;;
     espocrm)
-        # https://docs.espocrm.com/administration/installation/
+        # https://docs.espocrm.com/administration/installation
         verlt "$PHP_VERSION" "8.1" && SKIP_BUILD=1
         ;;
     flarum)
-        # https://docs.flarum.org/install/
+        # https://docs.flarum.org/install
         BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.3" && SKIP_BUILD=1
+        ;;
+    flightphp)
+        # https://docs.flightphp.com
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
+        verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
         ;;
     grav)
         # https://learn.getgrav.org/17/basics/installation
@@ -230,7 +235,7 @@ app-*)
         verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
         ;;
     laminas)
-        # https://docs.laminas.dev/tutorials/getting-started/skeleton-application/
+        # https://docs.laminas.dev/tutorials/getting-started/skeleton-application
         LATEST_PHP="8.3"
         BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.3" && SKIP_BUILD=1
@@ -275,10 +280,10 @@ app-*)
         # https://github.com/sulu/skeleton
         ;;
     wordpress)
-        # https://wordpress.org/documentation/category/installation/
+        # https://wordpress.org/documentation/category/installation
         ;;
     bedrock)
-        # https://roots.io/bedrock/docs/installation/
+        # https://roots.io/bedrock/docs/installation
         verlt "$PHP_VERSION" "8.0" && SKIP_BUILD=1
         ;;
     yii)

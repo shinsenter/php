@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 ## [5.6.0] - XXXX-XX-XX
 
 - Added Docker images for PHP versions [8.5-rc](https://hub.docker.com/r/shinsenter/php/tags?name=8.5).
+- Added Docker images for [Flight framework](http://hub.docker.com/r/shinsenter/flightphp)
 
 
 ## [5.5.0] - 2025-07-03
