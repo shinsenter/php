@@ -120,10 +120,12 @@ You can optionally set the following environment variables in the container to e
 | `LARAVEL_QUEUE_WORKER_OPTIONS` | Defines custom options for the Laravel queue worker (e.g., connection, delay). |
 | `LARAVEL_ENABLE_SCHEDULER`     | Enables supervisor service for the Laravel scheduler. Set to `1` to run scheduled tasks. |
 | `LARAVEL_SCHEDULER_OPTIONS`    | Specifies additional options for the scheduler execution. |
-| `LARAVEL_ENABLE_PULSE`         | Enables supervisor service for Laravel Pulse for application performance monitoring. |
-| `LARAVEL_PULSE_OPTIONS`        | Configuration options for Laravel Pulse (e.g., port, storage). |
 | `LARAVEL_ENABLE_HORIZON`       | Enables supervisor service for Laravel Horizon, a dashboard for managing queues. |
 | `LARAVEL_HORIZON_OPTIONS`      | Options for customizing Horizon behavior (e.g., environment, queue names). |
+| `LARAVEL_ENABLE_PULSE`         | Enables supervisor service for Laravel Pulse for application performance monitoring. |
+| `LARAVEL_PULSE_OPTIONS`        | Configuration options for Laravel Pulse (e.g., port, storage). |
+| `LARAVEL_ENABLE_REVERB`        | Enables supervisor service for Laravel Reverb for real-time WebSocket communication. |
+| `LARAVEL_REVERB_OPTIONS`       | Configuration options for Laravel Reverb (e.g., port, storage). |
 
 
 ## Stable Image Tags
