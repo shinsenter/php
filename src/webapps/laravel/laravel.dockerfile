@@ -66,6 +66,17 @@ else
 fi
 '
 
+    # create Horizon service
+    s6-service horizon longrun '#!/usr/bin/env sh
+if is-true $LARAVEL_ENABLE_HORIZON; then
+    export APP_PATH="$(app-path)"
+    export APP_ROOT="$(app-root)"
+    cd "$APP_PATH" && exec artisan horizon $LARAVEL_HORIZON_OPTIONS
+else
+    exec s6-svc -Od .
+fi
+'
+
     # create Pulse service
     s6-service pulse longrun '#!/usr/bin/env sh
 if is-true $LARAVEL_ENABLE_PULSE; then
@@ -76,12 +87,13 @@ else
     exec s6-svc -Od .
 fi
 '
-    # create Horizon service
-    s6-service horizon longrun '#!/usr/bin/env sh
-if is-true $LARAVEL_ENABLE_HORIZON; then
+
+    # create Reverb service
+    s6-service reverb longrun '#!/usr/bin/env sh
+if is-true $LARAVEL_ENABLE_REVERB; then
     export APP_PATH="$(app-path)"
     export APP_ROOT="$(app-root)"
-    cd "$APP_PATH" && exec artisan horizon $LARAVEL_HORIZON_OPTIONS
+    cd "$APP_PATH" && exec artisan reverb:start $(is-debug && echo --debug) $LARAVEL_REVERB_OPTIONS
 else
     exec s6-svc -Od .
 fi
