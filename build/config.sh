@@ -189,7 +189,7 @@ app-*)
         ;;
     coolify)
         # https://coolify.io/docs/installation
-        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/laravel"
         verlt "$PHP_VERSION" "8.2" && SKIP_BUILD=1
         ;;
     drupal)
@@ -216,7 +216,6 @@ app-*)
         ;;
     hyperf)
         # https://hyperf.wiki/3.1/#/en/quick-start/install
-        LATEST_PHP="8.3"
         BUILD_PLATFORM="linux/amd64,linux/arm/v7,linux/arm64/v8"
         BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.2" && SKIP_BUILD=1
@@ -226,12 +225,11 @@ app-*)
         ;;
     invoiceshelf)
         # https://docs.invoiceshelf.com/install/manual.html
-        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/laravel"
         verlt "$PHP_VERSION" "8.1" && SKIP_BUILD=1
         ;;
     kirby)
         # https://getkirby.com/docs/cookbook/setup/composer
-        LATEST_PHP="8.3"
         verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
         ;;
     laminas)
@@ -263,14 +261,13 @@ app-*)
         ;;
     spiral)
         # https://spiral.dev/docs/start-installation/current/en
-        LATEST_PHP="8.3"
         BUILD_FROM_IMAGE="$DEFAULT_REPO/roadrunner"
         BUILD_PLATFORM="linux/amd64,linux/arm64"
         verlt "$PHP_VERSION" "8.1" && SKIP_BUILD=1
         ;;
     statamic)
         # https://statamic.dev/installing
-        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/laravel"
         verlt "$PHP_VERSION" "7.2" && SKIP_BUILD=1
         ;;
     symfony)
@@ -294,7 +291,7 @@ app-*)
     # crater)
     #     # https://docs.craterapp.com/installation.html
     #     LATEST_PHP="8.1"
-    #     BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
+    #     BUILD_FROM_IMAGE="$DEFAULT_REPO/laravel"
     #     verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
     #     ;;
     # fuelphp)

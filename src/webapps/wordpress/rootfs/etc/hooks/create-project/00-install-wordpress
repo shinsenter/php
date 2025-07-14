@@ -12,9 +12,12 @@ wp core download \
     --locale="${WORDPRESS_LOCALE:-en_US}" \
     --force
 
-if [ ! -f "$APP_PATH/wp-config.php" ]; then
-    php -r "copy('$WPCONFIG_URL', '$APP_PATH/wp-config.php');"
+if [ -f "$APP_PATH/wp-config-sample.php" ]; then
+    php -r "copy('$APP_PATH/wp-config-sample.php', '$APP_PATH/wp-config-sample.original.php');"
 fi
+
+php -r "copy('$WPCONFIG_URL', '$APP_PATH/wp-config-sample.php');"
+
 
 # wp core install \
 #     --url=${WORDPRESS_URL:-localhost} \

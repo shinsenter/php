@@ -14,7 +14,7 @@ ARG BUILDKIT_SBOM_SCAN_STAGE=true
 
 ################################################################################
 
-ARG  BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-shinsenter/phpfpm-nginx}
+ARG  BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-shinsenter/laravel}
 ARG  BUILD_TAG_PREFIX=${BUILD_TAG_PREFIX:-}
 
 ARG  PHP_VERSION=${PHP_VERSION:-8.4}
@@ -36,7 +36,7 @@ RUN env-default INITIAL_PROJECT "statamic/statamic"
 
 ################################################################################
 
-RUN web-cmd artisan 'php $(app-path)/artisan'
+# https://statamic.dev/cli#artisan-vs-please
 RUN web-cmd please  'php $(app-path)/please'
 
 ################################################################################

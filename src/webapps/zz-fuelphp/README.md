@@ -4,6 +4,7 @@
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/fuelphp
 - GitHub Packages: https://code.shin.company/php/pkgs/container/fuelphp
+- You can also find and use [other pre-built Docker images for some popular PHP applications and frameworks here](https://hub.docker.com/u/shinsenter).
 
 The Docker images are available for both Debian and Alpine versions.
 

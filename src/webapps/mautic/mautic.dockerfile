@@ -41,7 +41,7 @@ RUN <<'EOF'
 echo 'Install PHP extensions'
 [ -z "$DEBUG" ] || set -ex && set -e
 
-phpaddmod imap
+phpaddmod imap sockets
 
 web-cmd console 'php $(app-path)/bin/console'
 web-cmd mautic  'php $(app-path)/bin/console'

@@ -6,6 +6,7 @@ Our Docker images cover PHP versions from 5.6 to 8.5 (beta), available in CLI, Z
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/php
 - GitHub Packages: https://code.shin.company/php/pkgs/container/php
+- You can also find and use [other pre-built Docker images for some popular PHP applications and frameworks here](https://hub.docker.com/u/shinsenter).
 
 [![Daily build](https://code.shin.company/php/actions/workflows/build-all.yml/badge.svg)](https://code.shin.company/php/actions/workflows/build-all.yml)
 
@@ -168,8 +169,10 @@ opcache
 pcntl
 pdo_mysql
 pdo_pgsql
+pgsql
 redis
 sodium
+tidy
 uuid
 yaml
 zip

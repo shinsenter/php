@@ -1,0 +1,101 @@
+services:
+  bedrock:
+    image: ghcr.io/shinsenter/bedrock:latest-alpine
+    ports:
+      - 8100:80
+  cakephp4:
+    image: ghcr.io/shinsenter/cakephp4:latest-alpine
+    ports:
+      - 8101:80
+  cakephp5:
+    image: ghcr.io/shinsenter/cakephp5:latest-alpine
+    ports:
+      - 8102:80
+  codeigniter4:
+    image: ghcr.io/shinsenter/codeigniter4:latest-alpine
+    ports:
+      - 8103:80
+  coolify:
+    image: ghcr.io/shinsenter/coolify:latest-alpine
+    ports:
+      - 8104:80
+  drupal:
+    image: ghcr.io/shinsenter/drupal:latest-alpine
+    ports:
+      - 8105:80
+  espocrm:
+    image: ghcr.io/shinsenter/espocrm:latest-alpine
+    ports:
+      - 8106:80
+  flarum:
+    image: ghcr.io/shinsenter/flarum:latest-alpine
+    ports:
+      - 8107:80
+  flightphp:
+    image: ghcr.io/shinsenter/flightphp:latest-alpine
+    ports:
+      - 8108:80
+  grav:
+    image: ghcr.io/shinsenter/grav:latest-alpine
+    ports:
+      - 8109:80
+  hyperf:
+    image: ghcr.io/shinsenter/hyperf:latest-alpine
+    ports:
+      - 8110:80
+  invoiceshelf:
+    image: ghcr.io/shinsenter/invoiceshelf:latest-alpine
+    ports:
+      - 8111:80
+  kirby:
+    image: ghcr.io/shinsenter/kirby:latest-alpine
+    ports:
+      - 8112:80
+  laminas:
+    image: ghcr.io/shinsenter/laminas:latest-alpine
+    ports:
+      - 8113:80
+  laravel:
+    image: ghcr.io/shinsenter/laravel:latest-alpine
+    ports:
+      - 8114:80
+  magento:
+    image: ghcr.io/shinsenter/magento:latest-alpine
+    ports:
+      - 8115:80
+  mautic:
+    image: ghcr.io/shinsenter/mautic:latest-alpine
+    ports:
+      - 8116:80
+  phpmyadmin:
+    image: ghcr.io/shinsenter/phpmyadmin:latest-alpine
+    ports:
+      - 8117:80
+  slim:
+    image: ghcr.io/shinsenter/slim:latest-alpine
+    ports:
+      - 8118:80
+  spiral:
+    image: ghcr.io/shinsenter/spiral:latest-alpine
+    ports:
+      - 8119:80
+  statamic:
+    image: ghcr.io/shinsenter/statamic:latest-alpine
+    ports:
+      - 8120:80
+  sulu:
+    image: ghcr.io/shinsenter/sulu:latest-alpine
+    ports:
+      - 8121:80
+  symfony:
+    image: ghcr.io/shinsenter/symfony:latest-alpine
+    ports:
+      - 8122:80
+  wordpress:
+    image: ghcr.io/shinsenter/wordpress:latest-alpine
+    ports:
+      - 8123:80
+  yii:
+    image: ghcr.io/shinsenter/yii:latest-alpine
+    ports:
+      - 8124:80

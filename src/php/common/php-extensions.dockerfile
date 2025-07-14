@@ -91,6 +91,7 @@ phpaddmod @fix_letsencrypt \
         # mailparse \
         # maxminddb \
         # mcrypt \
+        # md4c \
         # memcache \
         # memcached \
         # memprof \
@@ -102,6 +103,7 @@ phpaddmod @fix_letsencrypt \
         # mysql \
         mysqli \
         # newrelic \
+        # nsq \
         # oauth \
         # oci8 \
         # odbc \
@@ -120,7 +122,7 @@ phpaddmod @fix_letsencrypt \
         # pdo_odbc \
         pdo_pgsql \
         # pdo_sqlsrv \
-        # pgsql \
+        pgsql \
         # phalcon \
         # php_trie \
         # phpy \
@@ -162,8 +164,9 @@ phpaddmod @fix_letsencrypt \
         # sysvshm \
         # tensor \
         # tideways \
-        # tidy \
+        tidy \
         # timezonedb \
+        # translit \
         # uopz \
         # uploadprogress \
         uuid \
