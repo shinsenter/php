@@ -13,17 +13,21 @@ esac
 
 if [ ! -t 1 ]; then NC=; CL=; fi
 
-colorize() {
-    local msg="$@"
-    if [ ! -z "$msg" ]; then
-        echo -e "${CL}${msg}${NC}"
+if [ "$(printf '%s' "$(echo -e '1\n2')" | wc -l)" -eq 2 ]; then
+    colorize() {
+        local msg="$@"
+        if [ ! -z "$msg" ]; then
+            echo -e "${CL}${msg}${NC}"
+        fi
+    }
+
+    colorize "$@"
+
+    if [ ! -t 0 ]; then
+        while IFS= read -r line; do
+            colorize "$line"
+        done
     fi
-}
-
-colorize "$@"
-
-if [ ! -t 0 ]; then
-    while IFS= read -r line; do
-        colorize "$line"
-    done
+else
+    echo "$@"
 fi

@@ -33,6 +33,22 @@ ONBUILD RUN hook onbuild
 
 ################################################################################
 
+# RUN <<'EOF'
+# # prefer snapshot sources if present
+# APT_SOURCES=/etc/apt/sources.list
+# if [ -e $APT_SOURCES ] && grep -q "^# deb http://snapshot\.debian\.org" "$APT_SOURCES"; then
+#     echo 'Correcting /etc/apt/sources.list'
+#     sed -i '/^# deb http:\/\/snapshot\.debian\.org/{
+#         s/^# *//          # uncomment the snapshot line
+#         n                 # move to the next line
+#         s/^\([^#]\)/# \1/ # comment the next line
+#     }' "$APT_SOURCES"
+#     cat "$APT_SOURCES"
+# fi
+# EOF
+
+################################################################################
+
 # Temporary workaround to fix Let's Encrypt CA certificates for old distros
 # https://github.com/mlocati/docker-php-extension-installer/pull/450
 # https://github.com/mlocati/docker-php-extension-installer/pull/451
@@ -50,8 +66,7 @@ echo 'Configure OS middlewares'
 # install common packages
 APK_PACKAGES='run-parts shadow tar tzdata unzip xz' \
 APT_PACKAGES='procps xz-utils' \
-pkg-add bash ca-certificates coreutils curl htop less openssl
-pkg-add upgrade
+pkg-add bash ca-certificates coreutils curl htop less openssl upgrade
 
 # patch sh binary if bash exists
 if has-cmd bash; then
