@@ -228,7 +228,7 @@ jobs:
 
   ##########################################################
 
-  popular-frameworks:
+  popular-apps:
     name: ${{ matrix.app }}
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
@@ -241,14 +241,12 @@ jobs:
           - app-cakephp4
           - app-cakephp5
           - app-codeigniter4
-          - app-coolify
           - app-drupal
           - app-espocrm
           - app-flarum
           - app-flightphp
           - app-grav
           - app-hyperf
-          - app-invoiceshelf
           - app-kirby
           - app-laminas
           - app-laravel
@@ -256,7 +254,6 @@ jobs:
           - app-mautic
           - app-phpmyadmin
           - app-slim
-          - app-statamic
           - app-sulu
           - app-symfony
           - app-wordpress
@@ -270,7 +267,25 @@ jobs:
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
       build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
 
-  other-frameworks:
+  laravel-based-apps:
+    name: ${{ matrix.app }}
+    uses: ./.github/workflows/template-php.yml
+    secrets: inherit
+    needs: [prepare, popular-apps]
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - app-coolify
+          - app-invoiceshelf
+          - app-statamic
+    with:
+      app_name: ${{ matrix.app }}
+      server: ${{ matrix.server }}
+      tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
+      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
+
+  other-apps:
     name: ${{ matrix.app }}
     uses: ./.github/workflows/template-php.yml
     secrets: inherit

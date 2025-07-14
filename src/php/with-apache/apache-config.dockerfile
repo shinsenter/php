@@ -88,15 +88,12 @@ exec php-fpm -y /usr/local/etc/php-fpm.d/zz-generated-settings.conf --nodaemoniz
     s6-service apache longrun '#!/usr/bin/env sh
 export APP_PATH="$(app-path)"
 export APP_ROOT="$(app-root)"
+export LOG_PATH="$(log-path)"
 if [ -f /etc/apache2/envvars ]; then source /etc/apache2/envvars; fi
 
 cd "$APP_PATH"
 rm -f ${APACHE_PID:-/run/apache2.pid}
-if is-debug; then
-    exec apache2 -e error -DFOREGROUND -X
-else
-    exec apache2 -e error -DFOREGROUND
-fi
+exec apache2 -E $LOG_PATH -DFOREGROUND $(is-debug && echo '-X')
 '
 fi
 
