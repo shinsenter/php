@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+APP_PATH="$(app-path)"
+APP_ROOT="$(app-root)"
+
+php $APP_PATH/artisan key:generate || true

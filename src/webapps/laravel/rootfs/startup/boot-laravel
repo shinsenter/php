@@ -3,4 +3,6 @@ APP_PATH="$(app-path)"
 APP_ROOT="$(app-root)"
 
 debug-echo "Your web application must be in {$APP_PATH}."
+
 touch $APP_PATH/database/database.sqlite &>/dev/null
+artisan migrate --graceful || true

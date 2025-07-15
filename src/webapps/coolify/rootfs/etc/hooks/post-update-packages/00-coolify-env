@@ -1,8 +1,0 @@
-#!/usr/bin/env sh
-APP_PATH="$(app-path)"
-APP_ROOT="$(app-root)"
-
-if [ ! -e "$APP_PATH/.env" ] && [ -e "$APP_PATH/.env.development.example" ]; then
-    cp -p "$APP_PATH/.env.development.example" "$APP_PATH/.env"
-    php $APP_PATH/artisan key:generate
-fi
