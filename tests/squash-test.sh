@@ -16,8 +16,7 @@ if [ ! -x "$BASE_DIR/build/docker-squash/docker-squash.sh" ]; then
 fi
 
 if [ "$1" = "clean" ] || [ "$1" = "clear" ]; then
-    docker system prune -af
-    docker volume prune -f
+    # docker system prune -af --volumes
     rm -rf "$LOG_DIR/"*
     clear
     shift

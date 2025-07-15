@@ -37,10 +37,13 @@ RUN <<'EOF'
 sources="/etc/apt/sources.list"
 if [ -f $sources ]; then
     . /etc/os-release
-    if [ "$ID" = "debian" ] && [ "${VERSION_ID%%.*}" -eq 10 ]; then
+    if [ "$ID" = "debian" ] && [ "${VERSION_ID%%.*}" -lt 11 ]; then
         debug-echo -i "Patching sources.list for $ID $VERSION_ID"
-        sed -i 's|deb.debian.org/debian|archive.debian.org/debian|g' $sources
-        sed -i 's|security.debian.org/debian-security|archive.debian.org/debian-security|g' $sources
+        sed  -i -e '/stretch-updates/d' \
+                -e 's|deb.debian.org/debian|archive.debian.org/debian|g' \
+                -e 's|security.debian.org/debian-security|archive.debian.org/debian-security|g' \
+                -e 's|^deb\(-src\)\? http|deb\1 [trusted=yes] http|g' \
+            $sources
         cat $sources
     fi
 fi
