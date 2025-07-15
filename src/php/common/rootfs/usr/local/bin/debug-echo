@@ -16,8 +16,9 @@ if [ ! -t 1 ]; then NC=; CL=; fi
 if [ "$(printf '%s' $(echo -e ''))" = "-e" ]; then EX=; fi
 
 colorize() {
-    local msg="$@"
-    echo $EX "${CL}${msg}${NC}"
+    if [ $# -gt 0 ]; then
+        echo $EX "${CL}$*${NC}"
+    fi
 }
 
 colorize "$@"
