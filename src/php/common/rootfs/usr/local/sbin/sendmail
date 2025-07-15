@@ -1,0 +1,86 @@
+#!/usr/bin/env sh
+##
+# Source: https://gist.github.com/onnimonni/e7f2a5199d6dc719ffd32dc4d6ac1902
+# This is custom wrapper for msmtp which acts like good old sendmail
+# - It is used for php and cron
+# - This is easier to configure for external mail server than sendmail
+# - sendmail is just the default binary which other services will use
+# - It needs following env: SMTP_HOST, SMTP_PASSWORD, SMTP_PORT, SMTP_AUTH, SMTP_USER
+##
+
+# This script gives itself as a parameter for msmtp
+# to print out the password for --passwordeval option
+# Check if msmtp called this script
+if [ -n "$SMTP_PASSWORD" ]; then
+    PARENT_COMMANDS="$(ps -o comm= $PPID)"
+    if [[ $PARENT_COMMANDS =~ .*msmtp.* ]]; then
+        echo $SMTP_PASSWORD
+        exit 0
+    fi
+fi
+
+# Deduce all used msmtp options from system ENVs
+declare -a options
+
+# Always extract recipients from message headers.
+if ! [[ $* == *-t* ]]; then
+    options+=('-t')
+fi
+
+# If user didn't provide from address with -f
+# Use the SMTP_FROM variable or after that fallback for the --read-envelope-from
+if ! [[ $* == *-f* ]]; then
+    if [ -n "$SMTP_FROM" ]; then
+        options+=("--from=$SMTP_FROM")
+    else
+        options+=('--read-envelope-from')
+    fi
+fi
+
+# Use system tls chain
+options+=("--tls-trust-file=/etc/ssl/certs/ca-certificates.crt")
+
+if [ -n "$SMTP_HOST" ]; then
+    options+=("--host=$SMTP_HOST")
+else
+    echo "[mail error] SMTP_HOST is not defined, mail can't be sent"
+    exit 1
+fi
+
+# Log all mail requests
+if [ -n "$SMTP_LOG" ]; then
+    options+=("--logfile=$SMTP_LOG")
+elif [ -f /var/log/mail.log ]; then
+    options+=("--logfile=/var/log/mail.log")
+fi
+
+# Default port for smtp is 25 and it will work even without this option
+if [ -n "$SMTP_PORT" ]; then
+    options+=("--port=$SMTP_PORT")
+fi
+
+# Setup credentials
+if [ -n "$SMTP_USER" ]; then
+    options+=("--user=$SMTP_USER")
+fi
+
+# msmtp doesn't provide password option because usually it's unsafe
+# Use recursive hack for passwordeval
+if [ -n "$SMTP_PASSWORD" ]; then
+    SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
+    options+=("--passwordeval=$SCRIPT_PATH")
+fi
+
+
+if [ -n "$SMTP_AUTH" ]; then
+    options+=("--auth=$SMTP_AUTH")
+elif [ -n "$SMTP_USER" ] || [ -n "$SMTP_PASSWORD" ]; then
+    options+=("--auth=on")
+fi
+
+if [ -n "$SMTP_TLS" ]; then
+    options+=("--tls=$SMTP_TLS")
+fi
+
+# Add our options and command line options for msmtp
+msmtp ${options[@]} "$@"

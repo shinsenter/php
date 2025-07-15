@@ -38,7 +38,7 @@ sources="/etc/apt/sources.list"
 if [ -f $sources ]; then
     . /etc/os-release
     if [ "$ID" = "debian" ] && [ "${VERSION_ID%%.*}" -lt 11 ]; then
-        debug-echo -i "Patching sources.list for $ID $VERSION_ID"
+        debug-echo -w "Patching sources.list for $ID $VERSION_ID"
         sed  -i -e '/stretch-updates/d' \
                 -e 's|deb.debian.org/debian|archive.debian.org/debian|g' \
                 -e 's|security.debian.org/debian-security|archive.debian.org/debian-security|g' \
@@ -68,7 +68,7 @@ echo 'Configure OS middlewares'
 # install common packages
 APK_PACKAGES='run-parts shadow tar tzdata unzip xz' \
 APT_PACKAGES='procps xz-utils' \
-pkg-add bash ca-certificates coreutils curl htop less openssl upgrade
+pkg-add bash ca-certificates coreutils curl htop less openssl msmtp upgrade
 
 # patch sh binary if bash exists
 if has-cmd bash; then
@@ -92,6 +92,11 @@ fi
 # check if the user exists
 if ! getent passwd $APP_USER >/dev/null 2>&1; then
     adduser --system --no-create-home --ingroup $APP_GROUP $APP_USER
+fi
+
+# add mail group
+if ! getent group mail >/dev/null 2>&1; then
+    addgroup mail
 fi
 
 # install su-exec
@@ -141,15 +146,19 @@ env-default CLEANUP_DEV_PACKAGES '1'
 env-default CLEANUP_PHPDBG '$(has-cmd php-fpm && echo 1 || echo 0)'
 
 env-default '# Environment variables for sendmail'
-env-default SENDMAIL_SERVER_HOSTNAME 'mailhog'
-env-default SENDMAIL_SERVER_PORT '1025'
+env-default SMTP_HOST 'mailhog'
+env-default SMTP_PORT '1025'
+env-default SMTP_LOG '$(log-path)'
+# env-default SMTP_FROM ''
+# env-default SMTP_USER ''
+# env-default SMTP_PASSWORD ''
+# env-default SMTP_AUTH ''
+# env-default SMTP_TLS ''
 
-if [ -z "$(command -v sendmail)" ]; then
-    if has-cmd msmtp; then
-        env-default SENDMAIL_PATH '$(command -v msmtp) -C /etc/msmtprc -t --read-envelope-from'
-    elif has-cmd ssmtp; then
-        env-default SENDMAIL_PATH '$(command -v ssmtp) -C /etc/ssmtp/ssmtp.conf -t'
-    fi
+# configure sendmail with msmtp
+if has-cmd msmtp; then
+    if has-cmd sendmail; then pkg-del sendmail; fi
+    env-default PHP_SENDMAIL_PATH '/usr/sbin/sendmail -t'
 fi
 
 # create self-signed certificate
