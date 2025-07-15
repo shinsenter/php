@@ -9,7 +9,7 @@
 
 run_cmd() {
     if [ -x "$1" ]; then
-        debug-echo "\nAutorun: $1"
+        debug-echo -i "\nAutorun: $1"
         with-env "$@"
     fi
 }

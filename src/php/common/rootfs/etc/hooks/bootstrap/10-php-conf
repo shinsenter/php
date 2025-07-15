@@ -46,5 +46,6 @@ pm.min_spare_servers = $pm_min_spare_servers
 pm.max_spare_servers = $pm_max_spare_servers
 pm.max_requests      = $pm_max_requests
 
+; Generated at $(date "+%Y-%m-%d %H:%M:%S")
 EOF
 fi

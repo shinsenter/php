@@ -16,15 +16,6 @@ FIRST_RUN=/var/local/first-run
 # cache environment variables for other processes
 mkdir -p /etc/default && with-env >/etc/default/locale
 
-# log the timestamp of the first run, then call the hook
-# this is convenient for running migration scripts etc.
-if [ ! -e "$FIRST_RUN" ]; then
-    echo "$(date)" >"$FIRST_RUN"
-    hook first-run
-else
-    hook post-restart
-fi
-
 ################################################################################
 
 # fix .htaccess to allow uri path after index.php
@@ -51,3 +42,17 @@ if ! is-true $DISABLE_AUTORUN_FIX_OWNER_GROUP; then
     fi
     rm -rf "$(web-chown path)"
 fi
+
+################################################################################
+
+# log the timestamp of the first run, then call the hook
+# this is convenient for running migration scripts etc.
+if [ ! -e "$FIRST_RUN" ]; then
+    echo "$(date)" >"$FIRST_RUN"
+    hook first-run
+else
+    hook post-restart
+fi
+
+# call the post-boot hook
+hook post-boot

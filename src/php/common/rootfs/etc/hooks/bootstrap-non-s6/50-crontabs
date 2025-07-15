@@ -6,7 +6,11 @@
 # Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-for hook; do
-    debug-echo -i "\nRun hook: $hook"
-    autorun "/etc/hooks/$hook" 2>&1
-done
+
+if has-cmd crond; then
+    export APP_PATH="$(app-path)"
+    export APP_ROOT="$(app-root)"
+    CROND_PID=/var/run/crond.pid
+    if [ -f $CROND_PID ]; then kill -TERM $(cat $CROND_PID) &>/dev/null || rm -f $CROND_PID; fi
+    cd "$APP_PATH" && with-env crond $CRONTAB_OPTIONS;
+fi
