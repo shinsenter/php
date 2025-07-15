@@ -45,7 +45,7 @@ alpine() {
 debian() {
     local options="-yq --allow-unauthenticated"
     if [ $# -gt 0 ] || [ $upgrade -eq 1 ]; then
-        apt-get update $options | debug-echo -l || true
+        apt-get update $options | grep -v 'GPG error' | debug-echo -l || true
     fi
     if [ $# -gt 0 ]; then
         debug-echo -i "\nInstall $@"
