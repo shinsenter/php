@@ -37,7 +37,7 @@ RUN <<'EOF'
 sources="/etc/apt/sources.list"
 if [ -f $sources ]; then
     . /etc/os-release
-    if [ "$ID" = "debian" ] && [ "${VERSION_ID%%.*}" -lt 12 ]; then
+    if [ "$ID" = "debian" ] && [ "${VERSION_ID%%.*}" -eq 10 ]; then
         debug-echo -i "Patching sources.list for $ID $VERSION_ID"
         sed -i 's|deb.debian.org/debian|archive.debian.org/debian|g' $sources
         sed -i 's|security.debian.org/debian-security|archive.debian.org/debian-security|g' $sources
