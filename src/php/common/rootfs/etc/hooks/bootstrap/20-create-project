@@ -53,21 +53,29 @@ unset_allow_plugins() {
 }
 
 copy_env() {
-    if [ ! -e "$ENV_PATH" ]; then
-        if [ -f "$ENV_PATH.example" ]; then
-            cp -p "$ENV_PATH.example" "$ENV_PATH"
-            debug-echo "Copied .env.example to .env"
-        elif [ -f "$ENV_PATH.sample" ]; then
-            cp -p "$ENV_PATH.sample" "$ENV_PATH"
-            debug-echo "Copied .env.sample to .env"
-        fi
+    local files=(
+        '.env.dev'
+        '.env.development.example'
+        '.env.example'
+        '.env.local'
+        '.env.sample'
+    )
+
+    for file in "${files[@]}"; do
+    if [ -f "$APP_PATH/$file" ]; then
+        echo "Found: $file. Copying to .env..."
+        cp -pf "$APP_PATH/$file" "$APP_PATH/.env"
+        break
     fi
+    done
 }
 
 ################################################################################
 
 web-mkdir "$APP_PATH" "$COMPOSER_HOME"
 cd "$APP_PATH"
+
+################################################################################
 
 if [ -z "$(ls -A "$APP_PATH")" ]; then
     # pull project from source
@@ -123,12 +131,12 @@ if [ -z "$(ls -A "$APP_PATH")" ]; then
         web-chown "Copied files from /source/ to $APP_PATH"
     fi
 
-    # copy .env.example to .env
-    copy_env
-
     # install required packages, allow composer plugins
     install_deps
     allow_plugins
+
+    # copy .env.example to .env
+    copy_env
 
     # update packages if the project has composer.json
     if [ -e "$CONF_PATH" ]; then
@@ -153,8 +161,7 @@ else
     debug-echo "Skip project creation because $APP_PATH is not empty."
 fi
 
-# copy .env.example to .env
-copy_env
+################################################################################
 
 # run composer install when vendor directory or ClassLoader.php is missing
 if ! is-true $DISABLE_AUTORUN_COMPOSER_INSTALL && has-cmd composer; then
@@ -165,6 +172,10 @@ if ! is-true $DISABLE_AUTORUN_COMPOSER_INSTALL && has-cmd composer; then
             install_deps
             allow_plugins
 
+            # copy .env.example to .env
+            copy_env
+
+            # install composer packages
             hook pre-install-packages
             composer install -n $COMPOSER_INSTALL_OPTIONS
             hook post-install-packages
@@ -178,3 +189,5 @@ if ! is-true $DISABLE_AUTORUN_COMPOSER_INSTALL && has-cmd composer; then
         debug-echo "Skip composer install because $CONF_PATH is missing."
     fi
 fi
+
+################################################################################

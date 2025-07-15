@@ -33,19 +33,18 @@ ONBUILD RUN hook onbuild
 
 ################################################################################
 
-# RUN <<'EOF'
-# # prefer snapshot sources if present
-# APT_SOURCES=/etc/apt/sources.list
-# if [ -e $APT_SOURCES ] && grep -q "^# deb http://snapshot\.debian\.org" "$APT_SOURCES"; then
-#     echo 'Correcting /etc/apt/sources.list'
-#     sed -i '/^# deb http:\/\/snapshot\.debian\.org/{
-#         s/^# *//          # uncomment the snapshot line
-#         n                 # move to the next line
-#         s/^\([^#]\)/# \1/ # comment the next line
-#     }' "$APT_SOURCES"
-#     cat "$APT_SOURCES"
-# fi
-# EOF
+RUN <<'EOF'
+sources="/etc/apt/sources.list"
+if [ -f $sources ]; then
+    . /etc/os-release
+    if [ "$ID" = "debian" ] && [ "${VERSION_ID%%.*}" -lt 12 ]; then
+        debug-echo -i "Patching sources.list for $ID $VERSION_ID"
+        sed -i 's|deb.debian.org/debian|archive.debian.org/debian|g' $sources
+        sed -i 's|security.debian.org/debian-security|archive.debian.org/debian-security|g' $sources
+        cat $sources
+    fi
+fi
+EOF
 
 ################################################################################
 
