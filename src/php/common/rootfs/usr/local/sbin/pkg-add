@@ -7,35 +7,54 @@
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
+keywords="update upgrade"
+upgrade=0
+packages=""
+
+for arg in "$@"; do
+    match=0
+    for keyword in $keywords; do
+        if [ "$arg" = "$keyword" ]; then
+            match=1
+            upgrade=1
+            break
+        fi
+    done
+
+    if [ "$match" -eq 0 ]; then
+        packages="$packages $arg"
+    fi
+done
+
+# packages="$(echo "$packages" | sed 's/^ *//')"
+
 alpine() {
-    if [ $# -gt 0 ]; then
+    if [ $# -gt 0 ] || [ $upgrade -eq 1 ]; then
         rm -rf /var/cache/apk && mkdir /var/cache/apk
         apk update | debug-echo -l || true
-        for pkg; do
-            if [ "$pkg" = "upgrade" ]; then
-                apk upgrade --available | debug-echo -l || true
-            else
-                debug-echo -i "\nInstall $pkg"
-                apk add $pkg | debug-echo -l
-            fi
-        done
+    fi
+    if [ $# -gt 0 ]; then
+        debug-echo -i "\nInstall $@"
+        apk add "$@" | debug-echo -l
+    fi
+    if [ $upgrade -eq 1 ]; then
+        apk upgrade --available | debug-echo -l || true
     fi
 }
 
 debian() {
     local options="-yq --allow-unauthenticated"
-    if [ $# -gt 0 ]; then
+    if [ $# -gt 0 ] || [ $upgrade -eq 1 ]; then
         apt-get update $options | debug-echo -l || true
-        for pkg; do
-            if [ "$pkg" = "upgrade" ] || [ "$pkg" = "update" ]; then
-                apt-get upgrade $options | debug-echo -l || true
-            else
-                debug-echo -i "\nInstall $pkg"
-                apt-get install $options --no-install-recommends --no-install-suggests $pkg | debug-echo -l
-            fi
-        done
+    fi
+    if [ $# -gt 0 ]; then
+        debug-echo -i "\nInstall $@"
+        apt-get install $options --no-install-recommends --no-install-suggests "$@" | debug-echo -l
+    fi
+    if [ $upgrade -eq 1 ]; then
+        apt-get upgrade $options | debug-echo -l || true
     fi
 }
 
-if has-cmd apk; then alpine $APK_PACKAGES "$@"; fi
-if has-cmd apt; then debian $APT_PACKAGES "$@"; fi
+if has-cmd apk; then alpine $APK_PACKAGES $packages; fi
+if has-cmd apt; then debian $APT_PACKAGES $packages; fi
