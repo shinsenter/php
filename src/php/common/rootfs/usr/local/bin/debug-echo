@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 
+EX='-e'
 NC='\033[0m'
 case "$1" in
     -c|--critical)  CL='\033[0;31m'; shift ;;
@@ -12,22 +13,17 @@ case "$1" in
 esac
 
 if [ ! -t 1 ]; then NC=; CL=; fi
+if [ "$(printf '%s' $(echo -e ''))" = "-e" ]; then EX=; fi
 
-if [ "$(printf '%s' "$(echo -e '1\n2')" | wc -l)" -eq 2 ]; then
-    colorize() {
-        local msg="$@"
-        if [ ! -z "$msg" ]; then
-            echo -e "${CL}${msg}${NC}"
-        fi
-    }
+colorize() {
+    local msg="$@"
+    echo $EX "${CL}${msg}${NC}"
+}
 
-    colorize "$@"
+colorize "$@"
 
-    if [ ! -t 0 ]; then
-        while IFS= read -r line; do
-            colorize "$line"
-        done
-    fi
-else
-    echo "$@"
+if [ ! -t 0 ]; then
+    while IFS= read -r line; do
+        colorize "$line"
+    done
 fi
