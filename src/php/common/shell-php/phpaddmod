@@ -11,9 +11,9 @@ if ! has-cmd install-php-extensions; then exit 0; fi
 
 # show usage if no arguments are passed
 if [ $# -eq 0 ]; then
-    debug-echo -w "Install and enable PHP modules."
-    debug-echo -w "  Usage: ${0##*/} <module> [module] [...]" >&2
-    debug-echo -w "  For example: ${0##*/} gd imagick" >&2
+    debug-echo -i "Install and enable PHP modules."
+    debug-echo -i "  Usage: ${0##*/} <module> [module] [...]" >&2
+    debug-echo -l "  For example: ${0##*/} gd imagick" >&2
     exit 1
 fi
 
@@ -21,7 +21,7 @@ INSTALLED_MODS="$(php -m 2>/dev/null | grep -v '^\[' | tr '[:upper:]' '[:lower:]
 
 for module; do
     if [ ! -z "$module" ] && grep -q "\<$module\>" <<< "$INSTALLED_MODS"; then
-        debug-echo -i "Module $module is already installed."
+        debug-echo -w "Module $module is already installed."
     else
         NEW_MODS="$NEW_MODS${NEW_MODS:+ }$module"
     fi
@@ -50,7 +50,7 @@ fi
 PID=/tmp/$(php -r 'echo md5(uniqid());' || echo "$0-temp")
 
 set -o pipefail
-debug-echo -w "\nInstall PHP modules: $NEW_MODS."
+debug-echo -i "\nInstall PHP modules: $NEW_MODS."
 
 if is-debug; then env-default | grep IPE_ | debug-echo -i; fi
 

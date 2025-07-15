@@ -40,10 +40,10 @@ debug-echo "Verify user $APP_USER"
 if [ "$APP_USER" != "$DEFAULT_USER" ]; then
     APP_UID="${APP_UID:=$(rand_id)}"
     useradd -o -r -g $APP_GID \
-        -G $APP_GROUP,$DEFAULT_GROUP --no-log-init \
+        -G $APP_GROUP,$DEFAULT_GROUP,mail --no-log-init \
         -d $USER_HOME -s /sbin/nologin -u $APP_UID $APP_USER &>/dev/null
 else
-    usermod -g $APP_GID -G $APP_GROUP,$DEFAULT_GROUP \
+    usermod -g $APP_GID -G $APP_GROUP,$DEFAULT_GROUP,mail \
         -d $USER_HOME -s /sbin/nologin $APP_USER 2>&1
 
     if [ "$APP_UID" != "$DEFAULT_UID" ]; then
