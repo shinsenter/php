@@ -7,6 +7,6 @@
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 for hook; do
-    debug-echo -i "\nRun hook: $hook"
+    debug-echo "\nRun hook: $hook"
     autorun "/etc/hooks/$hook" 2>&1
 done

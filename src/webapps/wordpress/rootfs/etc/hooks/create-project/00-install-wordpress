@@ -27,4 +27,4 @@ php -r "copy('$WPCONFIG_URL', '$APP_PATH/wp-config-sample.php');"
 #     --admin_email=${WORDPRESS_ADMIN_EMAIL:-admin@localhost} \
 #     --skip-email --quiet
 
-debug-echo -w "Wordpress $(wp core version) is downloaded to $APP_PATH."
+debug-echo -s "Wordpress $(wp core version) is downloaded to $APP_PATH."

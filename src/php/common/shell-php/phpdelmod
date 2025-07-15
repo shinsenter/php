@@ -10,9 +10,9 @@ if ! has-cmd php; then exit 0; fi
 
 # show usage if no arguments are passed
 if [ $# -eq 0 ]; then
-    debug-echo -w "Disable PHP modules."
-    debug-echo -w "  Usage: ${0##*/} <module> [module] [...]" >&2
-    debug-echo -w "  For example: ${0##*/} gd imagick" >&2
+    debug-echo -i "Disable PHP modules."
+    debug-echo -i "  Usage: ${0##*/} <module> [module] [...]" >&2
+    debug-echo -l "  For example: ${0##*/} gd imagick" >&2
     exit 1
 fi
 

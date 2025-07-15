@@ -9,11 +9,11 @@
 
 # show usage if no arguments are passed
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; then
-    debug-echo -w "Simple wrapper for adding s6-overlay services."
-    debug-echo -w "  Usage: ${0##*/} [service-name] [longrun|oneshot|needs|finish|down] [script file path|inline script]"
-    debug-echo -w "  For example: ${0##*/} greeting oneshot \"echo 'hello world!'\""
-    debug-echo -w "  For example: ${0##*/} apache longrun /path/to/apache/start.sh"
-    debug-echo -w "  For example: ${0##*/} apache needs php-fpm"
+    debug-echo -i "Simple wrapper for adding s6-overlay services."
+    debug-echo -i "  Usage: ${0##*/} [service-name] [longrun|oneshot|needs|finish|down] [script file path|inline script]"
+    debug-echo -l "  For example: ${0##*/} greeting oneshot \"echo 'hello world!'\""
+    debug-echo -l "  For example: ${0##*/} apache longrun /path/to/apache/start.sh"
+    debug-echo -l "  For example: ${0##*/} apache needs php-fpm"
     exit 1
 fi
 
@@ -63,7 +63,7 @@ fi
 # Generate S6 service files
 # See: https://github.com/just-containers/s6-overlay#writing-a-service-script
 
-debug-echo -i "Creating s6 service: ${name} (${type})."
+debug-echo -w "Creating s6 service: ${name} (${type})."
 
 if [ "$type" = "down" ] || [ "$type" = "finish" ]; then
     create "${s6}/${name}/${type}" "$@"

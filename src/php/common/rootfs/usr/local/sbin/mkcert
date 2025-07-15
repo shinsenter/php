@@ -42,7 +42,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [ -z "$DOMAINS" ]; then
-    debug-echo -w "Usage: ${0##*/} example.com www.example.com [-c domain.crt] [-k domain.key] [-d 365] [-l 4096]"
+    debug-echo -i "Usage: ${0##*/} example.com www.example.com [-c domain.crt] [-k domain.key] [-d 365] [-l 4096]"
     exit 1
 fi
 

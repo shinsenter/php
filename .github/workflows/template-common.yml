@@ -243,6 +243,11 @@ jobs:
           short-description: '${{ env.BUILD_DESC }}'
           readme-filepath: ${{ env.BUILD_README }}
 
+      -
+        if: ${{ !env.SKIP_BUILD && env.USE_BUILD_CACHE == '1' }}
+        name: Debug
+        run: docker images
+
       - # Temp fix
         # https://github.com/docker/build-push-action/issues/252
         # https://github.com/moby/buildkit/issues/1896
