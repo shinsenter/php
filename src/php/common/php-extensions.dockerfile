@@ -8,8 +8,12 @@
 
 # Get IPE script
 # See: https://github.com/mlocati/docker-php-extension-installer
-ARG IPE_SOURCE=https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions
-ADD --link --chmod=755 $IPE_SOURCE /usr/local/bin/
+# ARG IPE_SOURCE=https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions
+# ADD --link --chmod=755 $IPE_SOURCE /usr/local/bin/
+
+COPY --link --from=mlocati/php-extension-installer:latest --chmod=755 \
+    /usr/bin/install-php-extensions \
+    /usr/local/bin/
 
 ################################################################################
 
