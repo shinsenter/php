@@ -1,7 +1,7 @@
 ################################################################################
-# The setups in this file belong to the project https://code.shin.company/php
-# I appreciate you respecting my intellectual efforts in creating them.
-# If you intend to copy or use ideas from this project, please credit properly.
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
 # Author:  SHIN Company <shin@shin.company>
 # License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
@@ -83,7 +83,7 @@ EOF
 STOPSIGNAL SIGTERM
 
 ################################################################################
-# The setups in this file belong to the project https://code.shin.company/php
-# I appreciate you respecting my intellectual efforts in creating them.
-# If you intend to copy or use ideas from this project, please credit properly.
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
 ################################################################################
