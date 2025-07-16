@@ -13,7 +13,6 @@ DEFAULT_UID="$(id -u $DEFAULT_USER)"
 DEFAULT_GID="$(id -g $DEFAULT_USER)"
 
 APP_PATH="$(app-path)"
-LOG_PATH="$(dirname $(log-path))"
 APP_USER="${APP_USER:=$DEFAULT_USER}"
 APP_GROUP="${APP_GROUP:=$DEFAULT_GROUP}"
 APP_UID="${APP_UID:=$DEFAULT_UID}"
@@ -56,7 +55,7 @@ fi
 
 # create application directories
 debug-echo "Create $APP_PATH if not exists."
-web-mkdir  "$APP_PATH" "$LOG_PATH" &>/dev/null
+web-mkdir  "$APP_PATH" "$(dirname $(log-path))" &>/dev/null
 chmod 4755 "$APP_PATH"
 
 ################################################################################

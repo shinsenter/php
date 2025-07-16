@@ -43,7 +43,7 @@ exec "$unitd" --no-daemon \
     --group ${APP_GROUP:-www-data} \
     --control unix:$UNIT_CONTROL_SOCKET \
     --pid $UNIT_CONTROL_PID \
-    --log "$(log-path)"
+    --log "$(log-path stdout)"
 '
 fi
 

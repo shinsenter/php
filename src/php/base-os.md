@@ -228,7 +228,7 @@ These Docker images include additional environment variables for fine-tuning con
 
 | Setting Name                       | Default Value    | Description                                                                                                                           | Example |
 |------------------------------------|------------------|---------------------------------------------------------------------------------------------------------------------------------------|---------|
-| `DEFAULT_LOG_PATH`                 | `/dev/stderr`    | Sets the log output path. By default, logs will be sent to the container's standard output.                                           | `/var/log/container.txt` |
+| `DEFAULT_LOG_PATH`                 | `/proc/1/fd/2`   | Sets the log output path. By default, logs will be sent to the container's standard output.                                           | `/var/log/container.txt` |
 | `DEBUG` or `DEBUG_MODE`            | Not set          | Activates debug mode with more verbose logs when set to "1".                                                                          | 1 |
 | `TZ`                               | `UTC`            | Sets the default timezone for the container. [Full list](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).               | `Asia/Tokyo` |
 | `DISABLE_AUTORUN_SCRIPTS`          | Not set          | Disables all autorun scripts when set to "1".                                                                                         | 0 |

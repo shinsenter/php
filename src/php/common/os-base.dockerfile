@@ -148,17 +148,22 @@ env-default CLEANUP_PHPDBG '$(has-cmd php-fpm && echo 1 || echo 0)'
 env-default '# Environment variables for sendmail'
 env-default SMTP_HOST 'mailhog'
 env-default SMTP_PORT '1025'
-env-default SMTP_LOG '$(log-path)'
-# env-default SMTP_FROM ''
-# env-default SMTP_USER ''
-# env-default SMTP_PASSWORD ''
-# env-default SMTP_AUTH ''
-# env-default SMTP_TLS ''
+env-default SMTP_LOG '$(log-path stdout)'
+env-default SMTP_FROM ''
+env-default SMTP_USER ''
+env-default SMTP_PASSWORD ''
+env-default SMTP_AUTH ''
+env-default SMTP_TLS ''
 
 # configure sendmail with msmtp
-if has-cmd msmtp; then
-    if has-cmd sendmail; then pkg-del sendmail; fi
-    env-default PHP_SENDMAIL_PATH '/usr/sbin/sendmail -t'
+if has-cmd msmtp-wrapper; then
+    if has-cmd sendmail; then
+        old="$(command -v sendmail)"
+        pkg-del sendmail && rm -f $old || true
+    fi
+
+    new="$(command -v msmtp-wrapper)"
+    mv $new "$(dirname $new)/sendmail"
 fi
 
 # create self-signed certificate

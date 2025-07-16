@@ -38,7 +38,9 @@ if ! [[ $* == *-f* ]]; then
 fi
 
 # Use system tls chain
-options+=("--tls-trust-file=/etc/ssl/certs/ca-certificates.crt")
+if [ -f /etc/ssl/certs/ca-certificates.crt ]; then
+    options+=("--tls-trust-file=/etc/ssl/certs/ca-certificates.crt")
+fi
 
 if [ -n "$SMTP_HOST" ]; then
     options+=("--host=$SMTP_HOST")
@@ -70,7 +72,6 @@ if [ -n "$SMTP_PASSWORD" ]; then
     SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
     options+=("--passwordeval=$SCRIPT_PATH")
 fi
-
 
 if [ -n "$SMTP_AUTH" ]; then
     options+=("--auth=$SMTP_AUTH")

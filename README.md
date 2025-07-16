@@ -307,14 +307,6 @@ If you find my Docker images useful, consider donating via PayPal:
 (To edit this welcome message, add your text to /etc/welcome.txt)
 
 ---------------
-Container     : shinsenter/php (built: 2025-07-03T00:00:00+0000)
-Distro        : Debian GNU/Linux 12 (bookworm)
-Timezone      : UTC (GMT+0000)
-UID / GID     : www-data:www-data (33:33)
-App Root      : /var/www/html
-Document Root : /var/www/html
----------------
-
 Docker Images by SHIN Company
 Copyright (C) 2025 SHIN Company <shin@shin.company>
 
@@ -326,6 +318,15 @@ but it comes WITHOUT ANY WARRANTY. For more details, refer to the GNU GPL.
 To get support, please contact: SHIN Company <shin@shin.company>
 Docker Hub:      https://hub.docker.com/u/shinsenter
 GitHub Packages: https://github.com/shinsenter?tab=packages
+
+---------------
+Container     : shinsenter/php (built: 2025-07-03T00:00:00+0000)
+Distro        : Debian GNU/Linux 12 (bookworm)
+Timezone      : UTC (GMT+0000)
+UID / GID     : www-data:www-data (33:33)
+App Root      : /var/www/html
+Document Root : /var/www/html
+---------------
 
 PHP 8.4.8 (cli) (built: Jul  1 2025 03:40:54) (NTS)
 Copyright (c) The PHP Group
@@ -430,6 +431,21 @@ services:
 ```
 
 
+## Sending email
+
+In these Docker images, `sendmail` has been replaced by `msmtp` for sending emails. You'll need to configure SMTP using the following environment variables:
+
+| Environment Variable | Description                                     | Example Value        |
+|----------------------|-------------------------------------------------|----------------------|
+| SMTP_HOST            | The hostname or IP address of the SMTP server   | `smtp.gmail.com`     |
+| SMTP_PORT            | Port number used to connect to the SMTP server  | `587`                |
+| SMTP_LOG             | File path to store SMTP email logs              | `/path/to/email.log` |
+| SMTP_FROM            | The sender's email address                      | `admin@example.com`  |
+| SMTP_USER            | Username used for SMTP authentication           | `your_smtp_username` |
+| SMTP_PASSWORD        | Password used for SMTP authentication           | `your_smtp_password` |
+| SMTP_AUTH            | Whether SMTP authentication is required         | `on`                 |
+| SMTP_TLS             | Whether to use TLS for secure connection        | `on`                 |
+
 ## Debug Mode
 
 Enable "debug mode" for more verbose logging by setting `DEBUG=1` as an environment variable.
@@ -458,7 +474,7 @@ These Docker images include additional environment variables for fine-tuning con
 
 | Setting Name                       | Default Value    | Description                                                                                                                           | Example |
 |------------------------------------|------------------|---------------------------------------------------------------------------------------------------------------------------------------|---------|
-| `DEFAULT_LOG_PATH`                 | `/dev/stderr`    | Sets the log output path. By default, logs will be sent to the container's standard output.                                           | `/var/log/container.txt` |
+| `DEFAULT_LOG_PATH`                 | `/proc/1/fd/2`   | Sets the log output path. By default, logs will be sent to the container's standard output.                                           | `/var/log/container.txt` |
 | `DEBUG` or `DEBUG_MODE`            | Not set          | Activates debug mode with more verbose logs when set to `1`.                                                                          | 1 |
 | `TZ`                               | `UTC`            | Sets the default timezone for the container. [Full list](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).               | `Asia/Tokyo` |
 | `ALLOW_RUNTIME_PHP_ENVVARS`        | Not set          | Enables the use of `$PHP_*` environment variables to dynamically change configurations when running PHP commands in the container.    | 1 |

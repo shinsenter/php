@@ -26,7 +26,7 @@ exec /usr/local/bin/rr -w "$(app-path)" \
     -o http.ssl.key=/etc/ssl/site/server.key \
     -o logs.level=$(if is-debug; then echo debug; else echo info; fi) \
     -o logs.mode=$(if is-debug; then echo development; else echo production; fi) \
-    -o logs.output=$(log-path) \
+    -o logs.output=$(log-path stdout) \
     -o rpc.listen=tcp://127.0.0.1:6001 \
     $ROADRUNNER_COMMAND_OPTIONS \
     $(if is-debug; then echo "-o http.pool.debug=1 -d"; fi) \
