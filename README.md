@@ -450,7 +450,7 @@ you'll need to configure SMTP using the following environment variables in your 
 | `SMTP_AUTH`          | Whether SMTP authentication is required.        | `on`                 |
 | `SMTP_TLS`           | Whether to use TLS for secure connection.       | `on`                 |
 
-> 💡 Hint: If you don’t have an SMTP server available (like Gmail) to send emails,
+> 💡 Hint: If you don't have an SMTP server available (like Gmail) to send emails,
 > you can try using another container such as [MailHog](https://hub.docker.com/r/mailhog/mailhog) to act as an SMTP server.
 >
 > If you're using MailHog, you only need to set the following two environment variables
