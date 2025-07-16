@@ -1,2 +1,10 @@
 #!/usr/bin/env sh
-echo "${DEFAULT_LOG_PATH:-/proc/1/fd/2}"
+if [ -n "$DEFAULT_LOG_PATH" ]; then
+    echo "$DEFAULT_LOG_PATH"
+else
+    case "$1" in
+        stdout ) echo /dev/stdout  ;;
+        stderr ) echo /dev/stderr  ;;
+        *      ) echo /proc/1/fd/2 ;;
+    esac
+fi

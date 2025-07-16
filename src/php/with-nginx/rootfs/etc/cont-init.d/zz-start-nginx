@@ -46,10 +46,10 @@ fi
 
 # enable debug logs
 if is-debug; then
-    nginx-conf 'error_log' "$(log-path) debug"
+    nginx-conf 'error_log' "$(log-path stdout) debug"
     debug-echo -w "🐞 Nginx is in DEBUG MODE 🐞"
 else
-    nginx-conf 'error_log' "$(log-path) error"
+    nginx-conf 'error_log' "$(log-path stderr) error"
 fi
 
 if ! is-true $DISABLE_GREETING && has-cmd nginx; then

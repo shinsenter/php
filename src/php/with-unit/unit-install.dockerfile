@@ -50,7 +50,7 @@ build() {
         --runstatedir=/var/run \
         --logdir=/var/log \
         --tmpdir=/var/tmp \
-        --log=$(log-path)"
+        --log=$(log-path stdout)"
     shift
 
     # make -j $NCPU -C pkg/contrib .njs

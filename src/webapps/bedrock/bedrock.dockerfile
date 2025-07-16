@@ -52,7 +52,7 @@ env-default WP_CLI_CACHE_DIR    '$WP_CLI_DIR/cache/'
 env-default WP_CLI_PACKAGES_DIR '$WP_CLI_DIR/packages/'
 env-default WP_CLI_CONFIG_PATH  '$WP_CLI_DIR/config.yml'
 env-default WP_DEBUG            '$(is-debug && echo 1 || echo 0)'
-env-default WP_DEBUG_LOG        '$(log-path)'
+env-default WP_DEBUG_LOG        '$(log-path stdout)'
 
 php -r "copy('$WPCLI_URL', '$WPCLI_PATH');" && chmod +xr $WPCLI_PATH
 web-cmd wp "$WPCLI_PATH --allow-root --path=\"\$(app-path)/web/wp\""
