@@ -115,18 +115,20 @@ You can optionally set the following environment variables in the container to e
 
 > 📝 Note: you’ll need to install the required packages and create the necessary configs yourself for features like Pulse or Laravel Horizon.
 
-| Environment Variable           | Description             |
-|--------------------------------|-------------------------|
-| `LARAVEL_ENABLE_QUEUE_WORKER`  | Enables supervisor service for the Laravel queue worker. Set to `1` to start processing jobs. |
-| `LARAVEL_QUEUE_WORKER_OPTIONS` | Defines custom options for the Laravel queue worker (e.g., connection, delay). |
-| `LARAVEL_ENABLE_SCHEDULER`     | Enables supervisor service for the Laravel scheduler. Set to `1` to run scheduled tasks. |
-| `LARAVEL_SCHEDULER_OPTIONS`    | Specifies additional options for the scheduler execution. |
-| `LARAVEL_ENABLE_HORIZON`       | Enables supervisor service for Laravel Horizon, a dashboard for managing queues. |
-| `LARAVEL_HORIZON_OPTIONS`      | Options for customizing Horizon behavior (e.g., environment, queue names). |
-| `LARAVEL_ENABLE_PULSE`         | Enables supervisor service for Laravel Pulse for application performance monitoring. |
-| `LARAVEL_PULSE_OPTIONS`        | Configuration options for Laravel Pulse (e.g., port, storage). |
-| `LARAVEL_ENABLE_REVERB`        | Enables supervisor service for Laravel Reverb for real-time WebSocket communication. |
-| `LARAVEL_REVERB_OPTIONS`       | Configuration options for Laravel Reverb (e.g., port, storage). |
+| Environment Variable             | Description             |
+|----------------------------------|-------------------------|
+| `LARAVEL_AUTO_MIGRATION`         | Whether to automatically run database migrations when the app boots. |
+| `LARAVEL_AUTO_MIGRATION_OPTIONS` | Additional options/flags to pass to the `php artisan migrate` command. |
+| `LARAVEL_ENABLE_QUEUE_WORKER`    | Enables supervisor service for the Laravel queue worker. Set to `1` to start processing jobs. |
+| `LARAVEL_QUEUE_WORKER_OPTIONS`   | Defines custom options for the Laravel queue worker (e.g., connection, delay). |
+| `LARAVEL_ENABLE_SCHEDULER`       | Enables supervisor service for the Laravel scheduler. Set to `1` to run scheduled tasks. |
+| `LARAVEL_SCHEDULER_OPTIONS`      | Specifies additional options for the scheduler execution. |
+| `LARAVEL_ENABLE_HORIZON`         | Enables supervisor service for Laravel Horizon, a dashboard for managing queues. |
+| `LARAVEL_HORIZON_OPTIONS`        | Options for customizing Horizon behavior (e.g., environment, queue names). |
+| `LARAVEL_ENABLE_PULSE`           | Enables supervisor service for Laravel Pulse for application performance monitoring. |
+| `LARAVEL_PULSE_OPTIONS`          | Configuration options for Laravel Pulse (e.g., port, storage). |
+| `LARAVEL_ENABLE_REVERB`          | Enables supervisor service for Laravel Reverb for real-time WebSocket communication. |
+| `LARAVEL_REVERB_OPTIONS`         | Configuration options for Laravel Reverb (e.g., port, storage). |
 
 
 ## Stable Image Tags

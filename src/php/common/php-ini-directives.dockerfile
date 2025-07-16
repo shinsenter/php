@@ -77,9 +77,10 @@ env-default PHP_PM_STATUS_LISTEN '/run/php-fpm-status.sock'
 env-default PHP_PM_STATUS_PATH '/status/php-fpm'
 env-default PHP_SYSLOG_FACILITY 'syslog'
 
+EOF
+
 ################################################################################
 # The setups in this file belong to the project https://code.shin.company/php
 # I appreciate you respecting my intellectual efforts in creating them.
 # If you intend to copy or use ideas from this project, please credit properly.
 ################################################################################
-EOF

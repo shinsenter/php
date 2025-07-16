@@ -9,12 +9,6 @@
 
 APP_PATH="$(app-path)"
 APP_ROOT="$(app-root)"
-FIRST_RUN=/var/local/first-run
-
-################################################################################
-
-# cache environment variables for other processes
-mkdir -p /etc/default && with-env >/etc/default/locale
 
 ################################################################################
 
@@ -34,6 +28,7 @@ if ! is-true $DISABLE_AUTORUN_FIX_OWNER_GROUP; then
     elif [ -f "$APP_ROOT/index.php" ]; then
         owner="$(ls -ld "$APP_ROOT/index.php" | awk '{print $3 ":" $4}')"
         debug-echo "Detected owner: $owner"
+        debug-echo "Expected owner: $APP_USER:$APP_GROUP"
 
         if [ "$owner" != "$APP_USER:$APP_GROUP" ]; then
             debug-echo "Correct ownership for the application path."
@@ -45,14 +40,17 @@ fi
 
 ################################################################################
 
+# cache environment variables for other processes
+mkdir -p /etc/default && with-env >/etc/default/locale
+
+################################################################################
+
 # log the timestamp of the first run, then call the hook
 # this is convenient for running migration scripts etc.
+FIRST_RUN=/var/local/first-run
 if [ ! -e "$FIRST_RUN" ]; then
     echo "$(date)" >"$FIRST_RUN"
     hook first-run
 else
     hook post-restart
 fi
-
-# call the post-boot hook
-hook post-boot

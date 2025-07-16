@@ -11,7 +11,7 @@ INSTALL="0"
 CERT="domain.crt"
 KEY="domain.key"
 DAYS=365
-LENGTH=4096
+LENGTH=2048
 
 while [[ $# -gt 0 ]]; do
     case $1 in

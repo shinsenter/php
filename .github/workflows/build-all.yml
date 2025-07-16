@@ -38,6 +38,8 @@ jobs:
       - name: pre-build debug
         id: init
         run: |
+          set -e
+
           # Prepare variables
           the_day=$(date -u +"%d")
           event_name=${{ github.event_name }}

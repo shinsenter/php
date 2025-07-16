@@ -407,7 +407,7 @@ services:
 For more information on environment variables for cron jobs, refer to the [Other System Settings](#other-system-settings) section below.
 
 
-## Customize Supervisor command
+## Customize Supervisor Command
 
 We can set a `$SUPERVISOR_PHP_COMMAND` environment variable to the service definition in your application's `docker-compose.yml` file.
 This environment variable will contain the command that the container will use to serve your application using another process instead of the default process.
@@ -431,20 +431,31 @@ services:
 ```
 
 
-## Sending email
+## Sending Emails
 
-In these Docker images, `sendmail` has been replaced by `msmtp` for sending emails. You'll need to configure SMTP using the following environment variables:
+In these Docker images, `sendmail` has been replaced by `msmtp` for sending emails.
+You can send emails using common PHP libraries like [PHPMailer](https://github.com/PHPMailer/PHPMailer).
+
+If you prefer to use PHP's `mail()` function,
+you'll need to configure SMTP using the following environment variables in your container:
 
 | Environment Variable | Description                                     | Example Value        |
 |----------------------|-------------------------------------------------|----------------------|
-| SMTP_HOST            | The hostname or IP address of the SMTP server   | `smtp.gmail.com`     |
-| SMTP_PORT            | Port number used to connect to the SMTP server  | `587`                |
-| SMTP_LOG             | File path to store SMTP email logs              | `/path/to/email.log` |
-| SMTP_FROM            | The sender's email address                      | `admin@example.com`  |
-| SMTP_USER            | Username used for SMTP authentication           | `your_smtp_username` |
-| SMTP_PASSWORD        | Password used for SMTP authentication           | `your_smtp_password` |
-| SMTP_AUTH            | Whether SMTP authentication is required         | `on`                 |
-| SMTP_TLS             | Whether to use TLS for secure connection        | `on`                 |
+| `SMTP_HOST`          | The hostname or IP address of the SMTP server.  | `smtp.gmail.com`     |
+| `SMTP_PORT`          | Port number used to connect to the SMTP server. | `587`                |
+| `SMTP_LOG`           | File path to store SMTP email logs.             | `/path/to/email.log` |
+| `SMTP_FROM`          | The sender's email address.                     | `admin@example.com`  |
+| `SMTP_USER`          | Username used for SMTP authentication.          | `your_smtp_username` |
+| `SMTP_PASSWORD`      | Password used for SMTP authentication.          | `your_smtp_password` |
+| `SMTP_AUTH`          | Whether SMTP authentication is required.        | `on`                 |
+| `SMTP_TLS`           | Whether to use TLS for secure connection.       | `on`                 |
+
+> 💡 Hint: If you don’t have an SMTP server available (like Gmail) to send emails,
+> you can try using another container such as [MailHog](https://hub.docker.com/r/mailhog/mailhog) to act as an SMTP server.
+>
+> If you're using MailHog, you only need to set the following two environment variables
+> in your container: `SMTP_HOST=mailhog` and `SMTP_PORT=25`.
+
 
 ## Debug Mode
 
