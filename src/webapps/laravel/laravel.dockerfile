@@ -40,6 +40,14 @@ RUN <<'EOF'
 echo 'Configure Laravel'
 [ -z "$DEBUG" ] || set -ex && set -e
 
+env-default '# Environment variables for Laravel'
+env-default LARAVEL_AUTO_MIGRATION      '1'
+env-default LARAVEL_ENABLE_QUEUE_WORKER '0'
+env-default LARAVEL_ENABLE_SCHEDULER    '1'
+env-default LARAVEL_ENABLE_HORIZON      '0'
+env-default LARAVEL_ENABLE_PULSE        '0'
+env-default LARAVEL_ENABLE_REVERB       '0'
+
 # make artisan command alias
 web-cmd artisan 'php $(app-path)/artisan'
 
