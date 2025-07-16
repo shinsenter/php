@@ -15,7 +15,6 @@ if [ ! -f $conf_path ]; then
     echo '#!/bin/sh
 export APP_PATH="$(app-path)"
 export APP_ROOT="$(app-root)"
-export LOG_PATH="$(log-path)"
 if [ -d "$APP_PATH" ]; then cd "$APP_PATH"; fi
 
 NEW_PATH="$(echo $PATH | sed "s/\/usr\/local\/aliases://")"
