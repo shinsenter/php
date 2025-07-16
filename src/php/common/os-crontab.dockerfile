@@ -11,8 +11,10 @@ RUN <<'EOF'
 echo 'Configure base crontab'
 [ -z "$DEBUG" ] || set -ex && set -e
 
-env-default CRONTAB_SHELL  '/bin/sh'
-env-default CRONTAB_MAILTO '$APP_ADMIN'
+env-default '# Environment variables for crontab'
+env-default CRONTAB_SHELL   '/bin/sh'
+env-default CRONTAB_MAILTO  '$APP_ADMIN'
+env-default CRONTAB_OPTIONS ''
 
 if ! has-cmd crond; then
     pkg-add cron
@@ -30,4 +32,11 @@ else
 fi
 '
 fi
+
 EOF
+
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+################################################################################

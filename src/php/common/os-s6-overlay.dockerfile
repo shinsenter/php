@@ -59,11 +59,13 @@ if ! has-s6 && [ ! -z "$S6_VERSION" ]; then
     if has-cmd env-default; then
         env-default '# Environment variables for s6-overlay'
         env-default S6_BEHAVIOUR_IF_STAGE2_FAILS 2
+        env-default S6_CMD_WAIT_FOR_SERVICES 0
         env-default S6_CMD_WAIT_FOR_SERVICES_MAXTIME 0
         env-default S6_KEEP_ENV 1
         env-default S6_KILL_FINISH_MAXTIME 3000
         env-default S6_KILL_GRACETIME 3000
         env-default S6_LOGGING 0
+        env-default S6_READ_ONLY_ROOT 1
         env-default S6_SERVICES_GRACETIME 3000
         env-default S6_VERBOSITY '$(is-debug && echo 2 || echo 0)'
         env-default S6_VERSION $S6_VERSION
@@ -79,3 +81,9 @@ EOF
 ################################################################################
 
 STOPSIGNAL SIGTERM
+
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+################################################################################

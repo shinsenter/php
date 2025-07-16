@@ -29,7 +29,6 @@ ENV PHP_VERSION=${PHP_VERSION//-rc/}
 INCLUDE ./common/os-base
 INCLUDE ./common/os-crontab
 INCLUDE ./common/php-extensions
-INCLUDE ./common/php-composer
 INCLUDE ./common/php-ini-directives
 
 ################################################################################
