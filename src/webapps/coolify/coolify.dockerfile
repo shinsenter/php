@@ -40,6 +40,7 @@ ENV PHP_POST_MAX_SIZE="256M"
 ENV PHP_UPLOAD_MAX_FILESIZE="256M"
 ENV QUEUE_CONNECTION="sync"
 ENV LARAVEL_ENABLE_HORIZON=1
+ENV LARAVEL_ENABLE_SCHEDULER=1
 
 ################################################################################
 
