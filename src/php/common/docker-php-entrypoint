@@ -43,14 +43,14 @@ if [ -d "$APP_PATH" ]; then cd "$APP_PATH"; fi
 
 if [ ! -z "$SUPERVISOR_PHP_COMMAND" ]; then
     # run bootstrap hook to initialize the container
-    hook bootstrap
+    hook bootstrap post-boot onready
 
     # run custom command defined in $SUPERVISOR_PHP_COMMAND
     debug-echo "Start container with custom user command: $SUPERVISOR_PHP_COMMAND $@"
     exec with-env $SUPERVISOR_PHP_COMMAND "$@"
 else
     # run bootstrap hook to initialize the container
-    if ! has-s6; then hook bootstrap bootstrap-non-s6; fi
+    if ! has-s6; then hook bootstrap bootstrap-non-s6 post-boot onready; fi
 
     # fallback for docker-php-entrypoint
     if [ -x "/init" ]; then set -- /init "$@"; fi
@@ -62,3 +62,9 @@ else
     debug-echo "Start container with the command: $@"
     exec with-env "$@"
 fi
+
+################################################################################
+# The setups in this file belong to the project https://code.shin.company/php
+# I appreciate you respecting my intellectual efforts in creating them.
+# If you intend to copy or use ideas from this project, please credit properly.
+################################################################################

@@ -17,26 +17,36 @@ CONF_PATH="$APP_PATH/composer.json"
 
 install_deps() {
     if [ -e "$CONF_PATH" ]; then
-        cd "$APP_PATH"
+        deps=""
 
         # intall git if needed
         if grep -qF '"git"' $CONF_PATH || is-true $COMPOSER_REQUIRES_GIT; then
-            pkg-add git
-            git config --global --add safe.directory "$APP_PATH"
+            deps="$deps git"
         fi
 
         # intall nodejs if needed
         if grep -qF 'node ' $CONF_PATH || is-true $COMPOSER_REQUIRES_NODEJS; then
-            pkg-add nodejs
+            deps="$deps nodejs"
         fi
 
         # intall npm if needed
         if grep -qF 'npm ' $CONF_PATH || is-true $COMPOSER_REQUIRES_NPM; then
-            pkg-add npm
-            if [ -f "./package.json" ]; then
-                npm install || true
-            fi
+            deps="$deps npm"
         fi
+    fi
+
+    if [ ! -z "$deps" ]; then
+        pkg-add $deps
+    fi
+
+    cd "$APP_PATH"
+
+    if has-cmd git; then
+        git config --global --add safe.directory "$APP_PATH" || true
+    fi
+
+    if has-cmd npm && [ -f "./package.json" ] && [ ! -d "./node_modules" ]; then
+        npm install || true
     fi
 }
 
