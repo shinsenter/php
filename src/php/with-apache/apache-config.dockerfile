@@ -22,8 +22,8 @@ env-default PHP_ACCESS_LOG '/var/log/php-fpm.log'
 
 env-default '# Environment variables for Apache2'
 env-default APACHE_LOG_LEVEL 'error'
-env-default APACHE_ERROR_LOG '$(log-path)'
-env-default APACHE_ACCESS_LOG '$(log-path)'
+env-default APACHE_ERROR_LOG '$(log-path stderr)'
+env-default APACHE_ACCESS_LOG '$(log-path stdout)'
 env-default APACHE_MAX_CONNECTIONS_PER_CHILD '0'
 env-default APACHE_MAX_REQUEST_WORKERS '150'
 env-default APACHE_MAX_SPARE_SERVERS '10'
@@ -88,7 +88,7 @@ exec php-fpm -y /usr/local/etc/php-fpm.d/zz-generated-settings.conf --nodaemoniz
     s6-service apache longrun '#!/usr/bin/env sh
 export APP_PATH="$(app-path)"
 export APP_ROOT="$(app-root)"
-export LOG_PATH="$(log-path)"
+export LOG_PATH="$(log-path stderr)"
 if [ -f /etc/apache2/envvars ]; then source /etc/apache2/envvars; fi
 
 cd "$APP_PATH"
