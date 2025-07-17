@@ -146,7 +146,7 @@ env-default CLEANUP_DEV_PACKAGES '1'
 env-default CLEANUP_PHPDBG '$(has-cmd php-fpm && echo 1 || echo 0)'
 
 env-default '# Environment variables for sendmail'
-env-default SMTP_HOST 'mailhog'
+env-default SMTP_HOST 'mailpit'
 env-default SMTP_PORT '1025'
 env-default SMTP_LOG '$(log-path stdout)'
 env-default SMTP_FROM ''
