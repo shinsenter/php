@@ -35,14 +35,14 @@ When you mount an empty directory into the container, it will automatically down
 1. Create an empty directory on your host machine for your project code. For example:
 
 ```shell
-mkdir myproject
+mkdir laravel
 ```
 
 2. Run the container and mount the empty directory as a volume. For example:
 
 ```shell
 docker run -p 80:80 -p 443:443 -p 443:443/udp \
-    -v ./myproject:/var/www/html \
+    -v ./laravel:/var/www/html \
     shinsenter/laravel:latest
 ```
 
@@ -83,14 +83,14 @@ COPY my_domain.key /etc/ssl/site/server.key
 
 # Add your instructions here
 # For example:
-# ADD --chown=$APP_USER:$APP_GROUP ./myproject/ /var/www/html/
+# ADD --chown=$APP_USER:$APP_GROUP ./laravel/ /var/www/html/
 ```
 
 #### Using docker run
 
 ```shell
 docker run -p 80:80 -p 443:443 -p 443:443/udp \
-    -v ./myproject:/var/www/html \
+    -v ./laravel:/var/www/html \
     -v ./my_domain.crt:/etc/ssl/site/server.crt \
     -v ./my_domain.key:/etc/ssl/site/server.key \
     shinsenter/laravel:latest
@@ -103,7 +103,7 @@ services:
   web:
     image: shinsenter/laravel:latest
     volumes:
-      - ./myproject:/var/www/html
+      - ./laravel:/var/www/html
       - ./my_domain.crt:/etc/ssl/site/server.crt
       - ./my_domain.key:/etc/ssl/site/server.key
 ```
@@ -117,17 +117,17 @@ You can optionally set the following environment variables in the container to e
 
 | Environment Variable             | Description             |
 |----------------------------------|-------------------------|
-| `LARAVEL_AUTO_MIGRATION`         | Whether to automatically run database migrations when the app boots. |
+| `LARAVEL_AUTO_MIGRATION`         | Whether to automatically run database migrations when the app boots. Set to `0` to disable running migration. **Default is `1`**. |
 | `LARAVEL_AUTO_MIGRATION_OPTIONS` | Additional options/flags to pass to the `php artisan migrate` command. |
-| `LARAVEL_ENABLE_QUEUE_WORKER`    | Enables supervisor service for the Laravel queue worker. Set to `1` to start processing jobs. |
+| `LARAVEL_ENABLE_QUEUE_WORKER`    | Enables supervisor service for the Laravel queue worker. Set to `1` to start processing jobs. **Default is `0`**. |
 | `LARAVEL_QUEUE_WORKER_OPTIONS`   | Defines custom options for the Laravel queue worker (e.g., connection, delay). |
-| `LARAVEL_ENABLE_SCHEDULER`       | Enables supervisor service for the Laravel scheduler. Set to `1` to run scheduled tasks. |
+| `LARAVEL_ENABLE_SCHEDULER`       | Enables supervisor service for the Laravel scheduler. Set to `0` to disable running scheduled tasks. **Default is `1`**. |
 | `LARAVEL_SCHEDULER_OPTIONS`      | Specifies additional options for the scheduler execution. |
-| `LARAVEL_ENABLE_HORIZON`         | Enables supervisor service for Laravel Horizon, a dashboard for managing queues. |
+| `LARAVEL_ENABLE_HORIZON`         | Enables supervisor service for Laravel Horizon, a dashboard for managing queues. **Default is `0`**. |
 | `LARAVEL_HORIZON_OPTIONS`        | Options for customizing Horizon behavior (e.g., environment, queue names). |
-| `LARAVEL_ENABLE_PULSE`           | Enables supervisor service for Laravel Pulse for application performance monitoring. |
+| `LARAVEL_ENABLE_PULSE`           | Enables supervisor service for Laravel Pulse for application performance monitoring. **Default is `0`**. |
 | `LARAVEL_PULSE_OPTIONS`          | Configuration options for Laravel Pulse (e.g., port, storage). |
-| `LARAVEL_ENABLE_REVERB`          | Enables supervisor service for Laravel Reverb for real-time WebSocket communication. |
+| `LARAVEL_ENABLE_REVERB`          | Enables supervisor service for Laravel Reverb for real-time WebSocket communication. **Default is `0`**. |
 | `LARAVEL_REVERB_OPTIONS`         | Configuration options for Laravel Reverb (e.g., port, storage). |
 
 

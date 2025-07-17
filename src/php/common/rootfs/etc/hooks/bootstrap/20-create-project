@@ -112,6 +112,7 @@ if [ -z "$(ls -A "$APP_PATH")" ]; then
             else
                 cp -pn "$temp" "$APP_PATH"/ &>/dev/null
             fi
+            rm -rf "$temp" "$filename"
             ;;
         */*)
             debug-echo "Installing project $INITIAL_PROJECT to $APP_PATH."
