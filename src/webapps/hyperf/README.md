@@ -35,14 +35,14 @@ When you mount an empty directory into the container, it will automatically down
 1. Create an empty directory on your host machine for your project code. For example:
 
 ```shell
-mkdir myproject
+mkdir hyperf
 ```
 
 2. Run the container and mount the empty directory as a volume. For example:
 
 ```shell
 docker run -p 80:80 -p 443:443 -p 443:443/udp \
-    -v ./myproject:/var/www/html \
+    -v ./hyperf:/var/www/html \
     shinsenter/hyperf:latest
 ```
 
@@ -83,14 +83,14 @@ COPY my_domain.key /etc/ssl/site/server.key
 
 # Add your instructions here
 # For example:
-# ADD --chown=$APP_USER:$APP_GROUP ./myproject/ /var/www/html/
+# ADD --chown=$APP_USER:$APP_GROUP ./hyperf/ /var/www/html/
 ```
 
 #### Using docker run
 
 ```shell
 docker run -p 80:80 -p 443:443 -p 443:443/udp \
-    -v ./myproject:/var/www/html \
+    -v ./hyperf:/var/www/html \
     -v ./my_domain.crt:/etc/ssl/site/server.crt \
     -v ./my_domain.key:/etc/ssl/site/server.key \
     shinsenter/hyperf:latest
@@ -103,7 +103,7 @@ services:
   web:
     image: shinsenter/hyperf:latest
     volumes:
-      - ./myproject:/var/www/html
+      - ./hyperf:/var/www/html
       - ./my_domain.crt:/etc/ssl/site/server.crt
       - ./my_domain.key:/etc/ssl/site/server.key
 ```

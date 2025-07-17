@@ -6,8 +6,8 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-if ! has-cmd php; then exit 0; fi
-if ! has-cmd install-php-extensions; then exit 0; fi
+if ! has-cmd php; then exit 1; fi
+if ! has-cmd install-php-extensions; then exit 1; fi
 
 # show usage if no arguments are passed
 if [ $# -eq 0 ]; then
