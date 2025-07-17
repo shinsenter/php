@@ -240,6 +240,7 @@ app-*)
         ;;
     laravel)
         # https://laravel.com/docs/master/installation
+        ALLOW_RC=1
         BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         ;;
     magento)
@@ -272,12 +273,14 @@ app-*)
         ;;
     symfony)
         # https://symfony.com/doc/current/setup.html
+        ALLOW_RC=1
         ;;
     sulu)
         # https://github.com/sulu/skeleton
         ;;
     wordpress)
         # https://wordpress.org/documentation/category/installation
+        ALLOW_RC=1
         ;;
     bedrock)
         # https://roots.io/bedrock/docs/installation

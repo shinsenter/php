@@ -112,7 +112,7 @@ path_hash() {
     for target; do
         if [ ! -z "$target" ]; then
             if [ -d "$target" ]; then
-                find "$target" -type f -not -name '.*' \
+                find "$target" -type f ! -name '.*' ! -name '*.md' \
                 | sort -dbfi | xargs -r shasum 2>/dev/null
             elif [ -f "$target" ]; then
                 shasum "$target" 2>/dev/null
