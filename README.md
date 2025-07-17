@@ -13,7 +13,7 @@ Our Docker images cover PHP versions from 5.6 to 8.5 (beta), available in CLI, Z
 
 ## Introduction
 
-[![shinsenter/php](https://repository-images.githubusercontent.com/458053748/17acf331-c504-4105-b692-1c0c02337085)](https://docker.shin.company/php)
+[![shinsenter/php](https://repository-images.githubusercontent.com/458053748/5a05c8e4-1c00-440c-98f1-2cd4548bbaa2)](https://docker.shin.company/php)
 
 Our PHP Docker images are based on the [official PHP Docker images](https://hub.docker.com/_/php).
 These images facilitate the easy adjustment of PHP and PHP-FPM settings using environment variables,

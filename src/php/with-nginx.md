@@ -25,7 +25,7 @@ docker run -p 80:80 -p 443:443 -p 443:443/udp \
     shinsenter/phpfpm-nginx:latest
 ```
 
-[![shinsenter/php](https://repository-images.githubusercontent.com/458053748/17acf331-c504-4105-b692-1c0c02337085)](https://docker.shin.company/php)
+[![shinsenter/php](https://repository-images.githubusercontent.com/458053748/5a05c8e4-1c00-440c-98f1-2cd4548bbaa2)](https://docker.shin.company/php)
 
 Refer to [our documentation](https://hub.docker.com/r/shinsenter/php) to learn how to customize these Docker images for your projects.
 
