@@ -68,7 +68,7 @@ FROM shinsenter/alpine-s6:latest
 The default application directory is `/var/www/html` and can be customized via the `$APP_PATH` environment variable:
 
 ```shell
-docker run -v "$PWD":/app -e APP_PATH=/app shinsenter/ubuntu-s6:latest
+docker run -v "$PWD":/app -e APP_PATH=/app shinsenter/debian-s6:latest
 ```
 
 This changes the web application directory to `/app`.
@@ -90,7 +90,7 @@ Available variables:
 For example, to run a container as user `myapp` with UID `5000`:
 
 ```shell
-docker run -e APP_USER=myapp -e APP_UID=5000 shinsenter/ubuntu-s6:latest
+docker run -e APP_USER=myapp -e APP_UID=5000 shinsenter/debian-s6:latest
 ```
 
 Or in a `docker-compose.yml`:
@@ -98,7 +98,7 @@ Or in a `docker-compose.yml`:
 ```yaml
 services:
   web:
-    image: shinsenter/ubuntu-s6:latest
+    image: shinsenter/debian-s6:latest
     environment:
       APP_USER: "myapp"
       APP_UID: "5000"
@@ -117,7 +117,7 @@ Copy a script called `00-migration` into `/startup/` via a Dockerfile:
 > Note: Ensure the script has executable permissions.
 
 ```Dockerfile
-FROM shinsenter/ubuntu-s6:latest
+FROM shinsenter/debian-s6:latest
 
 ADD ./autorun/00-migration /startup/00-migration
 RUN chmod +x /startup/00-migration
@@ -136,7 +136,7 @@ To disable autorun scripts, set `DISABLE_AUTORUN_SCRIPTS=1` as an environment va
 For example, with `docker run`:
 
 ```shell
-docker run -e DISABLE_AUTORUN_SCRIPTS=1 shinsenter/ubuntu-s6:latest bash
+docker run -e DISABLE_AUTORUN_SCRIPTS=1 shinsenter/debian-s6:latest bash
 ```
 
 Or in `docker-compose.yml`:
@@ -144,13 +144,15 @@ Or in `docker-compose.yml`:
 ```yaml
 services:
   web:
-    image: shinsenter/ubuntu-s6:latest
+    image: shinsenter/debian-s6:latest
     environment:
       DISABLE_AUTORUN_SCRIPTS: "1"
 ```
 
 
 ## Using Cron Jobs
+
+> **Note**: This is a supporting feature. If you require more advanced capabilities beyond basic `crontab` functionality, please consider building your own Docker image and installing an alternative scheduling tool (e.g., [supercronic](https://github.com/aptible/supercronic)) that better suits your needs.
 
 To enable cron jobs in containers, you can start the container with `ENABLE_CRONTAB=1`.
 This setting activates the Crontab service, which loads settings from the directory specified by `$CRONTAB_DIR` (default is `/etc/crontab.d`).
@@ -161,7 +163,7 @@ and with the home directory set by `$CRONTAB_HOME` (default is `/var/www/html`).
 Here is an example Dockerfile to add a crontab:
 
 ```Dockerfile
-FROM shinsenter/php:latest
+FROM shinsenter/debian-s6:latest
 
 ENV ENABLE_CRONTAB=1
 
@@ -191,7 +193,7 @@ When the container starts, these settings are loaded into crontab, giving you mo
 ```yml
 services:
   web:
-    image: shinsenter/php:8.4-fpm-nginx
+    image: shinsenter/debian-s6:latest
     environment:
       ENABLE_CRONTAB: "1"
       CRONTAB_SETTINGS: "* * * * * echo 'This line will run every minute!' | tee /tmp/cron-every-minute.txt"
@@ -208,7 +210,7 @@ This can be used both with `docker run` and in `docker-compose.yml`.
 #### Command Line
 
 ```shell
-docker run -e DEBUG=1 shinsenter/ubuntu-s6:latest bash
+docker run -e DEBUG=1 shinsenter/debian-s6:latest bash
 ```
 
 #### docker-compose.yml
@@ -216,7 +218,7 @@ docker run -e DEBUG=1 shinsenter/ubuntu-s6:latest bash
 ```yaml
 services:
   web:
-    image: shinsenter/ubuntu-s6:latest
+    image: shinsenter/debian-s6:latest
     environment:
       DEBUG: "1"
 ```
