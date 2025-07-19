@@ -647,8 +647,8 @@ fi
 
 # remove -rc from PHP_VERSION
 if [ "$BUILD_FROM_IMAGE" != "php" ]; then
-    PHP_VERSION=${PHP_VERSION//alpha?/}
-    PHP_VERSION=${PHP_VERSION//-rc/}
+    BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE//alpha?/}
+    BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE//-rc/}
 fi
 
 ################################################################################
