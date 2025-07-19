@@ -359,6 +359,8 @@ services:
 
 ## Using Cron Jobs
 
+> **Note**: This is a supporting feature. If you require more advanced capabilities beyond basic `crontab` functionality, please consider building your own Docker image and installing an alternative scheduling tool (e.g., [supercronic](https://github.com/aptible/supercronic)) that better suits your needs.
+
 To enable cron jobs in containers, you can start the container with `ENABLE_CRONTAB=1`.
 This setting activates the Crontab service, which loads settings from the directory specified by `$CRONTAB_DIR` (default is `/etc/crontab.d`).
 
