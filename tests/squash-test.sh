@@ -3,8 +3,8 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-# Author:  SHIN Company <shin@shin.company>
-# License: https://code.shin.company/php/blob/main/LICENSE
+#      - Author:  SHIN Company <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
 BASE_DIR="$(git rev-parse --show-toplevel)"
@@ -16,7 +16,7 @@ if [ ! -x "$BASE_DIR/build/docker-squash/docker-squash.sh" ]; then
 fi
 
 if [ "$1" = "clean" ] || [ "$1" = "clear" ]; then
-    # docker system prune -af --volumes
+    docker system prune -af --volumes
     rm -rf "$LOG_DIR/"*
     clear
     shift
@@ -40,10 +40,11 @@ fi
 
 for version; do
     set -xe
-    $BASE_DIR/build/docker-squash/docker-squash.sh "$dockerfile" \
+    DEBUG= $BASE_DIR/build/docker-squash/docker-squash.sh "$dockerfile" \
         --no-cache \
         --tag "docker-php-$version-${DOCKERTAG:-$variant}:squashed" \
         --platform  "$platform" \
+        --build-arg DEBUG=$DEBUG \
         --build-arg S6_VERSION=$s6_version \
         --build-arg PHP_VERSION=$version \
         --build-arg PHP_VARIANT=$variant \
@@ -53,6 +54,7 @@ done
 
 # build examples
 # PLATFORM=arm64 DOCKERTAG=s6 DOCKERFILE=php/base-s6.dockerfile ./tests/squash-test.sh latest
+# PLATFORM=arm64 DOCKERTAG=ubuntu-s6 DOCKERFILE=php/base-os.dockerfile ./tests/squash-test.sh latest
 # PLATFORM=arm64 DOCKERTAG=cli DOCKERFILE=php/base-php.dockerfile PHP_VARIANT=cli ./tests/squash-test.sh 5.6 8.3
 # PLATFORM=arm64 DOCKERTAG=fpm DOCKERFILE=php/base-php.dockerfile PHP_VARIANT=fpm ./tests/squash-test.sh 5.6 8.3
 # PLATFORM=arm64 DOCKERTAG=nginx DOCKERFILE=php/with-nginx.dockerfile PHP_VARIANT=fpm-alpine ./tests/squash-test.sh 5.6 8.3

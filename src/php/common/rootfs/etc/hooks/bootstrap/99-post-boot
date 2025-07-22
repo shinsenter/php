@@ -40,17 +40,5 @@ fi
 
 ################################################################################
 
-# cache environment variables for other processes
-mkdir -p /etc/default && with-env >/etc/default/locale
-
-################################################################################
-
-# log the timestamp of the first run, then call the hook
-# this is convenient for running migration scripts etc.
-FIRST_RUN=/var/local/first-run
-if [ ! -e "$FIRST_RUN" ]; then
-    echo "$(date)" >"$FIRST_RUN"
-    hook first-run
-else
-    hook post-restart
-fi
+# cache environment variables for other processes (like crond)
+with-env @

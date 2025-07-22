@@ -3,8 +3,8 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-# Author:  SHIN Company <shin@shin.company>
-# License: https://code.shin.company/php/blob/main/LICENSE
+#      - Author:  SHIN Company <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
 BASE_DIR="$(git rev-parse --show-toplevel)"
@@ -343,7 +343,7 @@ app-*)
     esac
 
     # get checksum of the base image
-    BUILD_CACHE_KEY="($BUILD_FROM_IMAGE@$(get_dockerhub_latest_sha "$BUILD_FROM_IMAGE" 1 "php$PHP_VERSION" | head -c17))"
+    BUILD_CACHE_KEY="($BUILD_FROM_IMAGE@$(get_dockerhub_latest_sha "$BUILD_FROM_IMAGE" 1 "php${PHP_VERSION//-rc/}" | head -c17))"
     ;;
 
 *)
@@ -356,28 +356,28 @@ app-*)
     ;;
 esac
 
-# skip build if the latest supported PHP version is less than the build version
+# Skip build if the latest supported PHP version is less than the build version
 if [ "$ALLOW_RC" != "1" ]; then
     verlt "$LATEST_PHP" "$PHP_VERSION" && SKIP_BUILD=1
 fi
 
-# skip build if the PHP version is earlier than 7.1 and the OS is not Debian
+# Skip build if the PHP version is earlier than 7.1 and the OS is not Debian
 if [ "$PHP_VERSION" != "" ] && verlt "$PHP_VERSION" "7.1" && [ "$OS_BASE" != "debian" ]; then
     BUILD_DOCKERFILE=
     SKIP_BUILD=1
 fi
 
-# lazy load the latest Composer version when necessary
+# Lazy load the latest Composer version when necessary
 if [ "$SKIP_BUILD" != "1" ] && [ "$COMPOSER_VERSION" == "latest" ]; then
     COMPOSER_VERSION="$(get_github_latest_tag "composer/composer" 1)"
 fi
 
-# lazy load the latest IPE version when necessary
+# Lazy load the latest IPE version when necessary
 if [ "$SKIP_BUILD" != "1" ] && [ "$IPE_VERSION" == "latest" ]; then
     IPE_VERSION="$(get_github_latest_tag "mlocati/docker-php-extension-installer" 1)"
 fi
 
-# lazy load the latest s6-overlay version when necessary
+# Lazy load the latest s6-overlay version when necessary
 if [ "$SKIP_BUILD" != "1" ] && [ "$S6_VERSION" == "latest" ]; then
     LATEST_S6=$(get_github_latest_tag "just-containers/s6-overlay" 1)
     if [ "$LATEST_S6" == "" ]; then
@@ -407,7 +407,7 @@ append_tags() {
     echo $new_string
 }
 
-# generate build tags
+# Generate build tags
 if [ "$PHP_VERSION" != "" ]; then
     if [ "$BUILD_NAME" == "$DEFAULT_BUILD_NAME" ]; then
         BUILD_TAGS="$BUILD_NAME:$PHP_VERSION-$PREFIX$SUFFIX"
@@ -478,11 +478,10 @@ else
     BUILD_TAGS="$BUILD_NAME:s6-$S6_VERSION,$BUILD_NAME:latest"
 fi
 
-# remove alpha or rc versions from build tags
-BUILD_TAGS=${BUILD_TAGS//alpha?/}
+# Remove alpha or rc versions from build tags
 BUILD_TAGS=${BUILD_TAGS//-rc/}
 
-# apply tag prefix for development branch
+# Apply tag prefix for development branch
 if [ "$BUILD_TAG_PREFIX" != "" ]; then
     BUILD_TAGS=${BUILD_TAGS//:/:$BUILD_TAG_PREFIX}
 
@@ -491,7 +490,7 @@ if [ "$BUILD_TAG_PREFIX" != "" ]; then
     fi
 fi
 
-# check if build tags are empty
+# Check if build tags are empty
 if [ "$BUILD_TAGS" == "" ]; then
     echo "Failed to generate build tags" 1>&2
     exit 1
@@ -499,22 +498,22 @@ else
     BUILD_TAG=$(echo $BUILD_TAGS | cut -d, -f1)
 fi
 
-# find tag contains "-alpine" and appends tags with "tidy"
-# if [ "$OS_BASE" == "alpine" ]; then
+# Find tag contains "-alpine" and appends tags with "tidy"
+# If [ "$OS_BASE" == "alpine" ]; then
 #     BUILD_TAGS="$(append_tags "-$OS_BASE" "-tidy" "$BUILD_TAGS")"
-# fi
+# Fi
 
-# also tag 'dev-' variants when the tag prefix is empty
+# Also tag 'dev-' variants when the tag prefix is empty
 if [ "$BUILD_TAG_PREFIX" == "" ]; then
     BUILD_TAGS="$(append_tags ":" ":dev-" "$BUILD_TAGS")"
 fi
 
-# also publish to ghcr.io
+# Also publish to ghcr.io
 if [ "$PUBLISH_TO_GHCR" == "1" ]; then
     BUILD_TAGS="$(append_tags "$DEFAULT_REPO" "ghcr.io/$DEFAULT_REPO" "$BUILD_TAGS")"
 fi
 
-# also push a copy to archived repo
+# Also push a copy to archived repo
 if [ "$ARCHIVES_REPO" != "" ] && [ "$BUILD_TAG_PREFIX" == "" ]; then
     unique_id="$(date +%Y%m%d)"
     BUILD_TAGS="$(append_tags "${DEFAULT_BUILD_NAME}:" "${ARCHIVES_REPO}:${unique_id}-" "$BUILD_TAGS" ":dev-")"
@@ -548,12 +547,12 @@ else
     BUILD_CONTEXT=
 fi
 
-# main README.md
+# Main README.md
 if [ "$BUILD_NAME" == "$DEFAULT_BUILD_NAME" ] && [ "$APP" == "cli" ] && [ "$PHP_VERSION" == "$LATEST_PHP" ]; then
     BUILD_README=$DEFAULT_README
 fi
 
-# parse description from README.md
+# Parse description from README.md
 if [ "$BUILD_README" != "" ] && [ -f "$BUILD_README" ]; then
     BUILD_DESC="$(sed '3q;d' $BUILD_README)"
 
@@ -566,12 +565,12 @@ else
     BUILD_DESC="$(sed '3q;d' $DEFAULT_README)"
 fi
 
-# skip build if no dockerfile files
+# Skip build if no dockerfile files
 if [ "$BUILD_DOCKERFILE" == "" ]; then
     SKIP_BUILD=1
 fi
 
-# skip squash if no dockerfile
+# Skip squash if no dockerfile
 if [ "$BUILD_DOCKERFILE_SQUASHED" == "" ]; then
     SKIP_SQUASH=1
 fi
@@ -632,7 +631,7 @@ remove_platform() {
     echo $platforms
 }
 
-# remove some platforms for older PHP versions
+# Remove some platforms for older PHP versions
 if [ "$PHP_VERSION" != "" ]; then
     if verlt "$PHP_VERSION" "7.1"; then
         BUILD_PLATFORM="linux/amd64,linux/arm/v7"
@@ -645,9 +644,8 @@ fi
 # Fix image name for RC versions
 ################################################################################
 
-# remove -rc from PHP_VERSION
+# Remove -rc from PHP_VERSION
 if [ "$BUILD_FROM_IMAGE" != "php" ]; then
-    PHP_VERSION=${PHP_VERSION//alpha?/}
     PHP_VERSION=${PHP_VERSION//-rc/}
 fi
 

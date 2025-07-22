@@ -8,6 +8,12 @@
 ################################################################################
 
 DEFAULT_ENV=/etc/.docker-env
+CACHED_ENV=/etc/default/locale
+
+print_env() {
+    # print the environment variables when no command is given
+    env -0 | sort -dbfiz | grep -vF '_=' | tr '\0' '\n'
+}
 
 # load extra env variables
 if [ -e /etc/environment ]; then
@@ -21,9 +27,17 @@ if [ "$ENV" != "$DEFAULT_ENV" ] && [ -x "$DEFAULT_ENV" ]; then source "$DEFAULT_
 if [ -x "$ENV" ]; then source "$ENV"; fi
 
 if [ $# -eq 0 ]; then
-    # print the environment variables when no command is given
-    exec env -0 | sort -dbfiz | tr '\0' '\n'
+    # print the environment variables
+    print_env
 else
+    # cache environment variables for other processes
+    if [ "$1" = "@" ]; then
+        mkdir -p "$(dirname $CACHED_ENV)" && print_env >"$CACHED_ENV"
+        shift
+    fi
+
     # execute the command
-    exec "$@"
+    if [ $# -gt 0 ]; then
+        exec "$@"
+    fi
 fi

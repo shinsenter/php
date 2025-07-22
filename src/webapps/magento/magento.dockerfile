@@ -14,13 +14,14 @@ ARG BUILDKIT_SBOM_SCAN_STAGE=true
 
 ################################################################################
 
-ARG  BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-shinsenter/phpfpm-nginx}
-ARG  BUILD_TAG_PREFIX=${BUILD_TAG_PREFIX:-}
+ARG BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-shinsenter/phpfpm-nginx}
+ARG BUILD_TAG_PREFIX=${BUILD_TAG_PREFIX:-}
 
-ARG  PHP_VERSION=${PHP_VERSION:-8.4}
-ARG  PHP_VARIANT=${PHP_VARIANT:-}
+ARG PHP_VERSION=${PHP_VERSION:-8.4}
+ARG PHP_VARIANT=${PHP_VARIANT:-}
 
 FROM ${BUILD_FROM_IMAGE}:${BUILD_TAG_PREFIX}php${PHP_VERSION}${PHP_VARIANT}
+ARG  DEBUG
 ONBUILD RUN hook onbuild
 
 ################################################################################
