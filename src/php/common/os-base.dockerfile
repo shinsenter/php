@@ -73,7 +73,7 @@ pkg-add bash ca-certificates coreutils curl htop less openssl msmtp upgrade
 # Install su-exec
 SU_EXEC_PATH=/sbin/su-exec
 SU_EXEC_URL=https://github.com/songdongsheng/su-exec/releases/download/1.3/su-exec-musl-static
-curl -o "$SU_EXEC_PATH" --retry 3 --retry-delay 5 -ksLRJ "$SU_EXEC_URL"
+download "$SU_EXEC_URL" -o "$SU_EXEC_PATH"
 chmod 4755 "$SU_EXEC_PATH"
 
 # Replace sh binary with bash
