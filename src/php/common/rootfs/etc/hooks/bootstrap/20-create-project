@@ -13,6 +13,9 @@ APP_ROOT="$(app-root)"
 ENV_PATH="$APP_PATH/.env"
 CONF_PATH="$APP_PATH/composer.json"
 
+HAS_COMPOSER="$(has-cmd composer && echo 1 || echo 0)"
+RECENTLY_CREATED="0"
+
 ################################################################################
 
 install_deps() {
@@ -20,17 +23,17 @@ install_deps() {
         deps=""
 
         # intall git if needed
-        if grep -qF '"git"' $CONF_PATH || is-true $COMPOSER_REQUIRES_GIT; then
+        if is-true $COMPOSER_REQUIRES_GIT || grep -qF '"git"' $CONF_PATH; then
             deps="$deps git"
         fi
 
         # intall nodejs if needed
-        if grep -qF 'node ' $CONF_PATH || is-true $COMPOSER_REQUIRES_NODEJS; then
+        if is-true $COMPOSER_REQUIRES_NODEJS || grep -qF 'node ' $CONF_PATH; then
             deps="$deps nodejs"
         fi
 
         # intall npm if needed
-        if grep -qF 'npm ' $CONF_PATH || is-true $COMPOSER_REQUIRES_NPM; then
+        if is-true $COMPOSER_REQUIRES_NPM || grep -qF 'npm ' $CONF_PATH; then
             deps="$deps npm"
         fi
     fi
@@ -50,16 +53,28 @@ install_deps() {
     fi
 }
 
-allow_plugins() {
-    if [ -e "$CONF_PATH" ]; then
-        composer config -n --no-plugins "allow-plugins.*/*" true
+composer_exec() {
+    if [ $HAS_COMPOSER -eq 1 ]; then
+        composer "$@"
     fi
 }
 
-unset_allow_plugins() {
-    if [ -e "$CONF_PATH" ]; then
-        composer config -n --unset "allow-plugins.*/*"
+composer_hook() {
+    if [ "$1" != "" ]; then
+        local hook="$1"
+        if [ -e "$CONF_PATH" ] && grep -qF "\"$hook\"" $CONF_PATH; then
+            composer_exec run "$@"
+            hook "$hook"
+        fi
     fi
+}
+
+allow_plugins() {
+    composer_exec config -n --no-plugins "allow-plugins.*/*" true &>/dev/null || true
+}
+
+unset_allow_plugins() {
+    composer_exec config -n --unset "allow-plugins.*/*" &>/dev/null || true
 }
 
 copy_env() {
@@ -89,7 +104,7 @@ cd "$APP_PATH"
 
 if [ -z "$(ls -A "$APP_PATH")" ]; then
     # pull project from source
-    if ! is-true $DISABLE_AUTORUN_CREATING_PROJECT && [ ! -z "$INITIAL_PROJECT" ] && has-cmd composer; then
+    if [ ! -z "$INITIAL_PROJECT" ] && ! is-true $DISABLE_AUTORUN_CREATING_PROJECT; then
         hook pre-create-project
 
         case "$INITIAL_PROJECT" in
@@ -116,7 +131,7 @@ if [ -z "$(ls -A "$APP_PATH")" ]; then
             ;;
         */*)
             debug-echo "Installing project $INITIAL_PROJECT to $APP_PATH."
-            composer create-project $COMPOSER_CREATE_OPTIONS \
+            composer_exec create-project $COMPOSER_CREATE_OPTIONS \
                 -n --no-secure-http --no-install --no-scripts \
                 -- "$INITIAL_PROJECT" "$APP_PATH"
             ;;
@@ -125,24 +140,22 @@ if [ -z "$(ls -A "$APP_PATH")" ]; then
             ;;
         esac
 
-        if [ -e "$CONF_PATH" ] && grep -qF '"post-root-package-install"' $CONF_PATH; then
-            composer run post-root-package-install
-            hook post-root-package-install
-        fi
+        # run post-root-package-install if composer.json has it
+        composer_hook post-root-package-install
 
         hook post-create-project
         web-chown "Project created in $APP_PATH."
     fi
 
     # copy from source directory if it is not empty
-    if ! is-true $DISABLE_AUTORUN_COPYING_SOURCE && [ -d /source/ ]; then
+    if [ -d /source/ ] && ! is-true $DISABLE_AUTORUN_COPYING_SOURCE; then
         debug-echo "Copying files from /source/ to $APP_PATH."
 
         cp -rpn /source/. "$APP_PATH"/ &>/dev/null
         web-chown "Copied files from /source/ to $APP_PATH"
     fi
 
-    # install required packages, allow composer plugins
+    # install required packages, allow Composer plugins
     install_deps
     allow_plugins
 
@@ -154,44 +167,43 @@ if [ -z "$(ls -A "$APP_PATH")" ]; then
         debug-echo "Updating required packages in $APP_PATH."
 
         hook pre-update-packages
-        composer update -n -W $COMPOSER_UPDATE_OPTIONS
+        composer_exec update -n -W $COMPOSER_UPDATE_OPTIONS
         hook post-update-packages
 
         web-chown "Required packages in $APP_PATH were updated."
     fi
 
     # run post-create-project-cmd if composer.json has it
-    if [ -e "$CONF_PATH" ] && grep -qF '"post-create-project-cmd"' $CONF_PATH; then
-        composer run post-create-project-cmd
-        hook post-create-project-cmd
-    fi
+    composer_hook post-create-project-cmd
 
-    # unset allow composer plugins
+    # unset allow Composer plugins
     unset_allow_plugins
+
+    RECENTLY_CREATED="1"
 else
     debug-echo "Skip project creation because $APP_PATH is not empty."
 fi
 
 ################################################################################
 
-# run composer install when vendor directory or ClassLoader.php is missing
-if ! is-true $DISABLE_AUTORUN_COMPOSER_INSTALL && has-cmd composer; then
+# run Composer install when vendor directory or ClassLoader.php is missing
+if [ $RECENTLY_CREATED -ne 1 ] && [ $HAS_COMPOSER -eq 1 ] && ! is-true $DISABLE_AUTORUN_COMPOSER_INSTALL; then
     if [ -e "$CONF_PATH" ]; then
-        vendor_dir="$APP_PATH/$(composer config vendor-dir 2>/dev/null)"
+        vendor_dir="$APP_PATH/$(composer_exec config vendor-dir 2>/dev/null)"
         if [ ! -d "$vendor_dir" ] || [ ! -e "$vendor_dir/composer/ClassLoader.php" ]; then
-            # install required packages, allow composer plugins
+            # install required packages, allow Composer plugins
             install_deps
             allow_plugins
 
             # copy .env.example to .env
             copy_env
 
-            # install composer packages
+            # install Composer packages
             hook pre-install-packages
-            composer install -n $COMPOSER_INSTALL_OPTIONS
+            composer_exec install -n $COMPOSER_INSTALL_OPTIONS
             hook post-install-packages
 
-            # unset allow composer plugins
+            # unset allow Composer plugins
             unset_allow_plugins
 
             web-chown "Composer packages were installed in $APP_PATH"
@@ -199,6 +211,15 @@ if ! is-true $DISABLE_AUTORUN_COMPOSER_INSTALL && has-cmd composer; then
     else
         debug-echo "Skip composer install because $CONF_PATH is missing."
     fi
+fi
+
+################################################################################
+
+if [ $HAS_COMPOSER -eq 1 ] && is-true $COMPOSER_OPTIMIZE_AUTOLOADER; then
+    allow_plugins
+    composer_exec dumpautoload -n -o --no-cache
+    hook post-autoload-dump
+    unset_allow_plugins
 fi
 
 ################################################################################

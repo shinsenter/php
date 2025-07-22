@@ -6,7 +6,12 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
+if [ $# -eq 0 ]; then exit 0; fi
+
+mkdir -p /tmp/hooks
+
 for hook; do
     debug-echo "\nRun hook: $hook"
+    touch   "/tmp/hooks/$hook" 2>&1 || true
     autorun "/etc/hooks/$hook" 2>&1
 done

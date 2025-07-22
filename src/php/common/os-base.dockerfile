@@ -6,7 +6,7 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-# set defaults from build arguments
+# Set defaults from build arguments
 ARG DEBCONF_NOWARNINGS=yes
 ARG DEBIAN_FRONTEND=noninteractive
 ARG DOCKER_ENTRYPOINT=/usr/local/bin/docker-php-entrypoint
@@ -15,12 +15,12 @@ ARG APP_PATH=${APP_PATH:-/var/www/html}
 ARG APP_GROUP=${APP_GROUP:-www-data}
 ARG APP_USER=${APP_USER:-www-data}
 
-# set APP_PATH, APP_USER and APP_GROUP
+# Set APP_PATH, APP_USER and APP_GROUP
 ENV APP_PATH="$APP_PATH"
 ENV APP_USER="$APP_USER"
 ENV APP_GROUP="$APP_GROUP"
 
-# set OS variables
+# Set OS variables
 ENV ENV="/etc/.docker-env"
 ENV PATH="/usr/local/aliases:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 ENV PS1="\\u@\\h:\\w\\$ "
@@ -65,12 +65,18 @@ RUN <<'EOF'
 echo 'Configure OS middlewares'
 [ -z "$DEBUG" ] || set -ex && set -e
 
-# install common packages
+# Install common packages
 APK_PACKAGES='run-parts shadow tar tzdata unzip xz' \
 APT_PACKAGES='procps xz-utils' \
 pkg-add bash ca-certificates coreutils curl htop less openssl msmtp upgrade
 
-# patch sh binary if bash exists
+# Install su-exec
+SU_EXEC_PATH=/sbin/su-exec
+SU_EXEC_URL=https://github.com/songdongsheng/su-exec/releases/download/1.3/su-exec-musl-static
+curl -o "$SU_EXEC_PATH" --retry 3 --retry-delay 5 -ksLRJ "$SU_EXEC_URL"
+chmod 4755 "$SU_EXEC_PATH"
+
+# Replace sh binary with bash
 if has-cmd bash; then
     if has-cmd sh; then
         ln -nsf "$(command -v bash)" "$(command -v sh)"
@@ -79,41 +85,12 @@ if has-cmd bash; then
     fi
 fi
 
-# patch nologin
-if [ ! -e /sbin/nologin ] && has-cmd nologin; then
-    ln -nsf "$(command -v nologin)" /sbin/nologin
-fi
-
-# check if the group exists
-if ! getent group $APP_GROUP >/dev/null 2>&1; then
-    addgroup --system $APP_GROUP
-fi
-
-# check if the user exists
-if ! getent passwd $APP_USER >/dev/null 2>&1; then
-    adduser --system --no-create-home --ingroup $APP_GROUP $APP_USER
-fi
-
-# add mail group
-if ! getent group mail >/dev/null 2>&1; then
-    addgroup mail
-fi
-
-# install su-exec
-SU_EXEC_PATH=/sbin/su-exec
-SU_EXEC_URL=https://github.com/songdongsheng/su-exec/releases/download/1.3/su-exec-musl-static
-curl -o "$SU_EXEC_PATH" --retry 3 --retry-delay 5 -ksLRJ "$SU_EXEC_URL"
-chmod 4755 "$SU_EXEC_PATH"
-
-if ! has-cmd su-exec || [ "$(su-exec $APP_USER:$APP_GROUP whoami)" != "$APP_USER" ]; then
-    echo 'Failed to install su-exec'
-    exit 1
-fi
-
-# setuid bit
-chmod 4755 $(which autorun) /usr/local/sbin/web-*
-
 EOF
+
+################################################################################
+
+# Run onbuild hook
+RUN hook onbuild
 
 ################################################################################
 
@@ -155,7 +132,35 @@ env-default SMTP_PASSWORD ''
 env-default SMTP_AUTH ''
 env-default SMTP_TLS ''
 
-# configure sendmail with msmtp
+# Patch nologin
+if [ ! -e /sbin/nologin ] && has-cmd nologin; then
+    ln -nsf "$(command -v nologin)" /sbin/nologin
+fi
+
+# Check if the group exists
+if ! getent group $APP_GROUP >/dev/null 2>&1; then
+    addgroup --system $APP_GROUP
+fi
+
+# Check if the user exists
+if ! getent passwd $APP_USER >/dev/null 2>&1; then
+    adduser --system --no-create-home --ingroup $APP_GROUP $APP_USER
+fi
+
+# Add mail group
+if ! getent group mail >/dev/null 2>&1; then
+    addgroup mail
+fi
+
+if ! has-cmd su-exec || [ "$(su-exec $APP_USER:$APP_GROUP whoami)" != "$APP_USER" ]; then
+    echo 'Failed to install su-exec'
+    exit 1
+fi
+
+# Setuid bit
+chmod 4755 $(which autorun) /usr/local/sbin/web-*
+
+# Configure sendmail with msmtp
 if has-cmd msmtp-wrapper; then
     if has-cmd sendmail; then
         old="$(command -v sendmail)"
@@ -166,23 +171,23 @@ if has-cmd msmtp-wrapper; then
     mv $new "$(dirname $new)/sendmail"
 fi
 
-# create self-signed certificate
+# Create self-signed certificate
 mkcert -days 3652 -install \
     -cert-file /etc/ssl/site/server.crt \
     -key-file  /etc/ssl/site/server.key \
     localhost
 
-# backup entrypoint
+# Backup entrypoint
 if [ -f $DOCKER_ENTRYPOINT ]; then mv $DOCKER_ENTRYPOINT /init; fi
 
-# create application directory
+# Create application directory
 web-mkdir $APP_PATH
 
 EOF
 
 ################################################################################
 
-# add new entrypoint
+# Add new entrypoint
 COPY --chmod=4755 --link ./common/docker-php-entrypoint $DOCKER_ENTRYPOINT
 
 ################################################################################

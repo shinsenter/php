@@ -2,8 +2,8 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-# Author:  SHIN Company <shin@shin.company>
-# License: https://code.shin.company/php/blob/main/LICENSE
+#      - Author:  SHIN Company <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
 name: Daily build
@@ -52,6 +52,7 @@ jobs:
           echo "the_day=$the_day" >> "$GITHUB_OUTPUT"
           echo "tag_prefix=$tag_prefix" >> "$GITHUB_OUTPUT"
           echo "build_all=$build_all" >> "$GITHUB_OUTPUT"
+          echo "number_of_cores   = $(nproc)"
           echo "github.event_name = $event_name"
           echo "github.ref_type   = $ref_type"
           echo "github.ref        = $ref"

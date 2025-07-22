@@ -14,11 +14,12 @@ ARG BUILDKIT_SBOM_SCAN_STAGE=true
 
 ################################################################################
 
-ARG  BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-php}
-ARG  PHP_VERSION=${PHP_VERSION:-8.4}
-ARG  PHP_VARIANT=${PHP_VARIANT:-fpm-alpine}
+ARG BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-php}
+ARG PHP_VERSION=${PHP_VERSION:-8.4}
+ARG PHP_VARIANT=${PHP_VARIANT:-fpm-alpine}
 
 FROM ${BUILD_FROM_IMAGE}:${PHP_VERSION}-${PHP_VARIANT}
+ARG  DEBUG
 
 # set PHP variables
 ARG PHP_VERSION=${PHP_VERSION:-8.4}
