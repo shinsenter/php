@@ -6,8 +6,6 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-ARG PHP_VERSION=${PHP_VERSION:-8.4}
-
 # Install RoadRunner from the original binaries
 COPY --link --from=ghcr.io/roadrunner-server/roadrunner:latest /usr/bin/rr /usr/local/bin/rr
 COPY --link --from=ghcr.io/roadrunner-server/roadrunner:latest /etc/rr.yaml /etc/rr.yaml

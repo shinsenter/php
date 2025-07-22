@@ -32,14 +32,16 @@ echo 'Install Composer and PHP extensions'
 
 # Set Composer default settings
 env-default '# Environment variables for Composer'
-env-default COMPOSER_ALLOW_SUPERUSER  '1'
-env-default COMPOSER_ALLOW_XDEBUG     '$(is-debug && echo 1 || echo 0)'
-env-default COMPOSER_FUND             '0'
-env-default COMPOSER_HTACCESS_PROTECT '1'
-env-default COMPOSER_MEMORY_LIMIT     '-1'
-env-default COMPOSER_NO_AUDIT         '1'
-env-default COMPOSER_NO_INTERACTION   '1'
-env-default COMPOSER_PROCESS_TIMEOUT  '0'
+env-default COMPOSER_ALLOW_SUPERUSER     '1'
+env-default COMPOSER_ALLOW_XDEBUG        '$(is-debug && echo 1 || echo 0)'
+env-default COMPOSER_FUND                '0'
+env-default COMPOSER_HTACCESS_PROTECT    '1'
+env-default COMPOSER_MEMORY_LIMIT        '-1'
+env-default COMPOSER_NO_AUDIT            '1'
+env-default COMPOSER_NO_INTERACTION      '1'
+env-default COMPOSER_OPTIMIZE_AUTOLOADER '0'
+env-default COMPOSER_PROCESS_TIMEOUT     '0'
+
 
 # Set IPE default settings
 env-default '# Environment variables for IPE'
@@ -50,6 +52,7 @@ env-default IPE_ICU_EN_ONLY           '1'
 env-default IPE_INSTANTCLIENT_BASIC   '1'
 env-default IPE_KEEP_SYSPKG_CACHE     '0'
 env-default IPE_LZF_BETTERCOMPRESSION '1'
+env-default IPE_SWOOLE_WITHOUT_IOURING '1'
 
 # Install Composer and popular PHP modules
 phpaddmod @composer \
@@ -208,6 +211,12 @@ phpaddmod @composer \
     # zookeeper \
     # zstd \
     && php -m && composer -V
+
+# Install prestissimo for Composer v1.x
+major_version=$(composer --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | cut -d. -f1)
+if [ ! -z "$major_version" ] && [ "$major_version" -lt 2 ]; then
+    composer global require hirak/prestissimo
+fi
 
 # Make alias for some commands
 has-cmd php      && web-cmd root php      "$(command -v php)"

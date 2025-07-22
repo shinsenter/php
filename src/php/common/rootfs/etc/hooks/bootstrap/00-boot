@@ -23,6 +23,11 @@ rand_id() { echo "$((RANDOM % 500 + 499))"; }
 
 ################################################################################
 
+# call the pre-boot hook
+hook pre-boot
+
+################################################################################
+
 # create user and group
 debug-echo "Verify group $APP_GROUP"
 if [ "$APP_GROUP" != "$DEFAULT_GROUP" ]; then
@@ -61,6 +66,14 @@ chmod 4755 "$APP_PATH"
 ################################################################################
 
 # call the onboot hook
-# all the scripts in this hook will be executed
-# even when the autorun feature is disabled
 hook onboot
+
+# log the timestamp of the first run, then call the hook
+# this is convenient for running migration scripts etc.
+FIRST_RUN=/var/local/first-run
+if [ ! -e "$FIRST_RUN" ]; then
+    echo "$(date)" >"$FIRST_RUN"
+    hook first-run
+else
+    hook rebooted
+fi

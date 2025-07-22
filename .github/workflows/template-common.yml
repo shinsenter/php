@@ -2,8 +2,8 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-# Author:  SHIN Company <shin@shin.company>
-# License: https://code.shin.company/php/blob/main/LICENSE
+#      - Author:  SHIN Company <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
 name: Build Template
@@ -140,6 +140,7 @@ jobs:
           tags: ${{ env.BUILD_TAGS }}
           sbom: true
           build-args: |
+            DEBUG=${{ env.DEBUG }}
             BUILD_CACHE_KEY=${{ env.BUILD_CACHE_KEY }}
             BUILD_CACHE_PATH=${{ env.BUILD_CACHE_PATH }}
             BUILD_CONTEXT=${{ env.BUILD_CONTEXT }}
@@ -179,6 +180,7 @@ jobs:
           tags: ${{ env.BUILD_TMP_NAME }}
           sbom: true
           build-args: |
+            DEBUG=${{ env.DEBUG }}
             BUILD_CACHE_KEY=${{ env.BUILD_CACHE_KEY }}
             BUILD_CACHE_PATH=${{ env.BUILD_CACHE_PATH }}
             BUILD_CONTEXT=${{ env.BUILD_CONTEXT }}
@@ -229,6 +231,7 @@ jobs:
           tags: ${{ env.BUILD_TAGS }}
           sbom: true
           build-args: |
+            DEBUG=${{ env.DEBUG }}
             PRESQUASH_SCRIPTS=cleanup
 
       -

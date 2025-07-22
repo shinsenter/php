@@ -41,7 +41,6 @@ $(if [ ! -z "$CRONTAB_MAILTO" ]; then echo "MAILTO=${CRONTAB_MAILTO}"; fi)
 # |  |  |  |  |
 # *  *  *  *  *  command to be executed
 ${CRONTAB_SETTINGS}
-
 $(if [ -d "$CRONTAB_DIR" ]; then
     for script in $(find "$CRONTAB_DIR" -type f | sort -dbfi); do
         echo -e "\n# $script"; cat "$script"

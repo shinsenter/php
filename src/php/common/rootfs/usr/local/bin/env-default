@@ -13,8 +13,8 @@ conf_path="${ENV:=/etc/.docker-env}"
 if [ ! -f $conf_path ]; then
     mkdir -p "$(dirname $conf_path)"
     echo '#!/bin/sh
-export APP_PATH="$(app-path)"
-export APP_ROOT="$(app-root)"
+APP_PATH="$(app-path)"
+APP_ROOT="$(app-root)"
 if [ -d "$APP_PATH" ]; then cd "$APP_PATH"; fi
 
 NEW_PATH="$(echo $PATH | sed "s/\/usr\/local\/aliases://")"
@@ -27,9 +27,19 @@ export PATH="$NEW_PATH"
 fi
 
 # print the environment variables when the command argument is empty
-if [ $# -eq 0 ]; then
-    source $conf_path && env -0 | sort -dbfiz | tr '\0' '\n'
-    exit
+if [ $# -eq 0 ]; then with-env; exit 0; fi
+
+# if the first argument is a file then use it
+if [ "${1:0:1}" = "/" ] && [ -f "$1" ]; then
+    # check if the file is already sourced
+    if ! grep -qF "source $1" $conf_path; then
+        echo "\nsource $1\n" >>$conf_path
+    fi
+
+    # use the first argument as the config file
+    conf_path="$1"
+
+    shift
 fi
 
 line="$@"

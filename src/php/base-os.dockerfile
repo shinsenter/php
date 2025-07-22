@@ -14,10 +14,11 @@ ARG BUILDKIT_SBOM_SCAN_STAGE=true
 
 ################################################################################
 
-ARG  OS_BASE=${OS_BASE:-alpine}
-ARG  OS_VERSION=${OS_VERSION:-latest}
+ARG OS_BASE=${OS_BASE:-alpine}
+ARG OS_VERSION=${OS_VERSION:-latest}
 
 FROM ${OS_BASE}:${OS_VERSION}
+ARG  DEBUG
 
 ################################################################################
 

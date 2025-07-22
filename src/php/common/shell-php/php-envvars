@@ -79,6 +79,7 @@ final class DockerPHP
         'request_terminate_timeout_track_finished' => 'no',
     ];
 
+    protected $php_env_file;
     protected $all_env_vars;
     protected $fpm_conf_path;
     protected $fpm_settings;
@@ -86,10 +87,13 @@ final class DockerPHP
     protected $php_settings;
 
     public function __construct(
+        $php_env_file  = '',
         $php_conf_file = 'custom.ini',
         $fpm_conf_file = 'custom.conf',
         $prefix = null
     ) {
+        $this->php_env_file = $php_env_file;
+
         if (!empty($_ENV['PHP_INI_DIR'])) {
             $this->php_conf_path = "{$_ENV['PHP_INI_DIR']}/conf.d/$php_conf_file";
             $this->fpm_conf_path = "{$_ENV['PHP_INI_DIR']}-fpm.d/$fpm_conf_file";
@@ -126,6 +130,20 @@ final class DockerPHP
         return array_key_exists($env_key, $this->all_env_vars);
     }
 
+    public function recreate_env_file($override = true) {
+        if (empty($this->php_env_file)) {
+            return;
+        }
+
+        @mkdir(dirname($this->php_env_file), 0755, true);
+
+        if ($override && file_exists($this->php_env_file)) {
+            @unlink($this->php_env_file);
+        }
+
+        @touch($this->php_env_file);
+    }
+
     public function reset_envvars()
     {
         $this->export_envvars(true);
@@ -133,22 +151,25 @@ final class DockerPHP
 
     public function export_envvars($override = false)
     {
-        run("env-default '# Environment variables for PHP'");
+        $this->recreate_env_file();
+        $command = "env-default {$this->php_env_file}";
+
+        run("$command '# Environment variables for PHP'");
 
         foreach ($this->all_env_vars as $env_key => $env_val) {
             if (!$override && isset($_ENV[$env_key])) {
                 continue;
             }
 
-            run("env-default '$env_key' '$env_val'");
+            run("$command '$env_key' '$env_val'");
 
             if (DEBUG_MODE) {
                 echo "$env_key='$env_val'\n";
             }
         }
 
-        // Cache environment variables
-        run('mkdir -p /etc/default && with-env >/etc/default/locale');
+        // Cache environment variables for other processes
+        run('with-env @');
     }
 
     public function write_static_config()
@@ -171,7 +192,7 @@ final class DockerPHP
 
         $fpm_conf = [];
         foreach ($this->fpm_settings as $scope => $settings) {
-            if ($dynamic && 'www' == $scope) {
+            if ($dynamic && $scope == 'www') {
                 $fpm_conf[] = '[${PHP_POOL_NAME}]';
             } else {
                 $fpm_conf[] = "[$scope]";
@@ -370,12 +391,13 @@ final class DockerPHP
 
 ################################################################################
 
-date_default_timezone_set('UTC');
+date_default_timezone_set(getenv('TZ') ?: 'UTC');
 
 $arguments = $argv;
 array_shift($arguments);
 
 $instance = new DockerPHP(
+    '',
     'zz-generated-settings.ini',
     'zz-generated-settings.conf',
     'PHP'

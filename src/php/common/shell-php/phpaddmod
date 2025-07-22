@@ -54,7 +54,7 @@ debug-echo -i "\nInstall PHP modules: $NEW_MODS."
 
 if is-debug; then env-default | grep IPE_ | debug-echo -i; fi
 
-with-env install-php-extensions $NEW_MODS | while read -r line; do
+DEBUG= with-env install-php-extensions $NEW_MODS | while read -r line; do
     echo "$line"
     if [[ "$line" == *"only for installation"* ]]; then
         echo ${line##*:} | xargs echo -n >$PID
