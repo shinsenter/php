@@ -47,7 +47,7 @@ if ! has-s6 && [ ! -z "$S6_VERSION" ]; then
         local url="$1"
         local path="${2:-$S6_PATH}/"
         if [ ! -e $path ]; then mkdir -p $path; fi
-        curl --retry 3 --retry-delay 5 -ksLRJ "$url" | tar Jxp -C $path
+        download "$url" | tar Jxp -C $path
     }
 
     # and install the right version of s6-overlay
@@ -67,8 +67,9 @@ if ! has-s6 && [ ! -z "$S6_VERSION" ]; then
         env-default S6_LOGGING 0
         env-default S6_READ_ONLY_ROOT 0
         env-default S6_SERVICES_GRACETIME 3000
+        env-default S6_STAGE2_HOOK 'hook s6-onready'
         env-default S6_VERBOSITY '$(is-debug && echo 2 || echo 0)'
-        env-default S6_VERSION $S6_VERSION
+        env-default S6_VERSION "$S6_VERSION"
     fi
 
     # inject legacy entrypoint

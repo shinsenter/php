@@ -52,11 +52,11 @@ fetch_with_cache() {
         echo "Fetching $@" 1>&2
         content=$(
             if [ "$TOKEN" != "" ]; then
-                curl --retry 3 --retry-delay 5 -ksL \
+                curl --retry 3 --retry-delay 5 -ksSLRJ \
                     --header "Authorization: Bearer $TOKEN" \
                     --request GET --url "$url"
             else
-                curl --retry 3 --retry-delay 5 -ksL "$url"
+                curl --retry 3 --retry-delay 5 -ksSLRJ "$url"
             fi
         )
 

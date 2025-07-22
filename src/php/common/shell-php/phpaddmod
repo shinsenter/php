@@ -40,10 +40,10 @@ fi
 
 if [ ! -e "/usr/src/php.tar.xz" ] && [ ! -z "$PHP_URL" ]; then
     debug-echo -i "\nDownload PHP source from $PHP_URL."
-    curl --retry 3 --retry-delay 5 -ksL "$PHP_URL" -o /usr/src/php.tar.xz
+    download "$PHP_URL" -o /usr/src/php.tar.xz
 
     if [ ! -z "$PHP_ASC_URL" ]; then
-        curl --retry 3 --retry-delay 5 -ksL "$PHP_ASC_URL" -o /usr/src/php.tar.xz.asc
+        download "$PHP_ASC_URL" -o /usr/src/php.tar.xz.asc
     fi
 fi
 

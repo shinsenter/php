@@ -34,7 +34,7 @@ ADD --link ./rootfs/ /
 ENV DOCUMENT_ROOT="/public"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 ENV LARAVEL_ENABLE_SCHEDULER=1
-RUN env-default INITIAL_PROJECT "$(curl --retry 3 --retry-delay 5 -ksLRJ https://api.github.com/repos/InvoiceShelf/InvoiceShelf/releases/latest | grep "browser_download_url.*InvoiceShelf.*zip" | cut -d \" -f 4)"
+RUN env-default INITIAL_PROJECT "$(download https://api.github.com/repos/InvoiceShelf/InvoiceShelf/releases/latest | grep "browser_download_url.*InvoiceShelf.*zip" | cut -d \" -f 4)"
 
 ################################################################################
 

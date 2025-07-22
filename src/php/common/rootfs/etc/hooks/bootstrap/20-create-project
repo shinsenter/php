@@ -78,7 +78,8 @@ unset_allow_plugins() {
 }
 
 copy_env() {
-    local files=(
+    local target="$APP_PATH/.env"
+    local sources=(
         '.env.dev'
         '.env.development.example'
         '.env.example'
@@ -86,13 +87,15 @@ copy_env() {
         '.env.sample'
     )
 
-    for file in "${files[@]}"; do
-    if [ -f "$APP_PATH/$file" ]; then
-        echo "Found: $file. Copying to .env..."
-        cp -pf "$APP_PATH/$file" "$APP_PATH/.env"
-        break
+    if [ ! -f "$target" ]; then
+        for source in "${sources[@]}"; do
+            if [ -f "$APP_PATH/$source" ]; then
+                echo "Found: $source. Copying to .env..."
+                cp -pf "$APP_PATH/$source" "$target"
+                break
+            fi
+        done
     fi
-    done
 }
 
 ################################################################################
@@ -110,15 +113,14 @@ if [ -z "$(ls -A "$APP_PATH")" ]; then
         case "$INITIAL_PROJECT" in
         http*.tar.gz)
             debug-echo "Downloading $INITIAL_PROJECT to $APP_PATH."
-            curl --retry 3 --retry-delay 5 -kL "$INITIAL_PROJECT" | tar -xzv --strip-components=1 -C "$APP_PATH"
+            download "$INITIAL_PROJECT" | tar -xzv --strip-components=1 -C "$APP_PATH"
             ;;
         http*.zip)
             debug-echo "Downloading $INITIAL_PROJECT to $APP_PATH."
             filename="/tmp/${INITIAL_PROJECT##*/}"
             temp="/tmp/$(php -r 'echo uniqid();')"
             rm -rf "$temp" && mkdir -p "$temp"
-            curl -o "$filename" --retry 3 --retry-delay 5 -kL "$INITIAL_PROJECT"
-            unzip "$filename" -d "$temp"
+            download "$INITIAL_PROJECT" -o "$filename" && unzip "$filename" -d "$temp"
             if [ "$(ls -1 "$temp" | wc -l)" == "1" ]; then
                 temp="$temp/$(ls -1 "$temp")"
             fi
