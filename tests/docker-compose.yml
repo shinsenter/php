@@ -1,101 +1,151 @@
 services:
   bedrock:
-    image: ghcr.io/shinsenter/bedrock:latest-alpine
+    image: ghcr.io/shinsenter/bedrock:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8100:80
   cakephp4:
-    image: ghcr.io/shinsenter/cakephp4:latest-alpine
+    image: ghcr.io/shinsenter/cakephp4:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8101:80
   cakephp5:
-    image: ghcr.io/shinsenter/cakephp5:latest-alpine
+    image: ghcr.io/shinsenter/cakephp5:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8102:80
   codeigniter4:
-    image: ghcr.io/shinsenter/codeigniter4:latest-alpine
+    image: ghcr.io/shinsenter/codeigniter4:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8103:80
   coolify:
-    image: ghcr.io/shinsenter/coolify:latest-alpine
+    image: ghcr.io/shinsenter/coolify:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8104:80
   drupal:
-    image: ghcr.io/shinsenter/drupal:latest-alpine
+    image: ghcr.io/shinsenter/drupal:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8105:80
   espocrm:
-    image: ghcr.io/shinsenter/espocrm:latest-alpine
+    image: ghcr.io/shinsenter/espocrm:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8106:80
   flarum:
-    image: ghcr.io/shinsenter/flarum:latest-alpine
+    image: ghcr.io/shinsenter/flarum:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8107:80
   flightphp:
-    image: ghcr.io/shinsenter/flightphp:latest-alpine
+    image: ghcr.io/shinsenter/flightphp:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8108:80
   grav:
-    image: ghcr.io/shinsenter/grav:latest-alpine
+    image: ghcr.io/shinsenter/grav:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8109:80
   hyperf:
-    image: ghcr.io/shinsenter/hyperf:latest-alpine
+    image: ghcr.io/shinsenter/hyperf:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8110:80
   invoiceshelf:
-    image: ghcr.io/shinsenter/invoiceshelf:latest-alpine
+    image: ghcr.io/shinsenter/invoiceshelf:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8111:80
   kirby:
-    image: ghcr.io/shinsenter/kirby:latest-alpine
+    image: ghcr.io/shinsenter/kirby:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8112:80
   laminas:
-    image: ghcr.io/shinsenter/laminas:latest-alpine
+    image: ghcr.io/shinsenter/laminas:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8113:80
   laravel:
-    image: ghcr.io/shinsenter/laravel:latest-alpine
+    image: ghcr.io/shinsenter/laravel:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8114:80
   magento:
-    image: ghcr.io/shinsenter/magento:latest-alpine
+    image: ghcr.io/shinsenter/magento:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8115:80
   mautic:
-    image: ghcr.io/shinsenter/mautic:latest-alpine
+    image: ghcr.io/shinsenter/mautic:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8116:80
   phpmyadmin:
-    image: ghcr.io/shinsenter/phpmyadmin:latest-alpine
+    image: ghcr.io/shinsenter/phpmyadmin:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8117:80
   slim:
-    image: ghcr.io/shinsenter/slim:latest-alpine
+    image: ghcr.io/shinsenter/slim:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8118:80
   spiral:
-    image: ghcr.io/shinsenter/spiral:latest-alpine
+    image: ghcr.io/shinsenter/spiral:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8119:80
   statamic:
-    image: ghcr.io/shinsenter/statamic:latest-alpine
+    image: ghcr.io/shinsenter/statamic:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8120:80
   sulu:
-    image: ghcr.io/shinsenter/sulu:latest-alpine
+    image: ghcr.io/shinsenter/sulu:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8121:80
   symfony:
-    image: ghcr.io/shinsenter/symfony:latest-alpine
+    image: ghcr.io/shinsenter/symfony:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8122:80
   wordpress:
-    image: ghcr.io/shinsenter/wordpress:latest-alpine
+    image: ghcr.io/shinsenter/wordpress:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8123:80
   yii:
-    image: ghcr.io/shinsenter/yii:latest-alpine
+    image: ghcr.io/shinsenter/yii:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+    environment:
+      - DEBUG=${DEBUG}
     ports:
       - 8124:80

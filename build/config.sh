@@ -216,6 +216,7 @@ app-*)
         ;;
     hyperf)
         # https://hyperf.wiki/3.1/#/en/quick-start/install
+        LATEST_PHP="8.3"
         BUILD_PLATFORM="linux/amd64,linux/arm/v7,linux/arm64/v8"
         BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.2" && SKIP_BUILD=1
@@ -251,6 +252,7 @@ app-*)
         ;;
     mautic)
         # https://docs.mautic.org/en/5.x/getting_started/how_to_install_mautic.html#installing-with-composer
+        LATEST_PHP="8.3"
         verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
         ;;
     phpmyadmin)

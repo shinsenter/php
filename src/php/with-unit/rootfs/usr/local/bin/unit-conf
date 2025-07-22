@@ -48,7 +48,7 @@ fi
 
 RET=$(
     if is-debug; then cat $config_file; set -x; fi;
-    curl --retry 3 --retry-delay 5 -sL -w '%{http_code}' \
+    curl --retry 3 --retry-delay 5 -sSL -w '%{http_code}' \
         -X PUT --data-binary @$config_file \
         --unix-socket ${UNIT_CONTROL_SOCKET:-/run/control.unit.sock} \
         "http://localhost/$config_path"

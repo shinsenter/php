@@ -2,4 +2,4 @@
 APP_PATH="$(app-path)"
 APP_ROOT="$(app-root)"
 
-debug-echo "Your web application must be in {$APP_PATH}."
+debug-echo "Your application path is at ${APP_PATH}."
