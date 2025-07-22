@@ -14,7 +14,7 @@ ARG BUILDKIT_SBOM_SCAN_STAGE=true
 
 ################################################################################
 
-ARG BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-shinsenter/phpfpm-nginx}
+ARG BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-shinsenter/laravel}
 ARG BUILD_TAG_PREFIX=${BUILD_TAG_PREFIX:-}
 
 ARG PHP_VERSION=${PHP_VERSION:-8.4}
@@ -30,10 +30,10 @@ ADD --link ./rootfs/ /
 
 ################################################################################
 
-# https://hyperf.wiki/3.1/#/en/quick-start/install
-ENV DOCUMENT_ROOT=""
+# https://hypervel.org/docs/deployment
+ENV DOCUMENT_ROOT="/public"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
-RUN env-default INITIAL_PROJECT "hyperf/hyperf-skeleton"
+RUN env-default INITIAL_PROJECT "hypervel/hypervel"
 
 ################################################################################
 
@@ -41,20 +41,19 @@ RUN <<'EOF'
 echo 'Install PHP extensions'
 [ -z "$DEBUG" ] || set -ex && set -e
 
-phpaddmod protobuf swoole
-
-web-cmd hyperf 'php $(app-path)/bin/hyperf.php'
 env-default PHP_SWOOLE_USE_SHORTNAME 'off'
+env-default HTTP_SERVER_PORT "9501"
+
+phpaddmod swoole
 
 if has-cmd s6-service; then
-    s6-service hyperf longrun '#!/usr/bin/env sh
-export APP_PATH="$(app-path)"
-cd "$APP_PATH"
-exec php $APP_PATH/bin/hyperf.php start
+    s6-service hypervel longrun '#!/usr/bin/env sh
+cd "$(app-path)"
+exec artisan serve $LARAVEL_SERVE_OPTIONS
 '
     s6-service php-fpm unset
     s6-service nginx unset
-    s6-service nginx depends hyperf
+    s6-service nginx depends hypervel
 fi
 
 EOF

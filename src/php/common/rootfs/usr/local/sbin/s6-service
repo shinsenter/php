@@ -10,7 +10,7 @@
 # show usage if no arguments are passed
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; then
     debug-echo -i "Simple wrapper for adding s6-overlay services."
-    debug-echo -i "  Usage: ${0##*/} [service-name] [longrun|oneshot|needs|finish|down] [script file path|inline script]"
+    debug-echo -i "  Usage: ${0##*/} [service-name] [longrun|oneshot|needs|finish|down|unset] [script file path|inline script]"
     debug-echo -l "  For example: ${0##*/} greeting oneshot \"echo 'hello world!'\""
     debug-echo -l "  For example: ${0##*/} apache longrun /path/to/apache/start.sh"
     debug-echo -l "  For example: ${0##*/} apache needs php-fpm"
@@ -49,6 +49,14 @@ if [ -z "$name" ]; then name="00-default"; fi
 
 # get script contents from existing file
 if [ -f "$@" ]; then set -- "$(cat $@)"; fi
+
+################################################################################
+
+# delete service
+if [ "$type" = "unset" ] || [ "$type" = "delete" ]; then
+    rm -rf "${s6}/${name}" "${s6}/user/contents.d/${name}" 2>/dev/null || true
+    exit 0
+fi
 
 ################################################################################
 

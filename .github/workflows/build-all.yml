@@ -280,6 +280,7 @@ jobs:
       matrix:
         app:
           - app-coolify
+          - app-hypervel
           - app-invoiceshelf
           - app-statamic
     with:

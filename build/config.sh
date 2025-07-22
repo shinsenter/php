@@ -224,6 +224,12 @@ app-*)
             BUILD_PLATFORM="linux/amd64,linux/arm64/v8"
         fi
         ;;
+    hypervel)
+        # https://hypervel.org/docs/deployment
+        BUILD_PLATFORM="linux/amd64,linux/arm/v7,linux/arm64/v8"
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/laravel"
+        verlt "$PHP_VERSION" "8.2" && SKIP_BUILD=1
+        ;;
     invoiceshelf)
         # https://docs.invoiceshelf.com/install/manual.html
         BUILD_FROM_IMAGE="$DEFAULT_REPO/laravel"

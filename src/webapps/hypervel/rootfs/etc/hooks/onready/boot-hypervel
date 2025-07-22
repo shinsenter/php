@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+APP_PATH="$(app-path)"
+APP_ROOT="$(app-root)"
+
+debug-echo "Your web application must be in ${APP_PATH}."
+
+nginx_conf=/etc/nginx/sites-enabled/00-default.conf
+port="$HTTP_SERVER_PORT"
+if ! [[ "$port" =~ ^[0-9]+$ ]]; then
+    port=9501
+fi
+
+if [ -f "$nginx_conf" ]; then
+    sed -E -i \
+        -e "s~(proxy_pass +http://127\\.0\\.0\\.1:)[0-9]+;~\1${port};~" \
+        "$nginx_conf"
+fi
