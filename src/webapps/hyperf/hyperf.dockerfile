@@ -49,11 +49,13 @@ env-default PHP_SWOOLE_USE_SHORTNAME 'off'
 if has-cmd s6-service; then
     s6-service hyperf longrun '#!/usr/bin/env sh
 export APP_PATH="$(app-path)"
+export APP_ROOT="$(app-root)"
+
 cd "$APP_PATH"
 exec php $APP_PATH/bin/hyperf.php start
 '
     s6-service php-fpm unset
-    s6-service nginx unset
+    s6-service nginx unset php-fpm
     s6-service nginx depends hyperf
 fi
 

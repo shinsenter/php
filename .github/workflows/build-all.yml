@@ -69,40 +69,37 @@ jobs:
           get_github_latest_tag "roadrunner-server/roadrunner"
           get_dockerhub_latest_sha "library/debian"
           get_dockerhub_latest_sha "library/alpine"
+          get_dockerhub_latest_sha "library/ubuntu"
 
           distros=(debian alpine)
           variants=(cli fpm zts)
+          base_images=(phpfpm-nginx phpfpm-apache laravel)
           php_versions=(8.5-rc 8.4 8.3 8.2 8.1)
-          # base_images=(phpfpm-nginx phpfpm-apache unit-php frankenphp roadrunner)
 
           if [ ! -z "$build_all" ]; then
-            php_versions+=(8.0 7.4 7.3 7.2 7.1 7.0 5.6)
+              php_versions+=(8.0 7.4 7.3 7.2 7.1 7.0 5.6)
           fi
 
+          get_sha() {
+              get_dockerhub_latest_sha "$@"
+          }
+
           for distro in "${distros[@]}"; do
-            get_dockerhub_latest_sha "library/$distro"
-            for version in "${php_versions[@]}"; do
-              for variant in "${variants[@]}"; do
-                if [ "$distro" == "debian" ]; then
-                  get_dockerhub_latest_sha "library/php" 1 "${version}-${variant}"
-                  if [ "$variant" == "zts" ]; then
-                    get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php${version}"
-                  fi
-                else
-                  get_dockerhub_latest_sha "library/php" 1 "${version}-${variant}-${distro}"
-                  if [ "$variant" == "zts" ]; then
-                    get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php${version}-${distro}"
-                  fi
-                fi
+              get_sha "library/$distro"
+              if [ "$distro" == "debian" ]; then
+                  distro=""
+              fi
+              for version in "${php_versions[@]}"; do
+                  for variant in "${variants[@]}"; do
+                      get_sha "library/php" 1 "${version}-${variant}-${distro}"
+                      if [ "$variant" == "zts" ] && verlte "8.2" "$version"; then
+                          get_sha "dunglas/frankenphp" 1 "1-php${version}-${distro}"
+                      fi
+                  done
+                  # for base in "${base_images[@]}"; do
+                  #   get_sha "shinsenter/$base" 1 "${tag_prefix}php${version//-rc/}-${distro}"
+                  # done
               done
-              # for base in "${base_images[@]}"; do
-              #   if [ "$distro" == "debian" ]; then
-              #     get_dockerhub_latest_sha "shinsenter/$base" 1 "${tag_prefix}php${version}"
-              #   else
-              #     get_dockerhub_latest_sha "shinsenter/$base" 1 "${tag_prefix}php${version}-${distro}"
-              #   fi
-              # done
-            done
           done
 
       - uses: actions/upload-artifact@v4
@@ -285,7 +282,6 @@ jobs:
           - app-statamic
     with:
       app_name: ${{ matrix.app }}
-      server: ${{ matrix.server }}
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
       build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
 

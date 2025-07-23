@@ -20,12 +20,12 @@ echo_debug()    { echo $@; }
 # Helper methods
 ################################################################################
 
-# Function to compare two version strings
+# Function to compare if $1 is less than or equal to $2
 verlte() {
     printf '%s\n' "$1" "$2" | sort -C -V
 }
 
-# Function to compare two version strings
+# Function to compare if $1 is less than $2
 verlt() {
     ! verlte "$2" "$1"
 }
@@ -37,7 +37,7 @@ timestamp() {
 
 # Function to fetch and cache remote content
 fetch_with_cache() {
-    local url="$@"
+    local url="${1%-}"
     local cache_dir="/tmp/helper_cache"
     local today=$(date +"%Y%m%d")
     local hash=$(echo -n "$url" | md5sum | awk '{print $1}')
@@ -49,7 +49,7 @@ fetch_with_cache() {
         echo "Cache found for $url" 1>&2
         cat "$cache_file"
     else
-        echo "Fetching $@" 1>&2
+        echo "Fetching $url" 1>&2
         content=$(
             if [ "$TOKEN" != "" ]; then
                 curl --retry 3 --retry-delay 5 -ksSLRJ \
@@ -81,12 +81,12 @@ get_dockerhub_json () {
 }
 
 # For GitHub
-get_github_latest_tag () { get_github_json "$1" | jq -r '.[].name // empty' | head -n ${2:-1}; }
-get_github_latest_sha () { get_github_json "$1" | jq -r '.[].commit.sha // empty' | head -n ${2:-1}; }
+get_github_latest_tag () { get_github_json "$1" | jq -r '.[] | if type == "object" then (.name // empty) else empty end' | head -n ${2:-1}; }
+get_github_latest_sha () { get_github_json "$1" | jq -r '.[] | if type == "object" then (.commit.sha // .node_id // empty) else empty end' | head -n ${2:-1}; }
 
 # For Docker Hub
-get_dockerhub_latest_tag () { get_dockerhub_json "$1" "name=${3:-latest}" | jq -r '.results|.[].name // empty' | head -n ${2:-1}; }
-get_dockerhub_latest_sha () { get_dockerhub_json "$1" "name=${3:-latest}" | jq -r '.results|.[].digest // empty' | head -n ${2:-1}; }
+get_dockerhub_latest_tag () { get_dockerhub_json "$1" "name=${3:-latest}" | jq -r '.results[] | if type == "object" then (.name // empty) else empty end' | head -n ${2:-1}; }
+get_dockerhub_latest_sha () { get_dockerhub_json "$1" "name=${3:-latest}" | jq -r '.results[] | if type == "object" then (.digest // .tag_last_pushed // .id // empty) else . end' | head -n ${2:-1}; }
 
 # Function to set environment variables
 github_env() {
@@ -128,8 +128,11 @@ path_hash() {
 ################################################################################
 
 # get_github_latest_tag    "just-containers/s6-overlay"
+# get_github_latest_sha    "just-containers/s6-overlay"
 # get_github_latest_tag    "nginx/unit"
+# get_github_latest_sha    "nginx/unit"
 # get_github_latest_tag    "roadrunner-server/roadrunner"
+# get_github_latest_sha    "roadrunner-server/roadrunner"
 # get_dockerhub_latest_tag "library/php"
 # get_dockerhub_latest_tag "dunglas/frankenphp" 1 "1-php8.4-alpine"
 # get_dockerhub_latest_sha "library/alpine"

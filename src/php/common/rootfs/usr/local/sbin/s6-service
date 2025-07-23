@@ -54,7 +54,11 @@ if [ -f "$@" ]; then set -- "$(cat $@)"; fi
 
 # delete service
 if [ "$type" = "unset" ] || [ "$type" = "delete" ]; then
-    rm -rf "${s6}/${name}" "${s6}/user/contents.d/${name}" 2>/dev/null || true
+    if [ -z "$1" ]; then
+        rm -rf "${s6}/${name}" "${s6}/user/contents.d/${name}" 2>/dev/null || true
+    elif [ -f "${s6}/${name}/dependencies.d/$1" ]; then
+        rm -f "${s6}/${name}/dependencies.d/$1" 2>/dev/null || true
+    fi
     exit 0
 fi
 

@@ -137,7 +137,7 @@ with-unit)
     BUILD_NAME="$DEFAULT_REPO/unit-php"
     BUILD_DOCKERFILE=$BASE_DIR/src/php/with-unit.dockerfile
     BUILD_SOURCE_IMAGE="https://codeload.github.com/nginx/unit/tar.gz/refs/tags/$unit_version"
-    BUILD_CACHE_KEY="(unit@$(echo "$unit_version" | head -c17))"
+    BUILD_CACHE_KEY="(unit@$(echo "$unit_version" | head -c19))"
     PHP_VARIANT="zts$SUFFIX"
     ALLOW_RC=1
     ;;
@@ -148,7 +148,7 @@ with-f8p)
     BUILD_SOURCE_IMAGE="dunglas/frankenphp:1-php$PHP_VERSION$SUFFIX"
     BUILD_DOCKERFILE=$BASE_DIR/src/php/with-f8p.dockerfile
     BUILD_PLATFORM="linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8"
-    BUILD_CACHE_KEY="(frankenphp@$(get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php$PHP_VERSION$SUFFIX" | head -c17))"
+    BUILD_CACHE_KEY="(frankenphp@$(get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php$PHP_VERSION$SUFFIX" | head -c19))"
     PHP_VARIANT="zts$SUFFIX"
     ;;
 with-roadrunner)
@@ -159,7 +159,7 @@ with-roadrunner)
     BUILD_DOCKERFILE=$BASE_DIR/src/php/with-roadrunner.dockerfile
     PHP_VARIANT="cli$SUFFIX"
     BUILD_PLATFORM="linux/amd64,linux/arm64"
-    BUILD_CACHE_KEY="(roadrunner@$(get_github_latest_tag "roadrunner-server/roadrunner" | head -c17))"
+    BUILD_CACHE_KEY="(roadrunner@$(get_github_latest_tag "roadrunner-server/roadrunner" | head -c19))"
     ALLOW_RC=1
     ;;
 app-*)
@@ -351,7 +351,7 @@ app-*)
     esac
 
     # get checksum of the base image
-    BUILD_CACHE_KEY="($BUILD_FROM_IMAGE@$(get_dockerhub_latest_sha "$BUILD_FROM_IMAGE" 1 "php${PHP_VERSION//-rc/}" | head -c17))"
+    BUILD_CACHE_KEY="($BUILD_FROM_IMAGE@$(get_dockerhub_latest_sha "$BUILD_FROM_IMAGE" 1 "php${PHP_VERSION//-rc/}" | head -c19))"
     ;;
 
 *)
@@ -600,14 +600,14 @@ fi
 
 if [ "$OS_BASE" != "" ]; then
     if [ "$SKIP_BUILD" != "1" ]; then
-        OS_SHA="$(get_dockerhub_latest_sha "library/$OS_BASE" 1 "$OS_VERSION" | head -c17)"
+        OS_SHA="$(get_dockerhub_latest_sha "library/$OS_BASE" 1 "$OS_VERSION" | head -c19)"
     fi
     BUILD_CACHE_KEY="$BUILD_CACHE_KEY/($OS_BASE:$OS_VERSION@$OS_SHA)"
 fi
 
 if [ "$PHP_VERSION" != "" ]; then
     if [ "$SKIP_BUILD" != "1" ]; then
-        PHP_SHA="$(get_dockerhub_latest_sha "library/php" 1 "$PHP_VERSION-${PHP_VARIANT#-}" | head -c17)"
+        PHP_SHA="$(get_dockerhub_latest_sha "library/php" 1 "$PHP_VERSION-${PHP_VARIANT#-}" | head -c19)"
     fi
     BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(php:$PHP_VERSION-${PHP_VARIANT#-}@$PHP_SHA)/(IPE:$IPE_VERSION)/(composer:$COMPOSER_VERSION)"
 fi

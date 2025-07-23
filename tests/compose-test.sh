@@ -19,9 +19,7 @@ compose_exec() {
     docker compose -f "$BASE_DIR/tests/docker-compose.yml" "$@"
 }
 
-export PHP_VERSION=${PHP_VERSION:=latest}
-export PREFIX=${PREFIX:=dev-}
-export SUFFIX=${SUFFIX:=-alpine}
+export IMAGE_TAG=${IMAGE_TAG:=dev-latest-alpine}
 export DEBUG=${DEBUG:=1}
 
 compose_exec down --remove-orphans --volumes --timeout 10
