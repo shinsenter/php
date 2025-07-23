@@ -44,15 +44,18 @@ echo 'Install PHP extensions'
 env-default PHP_SWOOLE_USE_SHORTNAME 'off'
 env-default HTTP_SERVER_PORT "9501"
 
-phpaddmod swoole
+phpaddmod protobuf swoole
 
 if has-cmd s6-service; then
     s6-service hypervel longrun '#!/usr/bin/env sh
-cd "$(app-path)"
+export APP_PATH="$(app-path)"
+export APP_ROOT="$(app-root)"
+
+cd "$APP_PATH"
 exec artisan serve $LARAVEL_SERVE_OPTIONS
 '
     s6-service php-fpm unset
-    s6-service nginx unset
+    s6-service nginx unset php-fpm
     s6-service nginx depends hypervel
 fi
 

@@ -48,6 +48,7 @@ for version; do
         --build-arg S6_VERSION=$s6_version \
         --build-arg PHP_VERSION=$version \
         --build-arg PHP_VARIANT=$variant \
+        --build-arg BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-php} \
         --build-arg BUILD_TAG_PREFIX=$BUILD_TAG_PREFIX \
         2>&1 | tee "$BASE_DIR/tests/logs/squash-$version-${DOCKERTAG:-$variant}.txt" &
 done
@@ -64,6 +65,7 @@ done
 # PLATFORM=arm64 DOCKERTAG=roadrunner DOCKERFILE=php/with-roadrunner.dockerfile PHP_VARIANT=zts-alpine ./tests/squash-test.sh 8.0 8.3
 # PLATFORM=arm64 DOCKERTAG=bedrock DOCKERFILE=webapps/bedrock/bedrock.dockerfile PHP_VARIANT= ./tests/squash-test.sh 8.3
 # PLATFORM=arm64 DOCKERTAG=coolify DOCKERFILE=webapps/coolify/coolify.dockerfile PHP_VARIANT= ./tests/squash-test.sh 8.4
+# PLATFORM=arm64 DOCKERTAG=hypervel DOCKERFILE=webapps/hypervel/hypervel.dockerfile PHP_VARIANT= BUILD_FROM_IMAGE=shinsenter/laravel ./tests/squash-test.sh clear 8.3 8.4
 
 # run examples
 # PLATFORM=arm64 DOCKERTAG=apache DOCKERFILE=php/with-apache.dockerfile PHP_VARIANT=fpm ./tests/squash-test.sh 5.6 8.3
