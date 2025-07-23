@@ -168,7 +168,7 @@ app-*)
     BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-apache"
     BUILD_NAME="$DEFAULT_REPO/$APP_NAME"
     BUILD_DOCKERFILE=$BASE_DIR/src/webapps/$APP_NAME/$APP_NAME.dockerfile
-    PHP_VARIANT="$SUFFIX"
+    PHP_VARIANT="fpm$SUFFIX"
 
     # disable cache because there are too many useless cache keys
     # USE_BUILD_CACHE=0
@@ -229,6 +229,9 @@ app-*)
         BUILD_PLATFORM="linux/amd64,linux/arm/v7,linux/arm64/v8"
         BUILD_FROM_IMAGE="$DEFAULT_REPO/laravel"
         verlt "$PHP_VERSION" "8.2" && SKIP_BUILD=1
+        if verlte "8.3" "$PHP_VERSION"; then
+            BUILD_PLATFORM="linux/amd64,linux/arm64/v8"
+        fi
         ;;
     invoiceshelf)
         # https://docs.invoiceshelf.com/install/manual.html
@@ -270,6 +273,7 @@ app-*)
         ;;
     spiral)
         # https://spiral.dev/docs/start-installation/current/en
+        PHP_VARIANT="cli$SUFFIX"
         BUILD_FROM_IMAGE="$DEFAULT_REPO/roadrunner"
         BUILD_PLATFORM="linux/amd64,linux/arm64"
         verlt "$PHP_VERSION" "8.1" && SKIP_BUILD=1

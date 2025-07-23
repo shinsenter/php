@@ -228,11 +228,61 @@ jobs:
 
   ##########################################################
 
+  server-cache:
+    runs-on: ubuntu-22.04
+    needs: [prepare, cli-servers, fpm-servers]
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: helper_cache
+          path: /tmp/helper_cache/
+
+      - uses: actions/checkout@v4
+
+      - name: build cache
+        run: |
+          set -e
+          . ./build/helpers.sh
+          build_all="${{ fromJSON(needs.prepare.outputs.build_all) }}"
+          distros=(debian alpine)
+          base_images=(phpfpm-nginx phpfpm-apache roadrunner laravel)
+          php_versions=(8.5-rc 8.4 8.3 8.2 8.1)
+
+          if [ ! -z "$build_all" ]; then
+              php_versions+=(8.0 7.4 7.3 7.2 7.1 7.0 5.6)
+          fi
+
+          get_sha() {
+              get_dockerhub_latest_sha "$@"
+          }
+
+          for distro in "${distros[@]}"; do
+              get_sha "library/$distro"
+              if [ "$distro" == "debian" ]; then
+                  distro=""
+              fi
+              for version in "${php_versions[@]}"; do
+                  if verlt "7.1" "$version" || [ "$distro" = "" ]; then
+                    for base in "${base_images[@]}"; do
+                      get_sha "shinsenter/$base" 1 "${tag_prefix}php${version//-rc/}-${distro}"
+                    done
+                  fi
+              done
+          done
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: helper_cache
+          overwrite: true
+          path: /tmp/helper_cache/
+
+  ##########################################################
+
   popular-apps:
     name: ${{ matrix.app }}
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
-    needs: [prepare, fpm-servers]
+    needs: [prepare, server-cache]
     strategy:
       fail-fast: false
       matrix:
@@ -267,6 +317,21 @@ jobs:
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
       build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
 
+  other-apps:
+    name: ${{ matrix.app }}
+    uses: ./.github/workflows/template-php.yml
+    secrets: inherit
+    needs: [prepare, server-cache]
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - app-spiral
+    with:
+      app_name: ${{ matrix.app }}
+      tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
+      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
+
   laravel-based-apps:
     name: ${{ matrix.app }}
     uses: ./.github/workflows/template-php.yml
@@ -280,21 +345,6 @@ jobs:
           - app-hypervel
           - app-invoiceshelf
           - app-statamic
-    with:
-      app_name: ${{ matrix.app }}
-      tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
-      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
-
-  other-apps:
-    name: ${{ matrix.app }}
-    uses: ./.github/workflows/template-php.yml
-    secrets: inherit
-    needs: [prepare, cli-servers]
-    strategy:
-      fail-fast: false
-      matrix:
-        app:
-          - app-spiral
     with:
       app_name: ${{ matrix.app }}
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
