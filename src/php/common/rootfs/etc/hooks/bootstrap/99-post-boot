@@ -39,6 +39,3 @@ if ! is-true $DISABLE_AUTORUN_FIX_OWNER_GROUP; then
 fi
 
 ################################################################################
-
-# cache environment variables for other processes (like crond)
-with-env @

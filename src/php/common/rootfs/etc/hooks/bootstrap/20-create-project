@@ -80,11 +80,9 @@ unset_allow_plugins() {
 copy_env() {
     local target="$APP_PATH/.env"
     local sources=(
-        '.env.dev'
-        '.env.development.example'
         '.env.example'
         '.env.local'
-        '.env.sample'
+        .env.*
     )
 
     if [ ! -f "$target" ]; then
