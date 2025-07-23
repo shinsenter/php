@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+# cache environment variables for other processes (like crond)
+with-env @
