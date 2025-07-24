@@ -34,6 +34,7 @@ ADD --link ./rootfs/ /
 ENV DOCUMENT_ROOT="/public"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 RUN env-default INITIAL_PROJECT "hypervel/hypervel"
+RUN env-default APP_INDEX "artisan"
 
 ################################################################################
 
@@ -46,6 +47,8 @@ env-default HTTP_SERVER_PORT "9501"
 
 phpaddmod protobuf swoole
 
+sed -i 's/ --isolated//g' /etc/hooks/onready/*
+
 if has-cmd s6-service; then
     s6-service hypervel longrun '#!/usr/bin/env sh
 export APP_PATH="$(app-path)"
@@ -54,9 +57,15 @@ export APP_ROOT="$(app-root)"
 cd "$APP_PATH"
 exec artisan serve $LARAVEL_SERVE_OPTIONS
 '
+
     s6-service php-fpm unset
     s6-service nginx unset php-fpm
     s6-service nginx depends hypervel
+
+    s6-service horizon unset
+    s6-service pulse unset
+    s6-service reverb unset
+    s6-service scheduler unset
 fi
 
 EOF

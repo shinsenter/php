@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+echo "$(app-root)/${APP_INDEX:-index.php}"

@@ -109,6 +109,20 @@ services:
 ```
 
 
+## Environment variables
+
+You can optionally set the following environment variables in the container to enable certain services to run alongside the web server.
+
+> 📝 Note: you'll need to install the required packages and create the necessary configs yourself for features like Pulse or Hypervel Horizon.
+
+| Environment Variable             | Description             |
+|----------------------------------|-------------------------|
+| `LARAVEL_AUTO_MIGRATION`         | Whether to automatically run database migrations when the app boots. Set to `0` to disable running migration. **Default is `1`**. |
+| `LARAVEL_AUTO_MIGRATION_OPTIONS` | Additional options/flags to pass to the `php artisan migrate` command. |
+| `LARAVEL_ENABLE_QUEUE_WORKER`    | Enables supervisor service for the Laravel queue worker. Set to `1` to start processing jobs. **Default is `0`**. |
+| `LARAVEL_QUEUE_WORKER_OPTIONS`   | Defines custom options for the Laravel queue worker (e.g., connection, delay). |
+
+
 ## Stable Image Tags
 
 The release versions on [this GitHub repository](https://code.shin.company/php) don't guarantee
