@@ -55,6 +55,12 @@ if ! has-s6 && [ ! -z "$S6_VERSION" ]; then
     untar ${SOURCE}/s6-overlay-${S6_ARCH}.tar.xz
     untar ${SOURCE}/syslogd-overlay-noarch.tar.xz
 
+    # fix permissions of /init
+    if [ -x /init ]; then
+        chown root:root /init
+        chmod 4755 /init
+    fi
+
     # set s6-overlay default behavior
     if has-cmd env-default; then
         env-default '# Environment variables for s6-overlay'
