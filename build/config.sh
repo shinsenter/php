@@ -355,7 +355,7 @@ app-*)
     esac
 
     # get checksum of the base image
-    BUILD_CACHE_KEY="($BUILD_FROM_IMAGE@$(get_dockerhub_latest_sha "$BUILD_FROM_IMAGE" 1 "php${PHP_VERSION//-rc/}" | head -c19))"
+    BUILD_CACHE_KEY="($BUILD_FROM_IMAGE@$(get_dockerhub_latest_sha "$BUILD_FROM_IMAGE" 1 "php${PHP_VERSION//-rc/}${SUFFIX}" | head -c19))"
     ;;
 
 *)
@@ -667,6 +667,14 @@ fi
 
 if [ "$MIRROR_REPO" != "" ]; then
     BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE//$DEFAULT_REPO/$MIRROR_REPO}
+fi
+
+################################################################################
+# Correct the PHP variant for apps
+################################################################################
+
+if [ "${APP:0:4}" == "app-" ]; then
+    PHP_VARIANT="$SUFFIX"
 fi
 
 ################################################################################
