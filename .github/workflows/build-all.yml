@@ -270,6 +270,8 @@ jobs:
               done
           done
 
+          ls -1 /tmp/helper_cache/
+
       - uses: actions/upload-artifact@v4
         with:
           name: helper_cache
