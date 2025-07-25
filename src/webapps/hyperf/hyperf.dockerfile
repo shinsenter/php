@@ -34,7 +34,7 @@ ADD --link ./rootfs/ /
 ENV DOCUMENT_ROOT=""
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 RUN env-default INITIAL_PROJECT "hyperf/hyperf-skeleton"
-RUN env-default APP_INDEX "bin/hyperf.php"
+RUN env-default APP_INDEX "../bin/hyperf.php"
 
 ################################################################################
 
