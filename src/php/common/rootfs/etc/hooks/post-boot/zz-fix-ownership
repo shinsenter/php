@@ -28,11 +28,11 @@ if ! is-true $DISABLE_AUTORUN_FIX_OWNER_GROUP; then
         web-chown fix
     elif [ -f "$INDEX_PATH" ]; then
         owner="$(ls -ld "$INDEX_PATH" | awk '{print $3 ":" $4}')"
+        debug-echo "Verify ownership for the application path."
         debug-echo "Detected owner: $owner"
         debug-echo "Expected owner: $APP_USER:$APP_GROUP"
 
         if [ "$owner" != "$APP_USER:$APP_GROUP" ]; then
-            debug-echo "Correct ownership for the application path."
             web-chown fix
         fi
     fi
