@@ -51,7 +51,7 @@ fi
 
 if [ -d "$CRONTAB_DIR" ]; then
     for script in $(find "$CRONTAB_DIR" -type f | sort -dbfi); do
-        echo -e "\n# $script" >>$CRONTAB
+        echo -e "\n# $(realpath $script)" >>$CRONTAB
         cat "$script" >>$CRONTAB
     done
 fi

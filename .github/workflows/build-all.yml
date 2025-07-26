@@ -239,11 +239,13 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      - name: build cache
+      - name: Prepare cache
         run: |
           set -e
           . ./build/helpers.sh
-          build_all="${{ fromJSON(needs.prepare.outputs.build_all) }}"
+          build_all="${{ needs.prepare.outputs.build_all }}"
+          echo "build_all = '$build_all' ($(if [ ! -z "$build_all" ]; then echo 'yes, includes outdated versions'; else echo 'no, only maintained versions'; fi))"
+
           distros=(debian alpine)
           base_images=(phpfpm-nginx phpfpm-apache roadrunner laravel)
           php_versions=(8.5-rc 8.4 8.3 8.2 8.1)
@@ -270,7 +272,7 @@ jobs:
               done
           done
 
-          ls -1 /tmp/helper_cache/
+          ls -lh /tmp/helper_cache/ | awk '{ if(NR>1) printf "%10s  %s\n", $5, $9 }'
 
       - uses: actions/upload-artifact@v4
         with:

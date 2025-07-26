@@ -16,12 +16,10 @@ if [ ! -f $conf_path ]; then
 APP_PATH="$(app-path)"
 APP_ROOT="$(app-root)"
 if [ -d "$APP_PATH" ]; then cd "$APP_PATH"; fi
-
 NEW_PATH="$(echo $PATH | sed "s/\/usr\/local\/aliases://")"
 if [ ! -z "$COMPOSER_HOME" ] && ! echo $NEW_PATH | grep -qF "$COMPOSER_HOME/vendor/bin"; then NEW_PATH="$COMPOSER_HOME/vendor/bin:$NEW_PATH"; fi
 if ! echo $NEW_PATH | grep -qF "$APP_PATH/vendor/bin"; then NEW_PATH="$APP_PATH/vendor/bin:$NEW_PATH"; fi
 export PATH="$NEW_PATH"
-
 ' >$conf_path
     chmod +x $conf_path
 fi
@@ -46,7 +44,8 @@ line="$@"
 
 # add a comment if the command argument starts with #
 if [ "${line:0:1}" = "#" ]; then
-    echo -e "\n${line}\n# ------------------------------------------------------------ #" >>$conf_path
+    hl='# --------------------------------------------'
+    echo -e "\n${hl}\n${line}\n${hl}" >>$conf_path
     exit
 fi
 
