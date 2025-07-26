@@ -106,6 +106,7 @@ env-default 'alias ll="ls -alh"'
 
 # Set OS default settings
 env-default '# Environment variables for OS'
+env-default DEBUG '0'
 env-default DEBIAN_FRONTEND $DEBIAN_FRONTEND
 env-default DEBCONF_NOWARNINGS $DEBCONF_NOWARNINGS
 env-default HISTCONTROL 'ignoreboth'
