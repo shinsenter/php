@@ -59,5 +59,12 @@ fi
 # add an environment variable
 name="$1"; shift
 set -- "$(echo "$@" | sed -e 's/\([\\"]\)/\\\1/g')"
-sed -i "/$name=/d" $conf_path &>/dev/null
-echo "if [ -z \${${name}+x} ]; then export $name=\"$@\"; fi" >>$conf_path
+
+minlen=48
+check="if [ -z \${${name}+x} ];"
+newline="$(printf "%s%*s%s\n" "$check" $(( $minlen - ${#check} > 0 ? $minlen - ${#check} : 1 )) "" "then export $name=\"$@\"; fi")"
+if grep -qF "$name=" "$conf_path"; then
+    sed -i "/$name=/c\\$newline" "$conf_path"
+else
+    echo "$newline" >>"$conf_path"
+fi

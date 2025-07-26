@@ -21,8 +21,10 @@ set -e
 
 mkdir -p "$(dirname $CRONTAB)" $CRONTAB_DIR
 
-if is-debug; then
+if is-true $ENABLE_CRONTAB_DEBUG; then
     echo '*  *  *  *  *  echo -e "$(date) DEBUG: Crontab is running as $(whoami).\\n\\n$(env -0 | sort -dbfiz | tr '\''\\0'\'' '\''\\n'\'' | grep -vF '\''_='\'')" | tee /tmp/cron-debug.txt' >$CRONTAB_DIR/debug
+elif is-debug; then
+    echo '*  *  *  *  *  echo -e "$(date) DEBUG: Crontab is running as $(whoami).\\nTotal passed environment variables: $(env | wc -l)" | tee /tmp/cron-debug.txt' >$CRONTAB_DIR/debug
 fi
 
 cat <<CRONTAB >$CRONTAB

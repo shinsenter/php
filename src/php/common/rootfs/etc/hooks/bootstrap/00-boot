@@ -65,9 +65,6 @@ chmod 4755 "$APP_PATH"
 
 ################################################################################
 
-# call the onboot hook
-hook onboot
-
 # log the timestamp of the first run, then call the hook
 # this is convenient for running migration scripts etc.
 FIRST_RUN=/var/local/first-run
@@ -77,3 +74,6 @@ if [ ! -e "$FIRST_RUN" ]; then
 else
     hook rebooted
 fi
+
+# call the onboot hook
+hook onboot

@@ -228,25 +228,25 @@ services:
 
 These Docker images include additional environment variables for fine-tuning container behavior:
 
-| Setting Name                       | Default Value    | Description                                                                                                           | Example |
-|------------------------------------|------------------|-----------------------------------------------------------------------------------------------------------------------|---------|
-| `DEFAULT_LOG_PATH`                 | `/proc/1/fd/2`   | Sets the log output path. By default, logs will be sent to the container's standard output.                           | `/var/log/container.txt` |
-| `DEBUG` or `DEBUG_MODE`            | Not set          | Activates debug mode with more verbose logs when set to `1`.                                                          | `1` |
-| `TZ`                               | `UTC`            | Sets the default timezone for the container. [Full list](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). | `Asia/Tokyo` |
-| `DISABLE_AUTORUN_SCRIPTS`          | Not set          | Disables all autorun scripts when set to `1`.                                                                         | `0` |
-| `DISABLE_AUTORUN_FIX_OWNER_GROUP`  | Not set          | Disables automatic ownership correction of the application directory when set to "1".                                 | `1` |
-| `DISABLE_GREETING`                 | Not set          | Disables the welcome message at container startup when set to `1`.                                                    | `0` |
-| `ENABLE_CRONTAB`                   | Not set          | Enables the Crontab service when set to `1`, loading settings from the directory defined by `$CRONTAB_DIR` (default is `/etc/crontab.d`). | `1` |
-| `CRONTAB_DIR`                      | `/etc/crontab.d` | Specifies the directory containing cron job settings. Cron jobs are run as the user defined by `$APP_USER`.           | `/path/for/crontab/schedules` |
-| `CRONTAB_HOME`                     | `$APP_PATH`      | Specifies the `$HOME` directory for cron jobs.                                                                        | `/path/for/crontab` |
-| `CRONTAB_MAILTO`                   | Not set          | Email address to which cron job logs are sent.                                                                        | `admin@example.com` |
-| `CRONTAB_PATH`                     | `$PATH`          | Sets the directory paths for executing cron jobs.                                                                     | `/path/for/crontab/bin` |
-| `CRONTAB_SETTINGS`                 | Not set          | Allows you to configure cron jobs directly in the docker-compose.yml file, making it easy to manage and update scheduled tasks within your Docker container. | `0 0 * * * echo "Hello new day!"` |
-| `CRONTAB_SHELL`                    | `/bin/sh`        | Sets the default shell for cron jobs.                                                                                 | `/bin/bash` |
-| `CRONTAB_TZ`                       | `$TZ`            | Sets the default timezone for cron jobs. [Full list](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).   | `Asia/Tokyo` |
-| `SUPERVISOR_PHP_COMMAND`           | Not set          | Contains the command that the container will use to serve your application instead of the default entrypoint command. | `php -S localhost:80 index.php` |
-| `ENABLE_TUNING_FPM`                | Not enabled      | Enables auto-tuning of PM control settings when set to `1`.                                                           | `0` |
-| `ENABLE_TUNING_MPM`                | Not enabled      | Enables auto-tuning of Apache MPM settings when set to `1`.                                                           | `0` |
+| Setting Name                       | Default Value    | Description           | Example |
+|------------------------------------|------------------|-----------------------|---------|
+| `DEFAULT_LOG_PATH`                 | `/proc/1/fd/2`   | Specifies where logs are written. By default, logs are sent to the container’s standard output. | `/var/log/container.txt` |
+| `DEBUG` or `DEBUG_MODE`            | Not set          | Enables verbose logging when set to `1`. | `1` |
+| `TZ`                               | `UTC`            | Sets the container’s default timezone. See the [full list of timezones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). | `Asia/Tokyo` |
+| `DISABLE_AUTORUN_SCRIPTS`          | Not set          | Disables all autorun scripts when set to `1`. | `1` |
+| `DISABLE_AUTORUN_GENERATING_INDEX` | Not set          | Skips creation of `index.php` when set to `1`. By default, an `index.php` file is generated in `$DOCUMENT_ROOT` if it doesn't already exist. | `1` |
+| `DISABLE_AUTORUN_FIX_OWNER_GROUP`  | Not set          | Disables automatic correction of ownership for the application directory when set to `1`. | `1` |
+| `DISABLE_GREETING`                 | Not set          | Suppresses the startup greeting message when set to `1`. | `1` |
+| `ENABLE_CRONTAB`                   | Not set          | Enables the Crontab service when set to `1`, loading job definitions from `$CRONTAB_DIR` (default: `/etc/crontab.d`). | `1` |
+| `ENABLE_CRONTAB_DEBUG`             | Not set          | When set to `1`, adds a debug cron job that runs every minute and prints environment variables visible to cron. | `1` |
+| `CRONTAB_DIR`                      | `/etc/crontab.d` | Directory where cron job definitions are located. Jobs run as the user specified in `$APP_USER`. | `/path/for/crontab/schedules` |
+| `CRONTAB_HOME`                     | `$APP_PATH`      | Sets the `$HOME` directory used during cron job execution. | `/path/for/crontab` |
+| `CRONTAB_MAILTO`                   | Not set          | Email address to receive cron job output. | `admin@example.com` |
+| `CRONTAB_PATH`                     | `$PATH`          | Defines the executable search path used by cron jobs. | `/path/for/crontab/bin` |
+| `CRONTAB_SETTINGS`                 | Not set          | Allows defining cron jobs directly in `docker-compose.yml`, making it easy to manage scheduled tasks inside the container. | `0 0 * * * echo "Hello new day!"` |
+| `CRONTAB_SHELL`                    | `/bin/sh`        | Specifies the default shell used for cron job execution. | `/bin/bash` |
+| `CRONTAB_TZ`                       | `$TZ`            | Sets the timezone for cron jobs. See the [full list of timezones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). | `Asia/Tokyo` |
+| `SUPERVISOR_PHP_COMMAND`           | Not set          | Overrides the container’s default entrypoint with a custom PHP command to serve the application.  | `php -S localhost:80 index.php` |
 
 
 ## Contributing
