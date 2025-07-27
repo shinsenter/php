@@ -8,40 +8,40 @@ find /var/log/ -type f -exec rm -f {} + || true
 # delete paths
 rm -rf $@ \
     "$(web-chown path 2>/dev/null || true)" \
+    /boot/* \
     /etc/apk/cache/* \
+    /lib/modules/* \
     /root/.cache/* \
     /root/.npm/* \
-    /run/lock/* \
-    /run/shm/* \
     /tmp/* \
+    /usr/include/* \
+    /usr/lib/*/gconv/* \
+    /usr/lib/pkgconfig/* \
+    /usr/lib/python*/site-packages/*/tests/* \
+    /usr/share/aclocal/* \
+    /usr/share/applications/* \
+    /usr/share/cmake/* \
     /usr/share/doc/* \
+    /usr/share/fonts/* \
     /usr/share/info/* \
     /usr/share/locale/* \
     /usr/share/man/* \
-    /usr/share/zoneinfo.old \
+    /usr/share/pixmaps/* \
     /usr/src/* \
     /var/backups/* \
     /var/cache/* \
     /var/lib/apt/lists/* \
     /var/lib/apt/periodic/* \
-    /var/lib/cache/* \
-    /var/lib/gconf/* \
-    /var/lib/man-db/auto-update \
-    /var/lib/misc/* \
-    /var/lib/pam/* \
-    /var/lib/systemd/coredump/* \
-    /var/lib/ucf/cache/* \
+    /var/log/* \
     /var/tmp/* \
     "$HOME/.bash_history" \
     "$HOME/.bash_logout" \
     "$HOME/.cache/"* \
     "$HOME/.cache/pip/"* \
     "$HOME/.composer/"* \
-    "$HOME/.config/"* \
-    "$HOME/.local/share/"* \
     "$HOME/.log/"* \
     "$HOME/.npm/"* \
     "$HOME/.tmp/"* \
     "$HOME/.wget-hsts" \
     "$HOME/.yarn-cache/"* \
-    || true
+    2>/dev/null || true
