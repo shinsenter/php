@@ -9,7 +9,7 @@ case "$1" in
     -w|--warn)      CL='\033[0;33m'; shift ;;
     -i|--info)      CL='\033[0;34m'; shift ;;
     -l|--log)       CL='\033[0;90m'; shift ;;
-    *)              CL='\033[0;90m'; if ! is-debug; then exit 0; fi ;;
+    *)              CL='\033[0;90m'; is-debug || exit 0 ;;
 esac
 
 if [ ! -t 1 ]; then NC=; CL=; fi
