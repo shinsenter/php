@@ -9,7 +9,6 @@ find /var/log/ -type f -exec rm -f {} + || true
 rm -rf $@ \
     "$(web-chown path 2>/dev/null || true)" \
     /etc/apk/cache/* \
-    /lib/apk/db/* \
     /root/.cache/* \
     /root/.npm/* \
     /run/lock/* \
@@ -19,27 +18,19 @@ rm -rf $@ \
     /usr/share/info/* \
     /usr/share/locale/* \
     /usr/share/man/* \
-    /usr/share/man/**/*.gz \
     /usr/share/zoneinfo.old \
     /usr/src/* \
     /var/backups/* \
     /var/cache/* \
-    /var/cache/apk/* \
-    /var/cache/man/* \
     /var/lib/apt/lists/* \
     /var/lib/apt/periodic/* \
     /var/lib/cache/* \
-    /var/lib/dpkg/*-old \
-    /var/lib/dpkg/info/* \
-    /var/lib/dpkg/updates/* \
     /var/lib/gconf/* \
     /var/lib/man-db/auto-update \
     /var/lib/misc/* \
     /var/lib/pam/* \
     /var/lib/systemd/coredump/* \
-    /var/lib/systemd/random-seed \
     /var/lib/ucf/cache/* \
-    /var/run/utmp \
     /var/tmp/* \
     "$HOME/.bash_history" \
     "$HOME/.bash_logout" \
@@ -47,11 +38,9 @@ rm -rf $@ \
     "$HOME/.cache/pip/"* \
     "$HOME/.composer/"* \
     "$HOME/.config/"* \
-    "$HOME/.git/"* \
     "$HOME/.local/share/"* \
     "$HOME/.log/"* \
     "$HOME/.npm/"* \
-    "$HOME/.profile" \
     "$HOME/.tmp/"* \
     "$HOME/.wget-hsts" \
     "$HOME/.yarn-cache/"* \
