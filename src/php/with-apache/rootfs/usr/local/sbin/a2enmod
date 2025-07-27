@@ -7,10 +7,15 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-while [[ $# -gt 0 ]]; do
-    MODULE="$1"
-    PATTERN="/^#LoadModule ${MODULE}_module/s/^#//g"
+while [ "$#" -gt 0 ]; do
+    module="$1"
+    pattern="/^#LoadModule ${module}_module/s/^#//g"
     shift
-    debug-echo -i "Enable Apache module $MODULE."
-    sed -i "$PATTERN" /etc/apache2/*.conf &>/dev/null
+
+    debug-echo -i "Enable apache module: $module"
+
+    # enable the module in all relevant conf files
+    if ! sed -i "$pattern" /etc/apache2/*.conf 2>/dev/null; then
+        debug-echo -e "Failed to enable module: $module"
+    fi
 done

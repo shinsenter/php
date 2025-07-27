@@ -1,87 +1,75 @@
 #!/usr/bin/env sh
 ##
 # Source: https://gist.github.com/onnimonni/e7f2a5199d6dc719ffd32dc4d6ac1902
-# This is custom wrapper for msmtp which acts like good old sendmail
-# - It is used for php and cron
-# - This is easier to configure for external mail server than sendmail
-# - sendmail is just the default binary which other services will use
-# - It needs following env: SMTP_HOST, SMTP_PASSWORD, SMTP_PORT, SMTP_AUTH, SMTP_USER
+# This is a custom wrapper for msmtp to behave like sendmail.
+# It supports PHP and cron, and configures external SMTP via ENV vars:
+# SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_AUTH, SMTP_FROM, SMTP_LOG, SMTP_TLS
 ##
 
-# This script gives itself as a parameter for msmtp
-# to print out the password for --passwordeval option
-# Check if msmtp called this script
+# if msmtp calls this wrapper with --passwordeval, return password
 if [ -n "$SMTP_PASSWORD" ]; then
-    PARENT_COMMANDS="$(ps -o comm= $PPID)"
-    if [[ $PARENT_COMMANDS =~ .*msmtp.* ]]; then
-        echo $SMTP_PASSWORD
-        exit 0
-    fi
+    parent_command="$(ps -o comm= "$PPID" 2>/dev/null)"
+    case "$parent_command" in
+        *msmtp*)
+            printf '%s\n' "$SMTP_PASSWORD"
+            exit 0
+            ;;
+    esac
 fi
 
-# Deduce all used msmtp options from system ENVs
-declare -a options
+# start building msmtp options
+options=""
 
-# Always extract recipients from message headers.
-if ! [[ $* == *-t* ]]; then
-    options+=('-t')
-fi
+# add -t if not already present
+echo "$@" | grep -q -- '-t' || options="$options -t"
 
-# If user didn't provide from address with -f
-# Use the SMTP_FROM variable or after that fallback for the --read-envelope-from
-if ! [[ $* == *-f* ]]; then
+# set envelope from
+echo "$@" | grep -q -- '-f' || {
     if [ -n "$SMTP_FROM" ]; then
-        options+=("--from=$SMTP_FROM")
+        options="$options --from=$SMTP_FROM"
     else
-        options+=('--read-envelope-from')
+        options="$options --read-envelope-from"
     fi
-fi
+}
 
-# Use system tls chain
+# TLS trust file (system default)
 if [ -f /etc/ssl/certs/ca-certificates.crt ]; then
-    options+=("--tls-trust-file=/etc/ssl/certs/ca-certificates.crt")
+    options="$options --tls-trust-file=/etc/ssl/certs/ca-certificates.crt"
 fi
 
+# SMTP host is mandatory
 if [ -n "$SMTP_HOST" ]; then
-    options+=("--host=$SMTP_HOST")
+    options="$options --host=$SMTP_HOST"
 else
-    echo "[mail error] SMTP_HOST is not defined, mail can't be sent"
+    echo "[mail error] SMTP_HOST is not defined, mail can't be sent" >&2
     exit 1
 fi
 
-# Log all mail requests
+# logging
 if [ -n "$SMTP_LOG" ]; then
-    options+=("--logfile=$SMTP_LOG")
+    options="$options --logfile=$SMTP_LOG"
 elif [ -f /var/log/mail.log ]; then
-    options+=("--logfile=/var/log/mail.log")
+    options="$options --logfile=/var/log/mail.log"
 fi
 
-# Default port for smtp is 25 and it will work even without this option
-if [ -n "$SMTP_PORT" ]; then
-    options+=("--port=$SMTP_PORT")
-fi
+# optional settings
+[ -n "$SMTP_PORT" ] && options="$options --port=$SMTP_PORT"
+[ -n "$SMTP_USER" ] && options="$options --user=$SMTP_USER"
 
-# Setup credentials
-if [ -n "$SMTP_USER" ]; then
-    options+=("--user=$SMTP_USER")
-fi
-
-# msmtp doesn't provide password option because usually it's unsafe
-# Use recursive hack for passwordeval
+# passwordeval requires this script to output password when called by msmtp
 if [ -n "$SMTP_PASSWORD" ]; then
-    SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
-    options+=("--passwordeval=$SCRIPT_PATH")
+    script_path="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
+    options="$options --passwordeval=$script_path"
 fi
 
+# auth toggle
 if [ -n "$SMTP_AUTH" ]; then
-    options+=("--auth=$SMTP_AUTH")
+    options="$options --auth=$SMTP_AUTH"
 elif [ -n "$SMTP_USER" ] || [ -n "$SMTP_PASSWORD" ]; then
-    options+=("--auth=on")
+    options="$options --auth=on"
 fi
 
-if [ -n "$SMTP_TLS" ]; then
-    options+=("--tls=$SMTP_TLS")
-fi
+[ -n "$SMTP_TLS" ] && options="$options --tls=$SMTP_TLS"
 
-# Add our options and command line options for msmtp
-msmtp ${options[@]} "$@"
+# finally, invoke msmtp with built options
+exec msmtp $options "$@"
