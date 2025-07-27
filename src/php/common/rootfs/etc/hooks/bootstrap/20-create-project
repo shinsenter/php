@@ -13,86 +13,73 @@ APP_ROOT="$(app-root)"
 ENV_PATH="$APP_PATH/.env"
 CONF_PATH="$APP_PATH/composer.json"
 
-HAS_COMPOSER="$(has-cmd composer && echo 1 || echo 0)"
-RECENTLY_CREATED="0"
+has_composer="$(has-cmd composer && echo 1 || echo 0)"
+recently_created="0"
 
 ################################################################################
 
 install_deps() {
-    if [ -e "$CONF_PATH" ]; then
-        deps=""
+    [ -e "$CONF_PATH" ] || return 0
 
-        # intall git if needed
-        if is-true $COMPOSER_REQUIRES_GIT || grep -qF '"git"' $CONF_PATH; then
-            deps="$deps git"
-        fi
+    deps=""
+    [ "$(is-true "$COMPOSER_REQUIRES_GIT")" = "1" ] || grep -qF '"git"' "$CONF_PATH" && deps="$deps git"
+    [ "$(is-true "$COMPOSER_REQUIRES_NODEJS")" = "1" ] || grep -qF 'node ' "$CONF_PATH" && deps="$deps nodejs"
+    [ "$(is-true "$COMPOSER_REQUIRES_NPM")" = "1" ] || grep -qF 'npm ' "$CONF_PATH" && deps="$deps npm"
 
-        # intall nodejs if needed
-        if is-true $COMPOSER_REQUIRES_NODEJS || grep -qF 'node ' $CONF_PATH; then
-            deps="$deps nodejs"
-        fi
-
-        # intall npm if needed
-        if is-true $COMPOSER_REQUIRES_NPM || grep -qF 'npm ' $CONF_PATH; then
-            deps="$deps npm"
-        fi
-    fi
-
-    if [ ! -z "$deps" ]; then
-        pkg-add $deps
-    fi
+    [ -n "$deps" ] && pkg-add $deps
 
     cd "$APP_PATH"
-
-    if has-cmd git; then
-        git config --global --add safe.directory "$APP_PATH" || true
-    fi
-
-    if has-cmd npm && [ -f "./package.json" ] && [ ! -d "./node_modules" ]; then
-        npm install || true
-    fi
+    has-cmd git && git config --global --add safe.directory "$APP_PATH" || true
+    has-cmd npm && [ -f ./package.json ] && [ ! -d ./node_modules ] && npm install || true
 }
 
 composer_exec() {
-    if [ $HAS_COMPOSER -eq 1 ]; then
-        composer "$@"
-    fi
+    [ "$has_composer" -eq 1 ] && composer "$@"
 }
 
 composer_hook() {
-    if [ "$1" != "" ]; then
-        local hook="$1"
-        if [ -e "$CONF_PATH" ] && grep -qF "\"$hook\"" $CONF_PATH; then
-            composer_exec run "$@"
-            hook "$hook"
-        fi
-    fi
+    [ -n "$1" ] || return
+    local hook="$1"
+    [ -e "$CONF_PATH" ] && grep -qF "\"$hook\"" "$CONF_PATH" && {
+        composer_exec run "$@"
+        hook "$hook"
+    }
 }
 
 allow_plugins() {
-    composer_exec config -n --no-plugins "allow-plugins.*/*" true &>/dev/null || true
+    composer_exec config -n --no-plugins "allow-plugins.*/*" true >/dev/null 2>&1 || true
 }
 
 unset_allow_plugins() {
-    composer_exec config -n --unset "allow-plugins.*/*" &>/dev/null || true
+    composer_exec config -n --unset "allow-plugins.*/*" >/dev/null 2>&1 || true
 }
 
 copy_env() {
-    local target="$APP_PATH/.env"
-    local sources=(
-        '.env.example'
-        '.env.local'
-        .env.*
-    )
+    [ -f "$ENV_PATH" ] && return
+    for source in .env.example .env.local .env.*; do
+        [ -f "$APP_PATH/$source" ] && {
+            echo "Found: $source. Copying to .env..."
+            cp -pf "$APP_PATH/$source" "$ENV_PATH"
+            break
+        }
+    done
+}
 
-    if [ ! -f "$target" ]; then
-        for source in "${sources[@]}"; do
-            if [ -f "$APP_PATH/$source" ]; then
-                echo "Found: $source. Copying to .env..."
-                cp -pf "$APP_PATH/$source" "$target"
-                break
-            fi
-        done
+# download a zip/tar.gz project and extract to dest
+download_and_extract() {
+    local url="$1"
+    local dest="$2"
+
+    if echo "$url" | grep -qE '\.zip$'; then
+        filename="/tmp/${url##*/}"
+        tmp="/tmp/project-unpack-$(php -r 'echo uniqid();')"
+        mkdir -p "$tmp"
+        download "$url" -o "$filename" && unzip "$filename" -d "$tmp"
+        [ "$(ls -1 "$tmp" | wc -l)" = "1" ] && tmp="$tmp/$(ls -1 "$tmp")"
+        cp -rpn "$tmp"/. "$dest"/ &>/dev/null || cp -pn "$tmp"/* "$dest"/ &>/dev/null
+        rm -rf "$tmp" "$filename"
+    else
+        download "$url" | tar -xzv --strip-components=1 -C "$dest"
     fi
 }
 
@@ -103,66 +90,43 @@ cd "$APP_PATH"
 
 ################################################################################
 
+# case 1: project directory is empty
 if [ -z "$(ls -A "$APP_PATH")" ]; then
-    # pull project from source
-    if [ ! -z "$INITIAL_PROJECT" ] && ! is-true $DISABLE_AUTORUN_CREATING_PROJECT; then
+    if [ -n "$INITIAL_PROJECT" ] && ! is-true "$DISABLE_AUTORUN_CREATING_PROJECT"; then
         hook pre-create-project
 
         case "$INITIAL_PROJECT" in
-        http*.tar.gz)
-            debug-echo "Downloading $INITIAL_PROJECT to $APP_PATH."
-            download "$INITIAL_PROJECT" | tar -xzv --strip-components=1 -C "$APP_PATH"
-            ;;
-        http*.zip)
-            debug-echo "Downloading $INITIAL_PROJECT to $APP_PATH."
-            filename="/tmp/${INITIAL_PROJECT##*/}"
-            temp="/tmp/$(php -r 'echo uniqid();')"
-            rm -rf "$temp" && mkdir -p "$temp"
-            download "$INITIAL_PROJECT" -o "$filename" && unzip "$filename" -d "$temp"
-            if [ "$(ls -1 "$temp" | wc -l)" == "1" ]; then
-                temp="$temp/$(ls -1 "$temp")"
-            fi
-            if [ -d "$temp" ]; then
-                cp -rpn "$temp"/. "$APP_PATH"/ &>/dev/null
-            else
-                cp -pn "$temp" "$APP_PATH"/ &>/dev/null
-            fi
-            rm -rf "$temp" "$filename"
-            ;;
-        */*)
-            debug-echo "Installing project $INITIAL_PROJECT to $APP_PATH."
-            composer_exec create-project $COMPOSER_CREATE_OPTIONS \
-                -n --no-secure-http --no-install --no-scripts \
-                -- "$INITIAL_PROJECT" "$APP_PATH"
-            ;;
-        *)
-            hook create-project
-            ;;
+            http*.tar.gz | http*.zip)
+                debug-echo "Downloading $INITIAL_PROJECT to $APP_PATH."
+                download_and_extract "$INITIAL_PROJECT" "$APP_PATH"
+                ;;
+            */*)
+                debug-echo "Installing project $INITIAL_PROJECT to $APP_PATH."
+                composer_exec create-project $COMPOSER_CREATE_OPTIONS \
+                    -n --no-secure-http --no-install --no-scripts \
+                    -- "$INITIAL_PROJECT" "$APP_PATH"
+                ;;
+            *)
+                hook create-project
+                ;;
         esac
 
-        # run post-root-package-install if composer.json has it
         composer_hook post-root-package-install
-
         hook post-create-project
+
         web-chown "Project created in $APP_PATH."
     fi
 
-    # copy from source directory if it is not empty
-    if [ -d /source/ ] && ! is-true $DISABLE_AUTORUN_COPYING_SOURCE; then
+    if [ -d /source/ ] && ! is-true "$DISABLE_AUTORUN_COPYING_SOURCE"; then
         debug-echo "Copying files from /source/ to $APP_PATH."
-
-        cp -rpn /source/. "$APP_PATH"/ &>/dev/null
+        cp -rpn /source/. "$APP_PATH"/
         web-chown "Copied files from /source/ to $APP_PATH"
     fi
 
-    # install required packages, allow Composer plugins
     install_deps
     allow_plugins
-
-    # copy .env.example to .env
     copy_env
 
-    # update packages if the project has composer.json
     if [ -e "$CONF_PATH" ]; then
         debug-echo "Updating required packages in $APP_PATH."
 
@@ -173,39 +137,29 @@ if [ -z "$(ls -A "$APP_PATH")" ]; then
         web-chown "Required packages in $APP_PATH were updated."
     fi
 
-    # run post-create-project-cmd if composer.json has it
     composer_hook post-create-project-cmd
-
-    # unset allow Composer plugins
     unset_allow_plugins
-
-    RECENTLY_CREATED="1"
+    recently_created="1"
 else
     debug-echo "Skip project creation because $APP_PATH is not empty."
 fi
 
 ################################################################################
 
-# run Composer install when vendor directory or ClassLoader.php is missing
-if [ $RECENTLY_CREATED -ne 1 ] && [ $HAS_COMPOSER -eq 1 ] && ! is-true $DISABLE_AUTORUN_COMPOSER_INSTALL; then
+# case 2: project exists but vendor missing
+if [ "$recently_created" -ne 1 ] && [ "$has_composer" -eq 1 ] && ! is-true "$DISABLE_AUTORUN_COMPOSER_INSTALL"; then
     if [ -e "$CONF_PATH" ]; then
         vendor_dir="$APP_PATH/$(composer_exec config vendor-dir 2>/dev/null)"
         if [ ! -d "$vendor_dir" ] || [ ! -e "$vendor_dir/composer/ClassLoader.php" ]; then
-            # install required packages, allow Composer plugins
             install_deps
             allow_plugins
-
-            # copy .env.example to .env
             copy_env
 
-            # install Composer packages
             hook pre-install-packages
             composer_exec install -n $COMPOSER_INSTALL_OPTIONS
             hook post-install-packages
 
-            # unset allow Composer plugins
             unset_allow_plugins
-
             web-chown "Composer packages were installed in $APP_PATH"
         fi
     else
@@ -215,11 +169,13 @@ fi
 
 ################################################################################
 
-if [ $HAS_COMPOSER -eq 1 ] && is-true $COMPOSER_OPTIMIZE_AUTOLOADER; then
+# optional autoload optimization
+if [ "$has_composer" -eq 1 ] && is-true "${COMPOSER_OPTIMIZE_AUTOLOADER:-}"; then
     allow_plugins
+
+    hook pre-autoload-dump
     composer_exec dumpautoload -n -o --no-cache
     hook post-autoload-dump
+
     unset_allow_plugins
 fi
-
-################################################################################

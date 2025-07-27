@@ -7,10 +7,7 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-if [ $# -eq 0 ]; then exit 1; fi
+[ $# -eq 0 ] && exit 1
+echo "$1" | grep -iqE '^(false|no|n|none|null|undefined|off|0|0\.0|["'\'']?0["'\'']?)$' && exit 1
 
-case "$(echo "$1" | tr '[:upper:]' '[:lower:]')" in
-    ''|'false'|'none'|'null'|'off'|'undefined'|0|false|no)
-        exit 1 ;;
-    *)  exit 0 ;;
-esac
+exit 0

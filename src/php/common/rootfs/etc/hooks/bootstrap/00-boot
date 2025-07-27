@@ -7,73 +7,69 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-DEFAULT_USER="www-data"
-DEFAULT_GROUP="www-data"
-DEFAULT_UID="$(id -u $DEFAULT_USER)"
-DEFAULT_GID="$(id -g $DEFAULT_USER)"
+default_user="www-data"
+default_group="www-data"
+default_uid="$(id -u "$default_user")"
+default_gid="$(id -g "$default_user")"
 
-APP_PATH="$(app-path)"
-APP_USER="${APP_USER:=$DEFAULT_USER}"
-APP_GROUP="${APP_GROUP:=$DEFAULT_GROUP}"
-APP_UID="${APP_UID:=$DEFAULT_UID}"
-APP_GID="${APP_GID:=$DEFAULT_GID}"
-USER_HOME="/home/${APP_USER}"
+app_path="$(app-path)"
+app_user="${APP_USER:=$default_user}"
+app_group="${APP_GROUP:=$default_group}"
+app_uid="${APP_UID:=$default_uid}"
+app_gid="${APP_GID:=$default_gid}"
+user_home="/home/$app_user"
 
 rand_id() { echo "$((RANDOM % 500 + 499))"; }
 
 ################################################################################
 
-# call the pre-boot hook
 hook pre-boot
 
 ################################################################################
 
-# create user and group
-debug-echo "Verify group $APP_GROUP"
-if [ "$APP_GROUP" != "$DEFAULT_GROUP" ]; then
-    APP_GID="${APP_GID:=$(rand_id)}"
-    groupadd -o -r -g $APP_GID $APP_GROUP &>/dev/null
-else
-    if [ "$APP_GID" != "$DEFAULT_GID" ]; then
-        groupmod -o -g $APP_GID $APP_GROUP 2>&1
-        web-chown "GID changed to $APP_GROUP ($APP_GID)."
-    fi
+# group setup
+debug-echo "Verify group $app_group"
+if [ "$app_group" != "$default_group" ]; then
+    app_gid="${app_gid:=$(rand_id)}"
+    groupadd -o -r -g "$app_gid" "$app_group" 2>/dev/null || true
+elif [ "$app_gid" != "$default_gid" ]; then
+    groupmod -o -g "$app_gid" "$app_group" 2>/dev/null || true
+    web-chown "GID changed to $app_group ($app_gid)."
 fi
 
-debug-echo "Verify user $APP_USER"
-if [ "$APP_USER" != "$DEFAULT_USER" ]; then
-    APP_UID="${APP_UID:=$(rand_id)}"
-    useradd -o -r -g $APP_GID \
-        -G $APP_GROUP,$DEFAULT_GROUP,mail --no-log-init \
-        -d $USER_HOME -s /sbin/nologin -u $APP_UID $APP_USER &>/dev/null
+# user setup
+debug-echo "Verify user $app_user"
+if [ "$app_user" != "$default_user" ]; then
+    app_uid="${app_uid:=$(rand_id)}"
+    useradd -o -r -g "$app_gid" \
+        -G "$app_group","$default_group",mail --no-log-init \
+        -d "$user_home" -s /sbin/nologin -u "$app_uid" "$app_user" 2>/dev/null || true
 else
-    usermod -g $APP_GID -G $APP_GROUP,$DEFAULT_GROUP,mail \
-        -d $USER_HOME -s /sbin/nologin $APP_USER 2>&1
+    usermod -g "$app_gid" -G "$app_group","$default_group",mail \
+        -d "$user_home" -s /sbin/nologin "$app_user" 2>/dev/null || true
 
-    if [ "$APP_UID" != "$DEFAULT_UID" ]; then
-        usermod -o -u $APP_UID $APP_USER 2>&1
-        web-chown "UID changed to $APP_USER ($APP_UID)."
+    if [ "$app_uid" != "$default_uid" ]; then
+        usermod -o -u "$app_uid" "$app_user" 2>/dev/null || true
+        web-chown "UID changed to $app_user ($app_uid)."
     fi
 fi
 
 ################################################################################
 
-# create application directories
-debug-echo "Create $APP_PATH if not exists."
-web-mkdir  "$APP_PATH" "$(dirname $(log-path))" &>/dev/null
-chmod 4755 "$APP_PATH"
+# ensure application directory exists
+debug-echo "Create $app_path if not exists"
+web-mkdir "$app_path" "$(dirname "$(log-path)")" 2>/dev/null || true
+chmod 4755 "$app_path"
 
 ################################################################################
 
-# log the timestamp of the first run, then call the hook
-# this is convenient for running migration scripts etc.
-FIRST_RUN=/var/local/first-run
-if [ ! -e "$FIRST_RUN" ]; then
-    echo "$(date)" >"$FIRST_RUN"
+# first run hook
+first_run_flag="/var/local/first-run"
+if [ ! -e "$first_run_flag" ]; then
+    date > "$first_run_flag"
     hook first-run
 else
     hook rebooted
 fi
 
-# call the onboot hook
 hook onboot
