@@ -7,58 +7,67 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-UNIT_CONTROL_SOCKET="${UNIT_CONTROL_SOCKET:-/run/control.unit.sock}"
-UNIT_CONTROL_PID="${UNIT_CONTROL_PID:-/run/unit.pid}"
-
-set -e
+unit_socket="${UNIT_CONTROL_SOCKET:-/run/control.unit.sock}"
+unit_pid_file="${UNIT_CONTROL_PID:-/run/unit.pid}"
 
 if is-debug && has-cmd unitd-debug; then
-    unitd="$(command -v unitd-debug)"
+    unitd_bin="$(command -v unitd-debug)"
 else
-    unitd="$(command -v unitd)"
+    unitd_bin="$(command -v unitd)"
 fi
 
-if ! is-true $DISABLE_GREETING && [ -x $unitd ]; then
-    $unitd --version 2>&1 | grep version
+if ! is-true "${DISABLE_GREETING:-}" && [[ -x "$unitd_bin" ]]; then
+    "$unitd_bin" --version 2>&1 | grep version || true
 fi
 
 configtest() {
-    download -X GET --unix-socket "$UNIT_CONTROL_SOCKET" http://localhost/ || true
+    download -X GET --unix-socket "$unit_socket" http://localhost/ || true
 }
 
 initial() {
     web-mkdir /var/lib/unit
     web-chown fix /var/lib/unit /var/log/unit /run/unit
 
-    if [ -e /var/lib/unit/conf.json ]; then
+    if [[ -e /var/lib/unit/conf.json ]]; then
         return 0
     fi
 
-    # start daemon
-    $unitd --control unix:$UNIT_CONTROL_SOCKET
+    "$unitd_bin" --control "unix:$unit_socket"
 
-    # wait for socket
-    while [ ! -e "$UNIT_CONTROL_SOCKET" ]; do sleep 0.5; done
+    local attempts=0
+    until [[ -e "$unit_socket" || $attempts -ge 20 ]]; do
+        sleep 0.5
+        ((attempts++))
+    done
     configtest &>/dev/null
 
-    # SSL bundle
-    CERT_PATH="/etc/ssl/site/server_${PHP_POOL_NAME:-www}.pem"
-    cat /etc/ssl/site/*.crt /etc/ssl/site/*.key >$CERT_PATH
-    unit-conf $CERT_PATH "certificates/default"
+    local pool="${PHP_POOL_NAME:-www}"
+    local cert_path="/etc/ssl/site/server_${pool}.pem"
+    if ls /etc/ssl/site/*.crt &>/dev/null && ls /etc/ssl/site/*.key &>/dev/null; then
+        cat /etc/ssl/site/*.crt /etc/ssl/site/*.key > "$cert_path"
+        unit-conf "$cert_path" "certificates/default"
+    fi
 
-    # enabled sites
-    for json in $(find /etc/unit/sites-enabled -type f -name "*.json" | sort -dbfi); do
-        unit-conf $json
+    find /etc/unit/sites-enabled -type f -name "*.json" | sort -dbfi | while read -r json; do
+        unit-conf "$json"
     done
 
-    # test config again
     if is-debug; then
         configtest >&2
     fi
 
-    # stop Unit daemon after initial configuration
-    kill -TERM $(cat $UNIT_CONTROL_PID) &>/dev/null || rm -f $UNIT_CONTROL_PID
-    while [ -e "$UNIT_CONTROL_SOCKET" ]; do sleep 0.5; done
+    if [[ -f "$unit_pid_file" ]]; then
+        local unit_pid
+        unit_pid="$(cat "$unit_pid_file")"
+        kill -TERM "$unit_pid" &>/dev/null || true
+        rm -f "$unit_pid_file"
+    fi
+
+    attempts=0
+    while [[ -e "$unit_socket" && $attempts -lt 20 ]]; do
+        sleep 0.5
+        ((attempts++))
+    done
 }
 
 if is-debug; then

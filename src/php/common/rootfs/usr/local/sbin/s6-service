@@ -27,28 +27,31 @@ create() {
     local path="$1"
     local dir="$(dirname $path)"
 
+    shift
     mkdir -p $dir && chmod 0755 $dir
     touch $path   && chmod ugo+x $path
 
-    shift
-    if [ -z "$@" ];  then set -- 'exec s6-svc -Od .'; fi
-    if [ -f $path ]; then echo "$@" >| $path; fi
+    if [ -f $path ] && [ ! -z "$@" ]; then echo "$@" >| $path; fi
 }
 
 ################################################################################
 
-# get service type and name
-name="$1"; shift
-type="$1"; shift
+# default name
+if [ ! -z "$1" ]; then
+    name="$1"; shift
+else
+    name="00-default"
+fi
 
 # default type
-if [ -z "$type" ]; then type="oneshot"; fi
-
-# default name
-if [ -z "$name" ]; then name="00-default"; fi
+if [ ! -z "$1" ]; then
+    type="$1"; shift
+else
+    type="oneshot"
+fi
 
 # get script contents from existing file
-if [ -f "$@" ]; then set -- "$(cat $@)"; fi
+if [ -f "$1" ]; then set -- "$(cat $1)"; fi
 
 ################################################################################
 
@@ -56,7 +59,7 @@ if [ -f "$@" ]; then set -- "$(cat $@)"; fi
 if [ "$type" = "unset" ] || [ "$type" = "delete" ]; then
     if [ -z "$1" ]; then
         rm -rf "${s6}/${name}" "${s6}/user/contents.d/${name}" 2>/dev/null || true
-    elif [ -f "${s6}/${name}/dependencies.d/$1" ]; then
+    else
         rm -f "${s6}/${name}/dependencies.d/$1" 2>/dev/null || true
     fi
     exit 0

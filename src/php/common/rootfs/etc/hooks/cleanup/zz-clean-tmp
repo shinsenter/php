@@ -1,6 +1,47 @@
 #!/usr/bin/env sh
-find /etc/ -name '*.dpkg-*' -or -name '*-' -exec rm -f {} \; || true
-find /var/log/ -type f -exec rm -f {} \; || true
-rm -rf $@ $(web-chown path || true) \
-    /tmp/* /usr/share/doc/* /var/cache/* /var/lib/apt/lists/* \
-    ~/.cache/ ~/.composer/ ~/.git/ ~/.log/ ~/.npm/ ~/.tmp/ || true
+# Clean dpkg leftovers (Debian/Ubuntu specific)
+find /etc/ -type f \( -name '*.dpkg-*' -o -name '*~' \) -exec rm -f {} + 2>/dev/null || true
+
+# Clean log files but preserve directory structure
+find /var/log/ -type f -name "*.log*" -exec rm -f {} + 2>/dev/null || true
+find /var/log/ -type f -name "*.gz" -exec rm -f {} + 2>/dev/null || true
+find /var/log/ -type f -name "*.old" -exec rm -f {} + 2>/dev/null || true
+
+# Delete safe paths for container optimization
+rm -rf $@ \
+    "$(web-chown path 2>/dev/null || true)" \
+    /etc/apk/cache/* \
+    /root/.cache/* \
+    /root/.npm/* \
+    /tmp/* \
+    /usr/share/aclocal/* \
+    /usr/share/applications/* \
+    /usr/share/cmake/* \
+    /usr/share/doc/* \
+    /usr/share/info/* \
+    /usr/share/man/* \
+    /usr/share/pixmaps/* \
+    /usr/src/* \
+    /var/backups/* \
+    /var/cache/* \
+    /var/lib/apt/lists/* \
+    /var/lib/apt/periodic/* \
+    /var/tmp/* \
+    "$HOME/.bash_history" \
+    "$HOME/.bash_logout" \
+    "$HOME/.cache/"* \
+    "$HOME/.cache/pip/"* \
+    "$HOME/.composer/"* \
+    "$HOME/.log/"* \
+    "$HOME/.npm/"* \
+    "$HOME/.tmp/"* \
+    "$HOME/.wget-hsts" \
+    "$HOME/.yarn-cache/"* \
+    2>/dev/null || true
+
+# Recreate necessary directories
+mkdir -p /tmp /var/tmp /var/cache /var/log
+chmod 1777 /tmp /var/tmp
+
+# Final cleanup - remove empty directories
+find /usr/share /var/lib /var/cache -type d -empty -delete 2>/dev/null || true
