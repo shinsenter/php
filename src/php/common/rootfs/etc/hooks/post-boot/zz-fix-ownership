@@ -9,6 +9,7 @@
 
 APP_PATH="$(app-path)"
 APP_ROOT="$(app-root)"
+INDEX_PATH="$(app-index)"
 
 ################################################################################
 
@@ -25,17 +26,16 @@ if ! is-true $DISABLE_AUTORUN_FIX_OWNER_GROUP; then
     if is-true $FIX_APP_PATH_PERMISSION || is-true $FIX_WEBHOME_PERMISSION; then
         debug-echo "Fix ownership for the application path."
         web-chown fix
-    elif [ -f "$APP_ROOT/index.php" ]; then
-        owner="$(ls -ld "$APP_ROOT/index.php" | awk '{print $3 ":" $4}')"
+    elif [ -f "$INDEX_PATH" ]; then
+        owner="$(ls -ld "$INDEX_PATH" | awk '{print $3 ":" $4}')"
+        debug-echo "Verify ownership for the application path."
         debug-echo "Detected owner: $owner"
         debug-echo "Expected owner: $APP_USER:$APP_GROUP"
 
         if [ "$owner" != "$APP_USER:$APP_GROUP" ]; then
-            debug-echo "Correct ownership for the application path."
             web-chown fix
         fi
     fi
     rm -rf "$(web-chown path)"
 fi
 
-################################################################################

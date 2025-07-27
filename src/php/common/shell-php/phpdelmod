@@ -16,12 +16,11 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-if [ -d "${PHP_INI_DIR}/conf.d" ]; then
-    while [[ $# -gt 0 ]]; do
-        MODULE="$1"
-        PATTERN="/^extension *= *$MODULE/s/^/;/g"
-        shift
-        debug-echo -e "Disable PHP module $MODULE."
-        sed -i "$PATTERN" "${PHP_INI_DIR}/conf.d"/*.ini &>/dev/null
+# ensure PHP_INI_DIR is defined and valid
+if [ -n "$PHP_INI_DIR" ] && [ -d "$PHP_INI_DIR/conf.d" ]; then
+    for module in "$@"; do
+        debug-echo -e "Disable PHP module $module."
+        # modify matching extension lines by commenting them
+        sed -i "/^extension *= *$module/s/^/;/g" "$PHP_INI_DIR"/conf.d/*.ini 2>/dev/null
     done
 fi
