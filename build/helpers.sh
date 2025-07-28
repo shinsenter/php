@@ -80,13 +80,27 @@ get_dockerhub_json () {
     TOKEN="$DOCKERHUB_TOKEN" fetch_with_cache "https://registry.hub.docker.com/v2/repositories/$1/tags?&page_size=10&status=active&sort=last_updated&$2"
 }
 
+# Function to parse JSON and return
+parse_json() {
+    local json="$1"
+    local limit="${2:-1}"
+    local jq_query="${3:-.}"
+    local result="$(echo "$json" | jq -r "$jq_query" | head -n $limit)"
+
+    if [ -z "$result" ]; then
+        return 1
+    fi
+
+    echo "$result"
+}
+
 # For GitHub
-get_github_latest_tag () { get_github_json "$1" | jq -r '.[] | if type == "object" then (.name // empty) else empty end' | head -n ${2:-1}; }
-get_github_latest_sha () { get_github_json "$1" | jq -r '.[] | if type == "object" then (.commit.sha // .node_id // empty) else empty end' | head -n ${2:-1}; }
+get_github_latest_tag () { parse_json "$(get_github_json "$1")" "${2:-1}" '.[] | if type == "object" then (.name // empty) else empty end'; }
+get_github_latest_sha () { parse_json "$(get_github_json "$1")" "${2:-1}" '.[] | if type == "object" then (.commit.sha // .node_id // empty) else empty end'; }
 
 # For Docker Hub
-get_dockerhub_latest_tag () { get_dockerhub_json "$1" "name=${3:-latest}" | jq -r '.results[] | if type == "object" then (.name // empty) else empty end' | head -n ${2:-1}; }
-get_dockerhub_latest_sha () { get_dockerhub_json "$1" "name=${3:-latest}" | jq -r '.results[] | if type == "object" then (.digest // .tag_last_pushed // .id // empty) else . end' | head -n ${2:-1}; }
+get_dockerhub_latest_tag () { parse_json "$(get_dockerhub_json "$1" "name=${3:-latest}")" "${2:-1}" '.results[] | if type == "object" then (.name // empty) else empty end'; }
+get_dockerhub_latest_sha () { parse_json "$(get_dockerhub_json "$1" "name=${3:-latest}")" "${2:-1}" '.results[] | if type == "object" then (.digest // .tag_last_pushed // .id // empty) else . end'; }
 
 # Function to set environment variables
 github_env() {
