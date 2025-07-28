@@ -43,7 +43,7 @@ echo 'Install PHP extensions'
 [ -z "$DEBUG" ] || set -ex && set -e
 
 # install PHP modules
-phpaddmod soap sodium sockets xsl
+phpaddmod ftp soap sodium sockets xsl
 
 # override nginx config
 rm -f /etc/nginx/custom.d/00-ext-*.conf

@@ -21,7 +21,11 @@ fix)
     for target; do
         if [ ! -z "$target" ] && [ -e "$target" ]; then
             debug-echo "Fix ownership for $target."
-            chown -R "$APP_USER:$APP_GROUP" "$target" 2>&1 || true
+            {
+                find "$target" -type f -exec chown "$APP_USER:$APP_GROUP" {} + &
+                find "$target" -type d -exec chown "$APP_USER:$APP_GROUP" {} + &
+                wait
+            } 2>/dev/null || chown -R "$APP_USER:$APP_GROUP" "$target" 2>/dev/null || true
         fi
     done
     ;;

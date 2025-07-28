@@ -7,23 +7,32 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-conf_path="${ENV:=/etc/.docker-env}"
+conf_path="${ENV:-/etc/.docker-env}"
 
-# correct path for the container
-if [ ! -f $conf_path ]; then
+if [[ ! -f "$conf_path" ]]; then
     mkdir -p "$(dirname $conf_path)"
-    echo '#!/bin/sh
+
+    cat <<'EOSH' > "$conf_path"
+#!/bin/sh
 APP_PATH="$(app-path)"
-APP_ROOT="$(app-root)"
-if [ -d "$APP_PATH" ]; then cd "$APP_PATH"; fi
+[ -d "$APP_PATH" ] && cd "$APP_PATH"
 
-NEW_PATH="$(echo $PATH | sed "s/\/usr\/local\/aliases://")"
-if [ ! -z "$COMPOSER_HOME" ] && ! echo $NEW_PATH | grep -qF "$COMPOSER_HOME/vendor/bin"; then NEW_PATH="$COMPOSER_HOME/vendor/bin:$NEW_PATH"; fi
-if ! echo $NEW_PATH | grep -qF "$APP_PATH/vendor/bin"; then NEW_PATH="$APP_PATH/vendor/bin:$NEW_PATH"; fi
-export PATH="$NEW_PATH"
+PATH="${PATH#/usr/local/aliases:}"
 
-' >$conf_path
-    chmod +x $conf_path
+[ -n "$COMPOSER_HOME" ] && case ":$PATH:" in
+    *":$COMPOSER_HOME/vendor/bin:"*) ;;
+    *) PATH="$COMPOSER_HOME/vendor/bin:$PATH" ;;
+esac
+
+case ":$PATH:" in
+    *":$APP_PATH/vendor/bin:"*) ;;
+    *) PATH="$APP_PATH/vendor/bin:$PATH" ;;
+esac
+
+export PATH
+EOSH
+
+    chmod +x "$conf_path"
 fi
 
 # print the environment variables when the command argument is empty
@@ -33,7 +42,7 @@ if [ $# -eq 0 ]; then with-env; exit 0; fi
 if [ "${1:0:1}" = "/" ] && [ -f "$1" ]; then
     # check if the file is already sourced
     if ! grep -qF "source $1" $conf_path; then
-        echo "\nsource $1\n" >>$conf_path
+        echo "\nsource $1\n" >>"$conf_path"
     fi
 
     # use the first argument as the config file
@@ -46,18 +55,33 @@ line="$@"
 
 # add a comment if the command argument starts with #
 if [ "${line:0:1}" = "#" ]; then
-    echo -e "\n${line}\n# ------------------------------------------------------------ #" >>$conf_path
+    hl='# --------------------------------------------'
+    echo -e "\n${hl}\n${line}\n${hl}" >>"$conf_path"
     exit
 fi
 
 # add a bash alias
 if [ "${line:0:6}" = "alias " ]; then
-    echo "$line" >>$conf_path
+    echo "$line" >>"$conf_path"
     exit
 fi
 
 # add an environment variable
 name="$1"; shift
 set -- "$(echo "$@" | sed -e 's/\([\\"]\)/\\\1/g')"
-sed -i "/$name=/d" $conf_path &>/dev/null
-echo "if [ -z \${${name}+x} ]; then export $name=\"$@\"; fi" >>$conf_path
+
+# minlen=48
+# check="if [ -z \${${name}+x} ];"
+# newline="$(printf "%s%*s%s\n" "$check" $(( $minlen - ${#check} > 0 ? $minlen - ${#check} : 1 )) "" "then export $name=\"$@\"; fi")"
+# if grep -qF "$name=" "$conf_path"; then
+#     sed -i "/$name=/c\\$newline" "$conf_path"
+# else
+#     echo "$newline" >>"$conf_path"
+# fi
+
+newline="export $name=\"\${$name:=\"$@\"}\""
+if grep -qF "export $name=" "$conf_path"; then
+    sed -i "/export $name=/c\\$newline" "$conf_path"
+else
+    echo "$newline" >>"$conf_path"
+fi

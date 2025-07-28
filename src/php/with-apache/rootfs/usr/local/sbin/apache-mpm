@@ -8,26 +8,49 @@
 ################################################################################
 
 config="${1:-/etc/apache2/conf-enabled/mpm_tuning.conf}"
+profile="${2:-balanced}"
 
-# Gather system information
 cpu_cores=$(grep -c ^processor /proc/cpuinfo)
 ram_mb=$(free -m | awk '/^Mem:/{print $2}')
 
-# Determine appropriate MPM module
-if [ "$(apache2 -M | grep mpm_prefork)"]; then
+if ! command -v apache2 >/dev/null 2>&1; then
+    echo "Error: apache2 command not found" >&2
+    exit 1
+fi
+
+if apache2 -M 2>/dev/null | grep -q mpm_prefork; then
     mpm_module='prefork'
 else
     mpm_module='event'
 fi
 
-# Set MPM-specific directives based on system specs and best practices
-if [[ $mpm_module == "prefork" ]]; then
-    start_servers=$((cpu_cores * 5))
-    min_spare_servers=$((cpu_cores * 2))
-    max_spare_servers=$((cpu_cores * 10))
-    max_clients=$((ram_mb / 10))
+# === hệ số điều chỉnh theo profile ===
+case "$profile" in
+  low)
+    factor_start=1
+    factor_spare=1
+    factor_clients=0.5
+    ;;
+  high)
+    factor_start=5
+    factor_spare=4
+    factor_clients=2
+    ;;
+  balanced|*)
+    factor_start=2
+    factor_spare=2
+    factor_clients=1
+    ;;
+esac
+
+if [ "$mpm_module" = "prefork" ]; then
+    start_servers=$((cpu_cores * factor_start))
+    min_spare_servers=$((cpu_cores * factor_spare))
+    max_spare_servers=$((cpu_cores * factor_spare * 2))
+    max_clients=$(awk "BEGIN {printf \"%d\", $ram_mb / 10 * $factor_clients}")
     max_requests_per_child=1000
-    cat <<EOF >$config
+
+    cat <<EOF > "$config"
 <IfModule mpm_${mpm_module}_module>
     ServerLimit 20000
     StartServers $start_servers
@@ -37,13 +60,15 @@ if [[ $mpm_module == "prefork" ]]; then
     MaxConnectionsPerChild $max_requests_per_child
 </IfModule>
 EOF
+
 else
-    start_servers=$((cpu_cores * 2))
-    min_spare_threads=$((cpu_cores * 10))
-    max_spare_threads=$((cpu_cores * 20))
+    start_servers=$((cpu_cores * factor_start))
+    min_spare_threads=$((cpu_cores * factor_spare * 5))
+    max_spare_threads=$((cpu_cores * factor_spare * 10))
     threads_per_child=25
-    max_clients=$((ram_mb / 10 / threads_per_child * threads_per_child))
-    cat <<EOF >$config
+    max_clients=$(awk "BEGIN {printf \"%d\", $ram_mb / 10 * $factor_clients / $threads_per_child * $threads_per_child}")
+
+    cat <<EOF > "$config"
 <IfModule mpm_${mpm_module}_module>
     ServerLimit 20000
     StartServers $start_servers

@@ -21,8 +21,10 @@ set -e
 
 mkdir -p "$(dirname $CRONTAB)" $CRONTAB_DIR
 
-if is-debug; then
-    echo '*  *  *  *  *  echo "DEBUG: Crontab is running as $(whoami)." | tee /tmp/cron-debug.txt' >$CRONTAB_DIR/debug
+if is-true $ENABLE_CRONTAB_DEBUG; then
+    echo '*  *  *  *  *  echo -e "$(date) DEBUG: Crontab is running as $(whoami).\\n\\n$(env -0 | sort -dbfiz | tr '\''\\0'\'' '\''\\n'\'' | grep -vF '\''_='\'')" | tee /tmp/cron-debug.txt' >$CRONTAB_DIR/debug
+elif is-debug; then
+    echo '*  *  *  *  *  echo -e "$(date) DEBUG: Crontab is running as $(whoami).\\nTotal passed environment variables: $(env | wc -l)" | tee /tmp/cron-debug.txt' >$CRONTAB_DIR/debug
 fi
 
 cat <<CRONTAB >$CRONTAB
@@ -40,14 +42,21 @@ $(if [ ! -z "$CRONTAB_MAILTO" ]; then echo "MAILTO=${CRONTAB_MAILTO}"; fi)
 # |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
 # |  |  |  |  |
 # *  *  *  *  *  command to be executed
-${CRONTAB_SETTINGS}
-$(if [ -d "$CRONTAB_DIR" ]; then
-    for script in $(find "$CRONTAB_DIR" -type f | sort -dbfi); do
-        echo -e "\n# $script"; cat "$script"
-    done
-fi)
-
 CRONTAB
+
+if [ ! -z "$CRONTAB_SETTINGS" ]; then
+    echo -e "\n# from \$CRONTAB_SETTINGS" >>$CRONTAB
+    echo "$CRONTAB_SETTINGS" >>$CRONTAB
+fi
+
+if [ -d "$CRONTAB_DIR" ]; then
+    for script in $(find "$CRONTAB_DIR" -type f | sort -dbfi); do
+        echo -e "\n# $(realpath $script)" >>$CRONTAB
+        cat "$script" >>$CRONTAB
+    done
+fi
+
+echo '' >>$CRONTAB
 
 chmod 0600 $CRONTAB
 debug-echo -i "\nCron will run as $APP_USER.\n\n### Config:\n$(crontab -u $APP_USER -l 2>/dev/null)\n"

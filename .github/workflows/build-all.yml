@@ -69,38 +69,35 @@ jobs:
           get_github_latest_tag "roadrunner-server/roadrunner"
           get_dockerhub_latest_sha "library/debian"
           get_dockerhub_latest_sha "library/alpine"
+          get_dockerhub_latest_sha "library/ubuntu"
 
           distros=(debian alpine)
           variants=(cli fpm zts)
+          base_images=(phpfpm-nginx phpfpm-apache laravel)
           php_versions=(8.5-rc 8.4 8.3 8.2 8.1)
-          # base_images=(phpfpm-nginx phpfpm-apache unit-php frankenphp roadrunner)
 
           if [ ! -z "$build_all" ]; then
             php_versions+=(8.0 7.4 7.3 7.2 7.1 7.0 5.6)
           fi
 
+          get_sha() {
+            get_dockerhub_latest_sha "$@" || true
+          }
+
           for distro in "${distros[@]}"; do
-            get_dockerhub_latest_sha "library/$distro"
+            get_sha "library/$distro"
+            if [ "$distro" == "debian" ]; then
+              distro=""
+            fi
             for version in "${php_versions[@]}"; do
               for variant in "${variants[@]}"; do
-                if [ "$distro" == "debian" ]; then
-                  get_dockerhub_latest_sha "library/php" 1 "${version}-${variant}"
-                  if [ "$variant" == "zts" ]; then
-                    get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php${version}"
-                  fi
-                else
-                  get_dockerhub_latest_sha "library/php" 1 "${version}-${variant}-${distro}"
-                  if [ "$variant" == "zts" ]; then
-                    get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php${version}-${distro}"
-                  fi
+                get_sha "library/php" 1 "${version}-${variant}-${distro}"
+                if [ "$variant" == "zts" ] && verlte "8.2" "$version"; then
+                  get_sha "dunglas/frankenphp" 1 "1-php${version}-${distro}"
                 fi
               done
               # for base in "${base_images[@]}"; do
-              #   if [ "$distro" == "debian" ]; then
-              #     get_dockerhub_latest_sha "shinsenter/$base" 1 "${tag_prefix}php${version}"
-              #   else
-              #     get_dockerhub_latest_sha "shinsenter/$base" 1 "${tag_prefix}php${version}-${distro}"
-              #   fi
+              #   get_sha "shinsenter/$base" 1 "${tag_prefix}php${version//-rc/}-${distro}"
               # done
             done
           done
@@ -231,11 +228,65 @@ jobs:
 
   ##########################################################
 
+  server-cache:
+    runs-on: ubuntu-22.04
+    needs: [prepare, cli-servers, fpm-servers]
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: helper_cache
+          path: /tmp/helper_cache/
+
+      - uses: actions/checkout@v4
+
+      - name: Prepare cache
+        run: |
+          set -e
+          . ./build/helpers.sh
+          build_all="${{ needs.prepare.outputs.build_all }}"
+          echo "build_all = '$build_all' ($(if [ "$build_all" = "true" ]; then echo 'yes, includes outdated versions'; else echo 'no, only maintained versions'; fi))"
+
+          distros=(debian alpine)
+          base_images=(phpfpm-nginx phpfpm-apache roadrunner laravel)
+          php_versions=(8.5-rc 8.4 8.3 8.2 8.1)
+
+          if [ "$build_all" = "true" ]; then
+            php_versions+=(8.0 7.4 7.3 7.2 7.1 7.0 5.6)
+          fi
+
+          get_sha() {
+            get_dockerhub_latest_sha "$@" || true
+          }
+
+          for distro in "${distros[@]}"; do
+            get_sha "library/$distro"
+            if [ "$distro" == "debian" ]; then
+              distro=""
+            fi
+            for version in "${php_versions[@]}"; do
+              if verlt "7.1" "$version" || [ "$distro" = "" ]; then
+                for base in "${base_images[@]}"; do
+                  get_sha "shinsenter/$base" 1 "${tag_prefix}php${version//-rc/}-${distro}"
+                done
+              fi
+            done
+          done
+
+          ls -lh /tmp/helper_cache/ | awk '{ if(NR>1) printf "%10s  %s\n", $5, $9 }'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: helper_cache
+          overwrite: true
+          path: /tmp/helper_cache/
+
+  ##########################################################
+
   popular-apps:
     name: ${{ matrix.app }}
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
-    needs: [prepare, fpm-servers]
+    needs: [prepare, server-cache]
     strategy:
       fail-fast: false
       matrix:
@@ -270,6 +321,21 @@ jobs:
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
       build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
 
+  other-apps:
+    name: ${{ matrix.app }}
+    uses: ./.github/workflows/template-php.yml
+    secrets: inherit
+    needs: [prepare, server-cache]
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - app-spiral
+    with:
+      app_name: ${{ matrix.app }}
+      tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
+      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
+
   laravel-based-apps:
     name: ${{ matrix.app }}
     uses: ./.github/workflows/template-php.yml
@@ -283,22 +349,6 @@ jobs:
           - app-hypervel
           - app-invoiceshelf
           - app-statamic
-    with:
-      app_name: ${{ matrix.app }}
-      server: ${{ matrix.server }}
-      tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
-      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
-
-  other-apps:
-    name: ${{ matrix.app }}
-    uses: ./.github/workflows/template-php.yml
-    secrets: inherit
-    needs: [prepare, cli-servers]
-    strategy:
-      fail-fast: false
-      matrix:
-        app:
-          - app-spiral
     with:
       app_name: ${{ matrix.app }}
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}

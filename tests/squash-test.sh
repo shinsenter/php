@@ -48,6 +48,7 @@ for version; do
         --build-arg S6_VERSION=$s6_version \
         --build-arg PHP_VERSION=$version \
         --build-arg PHP_VARIANT=$variant \
+        --build-arg BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-php} \
         --build-arg BUILD_TAG_PREFIX=$BUILD_TAG_PREFIX \
         2>&1 | tee "$BASE_DIR/tests/logs/squash-$version-${DOCKERTAG:-$variant}.txt" &
 done
@@ -55,18 +56,19 @@ done
 # build examples
 # PLATFORM=arm64 DOCKERTAG=s6 DOCKERFILE=php/base-s6.dockerfile ./tests/squash-test.sh latest
 # PLATFORM=arm64 DOCKERTAG=ubuntu-s6 DOCKERFILE=php/base-os.dockerfile ./tests/squash-test.sh latest
-# PLATFORM=arm64 DOCKERTAG=cli DOCKERFILE=php/base-php.dockerfile PHP_VARIANT=cli ./tests/squash-test.sh 5.6 8.3
-# PLATFORM=arm64 DOCKERTAG=fpm DOCKERFILE=php/base-php.dockerfile PHP_VARIANT=fpm ./tests/squash-test.sh 5.6 8.3
-# PLATFORM=arm64 DOCKERTAG=nginx DOCKERFILE=php/with-nginx.dockerfile PHP_VARIANT=fpm-alpine ./tests/squash-test.sh 5.6 8.3
-# PLATFORM=arm64 DOCKERTAG=apache DOCKERFILE=php/with-apache.dockerfile PHP_VARIANT=fpm ./tests/squash-test.sh 5.6 8.3
-# PLATFORM=arm64 DOCKERTAG=f8p DOCKERFILE=php/with-f8p.dockerfile PHP_VARIANT=zts ./tests/squash-test.sh 8.3
-# PLATFORM=arm64 DOCKERTAG=unit DOCKERFILE=php/with-unit.dockerfile PHP_VARIANT=zts ./tests/squash-test.sh 8.2
-# PLATFORM=arm64 DOCKERTAG=roadrunner DOCKERFILE=php/with-roadrunner.dockerfile PHP_VARIANT=zts-alpine ./tests/squash-test.sh 8.0 8.3
+# PLATFORM=arm64 DOCKERTAG=cli DOCKERFILE=php/base-php.dockerfile PHP_VARIANT=cli ./tests/squash-test.sh 5.6 7.1 8.4
+# PLATFORM=arm64 DOCKERTAG=fpm DOCKERFILE=php/base-php.dockerfile PHP_VARIANT=fpm ./tests/squash-test.sh 5.6 7.1 8.4
+# PLATFORM=arm64 DOCKERTAG=nginx DOCKERFILE=php/with-nginx.dockerfile PHP_VARIANT=fpm-alpine BUILD_FROM_IMAGE="shinsenter/php" ./tests/squash-test.sh 7.1 8.4
+# PLATFORM=arm64 DOCKERTAG=apache DOCKERFILE=php/with-apache.dockerfile PHP_VARIANT=fpm BUILD_FROM_IMAGE="shinsenter/php" ./tests/squash-test.sh 5.6 7.1 8.4
+# PLATFORM=arm64 DOCKERTAG=f8p DOCKERFILE=php/with-f8p.dockerfile PHP_VARIANT=zts BUILD_FROM_IMAGE="shinsenter/php" ./tests/squash-test.sh 8.3
+# PLATFORM=arm64 DOCKERTAG=unit DOCKERFILE=php/with-unit.dockerfile PHP_VARIANT=zts BUILD_FROM_IMAGE="shinsenter/php" ./tests/squash-test.sh 8.2
+# PLATFORM=arm64 DOCKERTAG=roadrunner DOCKERFILE=php/with-roadrunner.dockerfile PHP_VARIANT=zts-alpine BUILD_FROM_IMAGE="shinsenter/php" ./tests/squash-test.sh 8.0 8.3
 # PLATFORM=arm64 DOCKERTAG=bedrock DOCKERFILE=webapps/bedrock/bedrock.dockerfile PHP_VARIANT= ./tests/squash-test.sh 8.3
 # PLATFORM=arm64 DOCKERTAG=coolify DOCKERFILE=webapps/coolify/coolify.dockerfile PHP_VARIANT= ./tests/squash-test.sh 8.4
+# PLATFORM=arm64 DOCKERTAG=hypervel DOCKERFILE=webapps/hypervel/hypervel.dockerfile PHP_VARIANT= BUILD_FROM_IMAGE="shinsenter/laravel" ./tests/squash-test.sh clear 8.3 8.4
 
 # run examples
-# PLATFORM=arm64 DOCKERTAG=apache DOCKERFILE=php/with-apache.dockerfile PHP_VARIANT=fpm ./tests/squash-test.sh 5.6 8.3
+# PLATFORM=arm64 DOCKERTAG=apache DOCKERFILE=php/with-apache.dockerfile PHP_VARIANT=fpm ./tests/squash-test.sh 5.6 7.1 8.4
 # docker run --rm -p 443:443 -p 80:80 -e DEBUG=1 -e ENABLE_CRONTAB=1 -e S6_VERBOSITY=3 docker-php-5.6-apache:squashed
 # docker run --rm -p 443:443 -p 80:80 -e DEBUG=1 -e ENABLE_CRONTAB=1 -e S6_VERBOSITY=3 docker-php-8.3-apache:squashed
 # docker run --rm -p 443:443 -p 80:80 -e APP_USER=dev -e APP_GROUP=developers -e APP_UID=555 -e APP_GID=666 -e DEBUG=1 -e ENABLE_CRONTAB=1 -e S6_VERBOSITY=3 shinsenter/php-archives:20240731-8.3-fpm-apache

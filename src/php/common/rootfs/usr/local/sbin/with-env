@@ -12,7 +12,7 @@ CACHED_ENV=/etc/default/locale
 
 print_env() {
     # print the environment variables when no command is given
-    env -0 | sort -dbfiz | grep -vF '_=' | tr '\0' '\n'
+    env -0 | sort -dbfiz | tr '\0' '\n' | grep -vF '_='
 }
 
 # load extra env variables

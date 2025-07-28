@@ -109,6 +109,28 @@ services:
 ```
 
 
+## Environment variables
+
+You can optionally set the following environment variables in the container to enable certain services to run alongside the web server.
+
+> 📝 Note: you'll need to install the required packages and create the necessary configs yourself for features like Pulse or Coolify Horizon.
+
+| Environment Variable             | Description             |
+|----------------------------------|-------------------------|
+| `LARAVEL_AUTO_MIGRATION`         | Whether to automatically run database migrations when the app boots. Set to `0` to disable running migration. **Default is `1`**. |
+| `LARAVEL_AUTO_MIGRATION_OPTIONS` | Additional options/flags to pass to the `php artisan migrate` command. |
+| `LARAVEL_ENABLE_QUEUE_WORKER`    | Enables supervisor service for the Laravel queue worker. Set to `1` to start processing jobs. **Default is `0`**. |
+| `LARAVEL_QUEUE_WORKER_OPTIONS`   | Defines custom options for the Laravel queue worker (e.g., connection, delay). |
+| `LARAVEL_ENABLE_SCHEDULER`       | Enables supervisor service for the Laravel scheduler. Set to `0` to disable running scheduled tasks. **Default is `1`**. |
+| `LARAVEL_SCHEDULER_OPTIONS`      | Specifies additional options for the scheduler execution. |
+| `LARAVEL_ENABLE_HORIZON`         | Enables supervisor service for Laravel Horizon, a dashboard for managing queues. **Default is `0`**. |
+| `LARAVEL_HORIZON_OPTIONS`        | Options for customizing Horizon behavior (e.g., environment, queue names). |
+| `LARAVEL_ENABLE_PULSE`           | Enables supervisor service for Laravel Pulse for application performance monitoring. **Default is `0`**. |
+| `LARAVEL_PULSE_OPTIONS`          | Configuration options for Laravel Pulse (e.g., port, storage). |
+| `LARAVEL_ENABLE_REVERB`          | Enables supervisor service for Laravel Reverb for real-time WebSocket communication. **Default is `0`**. |
+| `LARAVEL_REVERB_OPTIONS`         | Configuration options for Laravel Reverb (e.g., port, storage). |
+
+
 ## Stable Image Tags
 
 The release versions on [this GitHub repository](https://code.shin.company/php) don't guarantee

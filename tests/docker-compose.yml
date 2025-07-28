@@ -1,157 +1,242 @@
 services:
-  bedrock:
-    image: ghcr.io/shinsenter/bedrock:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
+
+  redis:
+    image: redis:alpine
+
+  cli:
+    image: ghcr.io/shinsenter/php:cli-alpine
+    security_opt:
+      - no-new-privileges:true
+    privileged: true
+    cap_add:
+      - SYS_ADMIN
+      - SYS_NICE
+      - SYS_PTRACE
     environment:
+      - TZ=Asia/Tokyo
       - DEBUG=${DEBUG}
+      - ENABLE_CRONTAB=${ENABLE_CRONTAB}
+      - PHP_POOL_NAME=shin
+
+  ##########################################################
+
+  phpfpm-nginx:
+    image: ghcr.io/shinsenter/phpfpm-nginx:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8101:80
-  cakephp4:
-    image: ghcr.io/shinsenter/cakephp4:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8201:443
+  phpfpm-apache:
+    image: ghcr.io/shinsenter/phpfpm-apache:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8102:80
-  cakephp5:
-    image: ghcr.io/shinsenter/cakephp5:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8202:443
+  unit-php:
+    image: ghcr.io/shinsenter/unit-php:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8103:80
-  codeigniter4:
-    image: ghcr.io/shinsenter/codeigniter4:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8203:443
+  frankenphp:
+    image: ghcr.io/shinsenter/frankenphp:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8104:80
-  coolify:
-    image: ghcr.io/shinsenter/coolify:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8204:443
+  roadrunner:
+    image: ghcr.io/shinsenter/roadrunner:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8105:80
-  drupal:
-    image: ghcr.io/shinsenter/drupal:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8205:443
+
+  ##########################################################
+
+  bedrock:
+    image: ghcr.io/shinsenter/bedrock:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8106:80
-  espocrm:
-    image: ghcr.io/shinsenter/espocrm:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8206:443
+  cakephp4:
+    image: ghcr.io/shinsenter/cakephp4:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8107:80
-  flarum:
-    image: ghcr.io/shinsenter/flarum:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8207:443
+  cakephp5:
+    image: ghcr.io/shinsenter/cakephp5:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8108:80
-  flightphp:
-    image: ghcr.io/shinsenter/flightphp:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8208:443
+  codeigniter4:
+    image: ghcr.io/shinsenter/codeigniter4:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8109:80
-  grav:
-    image: ghcr.io/shinsenter/grav:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8209:443
+  coolify:
+    image: ghcr.io/shinsenter/coolify:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8110:80
-  hyperf:
-    image: ghcr.io/shinsenter/hyperf:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8210:443
+  drupal:
+    image: ghcr.io/shinsenter/drupal:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8111:80
-  hypervel:
-    image: ghcr.io/shinsenter/hypervel:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8211:443
+  espocrm:
+    image: ghcr.io/shinsenter/espocrm:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8112:80
-  invoiceshelf:
-    image: ghcr.io/shinsenter/invoiceshelf:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8212:443
+  flarum:
+    image: ghcr.io/shinsenter/flarum:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8113:80
-  kirby:
-    image: ghcr.io/shinsenter/kirby:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8213:443
+  flightphp:
+    image: ghcr.io/shinsenter/flightphp:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8114:80
-  laminas:
-    image: ghcr.io/shinsenter/laminas:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8214:443
+  grav:
+    image: ghcr.io/shinsenter/grav:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8115:80
-  laravel:
-    image: ghcr.io/shinsenter/laravel:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8215:443
+  hyperf:
+    image: ghcr.io/shinsenter/hyperf:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8116:80
-  magento:
-    image: ghcr.io/shinsenter/magento:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8216:443
+  hypervel:
+    image: ghcr.io/shinsenter/hypervel:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8117:80
-  mautic:
-    image: ghcr.io/shinsenter/mautic:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8217:443
+  invoiceshelf:
+    image: ghcr.io/shinsenter/invoiceshelf:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8118:80
-  phpmyadmin:
-    image: ghcr.io/shinsenter/phpmyadmin:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8218:443
+  kirby:
+    image: ghcr.io/shinsenter/kirby:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8119:80
-  slim:
-    image: ghcr.io/shinsenter/slim:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8219:443
+  laminas:
+    image: ghcr.io/shinsenter/laminas:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8120:80
-  spiral:
-    image: ghcr.io/shinsenter/spiral:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8220:443
+  laravel:
+    image: ghcr.io/shinsenter/laravel:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8121:80
-  statamic:
-    image: ghcr.io/shinsenter/statamic:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8221:443
+  magento:
+    image: ghcr.io/shinsenter/magento:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8122:80
-  sulu:
-    image: ghcr.io/shinsenter/sulu:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8222:443
+  mautic:
+    image: ghcr.io/shinsenter/mautic:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8123:80
-  symfony:
-    image: ghcr.io/shinsenter/symfony:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8223:443
+  phpmyadmin:
+    image: ghcr.io/shinsenter/phpmyadmin:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8124:80
-  wordpress:
-    image: ghcr.io/shinsenter/wordpress:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8224:443
+  slim:
+    image: ghcr.io/shinsenter/slim:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8125:80
-  yii:
-    image: ghcr.io/shinsenter/yii:${PREFIX:-dev-}${PHP_VERSION:-latest}${SUFFIX}
-    environment:
-      - DEBUG=${DEBUG}
+      - 8225:443
+  spiral:
+    image: ghcr.io/shinsenter/spiral:${IMAGE_TAG}
+    extends:
+      service: cli
     ports:
       - 8126:80
+      - 8226:443
+  statamic:
+    image: ghcr.io/shinsenter/statamic:${IMAGE_TAG}
+    extends:
+      service: cli
+    ports:
+      - 8127:80
+      - 8227:443
+  sulu:
+    image: ghcr.io/shinsenter/sulu:${IMAGE_TAG}
+    extends:
+      service: cli
+    ports:
+      - 8128:80
+      - 8228:443
+  symfony:
+    image: ghcr.io/shinsenter/symfony:${IMAGE_TAG}
+    extends:
+      service: cli
+    ports:
+      - 8129:80
+      - 8229:443
+  wordpress:
+    image: ghcr.io/shinsenter/wordpress:${IMAGE_TAG}
+    extends:
+      service: cli
+    ports:
+      - 8130:80
+      - 8230:443
+  yii:
+    image: ghcr.io/shinsenter/yii:${IMAGE_TAG}
+    extends:
+      service: cli
+    ports:
+      - 8131:80
+      - 8231:443

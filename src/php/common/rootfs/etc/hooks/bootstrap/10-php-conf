@@ -9,43 +9,50 @@
 
 if has-cmd php && has-cmd php-envvars; then
     debug-echo "Generate PHP config."
-    if is-true $ALLOW_RUNTIME_PHP_ENVVARS; then
+    if is-true "$ALLOW_RUNTIME_PHP_ENVVARS"; then
         php-envvars write_dynamic_config 2>&1
     else
         php-envvars write_static_config 2>&1
     fi
 fi
 
-if has-cmd php-fpm && is-true $ENABLE_TUNING_FPM; then
+if has-cmd php-fpm && is-true "$ENABLE_TUNING_FPM"; then
     debug-echo -w "Tune PHP-FPM performance."
-    config_file="${PHP_INI_DIR}-fpm.d/zz-generated-settings.conf"
 
-    # Gather system information
+    config_file="${PHP_INI_DIR}-fpm.d/zz-generated-settings.conf"
+    mkdir -p "$(dirname "$config_file")"
+    touch "$config_file"
+    sed -i '/^; Tuning PM/,$d' "$config_file" 2>/dev/null || true
+
+    # gather system info
     cpu_cores=$(grep -c ^processor /proc/cpuinfo)
     ram_mb=$(free -m | awk '/^Mem:/{print $2}')
 
-    # Set PHP-FPM directives based on system specs and best practices
-    pm="dynamic"  # Recommended for most cases
-    pm_max_children=$((cpu_cores * 5))
-    pm_start_servers=$((cpu_cores * 2))
-    pm_min_spare_servers=$((cpu_cores * 1))
-    pm_max_spare_servers=$((cpu_cores * 3))
-    pm_max_requests=500
+    # read scaling from env or fallback to defaults
+    scale_children="${PHPFPM_SCALE_CHILDREN:-5}"
+    scale_start="${PHPFPM_SCALE_START:-2}"
+    scale_min_spare="${PHPFPM_SCALE_MIN_SPARE:-1}"
+    scale_max_spare="${PHPFPM_SCALE_MAX_SPARE:-3}"
+    max_requests="${PHPFPM_MAX_REQUESTS:-500}"
 
-    # Modify configuration file
-    mkdir -p "$(dirname $config_file)"
-    touch $config_file
-    sed -i '/^; Tuning PM/,$d' $config_file &>/dev/null
-    cat <<EOF >>$config_file
+    # calculate values
+    pm="dynamic"
+    pm_max_children=$((cpu_cores * scale_children))
+    pm_start_servers=$((cpu_cores * scale_start))
+    pm_min_spare_servers=$((cpu_cores * scale_min_spare))
+    pm_max_spare_servers=$((cpu_cores * scale_max_spare))
+
+    cat <<EOF >> "$config_file"
 ; Tuning PM
-[\${PHP_POOL_NAME}]
+[$(is-true "$ALLOW_RUNTIME_PHP_ENVVARS" && echo '${PHP_POOL_NAME}' || echo "${PHP_POOL_NAME}")]
 pm = $pm
 pm.max_children      = $pm_max_children
 pm.start_servers     = $pm_start_servers
 pm.min_spare_servers = $pm_min_spare_servers
 pm.max_spare_servers = $pm_max_spare_servers
-pm.max_requests      = $pm_max_requests
+pm.max_requests      = $max_requests
 
 ; Generated at $(date "+%Y-%m-%d %H:%M:%S")
 EOF
+
 fi

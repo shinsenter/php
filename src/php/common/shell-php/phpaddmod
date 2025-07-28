@@ -6,67 +6,74 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-if ! has-cmd php; then exit 1; fi
-if ! has-cmd install-php-extensions; then exit 1; fi
+# exit if required commands are missing
+has-cmd php >/dev/null 2>&1 || exit 1
+has-cmd install-php-extensions >/dev/null 2>&1 || exit 1
 
 # show usage if no arguments are passed
-if [ $# -eq 0 ]; then
+if [ "$#" -eq 0 ]; then
     debug-echo -i "Install and enable PHP modules."
     debug-echo -i "  Usage: ${0##*/} <module> [module] [...]" >&2
     debug-echo -l "  For example: ${0##*/} gd imagick" >&2
     exit 1
 fi
 
-INSTALLED_MODS="$(php -m 2>/dev/null | grep -v '^\[' | tr '[:upper:]' '[:lower:]')"
+if [ -n "$PHP_INI_DIR" ] && [ -d "$PHP_INI_DIR/conf.d" ]; then
+    for module in "$@"; do
+        sed -i "/^; *extension *= *$module/s/^; *//g" "$PHP_INI_DIR"/conf.d/*.ini 2>/dev/null
+    done
+fi
 
-for module; do
-    if [ ! -z "$module" ] && grep -q "\<$module\>" <<< "$INSTALLED_MODS"; then
-        debug-echo -w "Module $module is already installed."
+installed_mods="$(php -m 2>/dev/null | grep -v '^\[' | tr '[:upper:]' '[:lower:]')"
+new_mods=""
+
+for mod; do
+    if [ -n "$mod" ] && printf '%s\n' "$installed_mods" | grep -q -w "$mod"; then
+        debug-echo -w "Module $mod is already installed."
     else
-        NEW_MODS="$NEW_MODS${NEW_MODS:+ }$module"
+        new_mods="${new_mods:+$new_mods }$mod"
     fi
 done
 
-if [ -z "$NEW_MODS" ]; then
-    exit 0
-fi
+[ -z "$new_mods" ] && exit 0
 
-if ! has-cmd gcc; then
+# install build tools if gcc is missing
+if ! has-cmd gcc >/dev/null 2>&1; then
     debug-echo -i "\nInstall build tools."
     APK_PACKAGES="tar xz" \
     APT_PACKAGES="xz-utils" \
-    pkg-add $PHPIZE_DEPS curl
+    pkg-add "$PHPIZE_DEPS" curl
 fi
 
-if [ ! -e "/usr/src/php.tar.xz" ] && [ ! -z "$PHP_URL" ]; then
+# download PHP source if required
+if [ ! -e "/usr/src/php.tar.xz" ] && [ -n "$PHP_URL" ]; then
     debug-echo -i "\nDownload PHP source from $PHP_URL."
     download "$PHP_URL" -o /usr/src/php.tar.xz
 
-    if [ ! -z "$PHP_ASC_URL" ]; then
-        download "$PHP_ASC_URL" -o /usr/src/php.tar.xz.asc
-    fi
+    [ -n "$PHP_ASC_URL" ] && download "$PHP_ASC_URL" -o /usr/src/php.tar.xz.asc
 fi
 
-PID=/tmp/$(php -r 'echo md5(uniqid());' || echo "$0-temp")
+pid="/tmp/$(php -r 'echo md5(uniqid());' 2>/dev/null || echo "${0##*/}-temp")"
 
 set -o pipefail
-debug-echo -i "\nInstall PHP modules: $NEW_MODS."
+debug-echo -i "\nInstall PHP modules: $new_mods."
+is-debug && env-default | grep '^IPE_' | debug-echo -i
 
-if is-debug; then env-default | grep IPE_ | debug-echo -i; fi
-
-DEBUG= with-env install-php-extensions $NEW_MODS | while read -r line; do
-    echo "$line"
-    if [[ "$line" == *"only for installation"* ]]; then
-        echo ${line##*:} | xargs echo -n >$PID
-    fi
+DEBUG= with-env install-php-extensions $new_mods | while IFS= read -r line; do
+    printf '%s\n' "$line"
+    case "$line" in
+        *"only for installation"*)
+            printf '%s' "${line##*:}" | xargs printf '%s' > "$pid"
+            ;;
+    esac
 done | grep -vF StandWith | debug-echo -l
 
-EXIT_CODE=$?
+exit_code=$?
 
-# clean up when failed
-if [ $EXIT_CODE -ne 0 ] && [ -f $PID ]; then
-    pkg-del $(cat $PID)
-    rm -f $PID
+# clean up on failure
+if [ "$exit_code" -ne 0 ] && [ -f "$pid" ]; then
+    pkg-del "$(cat "$pid")"
+    rm -f "$pid"
 fi
 
-exit $EXIT_CODE
+exit "$exit_code"
