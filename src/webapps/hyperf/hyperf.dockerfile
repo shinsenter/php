@@ -34,6 +34,7 @@ ADD --link ./rootfs/ /
 ENV DOCUMENT_ROOT=""
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 RUN env-default INITIAL_PROJECT "hyperf/hyperf-skeleton"
+RUN env-default APP_INDEX "bin/hyperf.php"
 
 ################################################################################
 
@@ -43,17 +44,19 @@ echo 'Install PHP extensions'
 
 phpaddmod protobuf swoole
 
-web-cmd hyperf 'php $(app-path)/bin/hyperf.php'
+web-cmd hyperf 'php $(app-index)'
 env-default PHP_SWOOLE_USE_SHORTNAME 'off'
 
 if has-cmd s6-service; then
     s6-service hyperf longrun '#!/usr/bin/env sh
 export APP_PATH="$(app-path)"
+export APP_ROOT="$(app-root)"
+
 cd "$APP_PATH"
-exec php $APP_PATH/bin/hyperf.php start
+exec php $(app-index) start
 '
     s6-service php-fpm unset
-    s6-service nginx unset
+    s6-service nginx unset php-fpm
     s6-service nginx depends hyperf
 fi
 
