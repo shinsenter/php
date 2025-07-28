@@ -35,6 +35,7 @@ ENV DOCUMENT_ROOT="/public"
 ENV DISABLE_AUTORUN_COPYING_SOURCE=1
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 RUN env-default INITIAL_PROJECT "spiral/app"
+RUN env-default APP_INDEX "../app.php"
 
 ################################################################################
 

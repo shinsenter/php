@@ -8,4 +8,4 @@ elif [ ! -z "$NGINX_DOCUMENT_ROOT" ]; then
     document_root="$NGINX_DOCUMENT_ROOT"
 fi
 
-echo "$(app-path)$document_root"
+echo $(realpath "$(app-path)$document_root")
