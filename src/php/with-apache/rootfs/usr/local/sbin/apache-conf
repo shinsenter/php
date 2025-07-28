@@ -7,9 +7,14 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-conf_dir=/etc/apache2
-disable="$([ "${1:0:1}" = "#" ] && echo "# " || echo "")"
+conf_dir="/etc/apache2"
+disable="$( [ "${1:0:1}" = "#" ] && echo "# " || echo "" )"
 name="${1/#/}"; shift
-if [ -d $conf_dir ]; then
-    grep -lr "^ *#* *${name} " $conf_dir | grep '\.conf$' | xargs -r sed -i "s~^ *#* *${name}  *.*\$~${disable}${name} $@~g" &>/dev/null
+
+if [ -d "$conf_dir" ]; then
+    find "$conf_dir" -type f -name "*.conf" -print0 | while IFS= read -r -d '' file; do
+        if grep -qE "^\s*#*\s*${name}\s" "$file"; then
+            sed -i -E "s~^\s*#*\s*${name}\s+.*\$~${disable}${name} $*~g" "$file"
+        fi
+    done
 fi
