@@ -13,7 +13,15 @@ ARG DOCKER_ENTRYPOINT=/usr/local/bin/docker-php-entrypoint
 
 ARG APP_PATH=${APP_PATH:-/var/www/html}
 ARG APP_GROUP=${APP_GROUP:-www-data}
+ARG APP_GID=${APP_GID:-1000}
 ARG APP_USER=${APP_USER:-www-data}
+ARG APP_UID=${APP_UID:-1000}
+
+################################################################################
+
+ADD --link ./common/rootfs/ /
+
+################################################################################
 
 # Set APP_PATH, APP_USER and APP_GROUP
 ENV APP_PATH="$APP_PATH"
@@ -25,11 +33,6 @@ ENV ENV="/etc/.docker-env"
 ENV PATH="/usr/local/aliases:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 ENV PS1="\\u@\\h:\\w\\$ "
 ENV PRESQUASH_SCRIPTS="cleanup"
-
-################################################################################
-
-ADD --link ./common/rootfs/ /
-ONBUILD RUN hook onbuild
 
 ################################################################################
 
@@ -57,7 +60,7 @@ EOF
 # https://github.com/mlocati/docker-php-extension-installer/pull/724
 # https://github.com/mlocati/docker-php-extension-installer/pull/737
 RUN --mount=type=bind,from=mlocati/php-extension-installer:latest,source=/usr/bin/install-php-extensions,target=/tmp/install-php-extensions \
-    /tmp/install-php-extensions @fix_letsencrypt | grep -vF StandWith || true
+    /tmp/install-php-extensions @fix_letsencrypt | true
 
 ################################################################################
 
@@ -66,7 +69,7 @@ echo 'Configure OS middlewares'
 [ -z "$DEBUG" ] || set -ex && set -e
 
 # Install common packages
-APK_PACKAGES='run-parts shadow tar tzdata unzip xz' \
+APK_PACKAGES='findutils run-parts shadow tar tzdata unzip xz' \
 APT_PACKAGES='procps xz-utils' \
 pkg-add bash ca-certificates coreutils curl htop less openssl msmtp upgrade
 
@@ -75,6 +78,12 @@ SU_EXEC_PATH=/sbin/su-exec
 SU_EXEC_URL=https://github.com/songdongsheng/su-exec/releases/download/1.3/su-exec-musl-static
 download "$SU_EXEC_URL" -o "$SU_EXEC_PATH"
 chmod 4755 "$SU_EXEC_PATH"
+
+# Correct UID/GID for www-data
+if has-cmd ownership; then
+    chown root:root $(command -v ownership)
+    chmod 4755      $(command -v ownership)
+fi
 
 # Replace sh binary with bash
 if has-cmd bash; then
@@ -90,13 +99,23 @@ EOF
 ################################################################################
 
 # Run onbuild hook
-RUN hook onbuild
+ONBUILD RUN hook onbuild
+RUN DOCKER_NAME="shinsenter/***" hook onbuild
 
 ################################################################################
 
 RUN <<'EOF'
 echo 'Configure base OS'
 [ -z "$DEBUG" ] || set -ex && set -e
+
+# Set default debug mode
+env-default '# Default debug mode'
+env-default DEBUG '0'
+
+# Set default user and group
+env-default '# Default user and group'
+env-default DEFAULT_GROUP "$APP_USER"
+env-default DEFAULT_USER  "$APP_GROUP"
 
 # Set aliases for common commands
 env-default '# Aliases for common commands'
@@ -106,7 +125,6 @@ env-default 'alias ll="ls -alh"'
 
 # Set OS default settings
 env-default '# Environment variables for OS'
-env-default DEBUG '0'
 env-default DEBIAN_FRONTEND $DEBIAN_FRONTEND
 env-default DEBCONF_NOWARNINGS $DEBCONF_NOWARNINGS
 env-default HISTCONTROL 'ignoreboth'
@@ -140,12 +158,12 @@ fi
 
 # Check if the group exists
 if ! getent group $APP_GROUP >/dev/null 2>&1; then
-    addgroup --system $APP_GROUP
+    addgroup --system -g $APP_GID $APP_GROUP
 fi
 
 # Check if the user exists
 if ! getent passwd $APP_USER >/dev/null 2>&1; then
-    adduser --system --no-create-home --ingroup $APP_GROUP $APP_USER
+    adduser --system --no-create-home --ingroup $APP_GROUP -u $APP_UID $APP_USER
 fi
 
 # Add mail group
@@ -159,7 +177,7 @@ if ! has-cmd su-exec || [ "$(su-exec $APP_USER:$APP_GROUP whoami)" != "$APP_USER
 fi
 
 # Setuid bit
-chmod 4755 $(which autorun) /usr/local/sbin/web-*
+chmod 4755 $(command -v autorun) /usr/local/sbin/web-*
 
 # Configure sendmail with msmtp
 if has-cmd msmtp-wrapper; then

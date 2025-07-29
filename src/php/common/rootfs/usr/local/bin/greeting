@@ -18,5 +18,6 @@ App Root      : $(app-path)
 Document Root : $(app-root)
 ---------------
 "
+if [ -n "$S6_VERSION" ]; then echo "With s6-overlay $S6_VERSION"; fi
 if has-cmd php-fpm;  then php-fpm -v; elif has-cmd php; then php -v; fi
 if has-cmd composer; then composer -V 2>&1 | head -n1; fi

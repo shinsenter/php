@@ -7,8 +7,8 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 # exit if required commands are missing
-has-cmd php >/dev/null 2>&1 || exit 1
-has-cmd install-php-extensions >/dev/null 2>&1 || exit 1
+if ! has-cmd php; then exit 1; fi
+if ! has-cmd install-php-extensions; then exit 1; fi
 
 # show usage if no arguments are passed
 if [ "$#" -eq 0 ]; then

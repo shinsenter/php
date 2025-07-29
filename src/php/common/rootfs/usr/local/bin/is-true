@@ -6,7 +6,6 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 if [ $# -eq 0 ]; then exit 1; fi
 
 case "$(echo "$1" | tr '[:upper:]' '[:lower:]')" in
