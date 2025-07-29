@@ -1,0 +1,99 @@
+#!/usr/bin/env sh
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  SHIN Company <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+# ownership [new_group] [new_gid] [new_user] [new_uid]
+# Requires root; Debian/Ubuntu or Alpine with shadow
+
+OLD_GROUP="${DEFAULT_GROUP:-www-data}"
+OLD_USER="${DEFAULT_USER:-www-data}"
+OLD_UID=$(id -u "$OLD_USER")
+OLD_GID=$(id -g "$OLD_USER")
+
+NEW_GROUP="${1:-$OLD_GROUP}"
+NEW_GID="${2:-}"
+NEW_USER="${3:-$OLD_USER}"
+NEW_UID="${4:-}"
+
+if getent group "$NEW_GROUP" >/dev/null 2>&1; then
+    debug-echo "Group $NEW_GROUP exists, skipping creation."
+    OLD_GROUP="$NEW_GROUP"
+    # OLD_GID=$(getent group "$NEW_GROUP" | cut -d: -f3)
+fi
+
+if id "$NEW_USER" >/dev/null 2>&1; then
+    debug-echo "User $NEW_USER exists, skipping creation."
+    OLD_USER="$NEW_USER"
+    # OLD_UID=$(id -u "$NEW_USER")
+fi
+
+# check original exists
+id "$OLD_USER" >/dev/null 2>&1 || { debug-echo -e "Error: $OLD_USER does not exist" >&2; exit 1; }
+
+# default target IDs
+TARGET_GID="${NEW_GID:-$OLD_GID}"
+TARGET_UID="${NEW_UID:-$OLD_UID}"
+
+# decide if group needs change or creation
+if [ "$NEW_GROUP" = "$OLD_GROUP" ]; then
+    CHANGE_GROUP=$(( TARGET_GID != OLD_GID ))
+else
+    CHANGE_GROUP=1
+fi
+
+# decide if user needs change or creation
+if [ "$NEW_USER" = "$OLD_USER" ]; then
+    CHANGE_USER=$(( TARGET_UID != OLD_UID || CHANGE_GROUP == 1 ))
+else
+    CHANGE_USER=1
+fi
+
+# group action
+if [ "$CHANGE_GROUP" -eq 1 ]; then
+    if [ "$NEW_GROUP" = "$OLD_GROUP" ]; then
+        groupmod -g "$TARGET_GID" "$OLD_GROUP" \
+            && debug-echo -s "Changed $OLD_GROUP GID: $OLD_GID → $TARGET_GID"
+    else
+        if [ "$TARGET_GID" -ne "$OLD_GID" ]; then
+            groupadd -g "$NEW_GID" "$NEW_GROUP"
+        else
+            groupadd "$NEW_GROUP"
+        fi
+        debug-echo -s "Created group $NEW_GROUP (GID=$(getent group "$NEW_GROUP" | cut -d: -f3))"
+    fi
+fi
+
+# user action (creates new user if needed)
+if [ "$CHANGE_USER" -eq 1 ]; then
+    if [ "$NEW_USER" = "$OLD_USER" ]; then
+        usermod -u "$TARGET_UID" -g "$TARGET_GID" "$OLD_USER" \
+            && debug-echo -s "Changed $OLD_USER UID: $OLD_UID → $TARGET_UID"
+    else
+        # copy supplementary groups from original user
+        SUPP=$(id -Gn "$OLD_USER" | tr ' ' ',')
+        if [ "$TARGET_UID" -ne "$OLD_UID" ]; then
+            useradd -u "$TARGET_UID" -g "$NEW_GROUP" -G "$SUPP" -M -s $(command -v nologin) "$NEW_USER"
+        else
+            useradd -g "$NEW_GROUP" -G "$SUPP" -M -s $(command -v nologin) "$NEW_USER"
+        fi
+        debug-echo -s "Created user $NEW_USER (UID=$(id -u "$NEW_USER")) with groups: $SUPP"
+    fi
+fi
+
+# update ownership if any change
+if [ "$CHANGE_GROUP" -eq 1 ] || [ "$CHANGE_USER" -eq 1 ]; then
+    FINAL_UID=$(id -u "$NEW_USER")
+    FINAL_GID=$(getent group "$NEW_GROUP" | cut -d: -f3)
+    debug-echo -w "Updating file ownership: ${OLD_UID}:${OLD_GID} → ${FINAL_UID}:${FINAL_GID}"
+    find / -xdev \( -uid "$OLD_UID" -o -gid "$OLD_GID" \) \
+        -exec chown -h "$FINAL_UID":"$FINAL_GID" {} \; 2>/dev/null
+fi
+
+# set default values
+env-default DEFAULT_GROUP "$NEW_GROUP"
+env-default DEFAULT_USER  "$NEW_USER"
