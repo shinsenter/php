@@ -16,7 +16,7 @@ run_cmd() {
 
 for path; do
     if [ ! -z "$path" ] && [ -e "$path" ]; then
-        path="$(realpath -s $path)"
+        path="$(realpath -mqs $path)"
         if [ -d "$path" ]; then
             find $path -type f -name '*.sh' | xargs -r chmod +x &>/dev/null
             if has-cmd run-parts; then

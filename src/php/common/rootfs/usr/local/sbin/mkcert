@@ -58,9 +58,9 @@ openssl req -nodes -x509 -days $DAYS \
 
 if [ "$INSTALL" = "1" ]; then
     if [ -f /etc/ssl/certs/ca-certificates.crt ]; then
-        ln -nsf $(realpath $CERT) /etc/ssl/certs/
+        ln -nsf $(realpath -mqs $CERT) /etc/ssl/certs/
     elif [ -d /usr/local/share/ca-certificates ]; then
-        ln -nsf $(realpath $CERT) /usr/local/share/ca-certificates/
+        ln -nsf $(realpath -mqs $CERT) /usr/local/share/ca-certificates/
     fi
     if has-cmd update-ca-certificates; then
         update-ca-certificates

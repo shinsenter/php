@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 # falls back to old $WEBHOME if it is set
 if [ ! -z "$WEBHOME" ]; then
-    echo $(realpath "$WEBHOME")
+    echo "$WEBHOME"
 else
-    echo $(realpath "${APP_PATH:=/var/www/html}")
+    echo "${APP_PATH:=/var/www/html}"
 fi

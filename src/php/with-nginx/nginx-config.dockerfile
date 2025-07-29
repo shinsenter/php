@@ -17,10 +17,12 @@ ENV PHP_LISTEN='/run/php-fpm.sock'
 RUN <<'EOF'
 echo 'Configure Nginx'
 
-usermod -G $APP_GROUP,nginx nginx     >/dev/null 2>&1
-usermod -G $APP_GROUP,nginx $APP_USER >/dev/null 2>&1
+# add user to nginx group
+SUPP_GROUPS=$(id -Gn "$APP_USER" | tr ' ' ',')
+usermod -G $APP_GROUP,nginx nginx &>/dev/null || true
+usermod -G $SUPP_GROUPS,nginx $APP_USER &>/dev/null || true
 
-env-default '# Disable PHP-FPM logging to stdout'
+# disable PHP-FPM logging to stdout
 env-default PHP_ACCESS_LOG '/var/log/php-fpm.log'
 
 # create folders
