@@ -7,66 +7,25 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-default_user="www-data"
-default_group="www-data"
-default_uid="$(id -u "$default_user")"
-default_gid="$(id -g "$default_user")"
-
-app_path="$(app-path)"
-app_user="${APP_USER:=$default_user}"
-app_group="${APP_GROUP:=$default_group}"
-app_uid="${APP_UID:=$default_uid}"
-app_gid="${APP_GID:=$default_gid}"
-user_home="/home/$app_user"
-
-rand_id() { echo "$((RANDOM % 500 + 499))"; }
-
-################################################################################
+# fix ownership
+ownership "${APP_GROUP:-www-data}" "${APP_GID:-}" "${APP_USER:-www-data}" "${APP_UID:-}"
 
 hook pre-boot
 
 ################################################################################
 
-# group setup
-debug-echo "Verify group $app_group"
-if [ "$app_group" != "$default_group" ]; then
-    app_gid="${app_gid:=$(rand_id)}"
-    groupadd -o -r -g "$app_gid" "$app_group" 2>/dev/null || true
-elif [ "$app_gid" != "$default_gid" ]; then
-    groupmod -o -g "$app_gid" "$app_group" 2>/dev/null || true
-    web-chown "GID changed to $app_group ($app_gid)."
-fi
-
-# user setup
-debug-echo "Verify user $app_user"
-if [ "$app_user" != "$default_user" ]; then
-    app_uid="${app_uid:=$(rand_id)}"
-    useradd -o -r -g "$app_gid" \
-        -G "$app_group","$default_group",mail --no-log-init \
-        -d "$user_home" -s /sbin/nologin -u "$app_uid" "$app_user" 2>/dev/null || true
-else
-    usermod -g "$app_gid" -G "$app_group","$default_group",mail \
-        -d "$user_home" -s /sbin/nologin "$app_user" 2>/dev/null || true
-
-    if [ "$app_uid" != "$default_uid" ]; then
-        usermod -o -u "$app_uid" "$app_user" 2>/dev/null || true
-        web-chown "UID changed to $app_user ($app_uid)."
-    fi
-fi
-
-################################################################################
-
 # ensure application directory exists
-debug-echo "Create $app_path if not exists"
-web-mkdir "$app_path" "$(dirname "$(log-path)")" 2>/dev/null || true
-chmod 4755 "$app_path"
+APP_PATH="$(app-path)"
+debug-echo "Create $APP_PATH if not exists"
+web-mkdir "$APP_PATH" "$(dirname "$(log-path)")" 2>/dev/null || true
+chmod 4755 "$APP_PATH"
 
 ################################################################################
 
 # first run hook
-first_run_flag="/var/local/first-run"
-if [ ! -e "$first_run_flag" ]; then
-    date > "$first_run_flag"
+FIRST_RUN_FLAG="/var/local/first-run"
+if [ ! -e "$FIRST_RUN_FLAG" ]; then
+    date > "$FIRST_RUN_FLAG"
     hook first-run
 else
     hook rebooted

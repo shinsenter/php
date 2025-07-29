@@ -45,6 +45,8 @@ for version; do
         --tag "docker-php-$version-${DOCKERTAG:-$variant}:squashed" \
         --platform  "$platform" \
         --build-arg DEBUG=$DEBUG \
+        --build-arg OS_BASE=${OS_BASE:-debian} \
+        --build-arg OS_VERSION=${OS_VERSION:-latest} \
         --build-arg S6_VERSION=$s6_version \
         --build-arg PHP_VERSION=$version \
         --build-arg PHP_VARIANT=$variant \
@@ -55,7 +57,9 @@ done
 
 # build examples
 # PLATFORM=arm64 DOCKERTAG=s6 DOCKERFILE=php/base-s6.dockerfile ./tests/squash-test.sh latest
-# PLATFORM=arm64 DOCKERTAG=ubuntu-s6 DOCKERFILE=php/base-os.dockerfile ./tests/squash-test.sh latest
+# PLATFORM=arm64 DOCKERTAG=ubuntu-s6 DOCKERFILE=php/base-os.dockerfile OS_BASE=ubuntu ./tests/squash-test.sh latest
+# PLATFORM=arm64 DOCKERTAG=debian-s6 DOCKERFILE=php/base-os.dockerfile OS_BASE=debian ./tests/squash-test.sh latest
+# PLATFORM=arm64 DOCKERTAG=alpine-s6 DOCKERFILE=php/base-os.dockerfile OS_BASE=alpine ./tests/squash-test.sh latest
 # PLATFORM=arm64 DOCKERTAG=cli DOCKERFILE=php/base-php.dockerfile PHP_VARIANT=cli ./tests/squash-test.sh 5.6 7.1 8.4
 # PLATFORM=arm64 DOCKERTAG=fpm DOCKERFILE=php/base-php.dockerfile PHP_VARIANT=fpm ./tests/squash-test.sh 5.6 7.1 8.4
 # PLATFORM=arm64 DOCKERTAG=nginx DOCKERFILE=php/with-nginx.dockerfile PHP_VARIANT=fpm-alpine BUILD_FROM_IMAGE="shinsenter/php" ./tests/squash-test.sh 7.1 8.4

@@ -1,6 +1,39 @@
 #!/usr/bin/env sh
-find /etc/ -name '*.dpkg-*' -or -name '*-' -exec rm -f {} \; || true
-find /var/log/ -type f -exec rm -f {} \; || true
-rm -rf $@ $(web-chown path || true) \
-    /tmp/* /usr/share/doc/* /var/cache/* /var/lib/apt/lists/* \
-    ~/.cache/ ~/.composer/ ~/.git/ ~/.log/ ~/.npm/ ~/.tmp/ || true
+# clean package manager files
+find /etc -name '*.dpkg-*' -o -name '*-' -delete 2>/dev/null || true
+rm -rf /var/lib/apt/lists/* /var/cache/apt/* /var/cache/apk/* 2>/dev/null || true
+
+# clean logs (truncate instead of delete to preserve structure)
+find /var/log -type f -name "*.log.*" -delete 2>/dev/null || true
+find /var/log -type f -name "*.log" -exec truncate -s 0 {} \; 2>/dev/null || true
+
+# clean documentation and locales
+rm -rf /usr/share/doc/* /usr/share/man/* /usr/share/info/* /usr/share/locale/* 2>/dev/null || true
+rm -rf /usr/share/zoneinfo/* /usr/share/i18n/* /usr/share/X11/* /usr/games/* 2>/dev/null || true
+
+# clean temporary and cache files
+rm -rf /tmp/* /var/tmp/* /root/.cache 2>/dev/null || true
+
+# clean service files (not needed in containers)
+rm -rf /etc/systemd/* /lib/systemd/* /lib/modules/* /lib/firmware/* 2>/dev/null || true
+
+# clean backup and swap files
+find / -name "*~" -o -name "*.bak" -o -name "*.swp" -o -name ".*.swp" -delete 2>/dev/null || true
+
+# optional: remove development tools and static libraries (uncomment if not needed)
+# rm -rf /usr/include/* /usr/share/aclocal/* 2>/dev/null || true
+# find /usr/lib -name "*.a" -delete 2>/dev/null || true
+
+# optional: remove unused timezone data (keep only UTC, uncomment if needed)
+# find /usr/share/zoneinfo -type f ! -name "UTC" -delete 2>/dev/null || true
+
+# optional: clean SSH keys and machine ID (will regenerate) - optional
+# rm -f /etc/ssh/ssh_host_* /etc/machine-id /var/lib/dbus/machine-id 2>/dev/null || true
+
+# clean history
+rm -f /root/.bash_history /root/.sh_history 2>/dev/null || true
+
+# remove empty directories
+find /var/cache /var/tmp /tmp -type d -empty -delete 2>/dev/null || true
+
+echo "Cleanup completed"
