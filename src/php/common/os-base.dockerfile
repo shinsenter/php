@@ -94,9 +94,6 @@ if has-cmd bash; then
     fi
 fi
 
-# Create application directory
-web-mkdir $APP_PATH
-
 EOF
 
 ################################################################################
@@ -201,6 +198,9 @@ mkcert -days 3652 -install \
 
 # Backup entrypoint
 if [ -f $DOCKER_ENTRYPOINT ]; then mv $DOCKER_ENTRYPOINT /init; fi
+
+# Create application directory
+web-mkdir $APP_PATH
 
 EOF
 
