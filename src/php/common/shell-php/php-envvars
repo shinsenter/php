@@ -192,13 +192,16 @@ final class DockerPHP
 
         $fpm_conf = [];
         foreach ($this->fpm_settings as $scope => $settings) {
-            if ($dynamic && $scope == 'www') {
-                $fpm_conf[] = '[${PHP_POOL_NAME}]';
-            } else {
-                $fpm_conf[] = "[$scope]";
+            if ($scope == 'www') {
+                if ($dynamic) {
+                    $scope = '${PHP_POOL_NAME}';
+                } else if (!empty($_ENV['PHP_POOL_NAME'])) {
+                    $scope = $_ENV['PHP_POOL_NAME'];
+                }
             }
 
-            $fpm_conf = array_merge($fpm_conf, $this->build_conf($settings, $defaults, $dynamic), ['']);
+            $fpm_conf[] = "[$scope]";
+            $fpm_conf   = array_merge($fpm_conf, $this->build_conf($settings, $defaults, $dynamic), ['']);
         }
 
         save($this->fpm_conf_path, $fpm_conf);
@@ -391,7 +394,7 @@ final class DockerPHP
 
 ################################################################################
 
-date_default_timezone_set(getenv('TZ') ?: 'UTC');
+date_default_timezone_set($_ENV['TZ'] ?? 'UTC');
 
 $arguments = $argv;
 array_shift($arguments);
