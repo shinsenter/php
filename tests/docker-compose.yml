@@ -17,6 +17,12 @@ services:
       - DEBUG=${DEBUG}
       - ENABLE_CRONTAB=${ENABLE_CRONTAB}
       - PHP_POOL_NAME=shin
+      - ENABLE_TUNING_FPM=1
+      - ENABLE_TUNING_MPM=1
+      - APP_GROUP=mygroup
+      - APP_GID=555
+      - APP_USER=myuser
+      - APP_UID=555
 
   ##########################################################
 
