@@ -8,9 +8,9 @@ touch $APP_PATH/database/database.sqlite &>/dev/null
 artisan storage:link &>/dev/null
 
 if is-true $LARAVEL_AUTO_MIGRATION; then
-    MIGRATION_CMD='php artisan migrate --force -n'
+    MIGRATION_CMD='artisan migrate --force -n'
 
-    if php artisan migrate --help | grep -q -- '--isolated'; then
+    if artisan migrate --help | grep -q -- '--isolated'; then
         MIGRATION_CMD="$MIGRATION_CMD --isolated"
     fi
 
