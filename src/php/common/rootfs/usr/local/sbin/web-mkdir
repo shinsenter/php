@@ -9,7 +9,10 @@
 
 for dir; do
     if [ -n "$dir" ] && [ ! -f "$dir" ]; then
-        mkdir -vpm 4755 "$dir"
-        if [ -d "$dir" ]; then chown "$APP_USER:$APP_GROUP" "$dir"; fi
+        mkdir -vp "$dir"
+        if [ -d "$dir" ]; then
+            chown "$APP_USER:$APP_GROUP" "$dir"
+            chmod 4755 "$dir"
+        fi
     fi
 done
