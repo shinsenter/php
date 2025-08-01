@@ -196,6 +196,19 @@ mkcert -days 3652 -install \
     -key-file  /etc/ssl/site/server.key \
     localhost
 
+# Patch entrypoint for php-fpm
+if grep -q 'exec "\$@"' "$DOCKER_ENTRYPOINT"; then
+    sed -i '/exec "\$@"/c\
+if [[ " $@ " == *" php-fpm "* ]]; then\n\
+    config="/usr/local/etc/php-fpm.d/zz-generated-settings.conf"\n\
+    options="$(command -v php-fpm) -y $config --allow-to-run-as-root -d clear_env=no"\n\
+    [ -f "$config" ] && set -- ${@/php-fpm/$options}\n\
+elif [[ " $@ " == *" php "* ]]; then\n\
+    set -- web-do "$@"\n\
+fi\n\
+exec "$@"' "$DOCKER_ENTRYPOINT"
+fi
+
 # Backup entrypoint
 if [ -f $DOCKER_ENTRYPOINT ]; then mv $DOCKER_ENTRYPOINT /init; fi
 
