@@ -44,6 +44,7 @@ fetch_with_cache() {
     local cache_file="${cache_dir}/${today}_${hash}.cache"
 
     mkdir -p "$cache_dir"
+    shift
 
     if [[ -f "$cache_file" ]]; then
         echo "Cache found for $url" 1>&2
@@ -52,11 +53,11 @@ fetch_with_cache() {
         echo "Fetching $url" 1>&2
         content=$(
             if [ "$TOKEN" != "" ]; then
-                curl --retry 3 --retry-delay 5 -ksSLRJ \
+                curl --retry 3 --retry-delay 5 -ksSLRJ "$@" \
                     --header "Authorization: Bearer $TOKEN" \
-                    --request GET --url "$url"
+                    "$url"
             else
-                curl --retry 3 --retry-delay 5 -ksSLRJ "$url"
+                curl --retry 3 --retry-delay 5 -ksSLRJ "$@" "$url"
             fi
         )
 
@@ -77,7 +78,11 @@ get_github_json () {
 
 # Function to get metadata from Docker Hub
 get_dockerhub_json () {
-    TOKEN="$DOCKERHUB_TOKEN" fetch_with_cache "https://registry.hub.docker.com/v2/repositories/$1/tags?&page_size=10&status=active&sort=last_updated&$2"
+    local options=
+    if [ -n "$DOCKERHUB_USERNAME" ] && [ -n "$DOCKERHUB_PASSWORD" ]; then
+        options="-u $DOCKERHUB_USERNAME:$DOCKERHUB_PASSWORD"
+    fi
+    fetch_with_cache "https://registry.hub.docker.com/v2/repositories/$1/tags?&page_size=10&status=active&sort=last_updated&$2" "$options"
 }
 
 # Function to parse JSON and return
@@ -124,7 +129,7 @@ path_hash() {
     fi
 
     for target; do
-        if [ ! -z "$target" ]; then
+        if [ -n "$target" ]; then
             if [ -d "$target" ]; then
                 find "$target" -type f ! -name '.*' ! -name '*.md' \
                 | sort -dbfi | xargs -r shasum 2>/dev/null

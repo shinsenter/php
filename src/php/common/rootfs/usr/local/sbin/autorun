@@ -6,6 +6,8 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
+export APP_PATH="$(app-path)"
+export APP_ROOT="$(app-root)"
 
 run_cmd() {
     if [ -x "$1" ]; then
@@ -15,7 +17,7 @@ run_cmd() {
 }
 
 for path; do
-    if [ ! -z "$path" ] && [ -e "$path" ]; then
+    if [ -n "$path" ] && [ -e "$path" ]; then
         path="$(realpath -mqs $path)"
         if [ -d "$path" ]; then
             find $path -type f -name '*.sh' | xargs -r chmod +x &>/dev/null

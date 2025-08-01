@@ -13,29 +13,29 @@ if [ "$1" == "root" ]; then
     shift
 fi
 
-target=$1
+name="$1"
 shift
 
-if [ -z "$target" ] || [ $# -eq 0 ]; then
+if [ -z "$name" ] || [ $# -eq 0 ]; then
     debug-echo -i "Usage: ${0##*/} <name> <command> [options]"
     exit 1
 fi
 
 mkdir -p "/usr/local/sbin" "/usr/local/aliases"
 
-if [ "$allow_root" = "1" ]; then
-    target="/usr/local/aliases/$target"
+if [ "$allow_root" -eq 1 ]; then
+    target="/usr/local/aliases/$name"
     command="with-env"
     touch "$target" && chmod 4755 "$target"
 else
-    target="/usr/local/sbin/$target"
+    target="/usr/local/sbin/$name"
     command="web-do"
 fi
 
 echo "#!/usr/bin/env sh
 set -e
-if [ -d \$(app-path) ]; then cd \$(app-path); fi
-exec $command $@ \"\$@\"
+export APP_PATH="$(app-path)"
+export APP_ROOT="$(app-root)"
+cd "\$APP_PATH" && exec $command $@ \"\$@\"
 " >$target
-
 chmod +x $target

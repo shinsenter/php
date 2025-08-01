@@ -29,10 +29,10 @@ fi
 
 cat <<CRONTAB >$CRONTAB
 CRON_TZ=${CRONTAB_TZ:-${TZ:-UTC}}
-HOME=${CRONTAB_HOME:-$(app-path)}
+HOME=${CRONTAB_HOME:-$APP_PATH}
 PATH=${CRONTAB_PATH:-$PATH}
-$(if [ ! -z "$CRONTAB_SHELL" ];  then echo "SHELL=${CRONTAB_SHELL}"; fi)
-$(if [ ! -z "$CRONTAB_MAILTO" ]; then echo "MAILTO=${CRONTAB_MAILTO}"; fi)
+$(if [ -n "$CRONTAB_SHELL" ];  then echo "SHELL=${CRONTAB_SHELL}"; fi)
+$(if [ -n "$CRONTAB_MAILTO" ]; then echo "MAILTO=${CRONTAB_MAILTO}"; fi)
 
 # Job definition:
 # .---------------- minute (0 - 59)
@@ -44,7 +44,7 @@ $(if [ ! -z "$CRONTAB_MAILTO" ]; then echo "MAILTO=${CRONTAB_MAILTO}"; fi)
 # *  *  *  *  *  command to be executed
 CRONTAB
 
-if [ ! -z "$CRONTAB_SETTINGS" ]; then
+if [ -n "$CRONTAB_SETTINGS" ]; then
     echo -e "\n# from \$CRONTAB_SETTINGS" >>$CRONTAB
     echo "$CRONTAB_SETTINGS" >>$CRONTAB
 fi

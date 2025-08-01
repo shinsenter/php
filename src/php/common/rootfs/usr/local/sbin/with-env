@@ -38,6 +38,8 @@ else
 
     # execute the command
     if [ $# -gt 0 ]; then
+        export APP_PATH="$(app-path)"
+        export APP_ROOT="$(app-root)"
         exec "$@"
     fi
 fi

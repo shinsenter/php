@@ -8,8 +8,6 @@
 ################################################################################
 if ! has-cmd php; then exit 0; fi
 
-APP_PATH="$(app-path)"
-APP_ROOT="$(app-root)"
 ENV_PATH="$APP_PATH/.env"
 CONF_PATH="$APP_PATH/composer.json"
 

@@ -200,7 +200,7 @@ mkcert -days 3652 -install \
 if [ -f $DOCKER_ENTRYPOINT ]; then mv $DOCKER_ENTRYPOINT /init; fi
 
 # Create application directory
-web-mkdir $APP_PATH
+web-mkdir "$APP_PATH"
 
 EOF
 

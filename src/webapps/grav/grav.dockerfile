@@ -38,9 +38,9 @@ RUN env-default INITIAL_PROJECT "getgrav/grav"
 
 ################################################################################
 
-RUN web-cmd grav   'php $(app-path)/bin/grav'
-RUN web-cmd gpm    'php $(app-path)/bin/gpm'
-RUN web-cmd plugin 'php $(app-path)/bin/plugin'
+RUN web-cmd grav   'php "$APP_PATH"/bin/grav'
+RUN web-cmd gpm    'php "$APP_PATH"/bin/gpm'
+RUN web-cmd plugin 'php "$APP_PATH"/bin/plugin'
 
 ################################################################################
 

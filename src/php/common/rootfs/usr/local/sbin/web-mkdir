@@ -8,7 +8,7 @@
 ################################################################################
 
 for dir; do
-    if [ ! -z "$dir" ] && [ ! -f "$dir" ]; then
+    if [ -n "$dir" ] && [ ! -f "$dir" ]; then
         mkdir -vpm 4755 "$dir"
         if [ -d "$dir" ]; then chown "$APP_USER:$APP_GROUP" "$dir"; fi
     fi

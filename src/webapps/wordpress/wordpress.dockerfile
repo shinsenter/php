@@ -52,7 +52,7 @@ RUN <<'EOF'
 echo 'Install WP-CLI'
 [ -z "$DEBUG" ] || set -ex && set -e
 
-web-mkdir "/.wp-cli"
+mkdir -p "/.wp-cli"
 
 env-default '# Environment variables for WP-Cli'
 env-default INITIAL_PROJECT     'manual'
@@ -63,7 +63,7 @@ env-default WP_CLI_CONFIG_PATH  '$WP_CLI_DIR/config.yml'
 env-default WORDPRESS_DEBUG     '$(is-debug && echo 1 || echo 0)'
 
 php -r "copy('$WPCLI_URL', '$WPCLI_PATH');" && chmod +xr $WPCLI_PATH
-web-cmd wp "$WPCLI_PATH --allow-root --path=\"\$(app-path)\""
+web-cmd wp "$WPCLI_PATH --allow-root --path=\"\$APP_PATH\""
 EOF
 
 ################################################################################

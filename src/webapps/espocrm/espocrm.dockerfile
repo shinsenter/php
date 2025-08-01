@@ -31,12 +31,12 @@ ADD --link ./rootfs/ /
 ################################################################################
 
 # https://github.com/espocrm/espocrm/tree/stable
-ENV DOCUMENT_ROOT="/public"
+ENV DOCUMENT_ROOT="public"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 
 # https://docs.espocrm.com/administration/server-configuration/#setting-up-crontab
 ENV ENABLE_CRONTAB=1
-ENV CRONTAB_SETTINGS='* * * * * php -f $(app-path)/cron.php &>/dev/null'
+ENV CRONTAB_SETTINGS='* * * * * php -f "$(app-path)"/cron.php 2>&1'
 ENV ESPOCRM_CONFIG_USE_WEB_SOCKET=0
 RUN env-default INITIAL_PROJECT "$(download https://api.github.com/repos/espocrm/espocrm/releases/latest | grep "browser_download_url.*EspoCRM.*zip" | cut -d \" -f 4)"
 
@@ -70,15 +70,13 @@ fi
 if has-cmd s6-service; then
     s6-service espocrm-websocket longrun '#!/usr/bin/env sh
 if is-true $ESPOCRM_CONFIG_USE_WEB_SOCKET; then
-    export APP_PATH="$(app-path)"
-    export APP_ROOT="$(app-root)"
     export ESPOCRM_CONFIG_USE_WEB_SOCKET="true"
     export ESPOCRM_CONFIG_WEB_SOCKET_DEBUG_MODE="$(is-debug && echo 1 || echo 0)"
     export ESPOCRM_CONFIG_WEB_SOCKET_SSL_ALLOW_SELF_SIGNED="true"
     export ESPOCRM_CONFIG_WEB_SOCKET_URL="ws://localhost:8080"
     export ESPOCRM_CONFIG_WEB_SOCKET_ZERO_M_Q_SUBMISSION_DSN="tcp://espocrm-websocket:5555"
     export ESPOCRM_CONFIG_WEB_SOCKET_ZERO_M_Q_SUBSCRIBER_DSN="tcp://*:5555"
-    cd "$APP_PATH" && exec web-do php $APP_PATH/websocket.php
+    cd "$APP_PATH" && exec web-do php "$APP_PATH/websocket.php"
 else
     exec s6-svc -Od .
 fi
@@ -88,9 +86,9 @@ fi
 EOF
 
 # https://docs.espocrm.com/administration/commands/
-RUN web-cmd espocrm '$(app-path)/bin/command'
-RUN web-cmd clear_cache 'php $(app-path)/clear_cache.php'
-RUN web-cmd rebuild 'php $(app-path)/rebuild.php'
+RUN web-cmd espocrm '"$APP_PATH"/bin/command'
+RUN web-cmd clear_cache 'php "$APP_PATH"/clear_cache.php'
+RUN web-cmd rebuild 'php "$APP_PATH"/rebuild.php'
 
 ################################################################################
 

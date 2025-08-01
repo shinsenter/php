@@ -7,12 +7,6 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-APP_PATH="$(app-path)"
-APP_ROOT="$(app-root)"
-INDEX_PATH="$(app-index)"
-
-################################################################################
-
 # fix .htaccess to allow uri path after index.php
 if [ -f "$APP_ROOT/.htaccess" ]; then
     debug-echo "Fix .htaccess to allow uri path after index.php."
@@ -23,11 +17,12 @@ fi
 
 # fix ownership
 if ! is-true $DISABLE_AUTORUN_FIX_OWNER_GROUP; then
+    index_path="$(app-index)"
     if is-true $FIX_APP_PATH_PERMISSION || is-true $FIX_WEBHOME_PERMISSION; then
         debug-echo "Fix ownership for the application path."
         web-chown fix
-    elif [ -f "$INDEX_PATH" ]; then
-        owner="$(ls -ld "$INDEX_PATH" | awk '{print $3 ":" $4}')"
+    elif [ -f "$index_path" ]; then
+        owner="$(ls -ld "$index_path" | awk '{print $3 ":" $4}')"
         debug-echo "Verify ownership for the application path."
         debug-echo "Detected owner: $owner"
         debug-echo "Expected owner: $APP_USER:$APP_GROUP"

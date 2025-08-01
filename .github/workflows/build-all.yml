@@ -37,8 +37,14 @@ jobs:
 
       - name: pre-build debug
         id: init
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
         run: |
           set -e
+          . ./build/helpers.sh
 
           # Prepare variables
           the_day=$(date -u +"%d")
@@ -57,10 +63,9 @@ jobs:
           echo "github.ref_type   = $ref_type"
           echo "github.ref        = $ref"
           echo "tag_prefix        = $tag_prefix"
-          echo "build_all         = $(if [ ! -z "$build_all" ]; then echo 'yes, includes outdated versions'; else echo 'no, only maintained versions'; fi)"
+          echo "build_all         = $(if [ -n "$build_all" ]; then echo 'yes, includes outdated versions'; else echo 'no, only maintained versions'; fi)"
 
           # Cache requests
-          . ./build/helpers.sh
           echo "Generating cache keys..."
           get_github_latest_tag "composer/composer"
           get_github_latest_tag "just-containers/s6-overlay"
@@ -76,7 +81,7 @@ jobs:
           base_images=(phpfpm-nginx phpfpm-apache laravel)
           php_versions=(8.5-rc 8.4 8.3 8.2 8.1)
 
-          if [ ! -z "$build_all" ]; then
+          if [ -n "$build_all" ]; then
             php_versions+=(8.0 7.4 7.3 7.2 7.1 7.0 5.6)
           fi
 
@@ -240,6 +245,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Prepare cache
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
         run: |
           set -e
           . ./build/helpers.sh
@@ -308,7 +318,6 @@ jobs:
           - app-mautic
           - app-phpmyadmin
           - app-slim
-          - app-sulu
           - app-symfony
           - app-wordpress
           - app-yii
@@ -336,7 +345,7 @@ jobs:
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
       build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
 
-  laravel-based-apps:
+  extended-apps:
     name: ${{ matrix.app }}
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
@@ -349,6 +358,7 @@ jobs:
           - app-hypervel
           - app-invoiceshelf
           - app-statamic
+          - app-sulu
     with:
       app_name: ${{ matrix.app }}
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}

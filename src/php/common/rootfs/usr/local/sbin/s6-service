@@ -31,20 +31,20 @@ create() {
     mkdir -p $dir && chmod 0755 $dir
     touch $path   && chmod ugo+x $path
 
-    if [ -f $path ] && [ ! -z "$@" ]; then echo "$@" >| $path; fi
+    if [ -f $path ] && [ -n "$@" ]; then echo "$@" >| $path; fi
 }
 
 ################################################################################
 
 # default name
-if [ ! -z "$1" ]; then
+if [ -n "$1" ]; then
     name="$1"; shift
 else
     name="00-default"
 fi
 
 # default type
-if [ ! -z "$1" ]; then
+if [ -n "$1" ]; then
     type="$1"; shift
 else
     type="oneshot"

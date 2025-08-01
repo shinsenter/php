@@ -289,6 +289,7 @@ app-*)
         ;;
     sulu)
         # https://github.com/sulu/skeleton
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/symfony"
         ;;
     wordpress)
         # https://wordpress.org/documentation/category/installation
