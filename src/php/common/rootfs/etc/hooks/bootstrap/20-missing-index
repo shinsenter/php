@@ -28,10 +28,10 @@ if ! is-true $DISABLE_AUTORUN_GENERATING_INDEX; then
     if [ -z "$(ls -A "$APP_ROOT")" ]; then
         index_path="$APP_ROOT/index.php"
         if [ -n "$index_path" ]; then
-            debug-echo "Create $index_path."
+            debug-echo "Create missing $index_path."
             sample_index >"$index_path" && web-chown fix "$index_path" &>/dev/null || true
         else
-            debug-echo -w "Cannot create index.php."
+            debug-echo -w "Cannot create missing $index_path."
         fi
     else
         debug-echo "Skip creating index.php because $APP_ROOT is not empty."
