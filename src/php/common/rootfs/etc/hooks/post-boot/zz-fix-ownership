@@ -23,11 +23,8 @@ fi
 ################################################################################
 
 # create logs directory if it doesn't exist
-log_path="$(log-path)"
-if [ -n "$log_path" ]; then
-    web-mkdir "$(dirname "$log_path")"
-else
-    debug-echo -w "Cannot create logs directory."
+if [ -n "$DEFAULT_LOG_PATH" ]; then
+    web-mkdir "$(dirname "$DEFAULT_LOG_PATH")" &>/dev/null || true
 fi
 
 ################################################################################
