@@ -52,7 +52,7 @@ COMPOSER_VERSION="${COMPOSER_VERSION:-latest}"
 BUILD_NAME="$DEFAULT_BUILD_NAME"
 BUILD_DATE="$(date +%Y-%m-%dT%T%z)"
 BUILD_REVISION="$(git rev-parse HEAD)"
-BUILD_FROM_IMAGE=$DEFAULT_BUILD_NAME
+BUILD_FROM_IMAGE="$DEFAULT_BUILD_NAME"
 BUILD_SOURCE_IMAGE=
 BUILD_CONTEXT=
 BUILD_DOCKERFILE=
@@ -71,11 +71,11 @@ SKIP_BUILD=${SKIP_BUILD:-}
 SKIP_SQUASH=${SKIP_SQUASH:-}
 USE_BUILD_CACHE=${USE_BUILD_CACHE:-1}
 
-MIRROR_REPO="${MIRROR_REPO:-ghcr.io/shinsenter}"
+MIRROR_REPO="${MIRROR_REPO:-}"
 PREFIX="${APP//app-/}"
 SUFFIX=
 
-if [ "$OS" != "" ] && [ "$OS" != "debian" ]; then
+if [ -n "$OS" ] && [ "$OS" != "debian" ]; then
     SUFFIX="-$OS"
     OS_BASE="$OS"
 fi
@@ -374,7 +374,7 @@ if [ "$ALLOW_RC" != "1" ]; then
 fi
 
 # Skip build if the PHP version is earlier than 7.1 and the OS is not Debian
-if [ "$PHP_VERSION" != "" ] && verlt "$PHP_VERSION" "7.1" && [ "$OS_BASE" != "debian" ]; then
+if [ -n "$PHP_VERSION" ] && verlt "$PHP_VERSION" "7.1" && [ "$OS_BASE" != "debian" ]; then
     BUILD_DOCKERFILE=
     SKIP_BUILD=1
 fi
@@ -420,7 +420,7 @@ append_tags() {
 }
 
 # Generate build tags
-if [ "$PHP_VERSION" != "" ]; then
+if [ -n "$PHP_VERSION" ]; then
     if [ "$BUILD_NAME" == "$DEFAULT_BUILD_NAME" ]; then
         BUILD_TAGS="$BUILD_NAME:$PHP_VERSION-$PREFIX$SUFFIX"
         if [ "$PHP_VERSION" == "$LATEST_PHP" ]; then
@@ -494,7 +494,7 @@ fi
 BUILD_TAGS=${BUILD_TAGS//-rc/}
 
 # Apply tag prefix for development branch
-if [ "$BUILD_TAG_PREFIX" != "" ]; then
+if [ -n "$BUILD_TAG_PREFIX" ]; then
     BUILD_TAGS=${BUILD_TAGS//:/:$BUILD_TAG_PREFIX}
 
     if [ "$BUILD_FROM_IMAGE" != "php" ]; then
@@ -526,7 +526,7 @@ if [ "$PUBLISH_TO_GHCR" == "1" ]; then
 fi
 
 # Also push a copy to archived repo
-if [ "$ARCHIVES_REPO" != "" ] && [ "$BUILD_TAG_PREFIX" == "" ]; then
+if [ -n "$ARCHIVES_REPO" ] && [ "$BUILD_TAG_PREFIX" == "" ]; then
     unique_id="$(date +%Y%m%d)"
     BUILD_TAGS="$(append_tags "${DEFAULT_BUILD_NAME}:" "${ARCHIVES_REPO}:${unique_id}-" "$BUILD_TAGS" ":dev-")"
 fi
@@ -540,7 +540,7 @@ if [ "$DUMMY" == "1" ]; then
     BUILD_CACHE_KEY="(dummy@$BUILD_REVISION)"
 fi
 
-if [ "$BUILD_DOCKERFILE" != "" ] && [ -f $BUILD_DOCKERFILE ]; then
+if [ -n "$BUILD_DOCKERFILE" ] && [ -f $BUILD_DOCKERFILE ]; then
     BUILD_DOCKERFILE_SQUASHED="/tmp/squashed-$(basename $BUILD_DOCKERFILE)"
     BUILD_CONTEXT=$(dirname $BUILD_DOCKERFILE)
 
@@ -565,7 +565,7 @@ if [ "$BUILD_NAME" == "$DEFAULT_BUILD_NAME" ] && [ "$APP" == "cli" ] && [ "$PHP_
 fi
 
 # Parse description from README.md
-if [ "$BUILD_README" != "" ] && [ -f "$BUILD_README" ]; then
+if [ -n "$BUILD_README" ] && [ -f "$BUILD_README" ]; then
     BUILD_DESC="$(sed '3q;d' $BUILD_README)"
 
     # update readme on latest tag and not dev branch
@@ -598,18 +598,18 @@ fi
 
 BUILD_CACHE_KEY="($APP@$BUILD_TAG)${BUILD_CACHE_KEY:+/}$BUILD_CACHE_KEY"
 
-if [ "$S6_VERSION" != "" ]; then
+if [ -n "$S6_VERSION" ]; then
     BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(s6@$S6_VERSION)"
 fi
 
-if [ "$OS_BASE" != "" ]; then
+if [ -n "$OS_BASE" ]; then
     if [ "$SKIP_BUILD" != "1" ]; then
         OS_SHA="$(get_dockerhub_latest_sha "library/$OS_BASE" 1 "$OS_VERSION" | head -c19)"
     fi
     BUILD_CACHE_KEY="$BUILD_CACHE_KEY/($OS_BASE:$OS_VERSION@$OS_SHA)"
 fi
 
-if [ "$PHP_VERSION" != "" ]; then
+if [ -n "$PHP_VERSION" ]; then
     if [ "$SKIP_BUILD" != "1" ]; then
         PHP_SHA="$(get_dockerhub_latest_sha "library/php" 1 "$PHP_VERSION-${PHP_VARIANT#-}" | head -c19)"
     fi
@@ -644,7 +644,7 @@ remove_platform() {
 }
 
 # Remove some platforms for older PHP versions
-if [ "$PHP_VERSION" != "" ]; then
+if [ -n "$PHP_VERSION" ]; then
     if verlt "$PHP_VERSION" "7.1"; then
         BUILD_PLATFORM="linux/amd64,linux/arm/v7"
     elif [ "$OS_BASE" == "debian" ] && verlt "$PHP_VERSION" "8.1"; then
@@ -665,7 +665,7 @@ fi
 # Use mirror repos for pulling docker images
 ################################################################################
 
-if [ "$MIRROR_REPO" != "" ]; then
+if [ -n "$MIRROR_REPO" ]; then
     BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE//$DEFAULT_REPO/$MIRROR_REPO}
 fi
 
@@ -716,9 +716,11 @@ github_env UPDATE_README $UPDATE_README
 # Debug
 ################################################################################
 
-if [ "$SKIP_BUILD" != "1" ]; then
-    echo "🐧 Debug:"
-    path_hash $BUILD_CONTEXT
-    path_hash $BUILD_DOCKERFILE
-    path_hash $BASE_DIR/.github/workflows/template-*
-fi
+{
+    if [ "$SKIP_BUILD" != "1" ]; then
+        echo "🐧 Debug:"
+        path_hash $BUILD_CONTEXT
+        path_hash $BUILD_DOCKERFILE
+        path_hash $BASE_DIR/.github/workflows/template-*
+    fi
+} >&2

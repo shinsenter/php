@@ -11,8 +11,8 @@
 # TTY helper methods
 ################################################################################
 
-echo_error()    { echo $@ 1>&2; }
-echo_warning()  { echo $@ 1>&2; }
+echo_error()    { echo $@ >&2; }
+echo_warning()  { echo $@ >&2; }
 echo_info()     { echo $@; }
 echo_debug()    { echo $@; }
 
@@ -47,17 +47,17 @@ fetch_with_cache() {
     shift
 
     if [[ -f "$cache_file" ]]; then
-        echo "Cache found for $url" 1>&2
+        echo "Cache found for $url" >&2
         cat "$cache_file"
     else
-        echo "Fetching $url" 1>&2
+        echo "Fetching $url" >&2
         content=$(
             if [ "$TOKEN" != "" ]; then
-                curl --retry 3 --retry-delay 5 -ksSLRJ "$@" \
+                curl --retry 3 --retry-delay 5 -ksSLRJ $@ \
                     --header "Authorization: Bearer $TOKEN" \
                     "$url"
             else
-                curl --retry 3 --retry-delay 5 -ksSLRJ "$@" "$url"
+                curl --retry 3 --retry-delay 5 -ksSLRJ $@ "$url"
             fi
         )
 
@@ -110,8 +110,8 @@ get_dockerhub_latest_sha () { parse_json "$(get_dockerhub_json "$1" "name=${3:-l
 # Function to set environment variables
 github_env() {
     local name="$1"; shift
-    if [ -t 1 ]; then
-        echo "$name=$@"
+    if [ -t 1 ] || [ -z "$GITHUB_ENV" ]; then
+        echo "$name='$@'"
     else
         echo "$name=$@"
         echo "$name=$@" >> $GITHUB_ENV
