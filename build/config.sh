@@ -174,6 +174,11 @@ app-*)
     # USE_BUILD_CACHE=0
 
     case $APP_NAME in
+    bedrock)
+        # https://roots.io/bedrock/docs/installation
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/wordpress"
+        verlt "$PHP_VERSION" "8.0" && SKIP_BUILD=1
+        ;;
     cakephp4)
         # https://book.cakephp.org/4/en/installation.html
         LATEST_PHP="8.3"
@@ -250,7 +255,6 @@ app-*)
         ;;
     laravel)
         # https://laravel.com/docs/master/installation
-        ALLOW_RC=1
         BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         ;;
     magento)
@@ -285,7 +289,6 @@ app-*)
         ;;
     symfony)
         # https://symfony.com/doc/current/setup.html
-        ALLOW_RC=1
         ;;
     sulu)
         # https://github.com/sulu/skeleton
@@ -294,10 +297,6 @@ app-*)
     wordpress)
         # https://wordpress.org/documentation/category/installation
         ALLOW_RC=1
-        ;;
-    bedrock)
-        # https://roots.io/bedrock/docs/installation
-        verlt "$PHP_VERSION" "8.0" && SKIP_BUILD=1
         ;;
     yii)
         # https://www.yiiframework.com/doc/guide/2.0/en/start-installation

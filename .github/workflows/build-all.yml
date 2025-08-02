@@ -301,7 +301,6 @@ jobs:
       fail-fast: false
       matrix:
         app:
-          - app-bedrock
           - app-cakephp4
           - app-cakephp5
           - app-codeigniter4
@@ -354,6 +353,7 @@ jobs:
       fail-fast: false
       matrix:
         app:
+          - app-bedrock
           - app-coolify
           - app-hypervel
           - app-invoiceshelf

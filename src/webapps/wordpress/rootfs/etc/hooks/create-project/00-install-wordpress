@@ -1,11 +1,7 @@
 #!/usr/bin/env sh
-APP_PATH="$(app-path)"
-APP_ROOT="$(app-root)"
-WPCONFIG_URL=https://raw.githubusercontent.com/docker-library/wordpress/master/wp-config-docker.php
+source=https://raw.githubusercontent.com/docker-library/wordpress/master/wp-config-docker.php
 
 debug-echo -w "Install Wordpress to $APP_PATH."
-
-web-mkdir "$APP_PATH" "$WP_CLI_DIR" "$WP_CLI_CACHE_DIR" "$WP_CLI_PACKAGES_DIR"
 
 cd "$APP_PATH"
 wp core download \
@@ -16,7 +12,7 @@ if [ -f "$APP_PATH/wp-config-sample.php" ]; then
     php -r "copy('$APP_PATH/wp-config-sample.php', '$APP_PATH/wp-config-sample.original.php');"
 fi
 
-php -r "copy('$WPCONFIG_URL', '$APP_PATH/wp-config-sample.php');"
+php -r "copy('$source', '$APP_PATH/wp-config-sample.php');"
 
 
 # wp core install \
