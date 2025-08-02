@@ -39,7 +39,7 @@ RUN env-default CRONTAB_SETTINGS '*/5 * * * * curl http://localhost/wp/wp-cron.p
 
 ################################################################################
 
-RUN wp package install aaemnnosttv/wp-cli-dotenv-command:^2.0
+RUN wp-cli --allow-root package install aaemnnosttv/wp-cli-dotenv-command:^2.0 || true
 
 ################################################################################
 

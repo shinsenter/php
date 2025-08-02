@@ -14,7 +14,6 @@ fi
 
 php -r "copy('$source', '$APP_PATH/wp-config-sample.php');"
 
-
 # wp core install \
 #     --url=${WORDPRESS_URL:-localhost} \
 #     --title=${WORDPRESS_TITLE:-New Website} \
