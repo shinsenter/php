@@ -7,10 +7,27 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
+# fix missing APP_ROOT
+if [ "$APP_ROOT" != "$APP_PATH" ]; then
+    web-mkdir "$APP_ROOT"
+fi
+
+################################################################################
+
 # fix .htaccess to allow uri path after index.php
 if [ -f "$APP_ROOT/.htaccess" ]; then
     debug-echo "Fix .htaccess to allow uri path after index.php."
     sed -i 's|index\.php/|index.php?/|g' "$APP_ROOT/.htaccess" &>/dev/null
+fi
+
+################################################################################
+
+# create logs directory if it doesn't exist
+log_path="$(log-path)"
+if [ -n "$log_path" ]; then
+    web-mkdir "$(dirname "$log_path")"
+else
+    debug-echo -w "Cannot create logs directory."
 fi
 
 ################################################################################

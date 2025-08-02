@@ -13,9 +13,9 @@ ARG DOCKER_ENTRYPOINT=/usr/local/bin/docker-php-entrypoint
 
 ARG APP_PATH=${APP_PATH:-/var/www/html}
 ARG APP_GROUP=${APP_GROUP:-www-data}
-ARG APP_GID=${APP_GID:-1000}
+ARG APP_GID=${APP_GID:-33}
 ARG APP_USER=${APP_USER:-www-data}
-ARG APP_UID=${APP_UID:-1000}
+ARG APP_UID=${APP_UID:-33}
 
 ################################################################################
 
@@ -73,17 +73,8 @@ APK_PACKAGES='findutils run-parts shadow tar tzdata unzip xz' \
 APT_PACKAGES='procps xz-utils' \
 pkg-add bash ca-certificates coreutils curl htop less openssl msmtp upgrade
 
-# Install su-exec
-SU_EXEC_PATH=/sbin/su-exec
-SU_EXEC_URL=https://github.com/songdongsheng/su-exec/releases/download/1.3/su-exec-musl-static
-download "$SU_EXEC_URL" -o "$SU_EXEC_PATH"
-chmod 4755 "$SU_EXEC_PATH"
-
-# Correct UID/GID for www-data
-if has-cmd ownership; then
-    chown root:root $(command -v ownership)
-    chmod 4755      $(command -v ownership)
-fi
+# Setuid bit for some scripts
+chmod 4755 "$(command -v autorun)" "$(command -v ownership)" /usr/local/sbin/web-*
 
 # Replace sh binary with bash
 if has-cmd bash; then
@@ -93,6 +84,17 @@ if has-cmd bash; then
         ln -nsf "$(command -v bash)" "/bin/sh"
     fi
 fi
+
+# Patch nologin binary
+if [ ! -e /sbin/nologin ] && has-cmd nologin; then
+    ln -nsf "$(command -v nologin)" /sbin/nologin
+fi
+
+# Add default user and group
+ownership "$APP_GROUP" "$APP_GID" "$APP_USER" "$APP_UID"
+
+# Create default application directory
+web-mkdir "$APP_PATH"
 
 EOF
 
@@ -151,33 +153,20 @@ env-default SMTP_PASSWORD ''
 env-default SMTP_AUTH ''
 env-default SMTP_TLS ''
 
-# Patch nologin
-if [ ! -e /sbin/nologin ] && has-cmd nologin; then
-    ln -nsf "$(command -v nologin)" /sbin/nologin
-fi
-
-# Check if the group exists
-if ! getent group $APP_GROUP >/dev/null 2>&1; then
-    addgroup --system -g $APP_GID $APP_GROUP
-fi
-
-# Check if the user exists
-if ! getent passwd $APP_USER >/dev/null 2>&1; then
-    adduser --system --no-create-home --ingroup $APP_GROUP -u $APP_UID $APP_USER
-fi
-
-# Add mail group
-if ! getent group mail >/dev/null 2>&1; then
-    addgroup mail
-fi
+# Install su-exec
+su_exec_path=/sbin/su-exec
+su_exec_url=https://github.com/songdongsheng/su-exec/releases/download/1.3/su-exec-musl-static
+download "$su_exec_url" -o "$su_exec_path" && chmod 4755 "$su_exec_path"
 
 if ! has-cmd su-exec || [ "$(su-exec $APP_USER:$APP_GROUP whoami)" != "$APP_USER" ]; then
     echo 'Failed to install su-exec'
     exit 1
 fi
 
-# Setuid bit
-chmod 4755 $(command -v autorun) /usr/local/sbin/web-*
+# Add mail group
+if ! getent group mail >/dev/null 2>&1; then
+    groupadd mail
+fi
 
 # Configure sendmail with msmtp
 if has-cmd msmtp-wrapper; then
@@ -211,9 +200,6 @@ fi
 
 # Backup entrypoint
 if [ -f $DOCKER_ENTRYPOINT ]; then mv $DOCKER_ENTRYPOINT /init; fi
-
-# Create application directory
-web-mkdir "$APP_PATH"
 
 EOF
 
