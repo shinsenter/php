@@ -37,11 +37,11 @@ env-default COMPOSER_ALLOW_XDEBUG        '$(is-debug && echo 1 || echo 0)'
 env-default COMPOSER_FUND                '0'
 env-default COMPOSER_HTACCESS_PROTECT    '1'
 env-default COMPOSER_MEMORY_LIMIT        '-1'
+env-default COMPOSER_MINIMAL_CHANGES     '1'
 env-default COMPOSER_NO_AUDIT            '1'
 env-default COMPOSER_NO_INTERACTION      '1'
 env-default COMPOSER_OPTIMIZE_AUTOLOADER '0'
 env-default COMPOSER_PROCESS_TIMEOUT     '0'
-
 
 # Set IPE default settings
 env-default '# Environment variables for IPE'
