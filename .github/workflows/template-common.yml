@@ -37,6 +37,10 @@ on:
         required: false
         type: string
         default: ""
+      continue-on-error:
+        required: false
+        type: boolean
+        default: false
     secrets:
       DOCKER_HUB_ACCESS_TOKEN:
         required: true
@@ -69,20 +73,19 @@ jobs:
       PUBLISH_TO_GHCR: "1"
     steps:
       -
-        if: ${{ !env.SKIP_BUILD }}
         uses: actions/download-artifact@v4
         with:
           name: helper_cache
           path: /tmp/helper_cache/
 
       -
-        if: ${{ !env.SKIP_BUILD }}
         uses: actions/checkout@v4
         with:
           submodules: 'true'
 
       -
         name: Generate build config
+        continue-on-error: ${{ inputs.continue-on-error }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
@@ -95,7 +98,7 @@ jobs:
 
       -
         id: cache
-        if: ${{ !env.SKIP_BUILD && env.USE_BUILD_CACHE == '1' }}
+        if: ${{ success() && !env.SKIP_BUILD && env.USE_BUILD_CACHE == '1' }}
         uses: actions/cache@v4
         with:
           path: ${{ env.BUILD_CACHE_PATH }}
@@ -103,29 +106,29 @@ jobs:
           # restore-keys: ${{ runner.os }}-
 
       -
-        if: ${{ !env.SKIP_BUILD && env.USE_BUILD_CACHE == '1' && steps.cache.outputs.cache-hit == 'true' }}
+        if: ${{ success() && !env.SKIP_BUILD && env.USE_BUILD_CACHE == '1' && steps.cache.outputs.cache-hit == 'true' }}
         name: Skip building ${{ env.BUILD_TAG }}
         run: echo "SKIP_BUILD=1" >> $GITHUB_ENV
 
       -
-        if: ${{ !env.SKIP_BUILD }}
+        if: ${{ success() && !env.SKIP_BUILD }}
         uses: docker/setup-qemu-action@v3
 
       -
-        if: ${{ !env.SKIP_BUILD }}
+        if: ${{ success() && !env.SKIP_BUILD }}
         uses: docker/setup-buildx-action@v3
         with:
           driver-opts: network=host
 
       -
-        if: ${{ !env.SKIP_BUILD }}
+        if: ${{ success() && !env.SKIP_BUILD }}
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       -
-        if: ${{ !env.SKIP_BUILD && env.PUBLISH_TO_GHCR }}
+        if: ${{ success() && !env.SKIP_BUILD && env.PUBLISH_TO_GHCR }}
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -133,9 +136,10 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       -
-        if: ${{ !env.SKIP_BUILD && env.SKIP_SQUASH == '1' }}
+        if: ${{ success() && !env.SKIP_BUILD && env.SKIP_SQUASH == '1' }}
         name: Build and push ${{ env.BUILD_TAG }} using ${{ env.OS_BASE }}
         uses: docker/build-push-action@v6
+        continue-on-error: ${{ inputs.continue-on-error }}
         with:
           pull: false
           push: ${{ !env.SKIP_PUSH }}
@@ -173,9 +177,10 @@ jobs:
           # cache-to: type=local,dest=${{ env.BUILD_CACHE_PATH }}-new,mode=max
 
       -
-        if: ${{ !env.SKIP_BUILD && !env.SKIP_SQUASH }}
+        if: ${{ success() && !env.SKIP_BUILD && !env.SKIP_SQUASH }}
         name: Build ${{ env.BUILD_TAG }} using ${{ env.OS_BASE }}
         uses: docker/build-push-action@v6
+        continue-on-error: ${{ inputs.continue-on-error }}
         with:
           pull: false
           push: true
@@ -213,8 +218,9 @@ jobs:
           # cache-to: type=local,dest=${{ env.BUILD_CACHE_PATH }}-new,mode=max
 
       -
-        if: ${{ !env.SKIP_BUILD && !env.SKIP_SQUASH }}
+        if: ${{ success() && !env.SKIP_BUILD && !env.SKIP_SQUASH }}
         name: Make squashed Dockerfile for ${{ env.BUILD_TAG }}
+        continue-on-error: ${{ inputs.continue-on-error }}
         run: |
           # docker system prune -a --volumes -f
           docker pull "${{ env.BUILD_TMP_NAME }}"
@@ -224,9 +230,10 @@ jobs:
           df -h
 
       -
-        if: ${{ !env.SKIP_BUILD && !env.SKIP_SQUASH }}
+        if: ${{ success() && !env.SKIP_BUILD && !env.SKIP_SQUASH }}
         name: Squash and push ${{ env.BUILD_TAG }} using ${{ env.OS_BASE }}
         uses: docker/build-push-action@v6
+        continue-on-error: ${{ inputs.continue-on-error }}
         with:
           pull: false
           push: ${{ !env.SKIP_PUSH }}
@@ -240,7 +247,7 @@ jobs:
             PRESQUASH_SCRIPTS=cleanup
 
       -
-        if: ${{ env.BUILD_README != '' && env.UPDATE_README == '1' }}
+        if: ${{ success() && env.BUILD_README != '' && env.UPDATE_README == '1' }}
         name: Update ${{ env.BUILD_NAME }}/README.md
         uses: peter-evans/dockerhub-description@v4
         continue-on-error: true
