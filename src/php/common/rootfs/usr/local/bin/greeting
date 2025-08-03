@@ -1,21 +1,21 @@
 #!/usr/bin/env sh
-WELCOME_TXT=/etc/welcome.txt
-LICENSE_TXT=/license
-APP_USER="${APP_USER:=www-data}"
-APP_GROUP="${APP_GROUP:=www-data}"
+welcome_txt=/etc/welcome.txt
+license_txt=/license
+user="${APP_USER:=www-data}"
+group="${APP_GROUP:=www-data}"
 
 echo "
-$([ -f $WELCOME_TXT ] && cat $WELCOME_TXT | sed "s#%PATH%#$WELCOME_TXT#g")
+$([ -f $welcome_txt ] && cat $welcome_txt | sed "s#%PATH%#$welcome_txt#g")
 ---------------
-$([ -f $LICENSE_TXT ] && cat $LICENSE_TXT | sed "s#%EMAIL%#${MAINTAINER:-shin@shin.company}#g" | sed "s#%YEAR%#$(date +'%Y')#g")
+$([ -f $license_txt ] && cat $license_txt | sed "s#%EMAIL%#${MAINTAINER:-shin@shin.company}#g" | sed "s#%YEAR%#$(date +'%Y')#g")
 
 ---------------
 Container     : ${DOCKER_NAME:-shinsenter/php} (built: ${DOCKER_DATE:-$(date +'%Y-%m-%dT%T%z')})
 Distro        : $(source /etc/os-release && echo ${PRETTY_NAME:-Unknown})
 Timezone      : $(date +'%Z') (GMT$(date +'%z'))
-UID / GID     : $APP_USER:$APP_GROUP ($(id -u $APP_USER):$(id -g $APP_USER))
-App Root      : $(app-path)
-Document Root : $(app-root)
+UID / GID     : $user:$group ($(id -u $user):$(id -g $user))
+App Root      : $APP_PATH
+Document Root : $APP_ROOT
 ---------------
 "
 if [ -n "$S6_VERSION" ]; then echo "With s6-overlay $S6_VERSION"; fi

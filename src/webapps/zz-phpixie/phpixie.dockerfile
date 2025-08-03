@@ -31,13 +31,13 @@ ADD --link ./rootfs/ /
 ################################################################################
 
 # https://phpixie.com/quickstart.html
-ENV DOCUMENT_ROOT="/web"
+ENV DOCUMENT_ROOT="web"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 RUN env-default INITIAL_PROJECT "phpixie/project"
 
 ################################################################################
 
-RUN web-cmd phpixie 'php $(app-path)/console'
+RUN web-cmd phpixie 'php "$APP_PATH"/console'
 
 ################################################################################
 

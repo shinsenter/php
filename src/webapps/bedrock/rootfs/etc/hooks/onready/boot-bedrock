@@ -3,5 +3,3 @@ APP_PATH="$(app-path)"
 APP_ROOT="$(app-root)"
 
 debug-echo "Your web application must be in ${APP_PATH}."
-
-web-mkdir "$APP_PATH" "$WP_CLI_DIR" "$WP_CLI_CACHE_DIR" "$WP_CLI_PACKAGES_DIR"

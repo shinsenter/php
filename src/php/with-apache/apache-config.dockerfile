@@ -54,7 +54,7 @@ if [ -e $CONF_FILE ]; then
     fi
 fi
 
-# create folders
+# create directories
 mkdir -p /etc/apache2 \
     /etc/apache2/custom.d \
     /etc/apache2/conf-enabled \
@@ -80,20 +80,11 @@ fi
 
 # create s6 services
 if has-cmd s6-service; then
-    s6-service php-fpm longrun '#!/usr/bin/env sh
-cd "$(app-path)"
-exec php-fpm -y /usr/local/etc/php-fpm.d/zz-generated-settings.conf --nodaemonize --allow-to-run-as-root -d clear_env=no'
-
     s6-service apache depends php-fpm
     s6-service apache longrun '#!/usr/bin/env sh
-export APP_PATH="$(app-path)"
-export APP_ROOT="$(app-root)"
-export LOG_PATH="$(log-path stderr)"
 if [ -f /etc/apache2/envvars ]; then source /etc/apache2/envvars; fi
-
-cd "$APP_PATH"
-rm -f ${APACHE_PID:-/run/apache2.pid}
-exec apache2 -E $LOG_PATH -DFOREGROUND $(is-debug && echo '-X')
+rm -f "${APACHE_PID:-/run/apache2.pid}" || true
+cd "$APP_PATH" && exec apache2 -E "$(log-path stderr)" -DFOREGROUND $(is-debug && echo '-X')
 '
 fi
 

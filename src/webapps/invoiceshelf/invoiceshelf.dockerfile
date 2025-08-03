@@ -31,7 +31,7 @@ ADD --link ./rootfs/ /
 ################################################################################
 
 # https://docs.invoiceshelf.com/install/manual.html
-ENV DOCUMENT_ROOT="/public"
+ENV DOCUMENT_ROOT="public"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 ENV LARAVEL_ENABLE_SCHEDULER=1
 RUN env-default INITIAL_PROJECT "$(download https://api.github.com/repos/InvoiceShelf/InvoiceShelf/releases/latest | grep "browser_download_url.*InvoiceShelf.*zip" | cut -d \" -f 4)"

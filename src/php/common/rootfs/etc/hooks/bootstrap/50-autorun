@@ -7,8 +7,5 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 if ! has-cmd autorun; then exit 0; fi
-
 if is-true $DISABLE_AUTORUN_SCRIPTS; then exit 0; fi
-
-cd "$(app-path)"
-exec autorun /etc/autorun.d/ /startup/ 2>&1
+cd "$APP_PATH" && exec autorun /etc/autorun.d/ /startup/ 2>&1

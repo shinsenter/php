@@ -32,7 +32,7 @@ ADD  --link ./rootfs/ /
 ################################################################################
 
 # https://github.com/coollabsio/coolify
-ENV DOCUMENT_ROOT="/public"
+ENV DOCUMENT_ROOT="public"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 RUN env-default INITIAL_PROJECT "https://codeload.github.com/coollabsio/coolify/legacy.tar.gz/refs/tags/$(download https://api.github.com/repos/coollabsio/coolify/releases/latest | grep "tag_name" | cut -d \" -f 4)?ext=.tar.gz"
 
