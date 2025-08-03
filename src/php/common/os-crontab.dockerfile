@@ -12,9 +12,11 @@ echo 'Configure base crontab'
 [ -z "$DEBUG" ] || set -ex && set -e
 
 env-default '# Environment variables for crontab'
-env-default CRONTAB_SHELL   '/bin/sh'
-env-default CRONTAB_MAILTO  '$APP_ADMIN'
-env-default CRONTAB_OPTIONS ''
+env-default ENABLE_CRONTAB   '0'
+env-default CRONTAB_SETTINGS ''
+env-default CRONTAB_SHELL    '/bin/sh'
+env-default CRONTAB_MAILTO   '$APP_ADMIN'
+env-default CRONTAB_OPTIONS  ''
 
 if ! has-cmd crond; then
     pkg-add cron
@@ -24,12 +26,8 @@ fi
 if has-cmd s6-service; then
     s6-service crontab longrun '#!/usr/bin/env sh
 if is-true $ENABLE_CRONTAB; then
-    export APP_PATH="$(app-path)"
-    export APP_ROOT="$(app-root)"
-
-    cd "$APP_PATH"
     exec 2>&1
-    exec crond -f $CRONTAB_OPTIONS
+    cd "$APP_PATH" && exec crond -f $CRONTAB_OPTIONS
 else
     exec s6-svc -Od .
 fi

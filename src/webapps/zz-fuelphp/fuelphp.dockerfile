@@ -31,13 +31,13 @@ ADD --link ./rootfs/ /
 ################################################################################
 
 # https://fuelphp.com/docs/installation/instructions.html
-ENV DOCUMENT_ROOT="/public"
+ENV DOCUMENT_ROOT="public"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 RUN env-default INITIAL_PROJECT "fuel/fuel"
 
 ################################################################################
 
-RUN web-cmd oil 'php $(app-path)/bin/console'
+RUN web-cmd oil 'php "$APP_PATH"/bin/console'
 
 ################################################################################
 

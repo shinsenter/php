@@ -4,10 +4,10 @@
             "type": "php",
             "targets": {
                 "direct": {
-                    "root": "{{ APP_PATH }}{{ DOCUMENT_ROOT }}/"
+                    "root": "{{ APP_ROOT }}/"
                 },
                 "index": {
-                    "root": "{{ APP_PATH }}{{ DOCUMENT_ROOT }}/",
+                    "root": "{{ APP_ROOT }}/",
                     "script": "index.php"
                 }
             }
@@ -27,7 +27,7 @@
         },
         {
             "action": {
-                "share": "{{ APP_PATH }}{{ DOCUMENT_ROOT }}$uri",
+                "share": "{{ APP_ROOT }}$uri",
                 "fallback": {
                     "pass": "applications/{{ PHP_POOL_NAME }}/index"
                 }

@@ -225,14 +225,14 @@ docker run -p 80:80 -p 443:443 -p 443:443/udp \
 This changes the web application directory to `/app`.
 
 Moreover, the default document root
-(a relative path inside the application directory that contains your `index.php` file)
+(a relative path inside the `$APP_PATH` (application directory) that contains your `index.php` file)
 can be customized by setting the `$DOCUMENT_ROOT` environment variable:
 
 ```shell
 docker run -p 80:80 -p 443:443 -p 443:443/udp \
     -v "$PWD":/app \
     -e APP_PATH=/app \
-    -e DOCUMENT_ROOT=/public \
+    -e DOCUMENT_ROOT=public \
     shinsenter/php:8.4-fpm-nginx
 ```
 

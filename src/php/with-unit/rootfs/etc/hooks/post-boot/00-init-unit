@@ -6,7 +6,6 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 unit_socket="${UNIT_CONTROL_SOCKET:-/run/control.unit.sock}"
 unit_pid_file="${UNIT_CONTROL_PID:-/run/unit.pid}"
 
@@ -31,6 +30,8 @@ initial() {
     if [[ -e /var/lib/unit/conf.json ]]; then
         return 0
     fi
+
+
 
     "$unitd_bin" --control "unix:$unit_socket"
 

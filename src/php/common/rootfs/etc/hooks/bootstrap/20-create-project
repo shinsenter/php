@@ -8,8 +8,6 @@
 ################################################################################
 if ! has-cmd php; then exit 0; fi
 
-APP_PATH="$(app-path)"
-APP_ROOT="$(app-root)"
 ENV_PATH="$APP_PATH/.env"
 CONF_PATH="$APP_PATH/composer.json"
 
@@ -131,7 +129,7 @@ if [ -z "$(ls -A "$APP_PATH")" ]; then
         debug-echo "Updating required packages in $APP_PATH."
 
         hook pre-update-packages
-        composer_exec update -n -W $COMPOSER_UPDATE_OPTIONS
+        composer_exec update -n -W --bump-after-update $COMPOSER_UPDATE_OPTIONS
         hook post-update-packages
 
         web-chown "Required packages in $APP_PATH were updated."

@@ -8,21 +8,35 @@
 ################################################################################
 if [ "$(id -u)" != "0" ]; then debug-echo -e "!!! Please run this container as the root user !!!" >&2; exit 1; fi
 
-APP_PATH="$(app-path)"
-
 debug-echo "Initialize container"
-mkdir -p "$APP_PATH"
+
+################################################################################
 
 # set timezone
 export TZ="${TZ:=UTC}"
-if [ ! -z "$TZ" ] && [ -e /usr/share/zoneinfo/$TZ ]; then
+if [ -n "$TZ" ] && [ -e /usr/share/zoneinfo/$TZ ]; then
     ln -nsf /usr/share/zoneinfo/$TZ /etc/localtime
     echo $TZ >/etc/timezone
 fi
 
-# activity logging
-touch /var/log/startup.log
-echo "$(date) $(whoami)@$(hostname):$(pwd)\$ $0 $SUPERVISOR_PHP_COMMAND $@" >>/var/log/startup.log
+# fix ownership
+ownership "${APP_GROUP:-www-data}" "${APP_GID:-}" "${APP_USER:-www-data}" "${APP_UID:-}"
+
+set -e
+
+# ensure application directory exists
+APP_PATH="$(app-path)"
+debug-echo "Create $APP_PATH if not exists"
+web-mkdir "$APP_PATH"
+
+# change working directory
+[ -d "$APP_PATH" ] && cd "$APP_PATH"
+
+################################################################################
+
+hook pre-boot
+
+################################################################################
 
 # load the $ENV in ~/.bashrc
 ENV_CHECK='if [ -x "$ENV" ]; then source "$ENV"; fi'
@@ -38,12 +52,9 @@ if is-true $ALLOW_RUNTIME_PHP_ENVVARS && has-cmd php && has-cmd php-envvars; the
     php-envvars export_envvars 2>&1
 fi
 
-# change working directory
-if [ -d "$APP_PATH" ]; then cd "$APP_PATH"; fi
+################################################################################
 
-set -e
-
-if [ ! -z "$SUPERVISOR_PHP_COMMAND" ]; then
+if [ -n "$SUPERVISOR_PHP_COMMAND" ]; then
     # run bootstrap hook to initialize the container
     hook bootstrap post-boot onready
 

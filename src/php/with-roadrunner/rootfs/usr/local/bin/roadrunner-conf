@@ -6,10 +6,10 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
-conf_dir="$(app-path)"
 disable="$([ "${1:0:1}" = "#" ] && echo "# " || echo "")"
 name="${1/#/}"; shift
-if [ -d $conf_dir ]; then
-    grep -lr "^ *#* *${name}: " $conf_dir | grep '.rr.yaml$' | xargs -r sed -i "s~^\( *\)#* *${name}: *.*\$~\1${disable}${name}: $@~g" &>/dev/null
-fi
+find "$APP_PATH" -type f -name "*.rr.yaml" -print0 | while IFS= read -r -d '' file; do
+    if grep -qE "^ *#* *${name}: " "$file"; then
+        sed -i -E "s~^\( *\)#* *${name}: *.*\$~\1${disable}${name}: $@~g" "$file"
+    fi
+done

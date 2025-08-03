@@ -31,7 +31,7 @@ ADD --link ./rootfs/ /
 ################################################################################
 
 # https://www.slimframework.com/docs/v4/start/installation.html
-ENV DOCUMENT_ROOT="/public"
+ENV DOCUMENT_ROOT="public"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 RUN env-default INITIAL_PROJECT "slim/slim-skeleton"
 

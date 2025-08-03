@@ -7,21 +7,6 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-# fix ownership
-ownership "${APP_GROUP:-www-data}" "${APP_GID:-}" "${APP_USER:-www-data}" "${APP_UID:-}"
-
-hook pre-boot
-
-################################################################################
-
-# ensure application directory exists
-APP_PATH="$(app-path)"
-debug-echo "Create $APP_PATH if not exists"
-web-mkdir "$APP_PATH" "$(dirname "$(log-path)")" 2>/dev/null || true
-chmod 4755 "$APP_PATH"
-
-################################################################################
-
 # first run hook
 FIRST_RUN_FLAG="/var/local/first-run"
 if [ ! -e "$FIRST_RUN_FLAG" ]; then
@@ -32,3 +17,9 @@ else
 fi
 
 hook onboot
+
+################################################################################
+
+# activity logging
+touch /var/log/startup.log
+echo "$(date) $(whoami)@$(hostname):$(pwd)\$ $0 $SUPERVISOR_PHP_COMMAND $@" >>/var/log/startup.log

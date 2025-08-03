@@ -7,9 +7,10 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-APP_PATH="$(app-path)"
-APP_ROOT="$(app-root)"
-INDEX_PATH="$(app-index)"
+# fix missing APP_ROOT
+if [ "$APP_ROOT" != "$APP_PATH" ]; then
+    web-mkdir "$APP_ROOT"
+fi
 
 ################################################################################
 
@@ -21,21 +22,43 @@ fi
 
 ################################################################################
 
+# create logs directory if it doesn't exist
+if [ -n "$DEFAULT_LOG_PATH" ]; then
+    web-mkdir "$(dirname "$DEFAULT_LOG_PATH")" &>/dev/null || true
+fi
+
+################################################################################
+
 # fix ownership
 if ! is-true $DISABLE_AUTORUN_FIX_OWNER_GROUP; then
+    index_path="$(app-index)"
+    need_fixed=0
     if is-true $FIX_APP_PATH_PERMISSION || is-true $FIX_WEBHOME_PERMISSION; then
         debug-echo "Fix ownership for the application path."
-        web-chown fix
-    elif [ -f "$INDEX_PATH" ]; then
-        owner="$(ls -ld "$INDEX_PATH" | awk '{print $3 ":" $4}')"
+        need_fixed=1
+    elif [ -f "$index_path" ]; then
+        owner="$(ls -ld "$index_path" | awk '{print $3 ":" $4}')"
         debug-echo "Verify ownership for the application path."
         debug-echo "Detected owner: $owner"
         debug-echo "Expected owner: $APP_USER:$APP_GROUP"
 
         if [ "$owner" != "$APP_USER:$APP_GROUP" ]; then
-            web-chown fix
+            need_fixed=1
         fi
     fi
+
     rm -rf "$(web-chown path)"
+
+    if [ "$need_fixed" -eq 1 ]; then
+        start_time=$(date +%s)
+        web-chown fix
+        end_time=$(date +%s)
+        elapsed=$(( end_time - start_time ))
+        if [ "$elapsed" -gt 10 ]; then
+            debug-echo -w "The ownership-fix process ensures the user '$APP_USER' can read and write files in $APP_PATH. "
+            debug-echo -w "If this takes too long and delays container startup, set the environment variable 'DISABLE_AUTORUN_FIX_OWNER_GROUP=1' to disable it."
+            debug-echo -w "You'll then need to manually fix ownership yourself and rebuild the Docker image."
+        fi
+    fi
 fi
 

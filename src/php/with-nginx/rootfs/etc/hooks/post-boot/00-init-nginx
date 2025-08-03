@@ -12,17 +12,17 @@ nginx-conf 'pid'  "${NGINX_PID:-/run/nginx.pid}"
 
 # set variables
 echo "
-set \$APP_PATH $(app-path);
-set \$APP_ROOT $(app-root);
+set \$APP_PATH '$APP_PATH';
+set \$APP_ROOT '$APP_ROOT';
 " >/etc/nginx/custom.d/00-set-variables.conf
 
 # adjust max upload size
-if [ ! -z "$PHP_POST_MAX_SIZE" ]; then
+if [ -n "$PHP_POST_MAX_SIZE" ]; then
     echo "client_max_body_size ${PHP_POST_MAX_SIZE};" >/etc/nginx/custom.d/00-client_max_body_size.conf
 fi
 
 # adjust max timeout
-if [ ! -z "$PHP_MAX_EXECUTION_TIME" ] && [ "$PHP_MAX_EXECUTION_TIME" -gt "0" ]; then
+if [ -n "$PHP_MAX_EXECUTION_TIME" ] && [ "$PHP_MAX_EXECUTION_TIME" -gt "0" ]; then
     echo "
 send_timeout        ${PHP_MAX_EXECUTION_TIME};
 client_body_timeout ${PHP_MAX_EXECUTION_TIME};

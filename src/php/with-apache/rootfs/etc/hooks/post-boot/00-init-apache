@@ -6,12 +6,9 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
-export APP_PATH="$(app-path)"
-export APP_ROOT="$(app-root)"
 export APACHE_PID="${APACHE_PID:-/run/apache2.pid}"
 
-if [ ! -z "$PHP_MAX_EXECUTION_TIME" ] && [ "$PHP_MAX_EXECUTION_TIME" -gt "0" ]; then
+if [ -n "$PHP_MAX_EXECUTION_TIME" ] && [ "$PHP_MAX_EXECUTION_TIME" -gt "0" ]; then
     echo "
 Timeout ${PHP_MAX_EXECUTION_TIME}
 <IfModule proxy_module>

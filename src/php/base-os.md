@@ -234,7 +234,6 @@ These Docker images include additional environment variables for fine-tuning con
 | `DEBUG` or `DEBUG_MODE`            | Not set          | Enables verbose logging when set to `1`. | `1` |
 | `TZ`                               | `UTC`            | Sets the container’s default timezone. See the [full list of timezones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). | `Asia/Tokyo` |
 | `DISABLE_AUTORUN_SCRIPTS`          | Not set          | Disables all autorun scripts when set to `1`. | `1` |
-| `DISABLE_AUTORUN_GENERATING_INDEX` | Not set          | Skips creation of `index.php` when set to `1`. By default, an `index.php` file is generated in `$DOCUMENT_ROOT` if it doesn't already exist. | `1` |
 | `DISABLE_AUTORUN_FIX_OWNER_GROUP`  | Not set          | Disables automatic correction of ownership for the application directory when set to `1`. | `1` |
 | `DISABLE_GREETING`                 | Not set          | Suppresses the startup greeting message when set to `1`. | `1` |
 | `ENABLE_CRONTAB`                   | Not set          | Enables the Crontab service when set to `1`, loading job definitions from `$CRONTAB_DIR` (default: `/etc/crontab.d`). | `1` |

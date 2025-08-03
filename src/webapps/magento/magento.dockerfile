@@ -32,7 +32,7 @@ ADD https://raw.githubusercontent.com/magento/magento2/2.4/nginx.conf.sample /et
 ################################################################################
 
 # https://experienceleague.adobe.com/en/docs/commerce-operations/installation-guide/system-requirements
-ENV DOCUMENT_ROOT="/pub"
+ENV DOCUMENT_ROOT="pub"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 RUN env-default INITIAL_PROJECT "magento/community-edition"
 
@@ -55,7 +55,7 @@ if grep -qF 'location / {' /etc/nginx/custom.d/magento.conf; then
 fi
 
 # make aliases
-web-cmd magento 'php $(app-path)/bin/magento'
+web-cmd magento 'php "$APP_PATH"/bin/magento'
 
 EOF
 

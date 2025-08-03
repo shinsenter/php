@@ -31,7 +31,7 @@ ADD --link ./rootfs/ /
 ################################################################################
 
 # https://laravel.com/docs/master/installation
-ENV DOCUMENT_ROOT="/public"
+ENV DOCUMENT_ROOT="public"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 RUN env-default INITIAL_PROJECT "laravel/laravel"
 
@@ -50,14 +50,12 @@ env-default LARAVEL_ENABLE_PULSE        '0'
 env-default LARAVEL_ENABLE_REVERB       '0'
 
 # make artisan command alias
-web-cmd artisan 'php $(app-path)/artisan'
+web-cmd artisan 'php "$APP_PATH"/artisan'
 
 if has-cmd s6-service; then
     # create queue service
     s6-service queue_worker longrun '#!/usr/bin/env sh
 if is-true $LARAVEL_ENABLE_QUEUE_WORKER; then
-    export APP_PATH="$(app-path)"
-    export APP_ROOT="$(app-root)"
     cd "$APP_PATH" && exec artisan queue:work $LARAVEL_QUEUE_WORKER_OPTIONS
 else
     exec s6-svc -Od .
@@ -67,8 +65,6 @@ fi
     # create scheduler service
     s6-service scheduler longrun '#!/usr/bin/env sh
 if is-true $LARAVEL_ENABLE_SCHEDULER; then
-    export APP_PATH="$(app-path)"
-    export APP_ROOT="$(app-root)"
     cd "$APP_PATH" && exec artisan schedule:work $LARAVEL_SCHEDULER_OPTIONS
 else
     exec s6-svc -Od .
@@ -78,8 +74,6 @@ fi
     # create Horizon service
     s6-service horizon longrun '#!/usr/bin/env sh
 if is-true $LARAVEL_ENABLE_HORIZON; then
-    export APP_PATH="$(app-path)"
-    export APP_ROOT="$(app-root)"
     cd "$APP_PATH" && exec artisan horizon $LARAVEL_HORIZON_OPTIONS
 else
     exec s6-svc -Od .
@@ -89,8 +83,6 @@ fi
     # create Pulse service
     s6-service pulse longrun '#!/usr/bin/env sh
 if is-true $LARAVEL_ENABLE_PULSE; then
-    export APP_PATH="$(app-path)"
-    export APP_ROOT="$(app-root)"
     cd "$APP_PATH" && exec artisan pulse:check $LARAVEL_PULSE_OPTIONS
 else
     exec s6-svc -Od .
@@ -100,8 +92,6 @@ fi
     # create Reverb service
     s6-service reverb longrun '#!/usr/bin/env sh
 if is-true $LARAVEL_ENABLE_REVERB; then
-    export APP_PATH="$(app-path)"
-    export APP_ROOT="$(app-root)"
     cd "$APP_PATH" && exec artisan reverb:start $(is-debug && echo --debug) $LARAVEL_REVERB_OPTIONS
 else
     exec s6-svc -Od .

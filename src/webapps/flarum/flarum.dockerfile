@@ -31,13 +31,13 @@ ADD --link ./rootfs/ /
 ################################################################################
 
 # https://docs.flarum.org/install/
-ENV DOCUMENT_ROOT="/public"
+ENV DOCUMENT_ROOT="public"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 RUN env-default INITIAL_PROJECT "flarum/flarum"
 
 ################################################################################
 
-RUN web-cmd flarum 'php $(app-path)/flarum'
+RUN web-cmd flarum 'php "$APP_PATH"/flarum'
 
 ################################################################################
 

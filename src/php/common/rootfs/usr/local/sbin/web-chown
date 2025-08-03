@@ -6,7 +6,6 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 del_flg=/etc/.fix-ownership
 
 case "$1" in
@@ -19,7 +18,7 @@ fix)
     fi
 
     for target; do
-        if [ ! -z "$target" ] && [ -e "$target" ]; then
+        if [ -n "$target" ] && [ -e "$target" ]; then
             debug-echo "Fix ownership for $target."
             {
                 find "$target" -type f -exec chown "$APP_USER:$APP_GROUP" {} + &
@@ -34,6 +33,6 @@ path)
     ;;
 *)
     touch $del_flg
-    if [ ! -z "$@" ]; then debug-echo "$@"; fi
+    if [ -n "$@" ]; then debug-echo "$@"; fi
     ;;
 esac

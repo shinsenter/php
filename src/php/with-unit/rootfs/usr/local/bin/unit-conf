@@ -6,7 +6,7 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-socket="${UNIT_CONTROL_SOCKET:-/run/control.unit.sock}"
+unit_socket="${UNIT_CONTROL_SOCKET:-/run/control.unit.sock}"
 default_config_path="config/"
 tmpfile=""
 
@@ -56,7 +56,7 @@ fi
 
 http_body="$(mktemp)"
 http_code=$(download -X PUT --data-binary @"$config_file" \
-    --unix-socket "$socket" \
+    --unix-socket "$unit_socket" \
     -w "%{http_code}" -o "$http_body" \
     "http://localhost/$config_path")
 

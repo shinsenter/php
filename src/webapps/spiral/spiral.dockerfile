@@ -31,7 +31,7 @@ ADD --link ./rootfs/ /
 ################################################################################
 
 # https://spiral.dev/docs/start-installation/current/en
-ENV DOCUMENT_ROOT="/public"
+ENV DOCUMENT_ROOT="public"
 ENV DISABLE_AUTORUN_COPYING_SOURCE=1
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 RUN env-default INITIAL_PROJECT "spiral/app"

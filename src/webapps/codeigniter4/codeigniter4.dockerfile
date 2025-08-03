@@ -31,13 +31,13 @@ ADD --link ./rootfs/ /
 ################################################################################
 
 # https://codeigniter.com/user_guide/installation/index.html
-ENV DOCUMENT_ROOT="/public"
+ENV DOCUMENT_ROOT="public"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 RUN env-default INITIAL_PROJECT "codeigniter4/appstarter"
 
 ################################################################################
 
-RUN web-cmd spark 'php $(app-path)/spark'
+RUN web-cmd spark 'php "$APP_PATH"/spark'
 
 ################################################################################
 

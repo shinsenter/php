@@ -8,8 +8,11 @@
 ################################################################################
 
 for dir; do
-    if [ ! -z "$dir" ] && [ ! -f "$dir" ]; then
-        mkdir -vpm 4755 "$dir"
-        if [ -d "$dir" ]; then chown "$APP_USER:$APP_GROUP" "$dir"; fi
+    if [ -n "$dir" ] && [ ! -f "$dir" ]; then
+        install -d -v \
+            -g "$APP_GROUP" \
+            -o "$APP_USER" \
+            -m 0755 \
+            -- "$dir" 2>&1 | sed 's/^install: //'
     fi
 done

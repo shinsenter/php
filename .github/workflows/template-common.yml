@@ -62,6 +62,7 @@ jobs:
           - '5000:5000'
     env:
       ARCHIVES_REPO: "shinsenter/php-archives"
+      MIRROR_REPO: ghcr.io/shinsenter
       DOCKER_BUILD_RECORD_UPLOAD: false
       DOCKER_BUILD_SUMMARY: false
       DOCKER_BUILDKIT: "1"
@@ -82,10 +83,14 @@ jobs:
 
       -
         name: Generate build config
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
+          BUILD_TAG_PREFIX: ${{ inputs.tag_prefix }}
         run: |
-          export GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
-          export DOCKERHUB_TOKEN="${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}"
-          export BUILD_TAG_PREFIX="${{ inputs.tag_prefix }}"
+          set -e
           ./build/config.sh "${{ inputs.os }}" "${{ inputs.app_name }}" "${{ inputs.php_version }}" "${{ inputs.server }}"
 
       -

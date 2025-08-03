@@ -31,13 +31,13 @@ ADD --link ./rootfs/ /
 ################################################################################
 
 # https://book.cakephp.org/5/en/installation.html
-ENV DOCUMENT_ROOT="/webroot"
+ENV DOCUMENT_ROOT="webroot"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 RUN env-default INITIAL_PROJECT "cakephp/app:~5.0"
 
 ################################################################################
 
-RUN web-cmd cake '$(app-path)/bin/cake'
+RUN web-cmd cake '"$APP_PATH"/bin/cake'
 
 ################################################################################
 

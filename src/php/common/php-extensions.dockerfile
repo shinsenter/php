@@ -37,11 +37,11 @@ env-default COMPOSER_ALLOW_XDEBUG        '$(is-debug && echo 1 || echo 0)'
 env-default COMPOSER_FUND                '0'
 env-default COMPOSER_HTACCESS_PROTECT    '1'
 env-default COMPOSER_MEMORY_LIMIT        '-1'
+env-default COMPOSER_MINIMAL_CHANGES     '1'
 env-default COMPOSER_NO_AUDIT            '1'
 env-default COMPOSER_NO_INTERACTION      '1'
 env-default COMPOSER_OPTIMIZE_AUTOLOADER '0'
 env-default COMPOSER_PROCESS_TIMEOUT     '0'
-
 
 # Set IPE default settings
 env-default '# Environment variables for IPE'
@@ -214,7 +214,7 @@ phpaddmod @composer \
 
 # Install prestissimo for Composer v1.x
 major_version=$(composer --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | cut -d. -f1)
-if [ ! -z "$major_version" ] && [ "$major_version" -lt 2 ]; then
+if [ -n "$major_version" ] && [ "$major_version" -lt 2 ]; then
     composer global require hirak/prestissimo
 fi
 
@@ -223,6 +223,13 @@ has-cmd php      && web-cmd root php      "$(command -v php)"
 has-cmd php-fpm  && web-cmd root php-fpm  "$(command -v php-fpm)"
 has-cmd pecl     && web-cmd root pecl     "$(command -v pecl)"
 has-cmd composer && web-cmd root composer "$(command -v composer)"
+
+# Create s6 services for PHP-FPM
+if has-cmd php-fpm && has-cmd s6-service; then
+    s6-service php-fpm longrun '#!/usr/bin/env sh
+config="/usr/local/etc/php-fpm.d/zz-generated-settings.conf"
+cd "$APP_PATH" && exec php-fpm -y "$config" --nodaemonize --allow-to-run-as-root -d clear_env=no'
+fi
 
 EOF
 

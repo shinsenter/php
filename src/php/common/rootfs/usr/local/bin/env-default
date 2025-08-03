@@ -15,21 +15,22 @@ if [[ ! -f "$conf_path" ]]; then
     cat <<'EOSH' > "$conf_path"
 #!/bin/sh
 APP_PATH="$(app-path)"
-[ -d "$APP_PATH" ] && cd "$APP_PATH"
+APP_ROOT="$(app-root)"
 
 PATH="${PATH#/usr/local/aliases:}"
-
 [ -n "$COMPOSER_HOME" ] && case ":$PATH:" in
     *":$COMPOSER_HOME/vendor/bin:"*) ;;
     *) PATH="$COMPOSER_HOME/vendor/bin:$PATH" ;;
 esac
-
 case ":$PATH:" in
     *":$APP_PATH/vendor/bin:"*) ;;
     *) PATH="$APP_PATH/vendor/bin:$PATH" ;;
 esac
 
-export PATH
+export PATH APP_PATH APP_ROOT
+
+web-mkdir "$APP_PATH" || true
+[ -d "$APP_PATH" ] && cd "$APP_PATH"
 EOSH
 
     chmod +x "$conf_path"

@@ -31,14 +31,14 @@ ADD --link ./rootfs/ /
 ################################################################################
 
 # https://symfony.com/doc/current/setup.html
-ENV DOCUMENT_ROOT="/public"
+ENV DOCUMENT_ROOT="public"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 RUN env-default INITIAL_PROJECT "symfony/skeleton"
 
 ################################################################################
 
-RUN web-cmd console 'php $(app-path)/bin/console'
-RUN web-cmd symfony 'php $(app-path)/bin/console'
+RUN web-cmd console 'php "$APP_PATH"/bin/console'
+RUN web-cmd symfony 'php "$APP_PATH"/bin/console'
 
 ################################################################################
 

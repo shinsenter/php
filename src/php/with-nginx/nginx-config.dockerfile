@@ -25,7 +25,7 @@ usermod -G $SUPP_GROUPS,nginx $APP_USER &>/dev/null || true
 # disable PHP-FPM logging to stdout
 env-default PHP_ACCESS_LOG '/var/log/php-fpm.log'
 
-# create folders
+# create directories
 mkdir -p /etc/nginx \
     /etc/nginx/custom.d \
     /etc/nginx/modules-enabled \
@@ -40,18 +40,10 @@ mkdir -p /etc/nginx \
 
 # create s6 services
 if has-cmd s6-service; then
-    s6-service php-fpm longrun '#!/usr/bin/env sh
-cd "$(app-path)"
-exec php-fpm -y /usr/local/etc/php-fpm.d/zz-generated-settings.conf --nodaemonize --allow-to-run-as-root -d clear_env=no'
-
     s6-service nginx depends php-fpm
     s6-service nginx longrun '#!/usr/bin/env sh
-export APP_PATH="$(app-path)"
-export APP_ROOT="$(app-root)"
-
-cd "$APP_PATH"
-rm -rf ${NGINX_PID:-/run/nginx.pid}
-exec nginx -g "daemon off;"
+rm -rf "${NGINX_PID:-/run/nginx.pid}" || true
+cd "$APP_PATH" && exec nginx -g "daemon off;"
 '
 fi
 

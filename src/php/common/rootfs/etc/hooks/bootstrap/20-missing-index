@@ -8,14 +8,10 @@
 ################################################################################
 if ! has-cmd php; then exit 0; fi
 
-APP_PATH="$(app-path)"
-APP_ROOT="$(app-root)"
-
 ################################################################################
 
-create_index() {
-    local index_path="${1:-$APP_ROOT}/index.php"
-    cat <<PHP >"$index_path"
+sample_index() {
+    cat <<PHP
 <?php
 // generated at $(date)
 if ((bool) trim((string) shell_exec('is-debug && echo 1 || echo 0'))) {
@@ -24,18 +20,19 @@ if ((bool) trim((string) shell_exec('is-debug && echo 1 || echo 0'))) {
     echo 'It works!';
 }
 PHP
-    web-chown fix "$index_path" &>/dev/null
 }
-
-################################################################################
-
-web-mkdir "$APP_ROOT" && cd "$APP_ROOT"
 
 # create index.php when it doesn't exist
 if ! is-true $DISABLE_AUTORUN_GENERATING_INDEX; then
+    web-mkdir "$APP_ROOT"
     if [ -z "$(ls -A "$APP_ROOT")" ]; then
-        debug-echo "Create index.php"
-        create_index "$APP_ROOT"
+        index_path="$APP_ROOT/index.php"
+        if [ -n "$index_path" ]; then
+            debug-echo "Create missing $index_path."
+            sample_index >"$index_path" && web-chown fix "$index_path" &>/dev/null || true
+        else
+            debug-echo -w "Cannot create missing $index_path."
+        fi
     else
         debug-echo "Skip creating index.php because $APP_ROOT is not empty."
     fi
