@@ -2,7 +2,7 @@
 	{$CADDY_GLOBAL_OPTIONS}
 
 	frankenphp {
-		# worker {$APP_PATH}{$DOCUMENT_ROOT}/index.php
+		# worker {$APP_ROOT}/index.php
 		{$FRANKENPHP_CONFIG}
 	}
 }
@@ -20,7 +20,7 @@
 
 	tls /etc/ssl/site/server.crt /etc/ssl/site/server.key
 
-	root * {$APP_PATH}{$DOCUMENT_ROOT}
+	root * {$APP_ROOT}
 	encode zstd br gzip
 
 	{$CADDY_SERVER_EXTRA_DIRECTIVES}

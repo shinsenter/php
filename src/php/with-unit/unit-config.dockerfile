@@ -17,15 +17,15 @@ if [ -z "$BUILD_SOURCE_IMAGE" ]; then
     exit 0
 fi
 
-# create folders
+# create directories
 mkdir -p /etc/unit /etc/unit/sites-enabled \
     /var/lib/unit /var/log/unit /run/unit
 
 # create s6 services
 if has-cmd s6-service; then
     s6-service unit longrun '#!/usr/bin/env sh
-UNIT_CONTROL_PID=${UNIT_CONTROL_PID:-/run/unit.pid}
-UNIT_CONTROL_SOCKET=${UNIT_CONTROL_SOCKET:-/run/control.unit.sock}
+unit_pid="${UNIT_CONTROL_PID:-/run/unit.pid}"
+unit_socket="${UNIT_CONTROL_SOCKET:-/run/control.unit.sock}"
 
 if is-debug && has-cmd unitd-debug; then
     unitd="$(command -v unitd-debug)"
@@ -33,16 +33,12 @@ else
     unitd="$(command -v unitd)"
 fi
 
-export APP_PATH="$(app-path)"
-export APP_ROOT="$(app-root)"
-
-cd "$APP_PATH"
-rm -rf $UNIT_CONTROL_PID
-exec "$unitd" --no-daemon \
-    --user ${APP_USER:-www-data} \
-    --group ${APP_GROUP:-www-data} \
-    --control unix:$UNIT_CONTROL_SOCKET \
-    --pid $UNIT_CONTROL_PID \
+rm -rf "$unit_pid" || true
+cd "$APP_PATH" && exec "$unitd" --no-daemon \
+    --user "${APP_USER:-www-data}" \
+    --group "${APP_GROUP:-www-data}" \
+    --control unix:"$unit_socket" \
+    --pid "$unit_pid" \
     --log "$(log-path stdout)"
 '
 fi

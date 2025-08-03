@@ -14,7 +14,7 @@ ARG BUILDKIT_SBOM_SCAN_STAGE=true
 
 ################################################################################
 
-ARG BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-shinsenter/phpfpm-apache}
+ARG BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-shinsenter/symfony}
 ARG BUILD_TAG_PREFIX=${BUILD_TAG_PREFIX:-}
 
 ARG PHP_VERSION=${PHP_VERSION:-8.4}
@@ -31,15 +31,13 @@ ADD --link ./rootfs/ /
 ################################################################################
 
 # https://github.com/sulu/skeleton
-ENV DOCUMENT_ROOT="/public"
+ENV DOCUMENT_ROOT="public"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 RUN env-default INITIAL_PROJECT "sulu/skeleton"
 
 ################################################################################
 
-RUN web-cmd console 'php $(app-path)/bin/console'
-RUN web-cmd symfony 'php $(app-path)/bin/console'
-RUN web-cmd sulu 'php $(app-path)/bin/console'
+RUN web-cmd sulu 'php "$APP_PATH"/bin/console'
 
 ################################################################################
 

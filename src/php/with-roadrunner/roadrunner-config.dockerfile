@@ -15,11 +15,7 @@ RUN <<'EOF'
 # create s6 services
 if has-cmd s6-service; then
     s6-service roadrunner longrun '#!/usr/bin/env sh
-export APP_PATH="$(app-path)"
-export APP_ROOT="$(app-root)"
-
-cd "$APP_PATH"
-exec /usr/local/bin/rr -w "$(app-path)" \
+cd "$APP_PATH" && exec $(command -v rr) -w "$APP_PATH" \
     -o http.address=0.0.0.0:80 \
     -o http.ssl.address=0.0.0.0:443 \
     -o http.ssl.cert=/etc/ssl/site/server.crt \
