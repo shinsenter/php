@@ -189,9 +189,12 @@ mkcert -days 3652 -install \
 if grep -q 'exec "\$@"' "$DOCKER_ENTRYPOINT"; then
     sed -i '/exec "\$@"/c\
 if [[ " $@ " == *" php-fpm "* ]]; then\n\
-    config="/usr/local/etc/php-fpm.d/zz-generated-settings.conf"\n\
-    options="$(command -v php-fpm) -y $config --allow-to-run-as-root -d clear_env=no"\n\
-    [ -f "$config" ] && set -- ${@/php-fpm/$options}\n\
+    php_conf="$(php-envvars php_conf)"\n\
+    fpm_conf="$(php-envvars fpm_conf)"\n\
+    if [ -f "$php_conf" ] && [ -f "$fpm_conf" ]; then\n\
+        options="php-fpm -c $php_conf -y $fpm_conf --allow-to-run-as-root -d clear_env=no"\n\
+        set -- ${@/php-fpm/$options}\n\
+    fi\n\
 elif [[ " $@ " == *" php "* ]]; then\n\
     set -- web-do "$@"\n\
 fi\n\
