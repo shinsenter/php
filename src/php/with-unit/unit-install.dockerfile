@@ -63,14 +63,14 @@ build() {
     # ./configure $args --cc-opt="$CC_OPT" "$@"
     # ./configure php --module=php
     # make -j $NCPU php-install
-    # test -d $mod_dir || install -d $mod_dir
+    # test -d "$mod_dir" || install -d "$mod_dir"
     # install -p build/lib/unit/modules/*.unit.so $mod_dir
     # make clean
 
     ./configure $args --cc-opt="$CC_OPT" "$@"
     ./configure php --module=php
     make -j $NCPU
-    test -d $mod_dir || install -d $mod_dir
+    test -d "$mod_dir" || install -d "$mod_dir"
     test -d /usr/local/sbin || install -d /usr/local/sbin
     install -p build/lib/unit/modules/*.unit.so $mod_dir
     install -p -m755 build/sbin/unitd /usr/local/sbin/$name

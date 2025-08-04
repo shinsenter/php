@@ -47,7 +47,7 @@ $ENV_CHECK
 " >> ~/.bashrc; fi
 
 # export all env variables for PHP
-if is-true $ALLOW_RUNTIME_PHP_ENVVARS && has-cmd php && has-cmd php-envvars; then
+if is-true "$ALLOW_RUNTIME_PHP_ENVVARS" && has-cmd php && has-cmd php-envvars; then
     debug-echo "Export all env variables for PHP."
     php-envvars export_envvars 2>&1
 fi

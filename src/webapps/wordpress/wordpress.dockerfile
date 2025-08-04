@@ -63,7 +63,7 @@ env-default WP_DEBUG            '$(is-debug && echo 1 || echo 0)'
 env-default WP_DEBUG_LOG        '$(log-path stdout)'
 env-default WORDPRESS_DEBUG     '$(is-debug && echo 1 || echo 0)'
 
-php -r "copy('$WPCLI_URL', '$WPCLI_PATH');" && chmod +xr $WPCLI_PATH
+php -r "copy('$WPCLI_URL', '$WPCLI_PATH');" && chmod +xr "$WPCLI_PATH"
 $WPCLI_PATH --allow-root --version
 
 web-cmd wp "$WPCLI_PATH --allow-root"

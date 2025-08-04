@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-if is-true $CLEANUP_DEV_PACKAGES; then
+if is-true "$CLEANUP_DEV_PACKAGES"; then
     EXTRA_DEPS='*-dev'
 fi
 

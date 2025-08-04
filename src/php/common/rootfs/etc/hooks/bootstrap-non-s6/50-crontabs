@@ -6,11 +6,11 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-if ! is-true $ENABLE_CRONTAB; then exit 0; fi
+if ! is-true "$ENABLE_CRONTAB"; then exit 0; fi
 
 if has-cmd crond; then
     CROND_PID=/var/run/crond.pid
-    if [ -f $CROND_PID ]; then kill -TERM $(cat $CROND_PID) &>/dev/null || rm -f $CROND_PID; fi
+    if [ -f "$CROND_PID" ]; then kill -TERM $(cat "$CROND_PID") &>/dev/null || rm -f "$CROND_PID"; fi
 
     exec 2>&1
     cd "$APP_PATH" && exec with-env crond $CRONTAB_OPTIONS

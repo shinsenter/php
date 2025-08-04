@@ -23,7 +23,7 @@ PHP
 }
 
 # create index.php when it doesn't exist
-if ! is-true $DISABLE_AUTORUN_GENERATING_INDEX; then
+if ! is-true "$DISABLE_AUTORUN_GENERATING_INDEX"; then
     web-mkdir "$APP_ROOT"
     if [ -z "$(ls -A "$APP_ROOT")" ]; then
         index_path="$APP_ROOT/index.php"
