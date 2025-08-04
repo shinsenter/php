@@ -216,6 +216,18 @@ final class DockerPHP
         }
     }
 
+    public function php_conf() {
+        echo $this->php_conf_path;
+    }
+
+    public function fpm_conf() {
+        echo $this->fpm_conf_path;
+    }
+
+    public function php_env() {
+        echo $this->php_env_file;
+    }
+
     public function list_env()
     {
         foreach ($this->all_env_vars as $env_key => $env_val) {
@@ -401,8 +413,8 @@ array_shift($arguments);
 
 $instance = new DockerPHP(
     '',
-    'zz-generated-settings.ini',
-    'zz-generated-settings.conf',
+    'zz-docker-shinsenter-php.ini',
+    'zz-docker-shinsenter-php.conf',
     'PHP'
 );
 
