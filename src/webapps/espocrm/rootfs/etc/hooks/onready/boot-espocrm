@@ -4,7 +4,7 @@ APP_ROOT="$(app-root)"
 
 debug-echo "Your application path is at ${APP_PATH}."
 
-if ! is-true $ESPOCRM_CONFIG_USE_WEB_SOCKET; then
+if ! is-true "$ESPOCRM_CONFIG_USE_WEB_SOCKET"; then
     rm -rf /etc/apache2/custom.d/espocrm-websocket.conf
 fi
 

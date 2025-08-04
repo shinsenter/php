@@ -55,7 +55,7 @@ web-cmd artisan 'php "$APP_PATH"/artisan'
 if has-cmd s6-service; then
     # create queue service
     s6-service queue_worker longrun '#!/usr/bin/env sh
-if is-true $LARAVEL_ENABLE_QUEUE_WORKER; then
+if is-true "$LARAVEL_ENABLE_QUEUE_WORKER"; then
     cd "$APP_PATH" && exec artisan queue:work $LARAVEL_QUEUE_WORKER_OPTIONS
 else
     exec s6-svc -Od .
@@ -64,7 +64,7 @@ fi
 
     # create scheduler service
     s6-service scheduler longrun '#!/usr/bin/env sh
-if is-true $LARAVEL_ENABLE_SCHEDULER; then
+if is-true "$LARAVEL_ENABLE_SCHEDULER"; then
     cd "$APP_PATH" && exec artisan schedule:work $LARAVEL_SCHEDULER_OPTIONS
 else
     exec s6-svc -Od .
@@ -73,7 +73,7 @@ fi
 
     # create Horizon service
     s6-service horizon longrun '#!/usr/bin/env sh
-if is-true $LARAVEL_ENABLE_HORIZON; then
+if is-true "$LARAVEL_ENABLE_HORIZON"; then
     cd "$APP_PATH" && exec artisan horizon $LARAVEL_HORIZON_OPTIONS
 else
     exec s6-svc -Od .
@@ -82,7 +82,7 @@ fi
 
     # create Pulse service
     s6-service pulse longrun '#!/usr/bin/env sh
-if is-true $LARAVEL_ENABLE_PULSE; then
+if is-true "$LARAVEL_ENABLE_PULSE"; then
     cd "$APP_PATH" && exec artisan pulse:check $LARAVEL_PULSE_OPTIONS
 else
     exec s6-svc -Od .
@@ -91,7 +91,7 @@ fi
 
     # create Reverb service
     s6-service reverb longrun '#!/usr/bin/env sh
-if is-true $LARAVEL_ENABLE_REVERB; then
+if is-true "$LARAVEL_ENABLE_REVERB"; then
     cd "$APP_PATH" && exec artisan reverb:start $(is-debug && echo --debug) $LARAVEL_REVERB_OPTIONS
 else
     exec s6-svc -Od .

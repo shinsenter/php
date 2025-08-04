@@ -52,7 +52,7 @@ else
     nginx-conf 'error_log' "$(log-path stderr) error"
 fi
 
-if ! is-true $DISABLE_GREETING && has-cmd nginx; then
+if ! is-true "$DISABLE_GREETING" && has-cmd nginx; then
     nginx -v 2>&1
 fi
 

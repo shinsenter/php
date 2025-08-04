@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-if ! is-true $DISABLE_GREETING && has-cmd greeting; then greeting; fi
+if ! is-true "$DISABLE_GREETING" && has-cmd greeting; then greeting; fi

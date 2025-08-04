@@ -38,7 +38,7 @@ ENV PRESQUASH_SCRIPTS="cleanup"
 
 RUN <<'EOF'
 sources="/etc/apt/sources.list"
-if [ -f $sources ]; then
+if [ -f "$sources" ]; then
     . /etc/os-release
     if [ "$ID" = "debian" ] && [ "${VERSION_ID%%.*}" -lt 11 ]; then
         debug-echo -w "Patching sources.list for $ID $VERSION_ID"
@@ -172,7 +172,7 @@ fi
 if has-cmd msmtp-wrapper; then
     if has-cmd sendmail; then
         old="$(command -v sendmail)"
-        pkg-del sendmail && rm -f $old || true
+        pkg-del sendmail && rm -f "$old" || true
     fi
 
     new="$(command -v msmtp-wrapper)"
@@ -199,14 +199,14 @@ exec "$@"' "$DOCKER_ENTRYPOINT"
 fi
 
 # Backup entrypoint
-if [ -f $DOCKER_ENTRYPOINT ]; then mv $DOCKER_ENTRYPOINT /init; fi
+if [ -f "$DOCKER_ENTRYPOINT" ]; then mv "$DOCKER_ENTRYPOINT" /init; fi
 
 EOF
 
 ################################################################################
 
 # Add new entrypoint
-COPY --chmod=4755 --link ./common/docker-php-entrypoint $DOCKER_ENTRYPOINT
+COPY --chmod=4755 --link ./common/docker-php-entrypoint "$DOCKER_ENTRYPOINT"
 
 ################################################################################
 #     These setups are part of the project: https://code.shin.company/php

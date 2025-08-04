@@ -25,7 +25,7 @@ fi
 
 if has-cmd s6-service; then
     s6-service crontab longrun '#!/usr/bin/env sh
-if is-true $ENABLE_CRONTAB; then
+if is-true "$ENABLE_CRONTAB"; then
     exec 2>&1
     cd "$APP_PATH" && exec crond -f $CRONTAB_OPTIONS
 else

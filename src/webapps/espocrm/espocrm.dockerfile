@@ -69,7 +69,7 @@ fi
 # create WebSocket services
 if has-cmd s6-service; then
     s6-service espocrm-websocket longrun '#!/usr/bin/env sh
-if is-true $ESPOCRM_CONFIG_USE_WEB_SOCKET; then
+if is-true "$ESPOCRM_CONFIG_USE_WEB_SOCKET"; then
     export ESPOCRM_CONFIG_USE_WEB_SOCKET="true"
     export ESPOCRM_CONFIG_WEB_SOCKET_DEBUG_MODE="$(is-debug && echo 1 || echo 0)"
     export ESPOCRM_CONFIG_WEB_SOCKET_SSL_ALLOW_SELF_SIGNED="true"

@@ -5,4 +5,7 @@ APP_ROOT="$(app-root)"
 debug-echo "Your web application must be in ${APP_PATH}."
 
 web-mkdir "$WP_CLI_DIR" "$WP_CLI_CACHE_DIR" "$WP_CLI_PACKAGES_DIR"
-has-cmd wp && wp --version
+
+if ! is-true "$DISABLE_GREETING"; then
+    wp --version
+fi

@@ -14,8 +14,8 @@ if [ -f /etc/phpmyadmin-config.php ] && [ ! -f "$PMA_CONFIG" ] ; then
 
     chmod 0644 "$PMA_CONFIG"
 
-    if [ -f $APP_PATH/libraries/vendor_config.php ]; then
+    if [ -f "$APP_PATH/libraries/vendor_config.php" ]; then
         sed -i "s@'configFile'.*@'configFile' => '${PMA_CONFIG}',@" \
-            $APP_PATH/libraries/vendor_config.php &>/dev/null
+            "$APP_PATH/libraries/vendor_config.php" &>/dev/null
     fi
 fi

@@ -28,7 +28,7 @@ if ! has-s6 && [ -n "$S6_VERSION" ]; then
     fi
 
     # backup existing entrypoint
-    if [ -x /init ]; then mv -f /init $FALLBACK_ENTRYPOINT; fi
+    if [ -x /init ]; then mv -f /init "$FALLBACK_ENTRYPOINT"; fi
 
     # detect system's architecture
     case "$(uname -m)" in
@@ -46,7 +46,7 @@ if ! has-s6 && [ -n "$S6_VERSION" ]; then
     untar() {
         local url="$1"
         local path="${2:-$S6_PATH}/"
-        if [ ! -e $path ]; then mkdir -p $path; fi
+        if [ ! -e "$path" ]; then mkdir -p "$path"; fi
         download "$url" | tar Jxp -C $path
     }
 

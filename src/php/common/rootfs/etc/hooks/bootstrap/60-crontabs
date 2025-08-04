@@ -12,8 +12,8 @@ APP_USER="${APP_USER:-root}"
 CRONTAB="/var/spool/cron/crontabs/$APP_USER"
 CRONTAB_DIR="${CRONTAB_DIR:-/etc/crontab.d}"
 
-if ! is-true $ENABLE_CRONTAB; then
-    rm -f $CRONTAB
+if ! is-true "$ENABLE_CRONTAB"; then
+    rm -f "$CRONTAB"
     exit 0
 fi
 
@@ -21,7 +21,7 @@ set -e
 
 mkdir -p "$(dirname $CRONTAB)" $CRONTAB_DIR
 
-if is-true $ENABLE_CRONTAB_DEBUG; then
+if is-true "$ENABLE_CRONTAB_DEBUG"; then
     echo '*  *  *  *  *  echo -e "$(date) DEBUG: Crontab is running as $(whoami).\\n\\n$(env -0 | sort -dbfiz | tr '\''\\0'\'' '\''\\n'\'' | grep -vF '\''_='\'')" | tee /tmp/cron-debug.txt' >$CRONTAB_DIR/debug
 elif is-debug; then
     echo '*  *  *  *  *  echo -e "$(date) DEBUG: Crontab is running as $(whoami).\\nTotal passed environment variables: $(env | wc -l)" | tee /tmp/cron-debug.txt' >$CRONTAB_DIR/debug

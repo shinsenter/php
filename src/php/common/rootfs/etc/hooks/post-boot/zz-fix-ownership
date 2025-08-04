@@ -30,10 +30,10 @@ fi
 ################################################################################
 
 # fix ownership
-if ! is-true $DISABLE_AUTORUN_FIX_OWNER_GROUP; then
+if ! is-true "$DISABLE_AUTORUN_FIX_OWNER_GROUP"; then
     index_path="$(app-index)"
     need_fixed=0
-    if is-true $FIX_APP_PATH_PERMISSION || is-true $FIX_WEBHOME_PERMISSION; then
+    if is-true "$FIX_APP_PATH_PERMISSION" || is-true "$FIX_WEBHOME_PERMISSION"; then
         debug-echo "Fix ownership for the application path."
         need_fixed=1
     elif [ -f "$index_path" ]; then

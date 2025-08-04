@@ -5,9 +5,9 @@ user="${APP_USER:=www-data}"
 group="${APP_GROUP:=www-data}"
 
 echo "
-$([ -f $welcome_txt ] && cat $welcome_txt | sed "s#%PATH%#$welcome_txt#g")
+$([ -f "$welcome_txt" ] && cat "$welcome_txt" | sed "s#%PATH%#$welcome_txt#g")
 ---------------
-$([ -f $license_txt ] && cat $license_txt | sed "s#%EMAIL%#${MAINTAINER:-shin@shin.company}#g" | sed "s#%YEAR%#$(date +'%Y')#g")
+$([ -f "$license_txt" ] && cat "$license_txt" | sed "s#%EMAIL%#${MAINTAINER:-shin@shin.company}#g" | sed "s#%YEAR%#$(date +'%Y')#g")
 
 ---------------
 Container     : ${DOCKER_NAME:-shinsenter/php} (built: ${DOCKER_DATE:-$(date +'%Y-%m-%dT%T%z')})
