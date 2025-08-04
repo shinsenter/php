@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-if is-true $DEBUG_MODE || is-true $DEBUG; then exit 0; else exit 1; fi
+if is-true "$DEBUG_MODE" || is-true "$DEBUG"; then exit 0; else exit 1; fi

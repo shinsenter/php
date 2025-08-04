@@ -36,7 +36,7 @@ env-default PHP_ACCESS_LOG '/var/log/php-fpm.log'
 CONF_FILE=/etc/apache2/apache2.conf
 MODS_FILE=/etc/apache2/modules.conf
 
-if [ -e $CONF_FILE ]; then
+if [ -e "$CONF_FILE" ]; then
     # detect available modules
     if [ -e /etc/apache2/modules ]; then
         echo -e "# Begin Modules\n# End Modules" >$MODS_FILE
@@ -50,7 +50,7 @@ if [ -e $CONF_FILE ]; then
 
     # copy production config
     if has-cmd httpd; then
-        mv -f $CONF_FILE /etc/apache2/httpd.conf
+        mv -f "$CONF_FILE" /etc/apache2/httpd.conf
     fi
 fi
 

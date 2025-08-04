@@ -9,7 +9,7 @@
 
 web-mkdir /config/caddy /data/caddy /etc/caddy
 
-if ! is-true $DISABLE_GREETING && has-cmd frankenphp; then
+if ! is-true "$DISABLE_GREETING" && has-cmd frankenphp; then
     frankenphp version 2>&1
 fi
 

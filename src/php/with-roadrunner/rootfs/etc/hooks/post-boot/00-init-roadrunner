@@ -17,6 +17,6 @@ else
     roadrunner-conf 'debug' 'false'
 fi
 
-if ! is-true $DISABLE_GREETING && has-cmd rr; then
-    rr -v 2>&1 | head -n1
+if ! is-true "$DISABLE_GREETING"; then
+    /usr/local/bin/rr -v 2>&1 | head -n1
 fi

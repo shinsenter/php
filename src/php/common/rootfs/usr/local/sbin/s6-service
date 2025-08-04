@@ -28,10 +28,10 @@ create() {
     local dir="$(dirname $path)"
 
     shift
-    mkdir -p $dir && chmod 0755 $dir
+    mkdir -p "$dir" && chmod 0755 $dir
     touch $path   && chmod ugo+x $path
 
-    if [ -f $path ] && [ -n "$@" ]; then echo "$@" >| $path; fi
+    if [ -f "$path" ] && [ -n "$@" ]; then echo "$@" >| $path; fi
 }
 
 ################################################################################
