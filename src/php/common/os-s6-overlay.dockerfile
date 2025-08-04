@@ -18,7 +18,7 @@ if ! has-s6 && [ -n "$S6_VERSION" ]; then
     [ -z "$DEBUG" ] || set -ex && set -e
 
     SOURCE="https://github.com/just-containers/s6-overlay/releases/download/${S6_VERSION}"
-    FALLBACK_ENTRYPOINT="/usr/local/bin/fallback-entrypoint"
+    FALLBACK_ENTRYPOINT="/init-non-s6"
 
     # install deps
     if [ ! -x "$(command -v xz)" ] || [ ! -x "$(command -v tar)" ]; then
