@@ -31,6 +31,7 @@ INCLUDE ./with-apache/apache-config
 INCLUDE ./common/os-s6-overlay
 
 RUN apache2 -v
+RUN env-default '# Other user-defined environment variables are from here'
 
 ################################################################################
 

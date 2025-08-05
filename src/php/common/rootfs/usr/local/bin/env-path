@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+DEFAULT_ENV="/usr/local/etc/.env"
+[ "$1" = "@" ] && echo "$DEFAULT_ENV" || echo "${ENV:-$DEFAULT_ENV}"

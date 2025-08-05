@@ -29,7 +29,7 @@ ENV APP_USER="$APP_USER"
 ENV APP_GROUP="$APP_GROUP"
 
 # Set OS variables
-ENV ENV="/etc/.docker-env"
+ENV ENV="/usr/local/etc/.env"
 ENV PATH="/usr/local/aliases:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 ENV PS1="\\u@\\h:\\w\\$ "
 ENV PRESQUASH_SCRIPTS="cleanup"
@@ -50,6 +50,8 @@ if [ -f "$sources" ]; then
         cat $sources
     fi
 fi
+
+pkg-add upgrade
 EOF
 
 ################################################################################
@@ -59,8 +61,8 @@ EOF
 # https://github.com/mlocati/docker-php-extension-installer/pull/451
 # https://github.com/mlocati/docker-php-extension-installer/pull/724
 # https://github.com/mlocati/docker-php-extension-installer/pull/737
-RUN --mount=type=bind,from=mlocati/php-extension-installer:latest,source=/usr/bin/install-php-extensions,target=/tmp/install-php-extensions \
-    /tmp/install-php-extensions @fix_letsencrypt | true
+RUN --mount=type=bind,from=mlocati/php-extension-installer:latest,source=/usr/bin/install-php-extensions,target=/usr/bin/install-php-extensions \
+    /usr/bin/install-php-extensions @fix_letsencrypt 2>&1 | grep -vF StandW || true
 
 ################################################################################
 
@@ -71,7 +73,7 @@ echo 'Configure OS middlewares'
 # Install common packages
 APK_PACKAGES='findutils run-parts shadow tar tzdata unzip xz' \
 APT_PACKAGES='procps xz-utils' \
-pkg-add bash ca-certificates coreutils curl htop less openssl msmtp upgrade
+pkg-add bash ca-certificates coreutils curl htop less openssl msmtp
 
 # Setuid bit for some scripts
 chmod 4755 "$(command -v autorun)" "$(command -v ownership)" /usr/local/sbin/web-*
@@ -89,6 +91,15 @@ fi
 if [ ! -e /sbin/nologin ] && has-cmd nologin; then
     ln -nsf "$(command -v nologin)" /sbin/nologin
 fi
+
+# Set default debug mode
+env-default '# Default debug mode'
+env-default DEBUG '0'
+
+# Set default user and group
+env-default '# Default user and group'
+env-default DEFAULT_GROUP "$APP_USER"
+env-default DEFAULT_USER  "$APP_GROUP"
 
 # Add default user and group
 ownership "$APP_GROUP" "$APP_GID" "$APP_USER" "$APP_UID"
@@ -109,15 +120,6 @@ RUN DOCKER_NAME="shinsenter/***" hook onbuild
 RUN <<'EOF'
 echo 'Configure base OS'
 [ -z "$DEBUG" ] || set -ex && set -e
-
-# Set default debug mode
-env-default '# Default debug mode'
-env-default DEBUG '0'
-
-# Set default user and group
-env-default '# Default user and group'
-env-default DEFAULT_GROUP "$APP_USER"
-env-default DEFAULT_USER  "$APP_GROUP"
 
 # Set aliases for common commands
 env-default '# Aliases for common commands'
@@ -186,7 +188,7 @@ mkcert -days 3652 -install \
     localhost
 
 # Patch entrypoint for php-fpm
-if grep -q 'exec "\$@"' "$DOCKER_ENTRYPOINT"; then
+if grep -qF -- 'exec "\$@"' "$DOCKER_ENTRYPOINT"; then
     sed -i '/exec "\$@"/c\
 if [[ " $@ " == *" php-fpm "* ]]; then\n\
     php_conf="$(php-envvars php_conf)"\n\

@@ -2,4 +2,6 @@
 APP_PATH="$(app-path)"
 APP_ROOT="$(app-root)"
 
-php $APP_PATH/artisan key:generate || true
+if [ -f "$APP_PATH/.env" ] && ! grep -qF -- "APP_KEY=base64" "$APP_PATH/.env"; then
+    artisan key:generate || true
+fi

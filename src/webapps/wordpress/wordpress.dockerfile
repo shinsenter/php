@@ -52,7 +52,6 @@ RUN <<'EOF'
 echo 'Install WP-CLI'
 [ -z "$DEBUG" ] || set -ex && set -e
 
-env-default '# Environment variables for WP-Cli'
 env-default "alias wp-cli='$WPCLI_PATH --allow-root'"
 env-default INITIAL_PROJECT     'manual'
 env-default WP_CLI_DIR          '/.wp-cli'

@@ -30,7 +30,8 @@ INCLUDE ./with-roadrunner/roadrunner-install
 INCLUDE ./with-roadrunner/roadrunner-config
 INCLUDE ./common/os-s6-overlay
 
-RUN /usr/local/bin/rr -v
+RUN rr -v
+RUN env-default '# Other user-defined environment variables are from here'
 
 ################################################################################
 

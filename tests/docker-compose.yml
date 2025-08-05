@@ -4,7 +4,7 @@ services:
     image: redis:alpine
 
   cli:
-    image: ghcr.io/shinsenter/php:cli-alpine
+    image: ghcr.io/shinsenter/php:dev-cli-alpine
     security_opt:
       - no-new-privileges:true
     privileged: true

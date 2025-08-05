@@ -56,9 +56,8 @@ echo 'Configure EspoCRM'
 # install zmq php extension
 phpaddmod zmq
 
-# enable preload
+# enable preload to bring a significant performance boost
 # see: https://docs.espocrm.com/administration/performance-tweaking/#preloading
-# env-default '# Enable preload to bring a significant performance boost'
 # env-default PHP_OPCACHE_PRELOAD '$(app-path)/preload.php'
 
 # enable mod_proxy and mod_proxy_wstunnel
