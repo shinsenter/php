@@ -27,7 +27,7 @@ initial() {
     web-mkdir /var/lib/unit
     web-chown fix /var/lib/unit /var/log/unit /run/unit
 
-    if [[ -e /var/lib/unit/conf.json ]]; then
+    if [[ -d /var/lib/unit/conf.json ]]; then
         return 0
     fi
 
@@ -36,7 +36,7 @@ initial() {
     "$unitd_bin" --control "unix:$unit_socket"
 
     local attempts=0
-    until [[ -e "$unit_socket" || $attempts -ge 20 ]]; do
+    until [[ -f "$unit_socket" || $attempts -ge 20 ]]; do
         sleep 0.5
         ((attempts++))
     done
@@ -65,7 +65,7 @@ initial() {
     fi
 
     attempts=0
-    while [[ -e "$unit_socket" && $attempts -lt 20 ]]; do
+    while [[ -f "$unit_socket" && $attempts -lt 20 ]]; do
         sleep 0.5
         ((attempts++))
     done

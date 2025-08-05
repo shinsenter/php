@@ -1,0 +1,40 @@
+#!/usr/bin/env sh
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  SHIN Company <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+force=0
+target=""
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -f|--force)
+            force=1
+            shift
+            ;;
+        *)
+            target="$1"
+            shift
+            ;;
+    esac
+done
+
+if [ -z "$target" ]; then
+    target="$(app-path)"
+fi
+
+if [ ! -d "$target" ]; then
+    debug-echo -e "Error: '$target' is not a valid directory."
+    exit 1
+fi
+
+if [ $force -ne 1 ]; then
+    read -p "Delete ALL contents of '$target'? (y/n): " confirm
+    [[ "$confirm" != [yY] ]] && echo "Aborted." && exit 0
+fi
+
+rm -rf "$(realpath -mqs "$target")"/{*,.[!.]*,..?*}

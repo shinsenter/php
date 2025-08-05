@@ -6,13 +6,11 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
-conf_path="${ENV:-/etc/.docker-env}"
+conf_path="$(env-path)"
 
 if [[ ! -f "$conf_path" ]]; then
     mkdir -p "$(dirname $conf_path)"
-
-    cat <<'EOSH' > "$conf_path"
+    cat <<'ENVVARS' > "$conf_path"
 #!/bin/sh
 APP_PATH="$(app-path)"
 APP_ROOT="$(app-root)"
@@ -31,8 +29,7 @@ export PATH APP_PATH APP_ROOT
 
 web-mkdir "$APP_PATH" || true
 [ -d "$APP_PATH" ] && cd "$APP_PATH"
-EOSH
-
+ENVVARS
     chmod +x "$conf_path"
 fi
 
@@ -42,13 +39,12 @@ if [ $# -eq 0 ]; then with-env; exit 0; fi
 # if the first argument is a file then use it
 if [ "${1:0:1}" = "/" ] && [ -f "$1" ]; then
     # check if the file is already sourced
-    if ! grep -qF "source $1" $conf_path; then
+    if ! grep -qF -- "source $1" $conf_path; then
         echo "\nsource $1\n" >>"$conf_path"
     fi
 
     # use the first argument as the config file
     conf_path="$1"
-
     shift
 fi
 
@@ -56,32 +52,25 @@ line="$@"
 
 # add a comment if the command argument starts with #
 if [ "${line:0:1}" = "#" ]; then
-    hl='# --------------------------------------------'
-    echo -e "\n${hl}\n${line}\n${hl}" >>"$conf_path"
-    exit
+    if ! grep -qF -- "$line" "$conf_path"; then
+        hl='# --------------------------------------------'
+        echo -e "\n${hl}\n${line}\n${hl}" >>"$conf_path"
+    fi
+    exit 0
 fi
 
 # add a bash alias
 if [ "${line:0:6}" = "alias " ]; then
     echo "$line" >>"$conf_path"
-    exit
+    exit 0
 fi
 
 # add an environment variable
 name="$1"; shift
 set -- "$(echo "$@" | sed -e 's/\([\\"]\)/\\\1/g')"
 
-# minlen=48
-# check="if [ -z \${${name}+x} ];"
-# newline="$(printf "%s%*s%s\n" "$check" $(( $minlen - ${#check} > 0 ? $minlen - ${#check} : 1 )) "" "then export $name=\"$@\"; fi")"
-# if grep -qF "$name=" "$conf_path"; then
-#     sed -i "/$name=/c\\$newline" "$conf_path"
-# else
-#     echo "$newline" >>"$conf_path"
-# fi
-
 newline="export $name=\"\${$name:=\"$@\"}\""
-if grep -qF "export $name=" "$conf_path"; then
+if grep -qF -- "export $name=" "$conf_path"; then
     sed -i "/export $name=/c\\$newline" "$conf_path"
 else
     echo "$newline" >>"$conf_path"

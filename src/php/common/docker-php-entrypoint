@@ -14,9 +14,9 @@ debug-echo "Initialize container"
 
 # set timezone
 export TZ="${TZ:=UTC}"
-if [ -n "$TZ" ] && [ -e /usr/share/zoneinfo/$TZ ]; then
-    ln -nsf /usr/share/zoneinfo/$TZ /etc/localtime
-    echo $TZ >/etc/timezone
+if [ -n "$TZ" ] && [ -f "/usr/share/zoneinfo/$TZ" ]; then
+    ln -nsf "/usr/share/zoneinfo/$TZ" /etc/localtime
+    echo "$TZ" >/etc/timezone
 fi
 
 # fix ownership
@@ -26,8 +26,8 @@ set -e
 
 # ensure application directory exists
 APP_PATH="$(app-path)"
-debug-echo "Create $APP_PATH if not exists"
-web-mkdir "$APP_PATH"
+debug-echo "Create '$APP_PATH' if not exists"
+web-mkdir "/var/www" "$APP_PATH"
 
 # change working directory
 [ -d "$APP_PATH" ] && cd "$APP_PATH"
@@ -39,12 +39,19 @@ hook pre-boot
 ################################################################################
 
 # load the $ENV in ~/.bashrc
-ENV_CHECK='if [ -x "$ENV" ]; then source "$ENV"; fi'
-touch ~/.bashrc
-if ! grep -qF "$ENV_CHECK" ~/.bashrc; then echo "
-# load environment variables for PHP
-$ENV_CHECK
-" >> ~/.bashrc; fi
+env_check='if [ -f "$ENV" ]; then source "$ENV"; fi'
+bashrc=~/.bashrc
+touch "$bashrc"
+if ! grep -qF -- "$env_check" "$bashrc"; then
+    tmp_file="$(mktemp)"
+    {
+        echo "# load environment variables"
+        echo "$env_check"
+        echo ""
+        cat "$bashrc"
+    } >"$tmp_file"
+    mv -f "$tmp_file" "$bashrc"
+fi
 
 # export all env variables for PHP
 if is-true "$ALLOW_RUNTIME_PHP_ENVVARS" && has-cmd php && has-cmd php-envvars; then

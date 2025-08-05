@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-if [ -e /tmp/hooks/onbuild ]; then DEBUG=1 hook post-build; fi
+if [ -f /tmp/hooks/onbuild ]; then DEBUG=1 hook post-build; fi

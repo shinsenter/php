@@ -19,6 +19,7 @@ COPY --link --from=mlocati/php-extension-installer:latest --chmod=755 \
 
 # Add Composer to the PATH
 ENV COMPOSER_HOME="/.composer"
+ENV COMPOSER_ALLOW_SUPERUSER="1"
 
 ################################################################################
 
@@ -32,7 +33,6 @@ echo 'Install Composer and PHP extensions'
 
 # Set Composer default settings
 env-default '# Environment variables for Composer'
-env-default COMPOSER_ALLOW_SUPERUSER     '1'
 env-default COMPOSER_ALLOW_XDEBUG        '$(is-debug && echo 1 || echo 0)'
 env-default COMPOSER_FUND                '0'
 env-default COMPOSER_HTACCESS_PROTECT    '1'

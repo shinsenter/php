@@ -17,12 +17,12 @@ recently_created="0"
 ################################################################################
 
 install_deps() {
-    [ -e "$CONF_PATH" ] || return 0
+    [ -f "$CONF_PATH" ] || return 0
 
     deps=""
-    [ "$(is-true "$COMPOSER_REQUIRES_GIT")" = "1" ] || grep -qF '"git"' "$CONF_PATH" && deps="$deps git"
-    [ "$(is-true "$COMPOSER_REQUIRES_NODEJS")" = "1" ] || grep -qF 'node ' "$CONF_PATH" && deps="$deps nodejs"
-    [ "$(is-true "$COMPOSER_REQUIRES_NPM")" = "1" ] || grep -qF 'npm ' "$CONF_PATH" && deps="$deps npm"
+    [ "$(is-true "$COMPOSER_REQUIRES_GIT")" = "1" ] || grep -qF -- '"git"' "$CONF_PATH" && deps="$deps git"
+    [ "$(is-true "$COMPOSER_REQUIRES_NODEJS")" = "1" ] || grep -qF -- 'node ' "$CONF_PATH" && deps="$deps nodejs"
+    [ "$(is-true "$COMPOSER_REQUIRES_NPM")" = "1" ] || grep -qF -- 'npm ' "$CONF_PATH" && deps="$deps npm"
 
     [ -n "$deps" ] && pkg-add $deps
 
@@ -38,7 +38,7 @@ composer_exec() {
 composer_hook() {
     [ -n "$1" ] || return
     local hook="$1"
-    [ -e "$CONF_PATH" ] && grep -qF "\"$hook\"" "$CONF_PATH" && {
+    [ -f "$CONF_PATH" ] && grep -qF -- "\"$hook\"" "$CONF_PATH" && {
         composer_exec run "$@"
         hook "$hook"
     }
@@ -125,11 +125,15 @@ if [ -z "$(ls -A "$APP_PATH")" ]; then
     allow_plugins
     copy_env
 
-    if [ -e "$CONF_PATH" ]; then
+    if [ -f "$CONF_PATH" ]; then
+        if composer_exec update --help | grep -qF -- '--bump-after-update'; then
+            COMPOSER_UPDATE_OPTIONS="$COMPOSER_UPDATE_OPTIONS --bump-after-update"
+        fi
+
         debug-echo "Updating required packages in $APP_PATH."
 
         hook pre-update-packages
-        composer_exec update -n -W --bump-after-update $COMPOSER_UPDATE_OPTIONS
+        composer_exec update -n -W $COMPOSER_UPDATE_OPTIONS
         hook post-update-packages
 
         web-chown "Required packages in $APP_PATH were updated."
@@ -146,7 +150,7 @@ fi
 
 # case 2: project exists but vendor missing
 if [ "$recently_created" -ne 1 ] && [ "$has_composer" -eq 1 ] && ! is-true "$DISABLE_AUTORUN_COMPOSER_INSTALL"; then
-    if [ -e "$CONF_PATH" ]; then
+    if [ -f "$CONF_PATH" ]; then
         vendor_dir="$APP_PATH/$(composer_exec config vendor-dir 2>/dev/null)"
         if [ ! -d "$vendor_dir" ] || [ ! -e "$vendor_dir/composer/ClassLoader.php" ]; then
             install_deps
