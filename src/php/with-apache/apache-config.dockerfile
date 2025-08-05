@@ -36,9 +36,9 @@ env-default PHP_ACCESS_LOG '/var/log/php-fpm.log'
 CONF_FILE=/etc/apache2/apache2.conf
 MODS_FILE=/etc/apache2/modules.conf
 
-if [ -e "$CONF_FILE" ]; then
+if [ -f "$CONF_FILE" ]; then
     # detect available modules
-    if [ -e /etc/apache2/modules ]; then
+    if [ -d /etc/apache2/modules ]; then
         echo -e "# Begin Modules\n# End Modules" >$MODS_FILE
         for module_path in /etc/apache2/modules/*.so ; do
             module="${module_path##*mod_}"

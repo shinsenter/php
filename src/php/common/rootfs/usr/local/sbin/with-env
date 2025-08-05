@@ -7,8 +7,8 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-DEFAULT_ENV=/etc/.docker-env
-CACHED_ENV=/etc/default/locale
+SYSTEM_ENV="/etc/environment"
+DEFAULT_ENV="$(env-path @)"
 
 print_env() {
     # print the environment variables when no command is given
@@ -16,23 +16,24 @@ print_env() {
 }
 
 # load extra env variables
-if [ -e /etc/environment ]; then
+if [ -f "$SYSTEM_ENV" ]; then
     set -a
-    source /etc/environment
+    source "$SYSTEM_ENV"
     set +a
 fi
 
 # load extra env variables
-if [ "$ENV" != "$DEFAULT_ENV" ] && [ -x "$DEFAULT_ENV" ]; then source "$DEFAULT_ENV"; fi
-if [ -x "$ENV" ]; then source "$ENV"; fi
+if [ -f "$DEFAULT_ENV" ]; then source "$DEFAULT_ENV"; fi
+if [ -f "$ENV" ] && [ "$ENV" != "$DEFAULT_ENV" ]; then source "$ENV"; fi
 
 if [ $# -eq 0 ]; then
     # print the environment variables
-    print_env
+    print_env | debug-echo -l
 else
     # cache environment variables for other processes
     if [ "$1" = "@" ]; then
-        mkdir -p "$(dirname $CACHED_ENV)" && print_env >"$CACHED_ENV"
+        mkdir -pm 0755 /etc/default
+        print_env >/etc/default/locale
         shift
     fi
 

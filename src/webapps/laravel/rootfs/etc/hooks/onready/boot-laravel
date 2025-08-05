@@ -10,7 +10,7 @@ artisan storage:link &>/dev/null
 if is-true "$LARAVEL_AUTO_MIGRATION"; then
     MIGRATION_CMD='artisan migrate --force -n'
 
-    if artisan migrate --help | grep -q -- '--isolated'; then
+    if artisan migrate --help | grep -qF -- '--isolated'; then
         MIGRATION_CMD="$MIGRATION_CMD --isolated"
     fi
 

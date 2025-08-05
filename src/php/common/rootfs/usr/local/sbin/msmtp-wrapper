@@ -21,10 +21,10 @@ fi
 options=""
 
 # add -t if not already present
-echo "$@" | grep -q -- '-t' || options="$options -t"
+echo "$@" | grep -qF -- '-t' || options="$options -t"
 
 # set envelope from
-echo "$@" | grep -q -- '-f' || {
+echo "$@" | grep -qF -- '-f' || {
     if [ -n "$SMTP_FROM" ]; then
         options="$options --from=$SMTP_FROM"
     else

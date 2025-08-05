@@ -27,6 +27,7 @@ INCLUDE ./common/os-s6-overlay
 INCLUDE ./common/os-crontab
 
 RUN echo $(source /etc/os-release && echo $NAME $VERSION) >/etc/welcome.txt
+RUN env-default '# Other user-defined environment variables are from here'
 
 ################################################################################
 
