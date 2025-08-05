@@ -18,7 +18,7 @@ if ! command -v apache2 >/dev/null 2>&1; then
     exit 1
 fi
 
-if apache2 -M 2>/dev/null | grep -q mpm_prefork; then
+if apache2 -M 2>/dev/null | grep -qF -- mpm_prefork; then
     mpm_module='prefork'
 else
     mpm_module='event'

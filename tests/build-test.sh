@@ -64,6 +64,10 @@ if [ -n "${RECURSIVE:-1}" ] && [ -n "$BUILD_FROM_IMAGE" ]; then
     if [ -n "$deps" ]; then
         echo "INFO: $BUILD_TAG needs $BUILD_FROM_IMAGE"
         $0 "$1" "$deps" "${3:-latest}" "${4:-latest}"
+        if [ $? -ne 0 ]; then
+            echo "ERROR: Failed to build $BUILD_FROM_IMAGE"
+            exit 1
+        fi
     fi
 fi
 

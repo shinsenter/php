@@ -31,6 +31,7 @@ INCLUDE ./with-nginx/nginx-config
 INCLUDE ./common/os-s6-overlay
 
 RUN nginx -V
+RUN env-default '# Other user-defined environment variables are from here'
 
 ################################################################################
 

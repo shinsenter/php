@@ -17,11 +17,11 @@ alpine() {
 debian() {
     if [ $# -gt 0 ]; then
         debug-echo -e "\nRemove" $@
-        apt-get -yq remove --purge "$@" 2>&1 | grep -vF 'so not removed' | debug-echo -l
+        apt-get -yqq remove --purge "$@" 2>&1 | grep -vF 'so not removed' | debug-echo -l
     fi
 
-    apt-get -yq autoremove --purge | debug-echo -l || true
-    apt-get -yq clean | debug-echo -l || true
+    apt-get -yqq autoremove --purge | debug-echo -l || true
+    apt-get -yqq clean | debug-echo -l || true
 }
 
 if has-cmd apk; then alpine $APK_PACKAGES "$@"; fi
