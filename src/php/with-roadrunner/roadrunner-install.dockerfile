@@ -10,5 +10,8 @@
 COPY --link --from=ghcr.io/roadrunner-server/roadrunner:latest /usr/bin/rr /usr/local/bin/rr
 COPY --link --from=ghcr.io/roadrunner-server/roadrunner:latest /etc/rr.yaml /etc/rr.yaml
 
+# Add yq for YAML processing
+COPY --link --from=mikefarah/yq:latest /usr/bin/yq /usr/bin/yq
+
 # Install PHP extensions
 RUN phpaddmod sockets
