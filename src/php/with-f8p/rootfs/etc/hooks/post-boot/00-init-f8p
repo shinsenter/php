@@ -14,7 +14,7 @@ if ! is-true "$DISABLE_GREETING" && has-cmd frankenphp; then
 fi
 
 if is-debug; then
-    echo 'export CADDY_GLOBAL_OPTIONS="$CADDY_GLOBAL_OPTIONS debug"' >/etc/caddy/envvars || true
+    echo -e 'export CADDY_GLOBAL_OPTIONS="$CADDY_GLOBAL_OPTIONS\ndebug"' >/etc/caddy/envvars || true
     debug-echo -w "🐞 FrankenPHP is in DEBUG MODE 🐞"
 else
     rm -f /etc/caddy/envvars || true

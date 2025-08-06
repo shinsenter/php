@@ -9,12 +9,18 @@
 
 set -e
 
+# user and group for RoadRunner
+roadrunner-conf 'server.user'  "$APP_USER"
+roadrunner-conf 'server.group' "$APP_GROUP"
+
 # enable debug logs
 if is-debug; then
-    roadrunner-conf 'debug' 'true'
+    roadrunner-conf 'logs.level' 'debug'
+    roadrunner-conf 'http.pool.debug' 'true'
     debug-echo -w "🐞 RoadRunner is in DEBUG MODE 🐞"
 else
-    roadrunner-conf 'debug' 'false'
+    roadrunner-conf 'logs.level' 'error'
+    roadrunner-conf 'http.pool.debug' 'false'
 fi
 
 if ! is-true "$DISABLE_GREETING"; then

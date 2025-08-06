@@ -6,10 +6,5 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-disable="$([ "${1:0:1}" = "#" ] && echo "# " || echo "")"
-name="${1/#/}"; shift
-find "$APP_PATH" -type f -name "*.rr.yaml" -print0 | while IFS= read -r -d '' file; do
-    if grep -qE "^ *#* *${name}: " "$file"; then
-        sed -i -E "s~^\( *\)#* *${name}: *.*\$~\1${disable}${name}: $@~g" "$file"
-    fi
-done
+if ! has-cmd yq; then exit 0; fi
+exec yq -i ".$1 = \"$2\"" "$APP_PATH/.rr.yaml"
