@@ -20,9 +20,9 @@ install_deps() {
     [ -f "$CONF_PATH" ] || return 0
 
     deps=""
-    [ "$(is-true "$COMPOSER_REQUIRES_GIT")" = "1" ] || grep -qF -- '"git"' "$CONF_PATH" && deps="$deps git"
-    [ "$(is-true "$COMPOSER_REQUIRES_NODEJS")" = "1" ] || grep -qF -- 'node ' "$CONF_PATH" && deps="$deps nodejs"
-    [ "$(is-true "$COMPOSER_REQUIRES_NPM")" = "1" ] || grep -qF -- 'npm ' "$CONF_PATH" && deps="$deps npm"
+    is-true "$COMPOSER_REQUIRES_GIT"    || grep -qF -- '"git"' "$CONF_PATH" && deps="$deps git"
+    is-true "$COMPOSER_REQUIRES_NODEJS" || grep -qF -- 'node ' "$CONF_PATH" && deps="$deps nodejs"
+    is-true "$COMPOSER_REQUIRES_NPM"    || grep -qF -- 'npm '  "$CONF_PATH" && deps="$deps npm"
 
     [ -n "$deps" ] && pkg-add $deps
 

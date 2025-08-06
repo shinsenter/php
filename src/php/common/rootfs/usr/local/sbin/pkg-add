@@ -52,7 +52,7 @@ debian() {
     fi
     if [ $# -gt 0 ]; then
         debug-echo -i "\nInstall $@"
-        apt-get install $options --no-install-recommends --no-install-suggests "$@" | debug-echo -l
+        apt-get install $options --no-install-recommends --no-install-suggests "$@" 2>&1 | grep -vF ' warning: ' | debug-echo -l
     fi
 }
 

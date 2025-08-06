@@ -10,10 +10,6 @@ ADD --link ./with-nginx/rootfs/ /
 
 ################################################################################
 
-ENV PHP_LISTEN='/run/php-fpm.sock'
-
-################################################################################
-
 RUN <<'EOF'
 echo 'Configure Nginx'
 
@@ -23,6 +19,7 @@ usermod -G $APP_GROUP,nginx nginx &>/dev/null || true
 usermod -G $SUPP_GROUPS,nginx $APP_USER &>/dev/null || true
 
 # disable PHP-FPM logging to stdout
+env-default PHP_LISTEN '/run/php-fpm.sock'
 env-default PHP_ACCESS_LOG '/var/log/php-fpm.log'
 
 # create directories
