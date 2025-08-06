@@ -129,14 +129,16 @@ env-default 'alias ll="ls -alh"'
 
 # Set OS default settings
 env-default '# Environment variables for OS'
-env-default DEBIAN_FRONTEND $DEBIAN_FRONTEND
 env-default DEBCONF_NOWARNINGS $DEBCONF_NOWARNINGS
+env-default DEBIAN_FRONTEND $DEBIAN_FRONTEND
 env-default HISTCONTROL 'ignoreboth'
 env-default HISTFILESIZE '2000'
 env-default HISTSIZE '1000'
+env-default HISTTIMEFORMAT '%F %T '
 env-default LANG 'C.UTF-8'
 env-default LANGUAGE 'C.UTF-8'
 env-default LC_ALL 'C'
+env-default PROMPT_COMMAND 'history -a'
 env-default TERM 'xterm'
 env-default TZ 'UTC'
 
