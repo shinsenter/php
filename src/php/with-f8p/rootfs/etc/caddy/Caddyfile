@@ -1,23 +1,35 @@
 {
+	skip_install_trust
+
 	{$CADDY_GLOBAL_OPTIONS}
 
 	frankenphp {
 		# worker {$APP_ROOT}/index.php
 		{$FRANKENPHP_CONFIG}
 	}
+
+	log {
+		level {$CADDY_LOG_LEVEL:WARN}
+		# format filter {
+		# 	request>uri query {
+		# 		replace authorization REDACTED
+		# 	}
+		# }
+	}
 }
 
 {$CADDY_EXTRA_CONFIG}
 
-{$SERVER_NAME:localhost} {
-	log {
-		format filter {
-			request>uri query {
-				replace authorization REDACTED
-			}
-		}
-	}
+http://{$SERVER_NAME:localhost} {
+	root * {$APP_ROOT}
+	encode zstd br gzip
 
+	{$CADDY_SERVER_EXTRA_DIRECTIVES}
+
+	php_server
+}
+
+{$SERVER_NAME:localhost} {
 	tls /etc/ssl/site/server.crt /etc/ssl/site/server.key
 
 	root * {$APP_ROOT}
@@ -27,5 +39,7 @@
 
 	php_server
 }
+
+import Caddyfile.d/*.caddyfile
 
 # Source: https://raw.githubusercontent.com/dunglas/frankenphp/main/caddy/frankenphp/Caddyfile
