@@ -61,6 +61,12 @@ fi
 
 ################################################################################
 
+# activity logging
+touch /var/log/startup.log
+echo "$(date) $(whoami)@$(hostname):$(pwd)\$ $0 $SUPERVISOR_PHP_COMMAND $@" >>/var/log/startup.log
+
+################################################################################
+
 if [ -n "$SUPERVISOR_PHP_COMMAND" ]; then
     # run bootstrap hook to initialize the container
     hook bootstrap post-boot onready

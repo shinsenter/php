@@ -1,2 +1,3 @@
 #!/usr/bin/env sh
+if [ -f /etc/apache2/envvars ]; then source /etc/apache2/envvars; fi
 exec with-env apache2 -t 2>&1 | grep -qF -- "$@"

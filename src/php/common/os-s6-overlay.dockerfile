@@ -55,12 +55,6 @@ if ! has-s6 && [ -n "$S6_VERSION" ]; then
     untar ${SOURCE}/s6-overlay-${S6_ARCH}.tar.xz
     untar ${SOURCE}/syslogd-overlay-noarch.tar.xz
 
-    # fix permissions of /init
-    if [ -x /init ]; then
-        chown root:root /init
-        chmod 4755 /init
-    fi
-
     # set s6-overlay default behavior
     if has-cmd env-default; then
         env-default '# Environment variables for s6-overlay'
@@ -82,6 +76,10 @@ if ! has-s6 && [ -n "$S6_VERSION" ]; then
     if [ -x $FALLBACK_ENTRYPOINT ]; then
         sed -i "s|^exec |\nif [ \$# -gt 0 ]; then set -- $FALLBACK_ENTRYPOINT \"\$@\"; fi\n\nexec |" /init
     fi
+
+    # fix permissions of /init
+    chown root:root /init
+    chmod 4755 /init
 fi
 EOF
 
