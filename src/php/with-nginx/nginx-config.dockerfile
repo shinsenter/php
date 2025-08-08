@@ -40,7 +40,7 @@ if has-cmd s6-service; then
     s6-service nginx depends php-fpm
     s6-service nginx longrun '#!/usr/bin/env sh
 rm -rf "${NGINX_PID:-/run/nginx.pid}" || true
-cd "$APP_PATH" && exec nginx -g "daemon off;"
+cd "$APP_PATH" && exec with-env nginx -g "daemon off;"
 '
 fi
 

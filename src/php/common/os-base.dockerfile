@@ -180,7 +180,7 @@ if has-cmd msmtp-wrapper; then
     fi
 
     new="$(command -v msmtp-wrapper)"
-    mv $new "$(dirname $new)/sendmail"
+    mv -f $new "$(dirname $new)/sendmail"
 fi
 
 # Create self-signed certificate
@@ -206,7 +206,7 @@ exec "$@"' "$DOCKER_ENTRYPOINT"
 fi
 
 # Backup entrypoint
-if [ -f "$DOCKER_ENTRYPOINT" ]; then mv "$DOCKER_ENTRYPOINT" /init; fi
+if [ -f "$DOCKER_ENTRYPOINT" ]; then mv -f "$DOCKER_ENTRYPOINT" /init; fi
 
 EOF
 

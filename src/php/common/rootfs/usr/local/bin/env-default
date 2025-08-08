@@ -16,19 +16,21 @@ APP_PATH="$(app-path)"
 APP_ROOT="$(app-root)"
 
 PATH="${PATH#/usr/local/aliases:}"
-[ -n "$COMPOSER_HOME" ] && case ":$PATH:" in
-    *":$COMPOSER_HOME/vendor/bin:"*) ;;
-    *) PATH="$COMPOSER_HOME/vendor/bin:$PATH" ;;
-esac
-case ":$PATH:" in
-    *":$APP_PATH/vendor/bin:"*) ;;
-    *) PATH="$APP_PATH/vendor/bin:$PATH" ;;
-esac
+for scope in "global" "-d $APP_PATH"; do
+    bin_dir="$(composer $scope config bin-dir --quiet --absolute 2>/dev/null)"
+    [ -n "$bin_dir" ] && case ":$PATH:" in
+        *":$bin_dir:"*) ;;
+        *) PATH="$bin_dir:$PATH" ;;
+    esac
+done
 
 export PATH APP_PATH APP_ROOT
 
 web-mkdir "$APP_PATH" || true
 [ -d "$APP_PATH" ] && cd "$APP_PATH"
+
+# begin extra sources
+# end extra sources
 ENVVARS
     chmod +x "$conf_path"
 fi
@@ -40,7 +42,7 @@ if [ $# -eq 0 ]; then with-env; exit 0; fi
 if [ "${1:0:1}" = "/" ] && [ -f "$1" ]; then
     # check if the file is already sourced
     if ! grep -qF -- "source $1" $conf_path; then
-        echo "\nsource $1\n" >>"$conf_path"
+        sed -i "/# end extra sources/i source $1" "$conf_path"
     fi
 
     # use the first argument as the config file

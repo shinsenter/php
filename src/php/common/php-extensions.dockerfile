@@ -227,7 +227,9 @@ has-cmd composer && web-cmd root composer "$(command -v composer)"
 # Create s6 services for PHP-FPM
 if has-cmd php-fpm && has-cmd s6-service; then
     s6-service php-fpm longrun '#!/usr/bin/env sh
-cd "$APP_PATH" && exec php-fpm --nodaemonize --allow-to-run-as-root \
+cd "$APP_PATH" && exec with-env php-fpm \
+    --nodaemonize \
+    --allow-to-run-as-root \
     -c "$(php-envvars php_conf)" \
     -y "$(php-envvars fpm_conf)" \
     -d clear_env=no'

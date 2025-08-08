@@ -8,6 +8,8 @@
 ################################################################################
 export APACHE_PID="${APACHE_PID:-/run/apache2.pid}"
 
+if [ -f /etc/apache2/envvars ]; then source /etc/apache2/envvars; fi
+
 if [ -n "$PHP_MAX_EXECUTION_TIME" ] && [ "$PHP_MAX_EXECUTION_TIME" -gt "0" ]; then
     echo "
 Timeout ${PHP_MAX_EXECUTION_TIME}
@@ -29,10 +31,6 @@ else
     apache-conf 'LogLevel' '${APACHE_LOG_LEVEL}'
 fi
 
-if [ -f /etc/apache2/envvars ]; then
-    source /etc/apache2/envvars
-fi
-
 web-mkdir "$APACHE_LOG_DIR" "$APACHE_LOCK_DIR" "$APACHE_RUN_DIR"
 web-chown fix \
     "$APACHE_LOG_DIR" "$APACHE_LOCK_DIR" "$APACHE_RUN_DIR" \
@@ -43,4 +41,4 @@ if is-true "$ENABLE_TUNING_MPM"; then
     apache-mpm
 fi
 
-exec apache2 -t
+exec with-env apache2 -t
