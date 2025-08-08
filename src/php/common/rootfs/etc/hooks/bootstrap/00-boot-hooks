@@ -17,9 +17,3 @@ else
 fi
 
 hook onboot
-
-################################################################################
-
-# activity logging
-touch /var/log/startup.log
-echo "$(date) $(whoami)@$(hostname):$(pwd)\$ $0 $SUPERVISOR_PHP_COMMAND $@" >>/var/log/startup.log
