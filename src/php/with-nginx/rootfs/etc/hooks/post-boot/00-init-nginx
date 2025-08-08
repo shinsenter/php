@@ -56,4 +56,4 @@ if ! is-true "$DISABLE_GREETING" && has-cmd nginx; then
     nginx -v 2>&1
 fi
 
-exec nginx -t
+exec with-env nginx -t
