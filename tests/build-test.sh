@@ -72,11 +72,17 @@ if [ -n "${RECURSIVE:-1}" ] && [ -n "$BUILD_FROM_IMAGE" ]; then
 fi
 
 {
+    if [ "$SKIP_SQUASH" = "1" ]; then
+        command="docker buildx build --squash -f $BUILD_DOCKERFILE $BUILD_CONTEXT"
+    else
+        command="$BASE_DIR/build/docker-squash/docker-squash.sh $BUILD_DOCKERFILE"
+    fi
+
     echo ""
     echo "-------------------------------------------------"
     echo "📦 $BUILD_DATE Build: $BUILD_TAG"
-    $BASE_DIR/build/docker-squash/docker-squash.sh "$BUILD_DOCKERFILE" \
-        --tag "$BUILD_TAG" \
+    $command --attest type=sbom \
+         --tag "$BUILD_TAG" \
         --platform  "linux/${PLATFORM:-$(uname -m)}" \
         --build-arg DEBUG=$DEBUG \
         --build-arg BUILD_DATE=$BUILD_DATE \
