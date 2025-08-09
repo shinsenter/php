@@ -13,9 +13,10 @@ ARG S6_PATH=${S6_PATH:-}
 ################################################################################
 
 RUN <<'EOF'
-if ! has-s6 && [ -n "$S6_VERSION" ]; then
+[ -z "$DEBUG" ] || set -ex && set -e
+
+if [ -n "$S6_VERSION" ] && ! has-s6; then
     echo 'Configure s6-overlay'
-    [ -z "$DEBUG" ] || set -ex && set -e
 
     SOURCE="https://github.com/just-containers/s6-overlay/releases/download/${S6_VERSION}"
     FALLBACK_ENTRYPOINT="/init-non-s6"
@@ -26,9 +27,6 @@ if ! has-s6 && [ -n "$S6_VERSION" ]; then
         APT_PACKAGES="xz-utils" \
         pkg-add
     fi
-
-    # backup existing entrypoint
-    if [ -x /init ]; then mv -f /init "$FALLBACK_ENTRYPOINT"; fi
 
     # detect system's architecture
     case "$(uname -m)" in
@@ -47,13 +45,16 @@ if ! has-s6 && [ -n "$S6_VERSION" ]; then
         local url="$1"
         local path="${2:-$S6_PATH}/"
         if [ ! -e "$path" ]; then mkdir -p "$path"; fi
-        download "$url" | tar Jxp -C $path
+        download "$url" | tar Jxp -C "$path"
     }
 
+    # backup existing entrypoint
+    if [ -x /init ]; then mv -f /init "$FALLBACK_ENTRYPOINT"; fi
+
     # and install the right version of s6-overlay
-    untar ${SOURCE}/s6-overlay-noarch.tar.xz
-    untar ${SOURCE}/s6-overlay-${S6_ARCH}.tar.xz
-    untar ${SOURCE}/syslogd-overlay-noarch.tar.xz
+    untar "${SOURCE}/s6-overlay-noarch.tar.xz"
+    untar "${SOURCE}/s6-overlay-${S6_ARCH}.tar.xz"
+    untar "${SOURCE}/syslogd-overlay-noarch.tar.xz"
 
     # set s6-overlay default behavior
     if has-cmd env-default; then
@@ -72,14 +73,16 @@ if ! has-s6 && [ -n "$S6_VERSION" ]; then
         env-default S6_VERSION "$S6_VERSION"
     fi
 
-    # inject legacy entrypoint
-    if [ -x $FALLBACK_ENTRYPOINT ]; then
-        sed -i "s|^exec |\nif [ \$# -gt 0 ]; then set -- $FALLBACK_ENTRYPOINT \"\$@\"; fi\n\nexec |" /init
-    fi
+    if [ -x /init ]; then
+        # inject legacy entrypoint
+        if [ -x "$FALLBACK_ENTRYPOINT" ]; then
+            sed -i "s|^exec |\nif [ \$# -gt 0 ]; then set -- $FALLBACK_ENTRYPOINT \"\$@\"; fi\n\nexec |" /init
+        fi
 
-    # fix permissions of /init
-    chown root:root /init
-    chmod 4755 /init
+        # fix permissions of /init
+        chown root:root /init
+        chmod 4755 /init
+    fi
 fi
 EOF
 
