@@ -22,7 +22,7 @@ ARG  DEBUG
 
 ################################################################################
 
-INCLUDE ./common/os-base
+INCLUDE ./common/os-common
 INCLUDE ./common/os-s6-overlay
 INCLUDE ./common/os-crontab
 
