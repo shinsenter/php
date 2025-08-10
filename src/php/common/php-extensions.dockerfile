@@ -224,6 +224,23 @@ has-cmd php-fpm  && web-cmd root php-fpm  "$(command -v php-fpm)"
 has-cmd pecl     && web-cmd root pecl     "$(command -v pecl)"
 has-cmd composer && web-cmd root composer "$(command -v composer)"
 
+# Patch entrypoint for PHP-FPM
+if grep -qF -- 'exec "$@"' /init && has-cmd php; then
+    sed -i '/exec "$@"/c\
+if [[ " $@ " == *" php-fpm "* ]]; then\n\
+    php_conf="$(php-envvars php_conf)"\n\
+    fpm_conf="$(php-envvars fpm_conf)"\n\
+    if [ -f "$php_conf" ] && [ -f "$fpm_conf" ]; then\n\
+        options="php-fpm -c $php_conf -y $fpm_conf --allow-to-run-as-root -d clear_env=no"\n\
+        set -- ${@/php-fpm/$options}\n\
+    fi\n\
+elif [[ " $@ " == *" php "* ]]; then\n\
+    set -- web-do "$@"\n\
+fi\n\
+\n\
+exec "$@"' /init
+fi
+
 # Create s6 services for PHP-FPM
 if has-cmd php-fpm && has-cmd s6-service; then
     s6-service php-fpm longrun '#!/usr/bin/env sh
