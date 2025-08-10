@@ -2,6 +2,7 @@ services:
 
   redis:
     image: redis:alpine
+    container_name: redis
 
   cli:
     image: ghcr.io/shinsenter/php:dev-cli-alpine
@@ -23,6 +24,14 @@ services:
       - APP_GID=555
       - APP_USER=myuser
       - APP_UID=555
+      - REDIS_HOST=redis
+
+  fpm:
+    image: ghcr.io/shinsenter/php:dev-fpm-alpine
+    extends:
+      service: cli
+    ports:
+      - 9000:9000
 
   ##########################################################
 
