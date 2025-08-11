@@ -118,7 +118,7 @@ You can optionally set the following environment variables in the container to e
 | Environment Variable             | Description             |
 |----------------------------------|-------------------------|
 | `LARAVEL_AUTO_MIGRATION`         | Whether to automatically run database migrations when the app boots. Set to `0` to disable running migration. **Default is `1`**. |
-| `LARAVEL_AUTO_MIGRATION_OPTIONS` | Additional options/flags to pass to the `artisan migrate` command. |
+| `LARAVEL_AUTO_MIGRATION_OPTIONS` | Additional options/flags to pass to the `artisan migrate` command (e.g. `--seed`). |
 | `LARAVEL_ENABLE_QUEUE_WORKER`    | Enables supervisor service for the Laravel queue worker. Set to `1` to start processing jobs. **Default is `0`**. |
 | `LARAVEL_QUEUE_WORKER_OPTIONS`   | Defines custom options for the Laravel queue worker (e.g., connection, delay). |
 
