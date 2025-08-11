@@ -4,7 +4,7 @@ APP_ROOT="$(app-root)"
 
 debug-echo "Your web application must be in ${APP_PATH}."
 
-touch $APP_PATH/database/database.sqlite &>/dev/null
+touch "$APP_PATH/database/database.sqlite" &>/dev/null
 artisan storage:link &>/dev/null
 
 if is-true "$LARAVEL_AUTO_MIGRATION"; then

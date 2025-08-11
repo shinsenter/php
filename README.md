@@ -491,7 +491,8 @@ These Docker images include additional environment variables for fine-tuning con
 | `DEBUG` or `DEBUG_MODE`            | Not set          | Enables verbose logging when set to `1`. | `1` |
 | `TZ`                               | `UTC`            | Sets the container’s default timezone. See the [full list of timezones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). | `Asia/Tokyo` |
 | `ALLOW_RUNTIME_PHP_ENVVARS`        | Not set          | Allows `$PHP_*` environment variables to override PHP configurations at runtime. | `1` |
-| `INITIAL_PROJECT`                  | Not set          | Specifies the Composer project to create if the application directory is empty.<br>※ If the value is a URL ending in `*.zip` or `*.tar.gz`, the container will download and extract the archive to the application directory. | `laravel/laravel` |
+| `INITIAL_PROJECT`                  | Not set          | Specifies the Composer project to create if the application directory is empty.<br>※ If the value is a URL ending in `*.zip`, `*.tar.gz` or `*.git`, the container will download and extract the archive to the application directory. | `laravel/laravel` |
+| `INITIAL_PROJECT_GIT_OPTIONS`      | Not set          | The parameter will be passed to the `git clone` command if `$INITIAL_PROJECT` is set and is a URL ending with `.git`. | `-b develop` |
 | `DISABLE_AUTORUN_SCRIPTS`          | Not set          | Disables all autorun scripts when set to `1`. | `1` |
 | `DISABLE_AUTORUN_CREATING_PROJECT` | Not set          | Prevents automatic project creation when set to `1`. By default, Composer will create a project if `$INITIAL_PROJECT` is set and the application directory is empty. | `1` |
 | `DISABLE_AUTORUN_COMPOSER_INSTALL` | Not set          | Skips `composer install` during startup when set to `1`. By default, the command runs if `composer.json` exists but dependencies are missing. | `1` |
