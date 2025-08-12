@@ -8,25 +8,25 @@
 ################################################################################
 
 BASE_DIR="$(git rev-parse --show-toplevel)"
-. $BASE_DIR/build/helpers.sh
 SQUASH_CMD="$BASE_DIR/build/docker-squash/docker-squash.sh"
 
 set -e
+source "$BASE_DIR/build/helpers.sh"
 
 ################################################################################
 # Parse arguments
 ################################################################################
 
 # Show usage if no arguments are passed
-if [ $# -eq 0 ]; then
+if [ "$#" -eq 0 ]; then
     echo "Usage: ${0##*/} <os> <app_name> <php_version> [server]" >&2
     exit 1
 fi
 
-OS=$1
-APP=$2
-PHP_VERSION=$3
-USE_SERVER=$4
+OS="$1"
+APP="$2"
+PHP_VERSION="$3"
+USE_SERVER="$4"
 
 ################################################################################
 # Build environment variables
@@ -61,15 +61,15 @@ BUILD_README=
 BUILD_DESC=
 BUILD_TAG=
 BUILD_TAGS=
-BUILD_TAG_PREFIX=${BUILD_TAG_PREFIX:-}
+BUILD_TAG_PREFIX="${BUILD_TAG_PREFIX:-}"
 BUILD_TMP_NAME=
 BUILD_CACHE_KEY=
 BUILD_CACHE_PATH="/tmp/.buildx-cache"
 BUILD_PLATFORM="linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x"
 # BUILD_PLATFORM="linux/amd64,linux/arm/v7,linux/arm64/v8"
-SKIP_BUILD=${SKIP_BUILD:-}
-SKIP_SQUASH=${SKIP_SQUASH:-}
-USE_BUILD_CACHE=${USE_BUILD_CACHE:-1}
+SKIP_BUILD="${SKIP_BUILD:-0}"
+SKIP_SQUASH="${SKIP_SQUASH:-0}"
+USE_BUILD_CACHE="${USE_BUILD_CACHE:-1}"
 
 MIRROR_REPO="${MIRROR_REPO:-}"
 PREFIX="${APP//app-/}"
@@ -88,10 +88,10 @@ fi
 # Initialize build variables
 ################################################################################
 
-case $APP in
+case "$APP" in
 base-os)
     BUILD_NAME="$DEFAULT_REPO/$OS_BASE-s6"
-    BUILD_DOCKERFILE=$BASE_DIR/src/php/base-os.dockerfile
+    BUILD_DOCKERFILE="$BASE_DIR/src/php/base-os.dockerfile"
     PHP_VERSION=
     IPE_VERSION=
     COMPOSER_VERSION=
@@ -108,7 +108,7 @@ base-s6)
     if [ "$OS_BASE" == "alpine" ]; then
         BUILD_NAME="$DEFAULT_REPO/s6-overlay"
         S6_PATH=/s6
-        BUILD_DOCKERFILE=$BASE_DIR/src/php/base-s6.dockerfile
+        BUILD_DOCKERFILE="$BASE_DIR/src/php/base-s6.dockerfile"
         PHP_VERSION=
         IPE_VERSION=
         COMPOSER_VERSION=
@@ -119,14 +119,14 @@ base-s6)
 with-apache)
     PREFIX="fpm-apache"
     BUILD_NAME="$DEFAULT_REPO/phpfpm-apache"
-    BUILD_DOCKERFILE=$BASE_DIR/src/php/with-apache.dockerfile
+    BUILD_DOCKERFILE="$BASE_DIR/src/php/with-apache.dockerfile"
     PHP_VARIANT="fpm$SUFFIX"
     ALLOW_RC=1
     ;;
 with-nginx)
     PREFIX="fpm-nginx"
     BUILD_NAME="$DEFAULT_REPO/phpfpm-nginx"
-    BUILD_DOCKERFILE=$BASE_DIR/src/php/with-nginx.dockerfile
+    BUILD_DOCKERFILE="$BASE_DIR/src/php/with-nginx.dockerfile"
     PHP_VARIANT="fpm$SUFFIX"
     ALLOW_RC=1
     ;;
@@ -135,7 +135,7 @@ with-unit)
     unit_version="$(get_github_latest_tag nginx/unit)"
     PREFIX="unit"
     BUILD_NAME="$DEFAULT_REPO/unit-php"
-    BUILD_DOCKERFILE=$BASE_DIR/src/php/with-unit.dockerfile
+    BUILD_DOCKERFILE="$BASE_DIR/src/php/with-unit.dockerfile"
     BUILD_SOURCE_IMAGE="https://codeload.github.com/nginx/unit/tar.gz/refs/tags/$unit_version"
     BUILD_CACHE_KEY="(unit@$(echo "$unit_version" | head -c19))"
     PHP_VARIANT="zts$SUFFIX"
@@ -146,7 +146,7 @@ with-f8p)
     PREFIX="frankenphp"
     BUILD_NAME="$DEFAULT_REPO/frankenphp"
     BUILD_SOURCE_IMAGE="dunglas/frankenphp:1-php$PHP_VERSION$SUFFIX"
-    BUILD_DOCKERFILE=$BASE_DIR/src/php/with-f8p.dockerfile
+    BUILD_DOCKERFILE="$BASE_DIR/src/php/with-f8p.dockerfile"
     BUILD_PLATFORM="linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8"
     BUILD_CACHE_KEY="(frankenphp@$(get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php$PHP_VERSION$SUFFIX" | head -c19))"
     PHP_VARIANT="zts$SUFFIX"
@@ -156,7 +156,7 @@ with-roadrunner)
     # https://docs.roadrunner.dev/docs/general/install
     PREFIX="roadrunner"
     BUILD_NAME="$DEFAULT_REPO/roadrunner"
-    BUILD_DOCKERFILE=$BASE_DIR/src/php/with-roadrunner.dockerfile
+    BUILD_DOCKERFILE="$BASE_DIR/src/php/with-roadrunner.dockerfile"
     PHP_VARIANT="cli$SUFFIX"
     BUILD_PLATFORM="linux/amd64,linux/arm64"
     BUILD_CACHE_KEY="(roadrunner@$(get_github_latest_tag "roadrunner-server/roadrunner" | head -c19))"
@@ -167,13 +167,13 @@ app-*)
     APP_NAME="${APP//app-/}"
     BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-apache"
     BUILD_NAME="$DEFAULT_REPO/$APP_NAME"
-    BUILD_DOCKERFILE=$BASE_DIR/src/webapps/$APP_NAME/$APP_NAME.dockerfile
+    BUILD_DOCKERFILE="$BASE_DIR/src/webapps/$APP_NAME/$APP_NAME.dockerfile"
     PHP_VARIANT="fpm$SUFFIX"
 
     # disable cache because there are too many useless cache keys
     # USE_BUILD_CACHE=0
 
-    case $APP_NAME in
+    case "$APP_NAME" in
     bedrock)
         # https://roots.io/bedrock/docs/installation
         BUILD_FROM_IMAGE="$DEFAULT_REPO/wordpress"
@@ -362,7 +362,7 @@ app-*)
     # default
     S6_VERSION=
     BUILD_FROM_IMAGE=php
-    BUILD_DOCKERFILE=$BASE_DIR/src/php/base-php.dockerfile
+    BUILD_DOCKERFILE="$BASE_DIR/src/php/base-php.dockerfile"
     PHP_VARIANT="$APP$SUFFIX"
     ALLOW_RC=1
     ;;
@@ -379,24 +379,35 @@ if [ -n "$PHP_VERSION" ] && verlt "$PHP_VERSION" "7.1" && [ "$OS_BASE" != "debia
     SKIP_BUILD=1
 fi
 
-# Lazy load the latest Composer version when necessary
-if [ "$SKIP_BUILD" != "1" ] && [ "$COMPOSER_VERSION" == "latest" ]; then
-    COMPOSER_VERSION="$(get_github_latest_tag "composer/composer" 1)"
-fi
-
-# Lazy load the latest IPE version when necessary
-if [ "$SKIP_BUILD" != "1" ] && [ "$IPE_VERSION" == "latest" ]; then
-    IPE_VERSION="$(get_github_latest_tag "mlocati/docker-php-extension-installer" 1)"
-fi
-
-# Lazy load the latest s6-overlay version when necessary
-if [ "$SKIP_BUILD" != "1" ] && [ "$S6_VERSION" == "latest" ]; then
-    LATEST_S6=$(get_github_latest_tag "just-containers/s6-overlay" 1)
-    if [ "$LATEST_S6" == "" ]; then
-        echo "Failed to get latest s6-overlay version" >&2
-        exit 1
+# Lazy load the latest meta version when necessary
+if [ "$SKIP_BUILD" != "1" ]; then
+    # the latest Composer version
+    if [ "$COMPOSER_VERSION" == "latest" ]; then
+        COMPOSER_VERSION="$(get_github_latest_tag "composer/composer" 1)"
+        if [ -z "$COMPOSER_VERSION" ]; then
+            echo "Failed to get the latest Composer version" >&2
+            exit 1
+        fi
     fi
-    S6_VERSION="$LATEST_S6"
+
+    # the latest IPE version
+    if [ "$IPE_VERSION" == "latest" ]; then
+        IPE_VERSION="$(get_github_latest_tag "mlocati/docker-php-extension-installer" 1)"
+        if [ -z "$IPE_VERSION" ]; then
+            echo "Failed to get the latest docker-php-extension-installer version" >&2
+            exit 1
+        fi
+    fi
+
+    # the latest s6-overlay version
+    if [ "$S6_VERSION" == "latest" ]; then
+        LATEST_S6="$(get_github_latest_tag "just-containers/s6-overlay" 1)"
+        if [ -z "$LATEST_S6" ]; then
+            echo "Failed to get the latest s6-overlay version" >&2
+            exit 1
+        fi
+        S6_VERSION="$LATEST_S6"
+    fi
 fi
 
 ################################################################################
@@ -404,19 +415,19 @@ fi
 ################################################################################
 
 append_tags() {
-    local search=$1
-    local replace=$2
-    local csv_string=$3
-    local exclude=${4:-dummy}
+    local search="$1"
+    local replace="$2"
+    local csv_string="$3"
+    local exclude="${4:-dummy}"
     local new_string=""
     for item in ${csv_string//,/ }; do
         new_string+="${new_string:+,}$item"
         if echo "$item" | grep -v "$exclude" | grep -Eq "$search"; then
-            local new_item=${item/$search/$replace}
+            local new_item="${item/$search/$replace}"
             new_string+="${new_string:+,}$new_item"
         fi
     done
-    echo $new_string
+    echo "$new_string"
 }
 
 # Generate build tags
@@ -437,7 +448,7 @@ if [ -n "$PHP_VERSION" ]; then
         if [ "$PHP_VERSION" == "$LATEST_PHP" ]; then
             BUILD_TAGS="$BUILD_TAGS,$BUILD_NAME:latest$SUFFIX"
         fi
-        case $APP in
+        case "$APP" in
         with-apache)
             BUILD_TAGS="$(append_tags "$BUILD_NAME:latest" "$DEFAULT_BUILD_NAME:fpm-apache" "$BUILD_TAGS")"
             BUILD_TAGS="$(append_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-fpm-apache" "$BUILD_TAGS")"
@@ -491,23 +502,23 @@ else
 fi
 
 # Remove alpha or rc versions from build tags
-BUILD_TAGS=${BUILD_TAGS//-rc/}
+BUILD_TAGS="${BUILD_TAGS//-rc/}"
 
 # Apply tag prefix for development branch
 if [ -n "$BUILD_TAG_PREFIX" ]; then
-    BUILD_TAGS=${BUILD_TAGS//:/:$BUILD_TAG_PREFIX}
+    BUILD_TAGS="${BUILD_TAGS//:/:$BUILD_TAG_PREFIX}"
 
     if [ "$BUILD_FROM_IMAGE" != "php" ]; then
-        BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE//:/:$BUILD_TAG_PREFIX}
+        BUILD_FROM_IMAGE="${BUILD_FROM_IMAGE//:/:$BUILD_TAG_PREFIX}"
     fi
 fi
 
 # Check if build tags are empty
-if [ "$BUILD_TAGS" == "" ]; then
+if [ -z "$BUILD_TAGS" ]; then
     echo "Failed to generate build tags" 1>&2
     exit 1
 else
-    BUILD_TAG=$(echo $BUILD_TAGS | cut -d, -f1)
+    BUILD_TAG="$(echo $BUILD_TAGS | cut -d, -f1)"
 fi
 
 # Find tag contains "-alpine" and appends tags with "tidy"
@@ -516,7 +527,7 @@ fi
 # Fi
 
 # Also tag 'dev-' variants when the tag prefix is empty
-if [ "$BUILD_TAG_PREFIX" == "" ]; then
+if [ -z "$BUILD_TAG_PREFIX" ]; then
     BUILD_TAGS="$(append_tags ":" ":dev-" "$BUILD_TAGS")"
 fi
 
@@ -526,7 +537,7 @@ if [ "$PUBLISH_TO_GHCR" == "1" ]; then
 fi
 
 # Also push a copy to archived repo
-if [ -n "$ARCHIVES_REPO" ] && [ "$BUILD_TAG_PREFIX" == "" ]; then
+if [ -n "$ARCHIVES_REPO" ] && [ -z "$BUILD_TAG_PREFIX" ]; then
     unique_id="$(date +%Y%m%d)"
     BUILD_TAGS="$(append_tags "${DEFAULT_BUILD_NAME}:" "${ARCHIVES_REPO}:${unique_id}-" "$BUILD_TAGS" ":dev-")"
 fi
@@ -540,9 +551,9 @@ if [ "$DUMMY" == "1" ]; then
     BUILD_CACHE_KEY="(dummy@$BUILD_REVISION)"
 fi
 
-if [ -n "$BUILD_DOCKERFILE" ] && [ -f $BUILD_DOCKERFILE ]; then
-    BUILD_DOCKERFILE_SQUASHED="/tmp/squashed-$(basename $BUILD_DOCKERFILE)"
-    BUILD_CONTEXT=$(dirname $BUILD_DOCKERFILE)
+if [ -n "$BUILD_DOCKERFILE" ] && [ -f "$BUILD_DOCKERFILE" ]; then
+    BUILD_DOCKERFILE_SQUASHED="/tmp/squashed-$(basename "$BUILD_DOCKERFILE")"
+    BUILD_CONTEXT="$(dirname "$BUILD_DOCKERFILE")"
 
     if [ ! -e "$BUILD_CONTEXT/meta.dockerfile" ]; then
         cp -pf "$BASE_DIR/src/php/meta.dockerfile" "$BUILD_CONTEXT/meta.dockerfile"
@@ -561,29 +572,29 @@ fi
 
 # Main README.md
 if [ "$BUILD_NAME" == "$DEFAULT_BUILD_NAME" ] && [ "$APP" == "cli" ] && [ "$PHP_VERSION" == "$LATEST_PHP" ]; then
-    BUILD_README=$DEFAULT_README
+    BUILD_README="$DEFAULT_README"
 fi
 
 # Parse description from README.md
 if [ -n "$BUILD_README" ] && [ -f "$BUILD_README" ]; then
-    BUILD_DESC="$(sed '3q;d' $BUILD_README)"
+    BUILD_DESC="$(sed '3q;d' "$BUILD_README")"
 
     # update readme on latest tag and not dev branch
-    if [[ "$BUILD_TAGS" == *'latest'* ]] && [ "$BUILD_TAG_PREFIX" == "" ]; then
+    if [[ "$BUILD_TAGS" == *'latest'* ]] && [ -z "$BUILD_TAG_PREFIX" ]; then
         UPDATE_README=1
     fi
 else
     BUILD_README=
-    BUILD_DESC="$(sed '3q;d' $DEFAULT_README)"
+    BUILD_DESC="$(sed '3q;d' "$DEFAULT_README")"
 fi
 
 # Skip build if no dockerfile files
-if [ "$BUILD_DOCKERFILE" == "" ]; then
+if [ -z "$BUILD_DOCKERFILE" ]; then
     SKIP_BUILD=1
 fi
 
 # Skip squash if no dockerfile
-if [ "$BUILD_DOCKERFILE_SQUASHED" == "" ]; then
+if [ -z "$BUILD_DOCKERFILE_SQUASHED" ]; then
     SKIP_SQUASH=1
 fi
 
@@ -596,29 +607,29 @@ if [ ! -e "$BUILD_CACHE_PATH" ]; then
     mkdir -p "${BUILD_CACHE_PATH}-new" 2>&1
 fi
 
-BUILD_CACHE_KEY="($APP@$BUILD_TAG)${BUILD_CACHE_KEY:+/}$BUILD_CACHE_KEY"
+if [ "$SKIP_BUILD" != "1" ]; then
+    BUILD_CACHE_KEY="($APP@$BUILD_TAG)${BUILD_CACHE_KEY:+/}$BUILD_CACHE_KEY"
 
-if [ -n "$S6_VERSION" ]; then
-    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(s6@$S6_VERSION)"
-fi
+    if [ -n "$S6_VERSION" ]; then
+        BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(s6@$S6_VERSION)"
+    fi
 
-if [ -n "$OS_BASE" ]; then
-    if [ "$SKIP_BUILD" != "1" ]; then
+    if [ -n "$OS_BASE" ]; then
         OS_SHA="$(get_dockerhub_latest_sha "library/$OS_BASE" 1 "$OS_VERSION" | head -c19)"
+        BUILD_CACHE_KEY="$BUILD_CACHE_KEY/($OS_BASE:$OS_VERSION@$OS_SHA)"
     fi
-    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/($OS_BASE:$OS_VERSION@$OS_SHA)"
-fi
 
-if [ -n "$PHP_VERSION" ]; then
-    if [ "$SKIP_BUILD" != "1" ]; then
+    if [ -n "$PHP_VERSION" ]; then
         PHP_SHA="$(get_dockerhub_latest_sha "library/php" 1 "$PHP_VERSION-${PHP_VARIANT#-}" | head -c19)"
+        BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(php:$PHP_VERSION-${PHP_VARIANT#-}@$PHP_SHA)/(IPE:$IPE_VERSION)/(composer:$COMPOSER_VERSION)"
     fi
-    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(php:$PHP_VERSION-${PHP_VARIANT#-}@$PHP_SHA)/(IPE:$IPE_VERSION)/(composer:$COMPOSER_VERSION)"
-fi
 
-BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(buildfile:$(path_hash $BUILD_DOCKERFILE | head -c10))\
-/(buildcontext:$(path_hash $BUILD_CONTEXT | shasum | head -c10))\
-/(workflows:$(path_hash $BASE_DIR/.github/workflows/template-* | shasum | head -c10))"
+    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(buildfile:$(path_hash "$BUILD_DOCKERFILE" | head -c10))"
+    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(buildcontext:$(path_hash "$BUILD_CONTEXT" | shasum | head -c10))"
+    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(workflows:$(path_hash "$BASE_DIR/.github/workflows/template-"* | shasum | head -c10))"
+else
+    BUILD_CACHE_KEY=""
+fi
 
 BUILD_TMP_NAME="localhost:5000/$(path_hash "$BUILD_CACHE_KEY" | head -c10)"
 
@@ -633,14 +644,14 @@ remove_platform() {
 
     for search; do
         for item in ${platforms//,/ }; do
-            if [[ $item != *"$search"* ]]; then
+            if [[ "$item" != *"$search"* ]]; then
                 new_string+="${new_string:+,}$item"
             fi
         done
         platforms="$new_string"
         unset new_string
     done
-    echo $platforms
+    echo "$platforms"
 }
 
 # Remove some platforms for older PHP versions
@@ -658,7 +669,7 @@ fi
 
 # Remove -rc from PHP_VERSION
 if [ "$BUILD_FROM_IMAGE" != "php" ]; then
-    PHP_VERSION=${PHP_VERSION//-rc/}
+    PHP_VERSION="${PHP_VERSION//-rc/}"
 fi
 
 ################################################################################
@@ -666,7 +677,7 @@ fi
 ################################################################################
 
 if [ -n "$MIRROR_REPO" ]; then
-    BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE//$DEFAULT_REPO/$MIRROR_REPO}
+    BUILD_FROM_IMAGE="${BUILD_FROM_IMAGE//$DEFAULT_REPO/$MIRROR_REPO}"
 fi
 
 ################################################################################
@@ -681,36 +692,36 @@ fi
 # Export Git action environment variables
 ################################################################################
 
-github_env USE_BUILD_CACHE $USE_BUILD_CACHE
-github_env BUILD_CACHE_KEY $BUILD_CACHE_KEY
-github_env BUILD_CACHE_PATH $BUILD_CACHE_PATH
-github_env BUILD_CONTEXT $BUILD_CONTEXT
-github_env BUILD_DATE $BUILD_DATE
-github_env BUILD_DESC $BUILD_DESC
-github_env BUILD_DOCKERFILE $BUILD_DOCKERFILE
-github_env BUILD_DOCKERFILE_SQUASHED $BUILD_DOCKERFILE_SQUASHED
-github_env BUILD_FROM_IMAGE $BUILD_FROM_IMAGE
-github_env BUILD_NAME $BUILD_NAME
-github_env BUILD_PLATFORM $BUILD_PLATFORM
-github_env BUILD_README $BUILD_README
-github_env BUILD_REVISION $BUILD_REVISION
-github_env BUILD_SOURCE_IMAGE $BUILD_SOURCE_IMAGE
-github_env BUILD_TAG $BUILD_TAG
-github_env BUILD_TAG_PREFIX $BUILD_TAG_PREFIX
-github_env BUILD_TAGS $BUILD_TAGS
-github_env BUILD_TMP_NAME $BUILD_TMP_NAME
-github_env LATEST_PHP $LATEST_PHP
-github_env LATEST_S6 $LATEST_S6
-github_env OS_BASE $OS_BASE
-github_env OS_VERSION $OS_VERSION
-github_env PHP_VARIANT $PHP_VARIANT
-github_env PHP_VERSION $PHP_VERSION
-github_env S6_PATH $S6_PATH
-github_env S6_VERSION $S6_VERSION
-github_env SKIP_BUILD $SKIP_BUILD
-github_env SKIP_SQUASH $SKIP_SQUASH
-github_env SQUASH_CMD $SQUASH_CMD
-github_env UPDATE_README $UPDATE_README
+github_env USE_BUILD_CACHE "$USE_BUILD_CACHE"
+github_env BUILD_CACHE_KEY "$BUILD_CACHE_KEY"
+github_env BUILD_CACHE_PATH "$BUILD_CACHE_PATH"
+github_env BUILD_CONTEXT "$BUILD_CONTEXT"
+github_env BUILD_DATE "$BUILD_DATE"
+github_env BUILD_DESC "$BUILD_DESC"
+github_env BUILD_DOCKERFILE "$BUILD_DOCKERFILE"
+github_env BUILD_DOCKERFILE_SQUASHED "$BUILD_DOCKERFILE_SQUASHED"
+github_env BUILD_FROM_IMAGE "$BUILD_FROM_IMAGE"
+github_env BUILD_NAME "$BUILD_NAME"
+github_env BUILD_PLATFORM "$BUILD_PLATFORM"
+github_env BUILD_README "$BUILD_README"
+github_env BUILD_REVISION "$BUILD_REVISION"
+github_env BUILD_SOURCE_IMAGE "$BUILD_SOURCE_IMAGE"
+github_env BUILD_TAG "$BUILD_TAG"
+github_env BUILD_TAG_PREFIX "$BUILD_TAG_PREFIX"
+github_env BUILD_TAGS "$BUILD_TAGS"
+github_env BUILD_TMP_NAME "$BUILD_TMP_NAME"
+github_env LATEST_PHP "$LATEST_PHP"
+github_env LATEST_S6 "$LATEST_S6"
+github_env OS_BASE "$OS_BASE"
+github_env OS_VERSION "$OS_VERSION"
+github_env PHP_VARIANT "$PHP_VARIANT"
+github_env PHP_VERSION "$PHP_VERSION"
+github_env S6_PATH "$S6_PATH"
+github_env S6_VERSION "$S6_VERSION"
+github_env SKIP_BUILD "$SKIP_BUILD"
+github_env SKIP_SQUASH "$SKIP_SQUASH"
+github_env SQUASH_CMD "$SQUASH_CMD"
+github_env UPDATE_README "$UPDATE_README"
 
 ################################################################################
 # Debug
@@ -719,8 +730,8 @@ github_env UPDATE_README $UPDATE_README
 {
     if [ "$SKIP_BUILD" != "1" ]; then
         echo "🐧 Debug:"
-        path_hash $BUILD_CONTEXT
-        path_hash $BUILD_DOCKERFILE
-        path_hash $BASE_DIR/.github/workflows/template-*
+        path_hash "$BUILD_CONTEXT"
+        path_hash "$BUILD_DOCKERFILE"
+        path_hash "$BASE_DIR/.github/workflows/template-"*
     fi
 } >&2
