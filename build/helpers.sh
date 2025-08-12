@@ -38,6 +38,11 @@ timestamp() {
 # Function to fetch and cache remote content
 fetch_with_cache() {
     local url="$1"
+
+    url="${url%-}"
+    url="${url%&}"
+    url="${url%\/}"
+
     local cache_dir="/tmp/helper_cache"
     local today="$(date +"%Y%m%d")"
     local hash="$(echo -n "$url" | md5sum | awk '{print $1}')"
