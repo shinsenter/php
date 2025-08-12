@@ -34,8 +34,6 @@ fi
 
 echo "#!/usr/bin/env sh
 set -e
-export APP_PATH="$(app-path)"
-export APP_ROOT="$(app-root)"
-cd "\$APP_PATH" && exec $command $@ \"\$@\"
+exec app-exec $command $@ \"\$@\"
 " >$target
 chmod +x $target
