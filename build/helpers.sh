@@ -37,21 +37,21 @@ timestamp() {
 
 # Function to fetch and cache remote content
 fetch_with_cache() {
-    local url="${1%-}"
+    local url="$1"
     local cache_dir="/tmp/helper_cache"
-    local today=$(date +"%Y%m%d")
-    local hash=$(echo -n "$url" | md5sum | awk '{print $1}')
+    local today="$(date +"%Y%m%d")"
+    local hash="$(echo -n "$url" | md5sum | awk '{print $1}')"
     local cache_file="${cache_dir}/${today}_${hash}.cache"
 
     mkdir -p "$cache_dir"
     shift
 
-    if [[ -f "$cache_file" ]]; then
+    if [ -f "$cache_file" ]; then
         echo "Cache found for $url" >&2
         cat "$cache_file"
     else
         echo "Fetching $url" >&2
-        content=$(
+        content="$(
             if [ "$TOKEN" != "" ]; then
                 curl --retry 3 --retry-delay 5 -ksSLRJ $@ \
                     --header "Authorization: Bearer $TOKEN" \
@@ -59,9 +59,9 @@ fetch_with_cache() {
             else
                 curl --retry 3 --retry-delay 5 -ksSLRJ $@ "$url"
             fi
-        )
+        )"
 
-        if [[ $? -eq 0 && -n "$content" ]]; then
+        if [ "$?" -eq 0 ] && [ -n "$content" ]; then
             echo "$content" | tr -d '[:cntrl:]' >"$cache_file"
             cat "$cache_file"
         else
@@ -73,16 +73,22 @@ fetch_with_cache() {
 
 # Function to get metadata from GitHub
 get_github_json () {
-    TOKEN="$GITHUB_TOKEN" fetch_with_cache "https://api.github.com/repos/$1/tags?per_page=10&$2"
+    local name="$1"
+    local query="$2"
+    local limit="${3:-5}"
+    TOKEN="$GITHUB_TOKEN" fetch_with_cache "https://api.github.com/repos/$name/tags?per_page=$limit&$query"
 }
 
 # Function to get metadata from Docker Hub
 get_dockerhub_json () {
+    local name="$1"
+    local query="$2"
+    local limit="${3:-5}"
     local options=
     if [ -n "$DOCKERHUB_USERNAME" ] && [ -n "$DOCKERHUB_PASSWORD" ]; then
         options="-u $DOCKERHUB_USERNAME:$DOCKERHUB_PASSWORD"
     fi
-    fetch_with_cache "https://registry.hub.docker.com/v2/repositories/$1/tags?&page_size=10&status=active&sort=last_updated&$2" "$options"
+    fetch_with_cache "https://registry.hub.docker.com/v2/repositories/$name/tags?&page_size=$limit&status=active&sort=last_updated&$query" "$options"
 }
 
 # Function to parse JSON and return
@@ -90,7 +96,7 @@ parse_json() {
     local json="$1"
     local limit="${2:-1}"
     local jq_query="${3:-.}"
-    local result="$(echo "$json" | jq -r "$jq_query" | head -n $limit)"
+    local result="$(echo "$json" | jq -r "$jq_query" | head -n "$limit")"
 
     if [ -z "$result" ]; then
         return 1
@@ -123,7 +129,7 @@ github_env() {
 ################################################################################
 
 path_hash() {
-    if [ $# -eq 0 ]; then
+    if [ "$#" -eq 0 ]; then
         echo -n "" | shasum
         return
     fi
