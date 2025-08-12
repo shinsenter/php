@@ -25,5 +25,5 @@ rm -rf /var/www/localhost \
     /etc/nginx/modules-* \
     /etc/nginx/sites-* \
     /etc/nginx/conf-* \
-    $APP_PATH/*
+    "$APP_PATH"/*
 EOF
