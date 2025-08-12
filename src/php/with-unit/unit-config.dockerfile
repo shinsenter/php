@@ -34,7 +34,7 @@ else
 fi
 
 rm -rf "$unit_pid" || true
-cd "$APP_PATH" && exec with-env "$unitd" --no-daemon \
+exec app-exec with-env "$unitd" --no-daemon \
     --user "${APP_USER:-www-data}" \
     --group "${APP_GROUP:-www-data}" \
     --control unix:"$unit_socket" \

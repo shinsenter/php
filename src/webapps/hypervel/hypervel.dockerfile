@@ -51,7 +51,7 @@ sed -i 's/ --isolated//g' /etc/hooks/onready/*
 
 if has-cmd s6-service; then
     s6-service hypervel longrun '#!/usr/bin/env sh
-cd "$APP_PATH" && exec artisan serve $LARAVEL_SERVE_OPTIONS
+exec app-exec artisan serve $LARAVEL_SERVE_OPTIONS
 '
 
     s6-service php-fpm unset

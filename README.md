@@ -1,5 +1,4 @@
-# PHP Docker Images
-
+# PHP Docker Images <!-- omit from toc -->
 📦 Simplified PHP Docker images for effortless customization and extension setup.
 
 Our Docker images cover PHP versions from 5.6 to 8.5 (beta), available in CLI, ZTS, FPM, FPM/Apache2, FPM/Nginx, RoadRunner, FrankenPHP, and Nginx Unit variants. The Docker images are available for both Debian and Alpine versions.
@@ -10,6 +9,25 @@ Our Docker images cover PHP versions from 5.6 to 8.5 (beta), available in CLI, Z
 
 [![Daily build](https://code.shin.company/php/actions/workflows/build-all.yml/badge.svg)](https://code.shin.company/php/actions/workflows/build-all.yml)
 
+
+## Table of Contents <!-- omit from toc -->
+- [Introduction](#introduction)
+- [Docker Image Variants](#docker-image-variants)
+- [Customizing Settings via Environment Variables](#customizing-settings-via-environment-variables)
+- [Pre-installed PHP Extensions](#pre-installed-php-extensions)
+- [Adding PHP Extensions](#adding-php-extensions)
+- [Application Directory](#application-directory)
+- [Customizing Container User and Group in Docker](#customizing-container-user-and-group-in-docker)
+- [Autorun Scripts](#autorun-scripts)
+- [Using Cron Jobs](#using-cron-jobs)
+- [Customize Supervisor Command](#customize-supervisor-command)
+- [Sending Emails](#sending-emails)
+- [Debug Mode](#debug-mode)
+- [Other System Settings](#other-system-settings)
+- [Supported Platforms](#supported-platforms)
+- [Stable Image Tags](#stable-image-tags)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Introduction
 
@@ -50,13 +68,16 @@ Examples:
 
 Explore all available tags on our [Docker Hub](https://hub.docker.com/r/shinsenter/php/tags).
 
+<!--
 For stable versions suitable for production, we also offer version tags on [another repository](https://hub.docker.com/r/shinsenter/php-archives/tags).
+-->
 
-### Examples
+
+### Examples <!-- omit from toc -->
 
 You can easily run a container by copying and pasting one of these `docker run` commands:
 
-#### CLI
+#### CLI <!-- omit from toc -->
 
 ```shell
 # non-interactive
@@ -66,13 +87,13 @@ docker run --rm shinsenter/php:8.4-cli php -m
 docker run -it -v ./myproject:/var/www/html shinsenter/php:8.4-cli
 ```
 
-#### PHP-FPM
+#### PHP-FPM <!-- omit from toc -->
 
 ```shell
 docker run -v ./myproject:/var/www/html -p 9000:9000 shinsenter/php:8.4-fpm
 ```
 
-#### PHP-FPM + Nginx (or Apache, RoadRunner, FrankenPHP, Nginx Unit)
+#### PHP-FPM + Nginx (or Apache, RoadRunner, FrankenPHP, Nginx Unit) <!-- omit from toc -->
 
 ```shell
 # with Nginx
@@ -111,9 +132,9 @@ This naming convention helps you easily identify which environment variable appl
 
 > 💡 Hint: Run `php-envvars` in the container to get a full list of default `$PHP_*` environment variables.
 
-### Examples
+### Examples <!-- omit from toc -->
 
-#### Command Line
+#### Command Line <!-- omit from toc -->
 
 ```shell
 docker run \
@@ -125,7 +146,7 @@ docker run \
     shinsenter/php:8.4 php -i
 ```
 
-#### With docker-compose.yml
+#### With docker-compose.yml <!-- omit from toc -->
 
 ```yaml
 services:
@@ -138,7 +159,7 @@ services:
       PHP_SESSION_COOKIE_HTTPONLY: "1"
 ```
 
-#### Explanation
+#### Explanation <!-- omit from toc -->
 
 | Environment Variable          | Explanation                                        | Equivalent Configuration    |
 |-------------------------------|----------------------------------------------------|-----------------------------|
@@ -277,7 +298,7 @@ services:
 Shell scripts placed in the `/startup/` directory will automatically run when the container starts, in alphabetical order by filename.
 This feature can initialize projects before the main program runs, saving time by executing initialization scripts automatically.
 
-#### Usage Example
+#### Usage Example <!-- omit from toc -->
 
 Copy a script called `00-migration` into `/startup/` via a Dockerfile:
 
@@ -336,7 +357,7 @@ Zend Engine v4.5.0-dev, Copyright (c) Zend Technologies
 Composer version 2.8.10 2025-07-10 19:08:33
 ```
 
-#### Disable Autorun Scripts
+#### Disable Autorun Scripts <!-- omit from toc -->
 
 To disable autorun scripts, set `DISABLE_AUTORUN_SCRIPTS=1` as an environment variable.
 
@@ -414,7 +435,7 @@ For more information on environment variables for cron jobs, refer to the [Other
 We can set a `$SUPERVISOR_PHP_COMMAND` environment variable to the service definition in your application's `docker-compose.yml` file.
 This environment variable will contain the command that the container will use to serve your application using another process instead of the default process.
 
-#### Command Line
+#### Command Line <!-- omit from toc -->
 
 ```shell
 docker run \
@@ -422,7 +443,7 @@ docker run \
     shinsenter/php:8.4
 ```
 
-#### With docker-compose.yml
+#### With docker-compose.yml <!-- omit from toc -->
 
 ```yml
 services:
@@ -464,13 +485,13 @@ you'll need to configure SMTP using the following environment variables in your 
 Enable "debug mode" for more verbose logging by setting `DEBUG=1` as an environment variable.
 This can be used both with `docker run` and in `docker-compose.yml`.
 
-#### Command Line
+#### Command Line <!-- omit from toc -->
 
 ```shell
 docker run -e DEBUG=1 shinsenter/php:8.4-fpm-nginx
 ```
 
-#### With docker-compose.yml
+#### With docker-compose.yml <!-- omit from toc -->
 
 ```yml
 services:

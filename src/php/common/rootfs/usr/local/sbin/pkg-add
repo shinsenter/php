@@ -37,7 +37,7 @@ alpine() {
         apk upgrade --available | debug-echo -l || true
     fi
     if [ $# -gt 0 ]; then
-        debug-echo -i "\nInstall $@"
+        debug-echo -i "\nInstall" $@
         apk add "$@" | debug-echo -l
     fi
 }
@@ -51,7 +51,7 @@ debian() {
         apt full-upgrade $options | debug-echo -l || true
     fi
     if [ $# -gt 0 ]; then
-        debug-echo -i "\nInstall $@"
+        debug-echo -i "\nInstall" $@
         apt-get install $options --no-install-recommends --no-install-suggests "$@" 2>&1 | grep -vF ' warning: ' | debug-echo -l
     fi
 }

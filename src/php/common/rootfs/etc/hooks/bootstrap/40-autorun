@@ -8,4 +8,4 @@
 ################################################################################
 if ! has-cmd autorun; then exit 0; fi
 if is-true "$DISABLE_AUTORUN_SCRIPTS"; then exit 0; fi
-cd "$APP_PATH" && exec autorun /etc/autorun.d/ /startup/ 2>&1
+exec app-exec autorun /etc/autorun.d/ /startup/ 2>&1

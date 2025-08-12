@@ -26,7 +26,7 @@ install_deps() {
 
     [ -n "$deps" ] && pkg-add $deps
 
-    cd "$APP_PATH"
+    [ -d "$APP_PATH" ] && cd "$APP_PATH"
     has-cmd git && git config --global --add safe.directory "$APP_PATH" || true
     has-cmd npm && [ -f ./package.json ] && [ ! -d ./node_modules ] && npm install || true
 }
