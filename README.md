@@ -29,6 +29,7 @@ Our Docker images cover PHP versions from 5.6 to 8.5 (beta), available in CLI, Z
 - [Contributing](#contributing)
 - [License](#license)
 
+
 ## Introduction
 
 [![shinsenter/php](https://repository-images.githubusercontent.com/458053748/5a05c8e4-1c00-440c-98f1-2cd4548bbaa2)](https://docker.shin.company/php)
@@ -77,6 +78,7 @@ For stable versions suitable for production, we also offer version tags on [anot
 
 You can easily run a container by copying and pasting one of these `docker run` commands:
 
+
 #### CLI <!-- omit from toc -->
 
 ```shell
@@ -87,11 +89,13 @@ docker run --rm shinsenter/php:8.4-cli php -m
 docker run -it -v ./myproject:/var/www/html shinsenter/php:8.4-cli
 ```
 
+
 #### PHP-FPM <!-- omit from toc -->
 
 ```shell
 docker run -v ./myproject:/var/www/html -p 9000:9000 shinsenter/php:8.4-fpm
 ```
+
 
 #### PHP-FPM + Nginx (or Apache, RoadRunner, FrankenPHP, Nginx Unit) <!-- omit from toc -->
 
@@ -132,7 +136,9 @@ This naming convention helps you easily identify which environment variable appl
 
 > 💡 Hint: Run `php-envvars` in the container to get a full list of default `$PHP_*` environment variables.
 
+
 ### Examples <!-- omit from toc -->
+
 
 #### Command Line <!-- omit from toc -->
 
@@ -146,6 +152,7 @@ docker run \
     shinsenter/php:8.4 php -i
 ```
 
+
 #### With docker-compose.yml <!-- omit from toc -->
 
 ```yaml
@@ -158,6 +165,7 @@ services:
       PHP_UPLOAD_MAX_FILESIZE: "100M"
       PHP_SESSION_COOKIE_HTTPONLY: "1"
 ```
+
 
 #### Explanation <!-- omit from toc -->
 
@@ -298,6 +306,7 @@ services:
 Shell scripts placed in the `/startup/` directory will automatically run when the container starts, in alphabetical order by filename.
 This feature can initialize projects before the main program runs, saving time by executing initialization scripts automatically.
 
+
 #### Usage Example <!-- omit from toc -->
 
 Copy a script called `00-migration` into `/startup/` via a Dockerfile:
@@ -317,45 +326,6 @@ RUN chmod +x /startup/00-migration
 
 > 👉🏻 Info: The startup directory already includes a script called `99-greeting` that prints a welcome message when the container starts.
 
-```
-░█▀▀░█░█░▀█▀░█▀█░█▀▀░█▀▀░█▀█░▀█▀░█▀▀░█▀▄░░░█░█▀█░█░█░█▀█
-░▀▀█░█▀█░░█░░█░█░▀▀█░█▀▀░█░█░░█░░█▀▀░█▀▄░▄▀░░█▀▀░█▀█░█▀▀
-░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀▀▀░▀░▀░░▀░░▀▀▀░▀░▀░▀░░░▀░░░▀░▀░▀░░
-
-If you find my Docker images useful, consider donating via PayPal:
- -> https://www.paypal.me/shinsenter
-
-(To edit this welcome message, add your text to /etc/welcome.txt)
-
----------------
-Docker Images by SHIN Company
-Copyright (C) 2025 SHIN Company <shin@shin.company>
-
-This software is free under the GNU General Public License (GPL).
-You can redistribute and/or modify it under the terms of the GNU GPL.
-This program is provided with the hope that it will be useful,
-but it comes WITHOUT ANY WARRANTY. For more details, refer to the GNU GPL.
-
-To get support, please contact: SHIN Company <shin@shin.company>
-Docker Hub:      https://hub.docker.com/u/shinsenter
-GitHub Packages: https://github.com/shinsenter?tab=packages
-
----------------
-Container     : shinsenter/php (built: 2025-07-25T00:00:00+0000)
-Distro        : Debian GNU/Linux 12 (bookworm)
-Timezone      : UTC (GMT+0000)
-UID / GID     : www-data:www-data (33:33)
-App Root      : /var/www/html
-Document Root : /var/www/html
----------------
-
-PHP 8.5.0alpha2 (cli) (built: Jul 23 2025 21:34:52) (NTS)
-Copyright (c) The PHP Group
-Built by https://github.com/docker-library/php
-Zend Engine v4.5.0-dev, Copyright (c) Zend Technologies
-    with Zend OPcache v8.5.0alpha2, Copyright (c), by Zend Technologies
-Composer version 2.8.10 2025-07-10 19:08:33
-```
 
 #### Disable Autorun Scripts <!-- omit from toc -->
 
@@ -435,6 +405,7 @@ For more information on environment variables for cron jobs, refer to the [Other
 We can set a `$SUPERVISOR_PHP_COMMAND` environment variable to the service definition in your application's `docker-compose.yml` file.
 This environment variable will contain the command that the container will use to serve your application using another process instead of the default process.
 
+
 #### Command Line <!-- omit from toc -->
 
 ```shell
@@ -442,6 +413,7 @@ docker run \
     -e SUPERVISOR_PHP_COMMAND='php -S localhost:80 index.php' \
     shinsenter/php:8.4
 ```
+
 
 #### With docker-compose.yml <!-- omit from toc -->
 
@@ -485,11 +457,13 @@ you'll need to configure SMTP using the following environment variables in your 
 Enable "debug mode" for more verbose logging by setting `DEBUG=1` as an environment variable.
 This can be used both with `docker run` and in `docker-compose.yml`.
 
+
 #### Command Line <!-- omit from toc -->
 
 ```shell
 docker run -e DEBUG=1 shinsenter/php:8.4-fpm-nginx
 ```
+
 
 #### With docker-compose.yml <!-- omit from toc -->
 
