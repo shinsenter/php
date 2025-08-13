@@ -6,12 +6,10 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-if [ $# -eq 0 ]; then exit 0; fi
+if [ "$#" -eq 0 ]; then exit 1; fi
 
-mkdir -p /tmp/hooks
-
-for hook; do
-    debug-echo "\nRun hook: $hook"
-    touch   "/tmp/hooks/$hook" 2>&1 || true
-    autorun "/etc/hooks/$hook" 2>&1
-done
+case "$(echo "$1" | tr '[:upper:]' '[:lower:]')" in
+    ''|'false'|'none'|'null'|'off'|'undefined'|0|false|no)
+        exit 1 ;;
+    *)  exit 0 ;;
+esac

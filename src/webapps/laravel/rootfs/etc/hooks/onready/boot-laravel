@@ -1,15 +1,2 @@
 #!/usr/bin/env sh
 debug-echo "Your application path is at ${APP_PATH}."
-
-touch "$APP_PATH/database/database.sqlite" &>/dev/null
-artisan storage:link &>/dev/null
-
-if is-true "$LARAVEL_AUTO_MIGRATION"; then
-    MIGRATION_CMD='artisan migrate --force -n'
-
-    if artisan migrate --help | grep -qF -- '--isolated'; then
-        MIGRATION_CMD="$MIGRATION_CMD --isolated"
-    fi
-
-    eval $MIGRATION_CMD $LARAVEL_AUTO_MIGRATION_OPTIONS || true
-fi

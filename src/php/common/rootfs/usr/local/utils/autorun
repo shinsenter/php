@@ -11,7 +11,7 @@ export APP_ROOT="$(app-root)"
 
 run_cmd() {
     if [ -x "$1" ]; then
-        debug-echo "\nAutorun: $1"
+        debug-echo -d "Autorun: $1"
         with-env "$@"
     fi
 }

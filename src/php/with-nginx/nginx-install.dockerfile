@@ -17,7 +17,7 @@ echo 'Install Nginx'
 pkg-add nginx
 
 # clean up
-rm -rf /var/www/localhost \
+\rm -rf /var/www/localhost \
     /etc/init.d/nginx* \
     /etc/ssl/nginx* \
     /etc/nginx/nginx.conf \

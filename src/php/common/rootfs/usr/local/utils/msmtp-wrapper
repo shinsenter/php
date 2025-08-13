@@ -47,6 +47,7 @@ fi
 
 # logging
 if [ -n "$SMTP_LOG" ]; then
+    mkdir -p "$(dirname "$SMTP_LOG")" &>/dev/null || true
     options="$options --logfile=$SMTP_LOG"
 elif [ -f /var/log/mail.log ]; then
     options="$options --logfile=/var/log/mail.log"

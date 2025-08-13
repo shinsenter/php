@@ -6,7 +6,6 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 INSTALL="0"
 CERT="domain.crt"
 KEY="domain.key"
@@ -47,9 +46,9 @@ if [ -z "$DOMAINS" ]; then
 fi
 
 mkdir -p "$(dirname $CERT)" "$(dirname $KEY)"
-rm -rf $CERT $KEY
+\rm -rf $CERT $KEY
 
-debug-echo -w "Generate self-signed CA for $DOMAINS."
+debug-echo -i "Generate self-signed CA for $DOMAINS."
 openssl dhparam -dsaparam -out "$(dirname $CERT)"/dhparam.pem $LENGTH
 openssl req -nodes -x509 -days $DAYS \
     -newkey rsa:$LENGTH -sha256 \

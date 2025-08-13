@@ -1,7 +1,0 @@
-#!/usr/bin/env sh
-usage() { du -sh / 2>/dev/null; }
-before="$(usage)"
-hook cleanup
-echo
-debug-echo -w "Before cleanup: $before."
-debug-echo -s "After cleanup:  $(usage)."

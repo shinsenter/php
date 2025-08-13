@@ -32,14 +32,8 @@ USE_SERVER="$4"
 # Build environment variables
 ################################################################################
 
-DEFAULT_REPO="shinsenter"
-DEFAULT_BUILD_NAME="$DEFAULT_REPO/php"
-DEFAULT_README="$BASE_DIR/README.md"
-UPDATE_README=0
-
 LATEST_PHP="8.4"
 LATEST_S6=
-ALLOW_RC=0
 
 PHP_VARIANT="${PHP_VARIANT:-}"
 S6_VERSION="${S6_VERSION:-latest}"
@@ -48,6 +42,12 @@ OS_BASE="${OS_BASE:-debian}"
 OS_VERSION="${OS_VERSION:-latest}"
 IPE_VERSION="${IPE_VERSION:-latest}"
 COMPOSER_VERSION="${COMPOSER_VERSION:-latest}"
+
+BASE_REPO="php"
+DEFAULT_REPO="shinsenter"
+DEFAULT_BUILD_NAME="$DEFAULT_REPO/php"
+DEFAULT_README="$BASE_DIR/README.md"
+MIRROR_REPO="${MIRROR_REPO:-}"
 
 BUILD_NAME="$DEFAULT_BUILD_NAME"
 BUILD_DATE="$(date +%Y-%m-%dT%T%z)"
@@ -67,11 +67,13 @@ BUILD_CACHE_KEY=
 BUILD_CACHE_PATH="/tmp/.buildx-cache"
 BUILD_PLATFORM="linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x"
 # BUILD_PLATFORM="linux/amd64,linux/arm/v7,linux/arm64/v8"
+
 SKIP_BUILD="${SKIP_BUILD:-0}"
 SKIP_SQUASH="${SKIP_SQUASH:-0}"
 USE_BUILD_CACHE="${USE_BUILD_CACHE:-1}"
+ALLOW_RC=0
+UPDATE_README=0
 
-MIRROR_REPO="${MIRROR_REPO:-}"
 PREFIX="${APP//app-/}"
 SUFFIX=
 
@@ -90,11 +92,11 @@ fi
 
 case "$APP" in
 base-os)
-    BUILD_NAME="$DEFAULT_REPO/$OS_BASE-s6"
-    BUILD_DOCKERFILE="$BASE_DIR/src/php/base-os.dockerfile"
     PHP_VERSION=
     IPE_VERSION=
     COMPOSER_VERSION=
+    BUILD_NAME="$DEFAULT_REPO/$OS_BASE-s6"
+    BUILD_DOCKERFILE="$BASE_DIR/src/php/base-os.dockerfile"
     if [ "$OS_BASE" == "ubuntu" ]; then
         BUILD_PLATFORM="linux/amd64,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x"
     elif [ "$OS_BASE" == "debian" ]; then
@@ -106,13 +108,13 @@ base-os)
 base-s6)
     # only build on alpine
     if [ "$OS_BASE" == "alpine" ]; then
-        BUILD_NAME="$DEFAULT_REPO/s6-overlay"
+        SKIP_SQUASH=1
         S6_PATH=/s6
-        BUILD_DOCKERFILE="$BASE_DIR/src/php/base-s6.dockerfile"
         PHP_VERSION=
         IPE_VERSION=
         COMPOSER_VERSION=
-        SKIP_SQUASH=1
+        BUILD_NAME="$DEFAULT_REPO/s6-overlay"
+        BUILD_DOCKERFILE="$BASE_DIR/src/php/base-s6.dockerfile"
         BUILD_PLATFORM="linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x"
     fi
     ;;
@@ -152,8 +154,8 @@ with-f8p)
     PHP_VARIANT="zts$SUFFIX"
     ;;
 with-roadrunner)
-    verlt "$PHP_VERSION" "8.0" && SKIP_BUILD=1
     # https://docs.roadrunner.dev/docs/general/install
+    verlt "$PHP_VERSION" "8.0" && SKIP_BUILD=1
     PREFIX="roadrunner"
     BUILD_NAME="$DEFAULT_REPO/roadrunner"
     BUILD_DOCKERFILE="$BASE_DIR/src/php/with-roadrunner.dockerfile"
@@ -176,13 +178,14 @@ app-*)
     case "$APP_NAME" in
     bedrock)
         # https://roots.io/bedrock/docs/installation
-        BUILD_FROM_IMAGE="$DEFAULT_REPO/wordpress"
         verlt "$PHP_VERSION" "8.0" && SKIP_BUILD=1
+        USE_SERVER=""
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/wordpress"
         ;;
     cakephp4)
         # https://book.cakephp.org/4/en/installation.html
-        LATEST_PHP="8.3"
         verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
+        LATEST_PHP="8.3"
         ;;
     cakephp5)
         # https://book.cakephp.org/5/en/installation.html
@@ -194,8 +197,9 @@ app-*)
         ;;
     coolify)
         # https://coolify.io/docs/installation
-        BUILD_FROM_IMAGE="$DEFAULT_REPO/laravel"
         verlt "$PHP_VERSION" "8.2" && SKIP_BUILD=1
+        USE_SERVER=""
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/laravel"
         ;;
     drupal)
         # https://www.drupal.org/docs/getting-started/system-requirements/php-requirements
@@ -207,13 +211,13 @@ app-*)
         ;;
     flarum)
         # https://docs.flarum.org/install
-        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.3" && SKIP_BUILD=1
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         ;;
     flightphp)
         # https://docs.flightphp.com
-        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
         ;;
     grav)
         # https://learn.getgrav.org/17/basics/installation
@@ -222,8 +226,8 @@ app-*)
     hyperf)
         # https://hyperf.wiki/3.1/#/en/quick-start/install
         LATEST_PHP="8.3"
-        BUILD_PLATFORM="linux/amd64,linux/arm/v7,linux/arm64/v8"
         BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
+        BUILD_PLATFORM="linux/amd64,linux/arm/v7,linux/arm64/v8"
         verlt "$PHP_VERSION" "7.2" && SKIP_BUILD=1
         if verlte "8.3" "$PHP_VERSION"; then
             BUILD_PLATFORM="linux/amd64,linux/arm64/v8"
@@ -231,8 +235,9 @@ app-*)
         ;;
     hypervel)
         # https://hypervel.org/docs/deployment
-        BUILD_PLATFORM="linux/amd64,linux/arm/v7,linux/arm64/v8"
+        USE_SERVER=""
         BUILD_FROM_IMAGE="$DEFAULT_REPO/laravel"
+        BUILD_PLATFORM="linux/amd64,linux/arm/v7,linux/arm64/v8"
         verlt "$PHP_VERSION" "8.2" && SKIP_BUILD=1
         if verlte "8.3" "$PHP_VERSION"; then
             BUILD_PLATFORM="linux/amd64,linux/arm64/v8"
@@ -240,8 +245,9 @@ app-*)
         ;;
     invoiceshelf)
         # https://docs.invoiceshelf.com/install/manual.html
-        BUILD_FROM_IMAGE="$DEFAULT_REPO/laravel"
         verlt "$PHP_VERSION" "8.1" && SKIP_BUILD=1
+        USE_SERVER=""
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/laravel"
         ;;
     kirby)
         # https://getkirby.com/docs/cookbook/setup/composer
@@ -249,9 +255,9 @@ app-*)
         ;;
     laminas)
         # https://docs.laminas.dev/tutorials/getting-started/skeleton-application
+        verlt "$PHP_VERSION" "7.3" && SKIP_BUILD=1
         LATEST_PHP="8.3"
         BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
-        verlt "$PHP_VERSION" "7.3" && SKIP_BUILD=1
         ;;
     laravel)
         # https://laravel.com/docs/master/installation
@@ -259,14 +265,14 @@ app-*)
         ;;
     magento)
         # https://experienceleague.adobe.com/en/docs/commerce-operations/installation-guide/system-requirements
+        verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
         LATEST_PHP="8.3"
         BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
-        verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
         ;;
     mautic)
         # https://docs.mautic.org/en/5.x/getting_started/how_to_install_mautic.html#installing-with-composer
-        LATEST_PHP="8.3"
         verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
+        LATEST_PHP="8.3"
         ;;
     phpmyadmin)
         # https://docs.phpmyadmin.net/en/latest/setup.html
@@ -277,21 +283,24 @@ app-*)
         ;;
     spiral)
         # https://spiral.dev/docs/start-installation/current/en
+        verlt "$PHP_VERSION" "8.1" && SKIP_BUILD=1
         PHP_VARIANT="cli$SUFFIX"
+        USE_SERVER=""
         BUILD_FROM_IMAGE="$DEFAULT_REPO/roadrunner"
         BUILD_PLATFORM="linux/amd64,linux/arm64"
-        verlt "$PHP_VERSION" "8.1" && SKIP_BUILD=1
         ;;
     statamic)
         # https://statamic.dev/installing
-        BUILD_FROM_IMAGE="$DEFAULT_REPO/laravel"
         verlt "$PHP_VERSION" "7.2" && SKIP_BUILD=1
+        USE_SERVER=""
+        BUILD_FROM_IMAGE="$DEFAULT_REPO/laravel"
         ;;
     symfony)
         # https://symfony.com/doc/current/setup.html
         ;;
     sulu)
         # https://github.com/sulu/skeleton
+        USE_SERVER=""
         BUILD_FROM_IMAGE="$DEFAULT_REPO/symfony"
         ;;
     wordpress)
@@ -305,9 +314,10 @@ app-*)
     ## Inactive frameworks
     # crater)
     #     # https://docs.craterapp.com/installation.html
-    #     LATEST_PHP="8.1"
-    #     BUILD_FROM_IMAGE="$DEFAULT_REPO/laravel"
     #     verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
+    #     LATEST_PHP="8.1"
+    #     USE_SERVER=""
+    #     BUILD_FROM_IMAGE="$DEFAULT_REPO/laravel"
     #     ;;
     # fuelphp)
     #     # https://fuelphp.com/docs/installation/instructions.html
@@ -324,33 +334,46 @@ app-*)
     case "$USE_SERVER" in
     httpd | apache*)
         if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/phpfpm-apache" ]; then
-            SUFFIX="-apache${SUFFIX}"
+            USE_SERVER="apache"
             BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-apache"
+        else
+            USE_SERVER=""
         fi
         ;;
     nginx)
         if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/phpfpm-nginx" ]; then
-            SUFFIX="-nginx${SUFFIX}"
+            USE_SERVER="nginx"
             BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
+        else
+            USE_SERVER=""
         fi
         ;;
-    unit)
+    unit | nginx-unit)
         if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/unit-php" ]; then
-            SUFFIX="-unit${SUFFIX}"
+            USE_SERVER="unit"
             BUILD_FROM_IMAGE="$DEFAULT_REPO/unit-php"
+        else
+            USE_SERVER=""
         fi
         ;;
     f8p | frankenphp)
         if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/frankenphp" ]; then
-            SUFFIX="-frankenphp${SUFFIX}"
+            USE_SERVER="frankenphp"
             BUILD_FROM_IMAGE="$DEFAULT_REPO/frankenphp"
+        else
+            USE_SERVER=""
         fi
         ;;
     rr | roadrunner)
         if [ "$BUILD_FROM_IMAGE" != "$DEFAULT_REPO/roadrunner" ]; then
-            SUFFIX="-roadrunner${SUFFIX}"
+            USE_SERVER="roadrunner"
             BUILD_FROM_IMAGE="$DEFAULT_REPO/roadrunner"
+        else
+            USE_SERVER=""
         fi
+        ;;
+    *)
+        USE_SERVER=""
         ;;
     esac
 
@@ -471,9 +494,13 @@ if [ -n "$PHP_VERSION" ]; then
             ;;
         esac
     elif [ "${APP:0:4}" == "app-" ]; then
-        BUILD_TAGS="$BUILD_NAME:php$PHP_VERSION$SUFFIX"
+        SERVER_SUFFIX=""
+        if [ -n "$USE_SERVER" ]; then
+            SERVER_SUFFIX="-$USE_SERVER"
+        fi
+        BUILD_TAGS="$BUILD_NAME:php$PHP_VERSION$SUFFIX$SERVER_SUFFIX"
         if [ "$PHP_VERSION" == "$LATEST_PHP" ]; then
-            BUILD_TAGS="$BUILD_TAGS,$BUILD_NAME:latest$SUFFIX"
+            BUILD_TAGS="$BUILD_TAGS,$BUILD_NAME:latest$SUFFIX$SERVER_SUFFIX"
         fi
     fi
 
@@ -508,7 +535,7 @@ BUILD_TAGS="${BUILD_TAGS//-rc/}"
 if [ -n "$BUILD_TAG_PREFIX" ]; then
     BUILD_TAGS="${BUILD_TAGS//:/:$BUILD_TAG_PREFIX}"
 
-    if [ "$BUILD_FROM_IMAGE" != "php" ]; then
+    if [ "$BUILD_FROM_IMAGE" != "$BASE_REPO" ]; then
         BUILD_FROM_IMAGE="${BUILD_FROM_IMAGE//:/:$BUILD_TAG_PREFIX}"
     fi
 fi
@@ -668,7 +695,7 @@ fi
 ################################################################################
 
 # Remove -rc from PHP_VERSION
-if [ "$BUILD_FROM_IMAGE" != "php" ]; then
+if [ "$BUILD_FROM_IMAGE" != "$BASE_REPO" ]; then
     PHP_VERSION="${PHP_VERSION//-rc/}"
 fi
 

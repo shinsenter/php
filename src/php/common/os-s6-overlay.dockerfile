@@ -68,7 +68,7 @@ if [ -n "$S6_VERSION" ] && ! has-s6; then
         env-default S6_LOGGING 0
         env-default S6_READ_ONLY_ROOT 0
         env-default S6_SERVICES_GRACETIME 3000
-        env-default S6_STAGE2_HOOK 'hook s6-onready'
+        env-default S6_STAGE2_HOOK 'hook s6-boot'
         env-default S6_VERBOSITY '$(is-debug && echo 2 || echo 0)'
         env-default S6_VERSION "$S6_VERSION"
     fi
@@ -76,7 +76,7 @@ if [ -n "$S6_VERSION" ] && ! has-s6; then
     if [ -x /init ]; then
         # inject legacy entrypoint
         if [ -x "$FALLBACK_ENTRYPOINT" ]; then
-            sed -i "s|^exec |\nif [ \$# -gt 0 ]; then set -- $FALLBACK_ENTRYPOINT \"\$@\"; fi\n\nexec |" /init
+            sed -i "s|^exec |if [ \"\$#\" -gt 0 ]; then set -- $FALLBACK_ENTRYPOINT \"\$@\"; fi\n\nexec |" /init
         fi
 
         # fix permissions of /init

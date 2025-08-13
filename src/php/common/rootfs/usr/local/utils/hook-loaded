@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+if [ "$#" -eq 0 ]; then exit 0; fi
+for hook; do
+    [ -n "$hook" ] && [ ! -f "/tmp/hooks/$hook" ] && exit 1
+done
+exit 0
