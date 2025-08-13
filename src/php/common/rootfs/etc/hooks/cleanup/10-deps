@@ -1,4 +1,6 @@
 #!/usr/bin/env sh
+debug-echo "Remove development packages."
+
 if is-true "$CLEANUP_DEV_PACKAGES"; then
     EXTRA_DEPS='*-dev'
 fi

@@ -11,7 +11,7 @@ default_config_path="config/"
 tmpfile=""
 
 cleanup() {
-    [[ -n "$tmpfile" && -f "$tmpfile" ]] && rm -f "$tmpfile"
+    [[ -n "$tmpfile" && -f "$tmpfile" ]] && \rm -f "$tmpfile"
 }
 trap cleanup EXIT
 
@@ -19,12 +19,12 @@ config_file="${1:-}"
 config_path="${2:-$default_config_path}"
 
 if [[ -z "$config_file" ]]; then
-    debug-echo -w "Usage: ${0##*/} /path/to/config.json [config/path]"
+    debug-echo -i "Usage: ${0##*/} /path/to/config.json [config/path]"
     exit 1
 fi
 
 if [[ ! -f "$config_file" ]]; then
-    debug-echo -e "Error: Invalid config file: $config_file"
+    debug-echo -e "Invalid config file: $config_file"
     exit 1
 fi
 
@@ -63,7 +63,7 @@ http_code=$(download -X PUT --data-binary @"$config_file" \
 [[ "$(is-debug)" == "1" ]] && cat "$http_body"
 
 if [[ "$http_code" != "200" ]]; then
-    debug-echo -e "Error: HTTP response status code is '$http_code'."
+    debug-echo -e "HTTP response status code is '$http_code'."
     cat "$http_body"
     exit 1
 else

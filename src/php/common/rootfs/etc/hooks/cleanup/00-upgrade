@@ -1,2 +1,0 @@
-#!/usr/bin/env sh
-is-true "$UPGRADE_BEFORE_CLEANUP" && pkg-add upgrade

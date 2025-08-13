@@ -6,7 +6,6 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 nginx-conf 'user' "$APP_USER $APP_GROUP"
 nginx-conf 'pid'  "${NGINX_PID:-/run/nginx.pid}"
 

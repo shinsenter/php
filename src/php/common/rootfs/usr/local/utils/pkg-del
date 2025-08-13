@@ -6,17 +6,16 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 alpine() {
-    if [ $# -gt 0 ]; then
-        debug-echo -e "\nRemove" $@
+    if [ "$#" -gt 0 ]; then
+        debug-echo -w "Remove" $@
         apk del --no-cache --purge "$@" 2>&1 | grep -vF 'No such package' | debug-echo -l
     fi
 }
 
 debian() {
-    if [ $# -gt 0 ]; then
-        debug-echo -e "\nRemove" $@
+    if [ "$#" -gt 0 ]; then
+        debug-echo -w "Remove" $@
         apt-get -yqq remove --purge "$@" 2>&1 | grep -vF 'so not removed' | debug-echo -l
     fi
 

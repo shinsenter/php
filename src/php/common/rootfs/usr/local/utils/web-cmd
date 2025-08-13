@@ -6,7 +6,6 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 allow_root=0
 if [ "$1" == "root" ]; then
     allow_root=1
@@ -16,7 +15,7 @@ fi
 name="$1"
 shift
 
-if [ -z "$name" ] || [ $# -eq 0 ]; then
+if [ -z "$name" ] || [ "$#" -eq 0 ]; then
     debug-echo -i "Usage: ${0##*/} <name> <command> [options]"
     exit 1
 fi
@@ -33,7 +32,6 @@ else
 fi
 
 echo "#!/usr/bin/env sh
-set -e
 exec app-exec $command $@ \"\$@\"
 " >$target
 chmod +x $target

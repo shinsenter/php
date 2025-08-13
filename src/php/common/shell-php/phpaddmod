@@ -29,7 +29,7 @@ new_mods=""
 
 for mod; do
     if [ -n "$mod" ] && printf '%s\n' "$installed_mods" | grep -q -w "$mod"; then
-        debug-echo -w "Module $mod is already installed."
+        debug-echo -i "Module $mod is already installed."
     else
         new_mods="${new_mods:+$new_mods }$mod"
     fi
@@ -39,7 +39,7 @@ done
 
 # install build tools if gcc is missing
 if ! has-cmd gcc >/dev/null 2>&1; then
-    debug-echo -i "\nInstall build tools."
+    debug-echo -i "Install build tools."
     APK_PACKAGES="tar xz" \
     APT_PACKAGES="xz-utils" \
     pkg-add "$PHPIZE_DEPS" curl
@@ -47,7 +47,7 @@ fi
 
 # download PHP source if required
 if [ ! -e "/usr/src/php.tar.xz" ] && [ -n "$PHP_URL" ]; then
-    debug-echo -i "\nDownload PHP source from $PHP_URL."
+    debug-echo -i "Download PHP source from $PHP_URL."
     download "$PHP_URL" -o /usr/src/php.tar.xz
 
     [ -n "$PHP_ASC_URL" ] && download "$PHP_ASC_URL" -o /usr/src/php.tar.xz.asc
@@ -56,10 +56,10 @@ fi
 pid="/tmp/$(php -r 'echo md5(uniqid());' 2>/dev/null || echo "${0##*/}-temp")"
 
 set -o pipefail
-debug-echo -i "\nInstall PHP modules: $new_mods."
+debug-echo -i "Install PHP modules: $new_mods."
 is-debug && env-default | grep '^IPE_' | debug-echo -i
 
-DEBUG= with-env install-php-extensions $new_mods | while IFS= read -r line; do
+with-env install-php-extensions $new_mods | while IFS= read -r line; do
     printf '%s\n' "$line"
     case "$line" in
         *"only for installation"*)
@@ -73,7 +73,7 @@ exit_code=$?
 # clean up on failure
 if [ "$exit_code" -ne 0 ] && [ -f "$pid" ]; then
     pkg-del "$(cat "$pid")"
-    rm -f "$pid"
+    \rm -f "$pid"
 fi
 
 exit "$exit_code"

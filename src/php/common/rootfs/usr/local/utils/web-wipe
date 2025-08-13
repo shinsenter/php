@@ -6,11 +6,10 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 force=0
 target=""
 
-while [[ $# -gt 0 ]]; do
+while [ "$#" -gt 0 ]; do
     case $1 in
         -f|--force)
             force=1
@@ -28,7 +27,7 @@ if [ -z "$target" ]; then
 fi
 
 if [ ! -d "$target" ]; then
-    debug-echo -e "Error: '$target' is not a valid directory."
+    debug-echo -e "'$target' is not a valid directory."
     exit 1
 fi
 
@@ -37,4 +36,4 @@ if [ $force -ne 1 ]; then
     [[ "$confirm" != [yY] ]] && echo "Aborted." && exit 0
 fi
 
-rm -rf "$(realpath -mqs "$target")"/{*,.[!.]*,..?*}
+\rm -rf "$(realpath -mqs "$target")"/{*,.[!.]*,..?*}

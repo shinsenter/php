@@ -6,13 +6,29 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
+set -e
 
-for dir; do
-    if [ -n "$dir" ] && [ ! -f "$dir" ]; then
-        install -d -v \
-            -g "$APP_GROUP" \
-            -o "$APP_USER" \
-            -m 0755 \
-            -- "$dir" 2>&1 | sed 's/^install: //'
-    fi
-done
+socket="$1"
+if [ "${socket:0:1}" = "/" ]; then
+    shift
+else
+    socket=""
+fi
+
+if [ -n "$socket" ]; then
+    start=$(date +%s)
+    timeout="${TIMEOUT:-60}"
+    while [ ! -S "$socket" ]; do
+        sleep 0.5
+        if [ "$timeout" -gt 0 ] && [ $(( $(date +%s) - start )) -ge "$timeout" ]; then
+            debug-echo -c "Timeout waiting for $socket."
+            exit 1
+        fi
+    done
+
+    debug-echo "Socket $socket is ready."
+fi
+
+if [ "$#" -gt 0 ]; then
+    exec app-exec with-env "$@"
+fi

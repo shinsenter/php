@@ -6,9 +6,8 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 # show usage if no arguments are passed
-if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; then
+if [ "$#" -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; then
     debug-echo -i "Simple wrapper for adding s6-overlay services."
     debug-echo -i "  Usage: ${0##*/} [service-name] [longrun|oneshot|needs|finish|down|unset] [script file path|inline script]"
     debug-echo -l "  For example: ${0##*/} greeting oneshot \"echo 'hello world!'\""
@@ -19,9 +18,14 @@ fi
 
 # s6-overlay service directory
 s6="/etc/s6-overlay/s6-rc.d"
-set -e
 
 ################################################################################
+slugify() {
+    echo "$1" | \
+        tr '[:upper:]' '[:lower:]' | \
+        sed -E 's/[^a-z0-9\.]+/-/g' | \
+        sed -E 's/^-+|-+$//g'
+}
 
 create() {
     local path="$1"
@@ -29,16 +33,15 @@ create() {
 
     shift
     mkdir -p "$dir" && chmod 0755 $dir
-    touch $path   && chmod ugo+x $path
+    touch "$path"   && chmod ugo+x $path
 
-    if [ -f "$path" ] && [ -n "$@" ]; then echo "$@" >| $path; fi
+    if [ -f "$path" ] && [ -n "$@" ]; then echo "$@" >| "$path"; fi
 }
 
 ################################################################################
-
 # default name
 if [ -n "$1" ]; then
-    name="$1"; shift
+    name="$(slugify "$1")"; shift
 else
     name="00-default"
 fi
@@ -54,19 +57,17 @@ fi
 if [ -f "$1" ]; then set -- "$(cat $1)"; fi
 
 ################################################################################
-
 # delete service
 if [ "$type" = "unset" ] || [ "$type" = "delete" ]; then
     if [ -z "$1" ]; then
-        rm -rf "${s6}/${name}" "${s6}/user/contents.d/${name}" 2>/dev/null || true
+        \rm -rf "${s6}/${name}" "${s6}/user/contents.d/${name}" 2>/dev/null || true
     else
-        rm -f "${s6}/${name}/dependencies.d/$1" 2>/dev/null || true
+        \rm -f "${s6}/${name}/dependencies.d/$1" 2>/dev/null || true
     fi
     exit 0
 fi
 
 ################################################################################
-
 # add service dependencies
 if [ "$type" = "depends" ] || [ "$type" = "needs" ]; then
     create "${s6}/${name}/dependencies.d/$1"
@@ -74,11 +75,10 @@ if [ "$type" = "depends" ] || [ "$type" = "needs" ]; then
 fi
 
 ################################################################################
-
 # Generate S6 service files
 # See: https://github.com/just-containers/s6-overlay#writing-a-service-script
 
-debug-echo -w "Creating s6 service: ${name} (${type})."
+debug-echo -i "Creating s6 service: ${name} (${type})."
 
 if [ "$type" = "down" ] || [ "$type" = "finish" ]; then
     create "${s6}/${name}/${type}" "$@"
@@ -86,10 +86,16 @@ if [ "$type" = "down" ] || [ "$type" = "finish" ]; then
 fi
 
 if [ "$type" = "oneshot" ]; then
-    create "${s6}/${name}/up" "exec ${s6}/${name}/run"
+    create "${s6}/${name}/up"   "exec ${s6}/${name}/run"
+    create "${s6}/${name}/down" "exec hook s6-post-${name}"
 fi
 
-create "${s6}/${name}/run" "$@"
+if [ "$type" = "longrun" ]; then
+    create "${s6}/${name}/finish" "#!/command/with-contenv sh
+exec hook s6-post-${name}"
+fi
+
 create "${s6}/${name}/type" "$type"
+create "${s6}/${name}/run" "$@"
 create "${s6}/${name}/dependencies.d/base"
 create "${s6}/user/contents.d/${name}"

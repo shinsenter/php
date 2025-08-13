@@ -33,7 +33,7 @@ else
     unitd="$(command -v unitd)"
 fi
 
-rm -rf "$unit_pid" || true
+\rm -rf "$unit_pid" || true
 exec app-exec with-env "$unitd" --no-daemon \
     --user "${APP_USER:-www-data}" \
     --group "${APP_GROUP:-www-data}" \

@@ -6,11 +6,13 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-if [ "$(id -u)" != "0" ]; then debug-echo -e "!!! Please run this container as the root user !!!" >&2; exit 1; fi
+if [ "$(id -u)" != "0" ]; then debug-echo -c "Please run this container as the root user!" >&2; exit 1; fi
 
-debug-echo "Initialize container"
+debug-echo -d "Initialize container $DOCKER_NAME"
 
 ################################################################################
+
+set -e
 
 # set timezone
 export TZ="${TZ:=UTC}"
@@ -22,15 +24,9 @@ fi
 # fix ownership
 ownership "${APP_GROUP:-www-data}" "${APP_GID:-}" "${APP_USER:-www-data}" "${APP_UID:-}"
 
-set -e
-
-# ensure application directory exists
-APP_PATH="$(app-path)"
-debug-echo "Create '$APP_PATH' if not exists"
-web-mkdir "/var/www" "$APP_PATH"
-
-# change working directory
-[ -d "$APP_PATH" ] && cd "$APP_PATH"
+# ensure application directory exist
+web-mkdir "/var/www" "$(app-path)"
+cd "$(app-path)"
 
 ################################################################################
 
@@ -55,7 +51,7 @@ fi
 
 # export all env variables for PHP
 if is-true "$ALLOW_RUNTIME_PHP_ENVVARS" && has-cmd php && has-cmd php-envvars; then
-    debug-echo "Export all env variables for PHP."
+    debug-echo -d "Export all env variables for PHP."
     php-envvars export_envvars 2>&1
 fi
 
@@ -63,31 +59,27 @@ fi
 
 # activity logging
 touch /var/log/startup.log
-echo "$(date) $(whoami)@$(hostname):$(pwd)\$ $0 $SUPERVISOR_PHP_COMMAND $@" >>/var/log/startup.log
+echo "$(date) $(whoami)@$(hostname):$(pwd)\$ ${0##*/} $SUPERVISOR_PHP_COMMAND $@" >>/var/log/startup.log
 
 ################################################################################
 
+# detect entrypoint
 if [ -n "$SUPERVISOR_PHP_COMMAND" ]; then
-    # run bootstrap hook to initialize the container
-    hook bootstrap post-boot onready
-
     # run custom command defined in $SUPERVISOR_PHP_COMMAND
     debug-echo "Start container with custom user command: $SUPERVISOR_PHP_COMMAND $@"
-    exec with-env $SUPERVISOR_PHP_COMMAND "$@"
 else
     # fallback for docker-php-entrypoint
     if [ -x "/init" ]; then set -- /init "$@"; fi
 
     # fallback empty entrypoint
-    if [ $# -eq 0 ]; then set -- /bin/sh; fi
-
-    # run bootstrap hook to initialize the container
-    if ! has-s6; then hook bootstrap bootstrap-non-s6 post-boot onready; fi
-
-    # start container with command
-    debug-echo "Start container with the command: $@"
-    exec with-env "$@"
+    if [ "$#" -eq 0 ]; then set -- /bin/sh; fi
 fi
+
+# run bootstrap hook to initialize the container
+hook bootstrap $(! has-s6 && echo bootstrap-non-s6) post-boot onready
+
+# start the container
+exec with-env $SUPERVISOR_PHP_COMMAND "$@"
 
 ################################################################################
 #     These setups are part of the project: https://code.shin.company/php
