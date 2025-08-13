@@ -7,8 +7,8 @@
 ################################################################################
 
 # Install RoadRunner from the original binaries
-COPY --link --from=ghcr.io/roadrunner-server/roadrunner:latest /usr/bin/rr /usr/local/bin/rr
-COPY --link --from=ghcr.io/roadrunner-server/roadrunner:latest /etc/rr.yaml /etc/rr.yaml
+COPY --link --from=ghcr.io/roadrunner-server/roadrunner:latest /usr/bin/rr /usr/local/bin/
+COPY --link --from=ghcr.io/roadrunner-server/roadrunner:latest /etc/rr.yaml /etc/
 
 # Add yq for YAML processing
 COPY --link --from=mikefarah/yq:latest /usr/bin/yq /usr/bin/yq

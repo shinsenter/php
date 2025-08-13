@@ -1,13 +1,15 @@
 #!/usr/bin/env sh
-rm -rf /usr/src/php* || true
+debug-echo "Remove PHP source."
+\rm -rf /usr/src/php* || true
 
 if has-cmd composer; then
+    debug-echo "Remove Composer cache."
     composer clearcache -q || true
 fi
 
 if is-true "$CLEANUP_PHPDBG" && has-cmd phpdbg; then
-    debug-echo -w 'Removing phpdbg binary.'
-    rm -rf "$(command -v phpdbg)" || true
+    debug-echo -w 'Remove phpdbg binary.'
+    \rm -rf "$(command -v phpdbg)" || true
 fi
 
 if [ -d "$PHP_EXTENSION_DIR" ]; then

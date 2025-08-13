@@ -80,10 +80,10 @@ if has-cmd s6-service; then
     s6-service apache depends php-fpm
     s6-service apache longrun '#!/usr/bin/env sh
 if [ -f /etc/apache2/envvars ]; then source /etc/apache2/envvars; fi
-rm -f "${APACHE_PID:-/run/apache2.pid}" || true
-exec app-exec with-env apache2 \
-    -E "$(log-path stderr)" \
-    -DFOREGROUND $(is-debug && echo '-X')
+\rm -f "${APACHE_PID:-/run/apache2.pid}" || true
+exec wait-for-socket "$PHP_LISTEN" \
+    apache2 -E "$(log-path stderr)" -DFOREGROUND $(is-debug && echo '-X') \
+    || /run/s6/basedir/bin/halt
 '
 fi
 

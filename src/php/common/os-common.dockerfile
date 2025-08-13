@@ -30,7 +30,7 @@ ENV APP_GROUP="$APP_GROUP"
 
 # Set OS variables
 ENV ENV="/usr/local/etc/.env"
-ENV PATH="/usr/local/aliases:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ENV PATH="/usr/local/aliases:/usr/local/utils:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 ENV PS1="\\u@\\h:\\w\\$ "
 ENV PRESQUASH_SCRIPTS="cleanup"
 
@@ -71,12 +71,12 @@ echo 'Configure OS middlewares'
 [ -z "$DEBUG" ] || set -ex && set -e
 
 # Install common packages
-APK_PACKAGES='findutils run-parts shadow tar tzdata unzip xz' \
+APK_PACKAGES='findutils inotify-tools run-parts shadow tar tzdata unzip xz' \
 APT_PACKAGES='procps xz-utils' \
 pkg-add bash ca-certificates coreutils curl htop less openssl msmtp
 
 # Setuid bit for some scripts
-chmod 4755 "$(command -v autorun)" "$(command -v ownership)" /usr/local/sbin/web-*
+chmod 4755 "$(command -v autorun)" "$(command -v ownership)" /usr/local/utils/web-*
 
 # Replace sh binary with bash
 if has-cmd bash; then
@@ -176,7 +176,7 @@ fi
 if has-cmd msmtp-wrapper; then
     if has-cmd sendmail; then
         old="$(command -v sendmail)"
-        pkg-del sendmail && rm -f "$old" || true
+        pkg-del sendmail && \rm -f "$old" || true
     fi
 
     new="$(command -v msmtp-wrapper)"

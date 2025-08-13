@@ -1,8 +1,2 @@
 #!/usr/bin/env sh
 debug-echo "Your application path is at ${APP_PATH}."
-
-web-mkdir "$WP_CLI_DIR" "$WP_CLI_CACHE_DIR" "$WP_CLI_PACKAGES_DIR"
-
-if ! is-true "$DISABLE_GREETING"; then
-    wp --version
-fi

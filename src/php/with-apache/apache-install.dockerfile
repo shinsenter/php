@@ -19,7 +19,7 @@ APT_PACKAGES="apache2" \
 pkg-add
 
 # clean up
-rm -rf /etc/init.d/apache* \
+\rm -rf /etc/init.d/apache* \
     /etc/ssl/apache* \
     /var/www \
     /etc/apache2/modules* \
@@ -40,7 +40,7 @@ fi
 # link modules directory
 module_dir="$(dirname $(find /usr/lib/ -type f -name mod_mpm_event.so | head -n 1))"
 if [ -d "$module_dir" ]; then
-    rm -rf /etc/apache2/modules
+    \rm -rf /etc/apache2/modules
     ln -nsf "$module_dir" /etc/apache2/modules
 
     if has-cmd strip; then

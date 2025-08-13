@@ -37,7 +37,7 @@ web-chown fix \
     /var/lib/apache2 /var/log/apache2 /run/apache2
 
 if is-true "$ENABLE_TUNING_MPM"; then
-    debug-echo -w "Tune Apache MPM."
+    debug-echo -i "Tune Apache MPM."
     apache-mpm
 fi
 

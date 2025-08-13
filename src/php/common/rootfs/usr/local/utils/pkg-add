@@ -6,7 +6,6 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 keywords="update upgrade"
 upgrade=0
 packages=""
@@ -29,29 +28,29 @@ done
 # packages="$(echo "$packages" | sed 's/^ *//')"
 
 alpine() {
-    if [ $# -gt 0 ] || [ $upgrade -eq 1 ]; then
-        rm -rf /var/cache/apk && mkdir /var/cache/apk
+    if [ "$#" -gt 0 ] || [ $upgrade -eq 1 ]; then
+        \rm -rf /var/cache/apk && mkdir /var/cache/apk
         apk update | debug-echo -l || true
     fi
     if [ $upgrade -eq 1 ]; then
         apk upgrade --available | debug-echo -l || true
     fi
-    if [ $# -gt 0 ]; then
-        debug-echo -i "\nInstall" $@
+    if [ "$#" -gt 0 ]; then
+        debug-echo -i "Install" $@
         apk add "$@" | debug-echo -l
     fi
 }
 
 debian() {
     local options="-yqq --allow-unauthenticated"
-    if [ $# -gt 0 ] || [ $upgrade -eq 1 ]; then
+    if [ "$#" -gt 0 ] || [ $upgrade -eq 1 ]; then
         apt-get update $options 2>&1 | grep -vF 'GPG error' | debug-echo -l || true
     fi
     if [ $upgrade -eq 1 ]; then
-        apt full-upgrade $options | debug-echo -l || true
+        apt-get full-upgrade $options | debug-echo -l || true
     fi
-    if [ $# -gt 0 ]; then
-        debug-echo -i "\nInstall" $@
+    if [ "$#" -gt 0 ]; then
+        debug-echo -i "Install" $@
         apt-get install $options --no-install-recommends --no-install-suggests "$@" 2>&1 | grep -vF ' warning: ' | debug-echo -l
     fi
 }

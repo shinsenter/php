@@ -83,5 +83,5 @@ build unitd
 cd "$HOME"
 
 # clean up
-rm -rf /tmp/*
+\rm -rf /tmp/*
 EOF

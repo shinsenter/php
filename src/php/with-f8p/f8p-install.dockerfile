@@ -8,7 +8,7 @@
 
 # Copy files from the official image
 COPY --link --from=frankenphp /usr/local/lib/libwatcher* /usr/local/lib/
-COPY --link --from=frankenphp /usr/local/bin/frankenphp /usr/local/bin/frankenphp
+COPY --link --from=frankenphp /usr/local/bin/frankenphp /usr/local/bin/
 
 ################################################################################
 

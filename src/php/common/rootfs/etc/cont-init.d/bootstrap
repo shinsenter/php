@@ -1,3 +1,0 @@
-#!/usr/bin/env sh
-set -e
-exec hook bootstrap post-boot onready

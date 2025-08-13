@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+websocket_conf="/etc/apache2/custom.d/espocrm-websocket.conf"
+if ! is-true "$ESPOCRM_CONFIG_USE_WEB_SOCKET"; then
+    mv "$websocket_conf"{,.disabled} &>/dev/null
+else
+    mv "$websocket_conf"{.disabled,} &>/dev/null
+fi
+
+# cd "$APP_PATH"
+# find . -type d -exec chmod 755 {} + && find . -type f -exec chmod 644 {} +
+# find data custom client/custom -type d -exec chmod 775 {} + && find data custom client/custom -type f -exec chmod 664 {} +
+# chmod 775 application/Espo/Modules client/modules
+# chmod 754 bin/command

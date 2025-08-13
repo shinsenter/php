@@ -20,6 +20,6 @@ if nginx-test 'use the "http2" directive'; then
 fi
 
 # customize extensions
-if nginx-test 'brotli'; then rm -f /etc/nginx/custom.d/*brotli.conf; fi
-if nginx-test 'gzip';   then rm -f /etc/nginx/custom.d/*gzip.conf;   fi
-if nginx-test 'http3';  then rm -f /etc/nginx/custom.d/*http3.conf;  fi
+if nginx-test 'brotli'; then \rm -f /etc/nginx/custom.d/*brotli.conf; fi
+if nginx-test 'gzip';   then \rm -f /etc/nginx/custom.d/*gzip.conf;   fi
+if nginx-test 'http3';  then \rm -f /etc/nginx/custom.d/*http3.conf;  fi

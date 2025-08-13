@@ -36,7 +36,7 @@ ENVVARS
 fi
 
 # print the environment variables when the command argument is empty
-if [ $# -eq 0 ]; then with-env; exit 0; fi
+if [ "$#" -eq 0 ]; then with-env; exit 0; fi
 
 # if the first argument is a file then use it
 if [ "${1:0:1}" = "/" ] && [ -f "$1" ]; then

@@ -46,8 +46,8 @@ echo 'Install PHP extensions'
 phpaddmod ftp soap sodium sockets xsl
 
 # override nginx config
-rm -f /etc/nginx/custom.d/00-ext-*.conf
-rm -f /etc/nginx/custom.d/*common.conf
+\rm -f /etc/nginx/custom.d/00-ext-*.conf
+\rm -f /etc/nginx/custom.d/*common.conf
 sed -i 's|MAGE_ROOT|APP_PATH|g' /etc/nginx/custom.d/magento.conf
 sed -i 's|fastcgi_backend|@php|g' /etc/nginx/custom.d/magento.conf
 if grep -qF -- 'location / {' /etc/nginx/custom.d/magento.conf; then

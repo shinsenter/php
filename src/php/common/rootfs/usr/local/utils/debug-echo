@@ -1,14 +1,15 @@
 #!/usr/bin/env sh
-
 EX='-e'
 NC='\033[0m'
+PF=''
 case "$1" in
-    -c|--critical)  CL='\033[0;31m'; shift ;;
-    -e|--error)     CL='\033[0;31m'; shift ;;
-    -s|--success)   CL='\033[0;32m'; shift ;;
+    -c|--critical)  CL='\033[0;31m'; shift; [ "$#" -gt 0 ] && PF='‼️ Critical: ' ;;
+    -e|--error)     CL='\033[0;31m'; shift; [ "$#" -gt 0 ] && PF='❗️ Error: ' ;;
     -w|--warn)      CL='\033[0;33m'; shift ;;
+    -s|--success)   CL='\033[0;32m'; shift ;;
     -i|--info)      CL='\033[0;34m'; shift ;;
     -l|--log)       CL='\033[0;90m'; shift ;;
+    -d|--debug)     CL='\033[0;90m'; is-debug || exit 0; shift; [ "$#" -gt 0 ] && PF='■ ' ;;
     *)              CL='\033[0;90m'; is-debug || exit 0 ;;
 esac
 
@@ -16,8 +17,8 @@ if [ ! -t 1 ]; then NC=; CL=; fi
 if [ "$(printf '%s' $(echo -e ''))" = "-e" ]; then EX=; fi
 
 colorize() {
-    if [ $# -gt 0 ]; then
-        echo $EX "${CL}$*${NC}"
+    if [ "$#" -gt 0 ]; then
+        echo $EX "${CL}${PF}$*${NC}"
     fi
 }
 

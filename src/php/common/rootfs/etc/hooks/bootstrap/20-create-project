@@ -12,7 +12,6 @@ ENV_PATH="$APP_PATH/.env"
 CONF_PATH="$APP_PATH/composer.json"
 
 has_composer="$(has-cmd composer && echo 1 || echo 0)"
-recently_created="0"
 
 ################################################################################
 
@@ -75,7 +74,7 @@ download_and_extract() {
         download "$url" -o "$filename" && unzip "$filename" -d "$tmp"
         [ "$(ls -1 "$tmp" | wc -l)" = "1" ] && tmp="$tmp/$(ls -1 "$tmp")"
         cp -rpn "$tmp"/. "$dest"/ &>/dev/null || cp -pn "$tmp"/* "$dest"/ &>/dev/null
-        rm -rf "$tmp" "$filename"
+        \rm -rf "$tmp" "$filename"
     else
         download "$url" | tar -xzv --strip-components=1 -C "$dest"
     fi
@@ -90,22 +89,22 @@ cd "$APP_PATH"
 
 # case 1: project directory is empty
 if [ -z "$(ls -A "$APP_PATH")" ]; then
-    if [ -n "$INITIAL_PROJECT" ] && ! is-true "$DISABLE_AUTORUN_CREATING_PROJECT"; then
-        hook pre-create-project
+    hook pre-create-project
 
+    if [ -n "$INITIAL_PROJECT" ] && ! is-true "$DISABLE_AUTORUN_CREATING_PROJECT"; then
         case "$INITIAL_PROJECT" in
             http*.tar.gz | http*.zip)
-                debug-echo "Downloading $INITIAL_PROJECT to $APP_PATH."
+                debug-echo -i "Downloading $INITIAL_PROJECT to $APP_PATH."
                 download_and_extract "$INITIAL_PROJECT" "$APP_PATH"
                 ;;
             http*.git)
-                debug-echo "Cloning $INITIAL_PROJECT to $APP_PATH."
+                debug-echo -i "Cloning $INITIAL_PROJECT to $APP_PATH."
                 pkg-add git
                 git config --global --add safe.directory "$APP_PATH" || true
                 git clone "$INITIAL_PROJECT" "$APP_PATH" $INITIAL_PROJECT_GIT_OPTIONS
                 ;;
             */*)
-                debug-echo "Installing project $INITIAL_PROJECT to $APP_PATH."
+                debug-echo -i "Installing project $INITIAL_PROJECT to $APP_PATH."
                 composer_exec create-project $COMPOSER_CREATE_OPTIONS \
                     -n --no-secure-http --no-install --no-scripts \
                     -- "$INITIAL_PROJECT" "$APP_PATH"
@@ -116,38 +115,35 @@ if [ -z "$(ls -A "$APP_PATH")" ]; then
         esac
 
         composer_hook post-root-package-install
-        hook post-create-project
-
         web-chown "Project created in $APP_PATH."
     fi
 
     if [ -d /source/ ] && ! is-true "$DISABLE_AUTORUN_COPYING_SOURCE"; then
-        debug-echo "Copying files from /source/ to $APP_PATH."
+        debug-echo -i "Copying files from /source/ to $APP_PATH."
         cp -rpn /source/. "$APP_PATH"/
         web-chown "Copied files from /source/ to $APP_PATH"
     fi
 
-    install_deps
-    allow_plugins
-    copy_env
-
     if [ -f "$CONF_PATH" ]; then
+        install_deps
+        allow_plugins
+        copy_env
+
         if composer_exec update --help | grep -qF -- '--bump-after-update'; then
             COMPOSER_UPDATE_OPTIONS="$COMPOSER_UPDATE_OPTIONS --bump-after-update"
         fi
-
-        debug-echo "Updating required packages in $APP_PATH."
 
         hook pre-update-packages
         composer_exec update -n -W $COMPOSER_UPDATE_OPTIONS
         hook post-update-packages
 
-        web-chown "Required packages in $APP_PATH were updated."
+        web-chown "Composer packages in $APP_PATH were updated."
+
+        composer_hook post-create-project-cmd
+        unset_allow_plugins
     fi
 
-    composer_hook post-create-project-cmd
-    unset_allow_plugins
-    recently_created="1"
+    hook post-create-project
 else
     debug-echo "Skip project creation because $APP_PATH is not empty."
 fi
@@ -155,7 +151,7 @@ fi
 ################################################################################
 
 # case 2: project exists but vendor missing
-if [ "$recently_created" -ne 1 ] && [ "$has_composer" -eq 1 ] && ! is-true "$DISABLE_AUTORUN_COMPOSER_INSTALL"; then
+if ! is-true "$DISABLE_AUTORUN_COMPOSER_INSTALL" && ! hook-loaded post-create-project; then
     if [ -f "$CONF_PATH" ]; then
         vendor_dir="$APP_PATH/$(composer_exec config vendor-dir 2>/dev/null)"
         if [ ! -d "$vendor_dir" ] || [ ! -e "$vendor_dir/composer/ClassLoader.php" ]; then
@@ -168,7 +164,7 @@ if [ "$recently_created" -ne 1 ] && [ "$has_composer" -eq 1 ] && ! is-true "$DIS
             hook post-install-packages
 
             unset_allow_plugins
-            web-chown "Composer packages were installed in $APP_PATH"
+            web-chown "Composer packages in $APP_PATH were installed."
         fi
     else
         debug-echo "Skip composer install because $CONF_PATH is missing."
@@ -178,12 +174,8 @@ fi
 ################################################################################
 
 # optional autoload optimization
-if [ "$has_composer" -eq 1 ] && is-true "${COMPOSER_OPTIMIZE_AUTOLOADER:-}"; then
+if is-true "${COMPOSER_OPTIMIZE_AUTOLOADER:-}"; then
     allow_plugins
-
-    hook pre-autoload-dump
     composer_exec dumpautoload -n -o --no-cache
-    hook post-autoload-dump
-
     unset_allow_plugins
 fi

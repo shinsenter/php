@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+if is-true "$UPGRADE_BEFORE_CLEANUP"; then
+    debug-echo "Upgrade outdated packages."
+    pkg-add upgrade
+fi

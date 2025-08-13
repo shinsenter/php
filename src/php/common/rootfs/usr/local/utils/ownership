@@ -6,12 +6,10 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 # ownership [new_group] [new_gid] [new_user] [new_uid]
 # Requires root; Debian/Ubuntu or Alpine with shadow
 
 ################################################################################
-
 OLD_GROUP="${DEFAULT_GROUP:-www-data}"
 OLD_USER="${DEFAULT_USER:-www-data}"
 
@@ -29,7 +27,6 @@ OLD_UID=$(id -u "$OLD_USER")
 OLD_GID=$(id -g "$OLD_USER")
 
 ################################################################################
-
 # get new IDs
 NEW_GROUP="${1:-$OLD_GROUP}"
 NEW_GID="${2:-$OLD_GID}"
@@ -41,7 +38,6 @@ CHANGE_GROUP=0
 CHANGE_USER=0
 
 ################################################################################
-
 # decide if group needs change or creation
 if getent group "$NEW_GROUP" >/dev/null 2>&1; then
     debug-echo "Group $NEW_GROUP exists, skipping creation."

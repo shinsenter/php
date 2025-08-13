@@ -23,7 +23,7 @@ configtest() {
     download -X GET --unix-socket "$unit_socket" http://localhost/ || true
 }
 
-initial() {
+init_unit() {
     web-mkdir /var/lib/unit
     web-chown fix /var/lib/unit /var/log/unit /run/unit
 
@@ -31,19 +31,10 @@ initial() {
         return 0
     fi
 
-
-
     "$unitd_bin" --control "unix:$unit_socket"
+    TIMEOUT=10 wait-for-socket "$unit_socket" configtest
 
-    local attempts=0
-    until [[ -f "$unit_socket" || $attempts -ge 20 ]]; do
-        sleep 0.5
-        ((attempts++))
-    done
-    configtest &>/dev/null
-
-    local pool="${PHP_POOL_NAME:-www}"
-    local cert_path="/etc/ssl/site/server_${pool}.pem"
+    local cert_path="/etc/ssl/site/server_${PHP_POOL_NAME:-www}.pem"
     if ls /etc/ssl/site/*.crt &>/dev/null && ls /etc/ssl/site/*.key &>/dev/null; then
         cat /etc/ssl/site/*.crt /etc/ssl/site/*.key > "$cert_path"
         unit-conf "$cert_path" "certificates/default"
@@ -61,7 +52,7 @@ initial() {
         local unit_pid
         unit_pid="$(cat "$unit_pid_file")"
         kill -TERM "$unit_pid" &>/dev/null || true
-        rm -f "$unit_pid_file"
+        \rm -f "$unit_pid_file"
     fi
 
     attempts=0
@@ -73,7 +64,7 @@ initial() {
 
 if is-debug; then
     debug-echo -w "🐞 Nginx Unit is in DEBUG MODE 🐞"
-    initial || true
+    init_unit || true
 else
-    initial &>/dev/null || true
+    init_unit &>/dev/null || true
 fi
