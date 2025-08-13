@@ -23,7 +23,7 @@ ENV COMPOSER_ALLOW_SUPERUSER="1"
 
 ################################################################################
 
-ADD --link ./common/shell-php/ /usr/local/sbin/
+ADD --link ./common/shell-php/ /usr/local/utils/
 
 ################################################################################
 

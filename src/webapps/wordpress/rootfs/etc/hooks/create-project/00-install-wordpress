@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 source=https://raw.githubusercontent.com/docker-library/wordpress/master/wp-config-docker.php
 
-debug-echo -w "Install Wordpress to $APP_PATH."
+debug-echo -i "Install Wordpress to $APP_PATH."
 
 cd "$APP_PATH"
 wp core download \

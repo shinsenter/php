@@ -39,8 +39,11 @@ mkdir -p /etc/nginx \
 if has-cmd s6-service; then
     s6-service nginx depends php-fpm
     s6-service nginx longrun '#!/usr/bin/env sh
-rm -rf "${NGINX_PID:-/run/nginx.pid}" || true
-exec app-exec with-env nginx -g "daemon off;"
+NGINX_PID="${NGINX_PID:-/run/nginx.pid}"
+\rm -rf "$NGINX_PID" || true
+exec wait-for-socket "$PHP_LISTEN" \
+    nginx -g "daemon off;user $APP_USER $APP_GROUP;pid $NGINX_PID;" \
+    || /run/s6/basedir/bin/halt
 '
 fi
 

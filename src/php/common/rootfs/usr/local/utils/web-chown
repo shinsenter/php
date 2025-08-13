@@ -12,8 +12,8 @@ case "$1" in
 fix)
     shift
 
-    if [ $# -eq 0 ]; then
-        rm -rf $del_flg
+    if [ "$#" -eq 0 ]; then
+        \rm -rf $del_flg
         set -- "$(app-path)"
     fi
 
@@ -33,6 +33,6 @@ path)
     ;;
 *)
     touch $del_flg
-    if [ -n "$@" ]; then debug-echo "$@"; fi
+    if [ -n "$@" ]; then debug-echo -l "$@"; fi
     ;;
 esac

@@ -6,12 +6,12 @@
 #      - Author:  SHIN Company <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
-set -- with-env "$@"
-
-# switch user:group and exec
-if has-cmd su-exec; then
-    exec su-exec "$APP_USER:$APP_GROUP" "$@"
-else
-    exec chroot --userspec="$APP_USER:$APP_GROUP" / "$@"
-fi
+for dir; do
+    if [ -n "$dir" ] && [ ! -f "$dir" ]; then
+        install -d -v \
+            -g "$APP_GROUP" \
+            -o "$APP_USER" \
+            -m 0755 \
+            -- "$dir" 2>&1 | sed 's/^install: //'
+    fi
+done

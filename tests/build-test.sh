@@ -9,10 +9,11 @@
 
 BASE_DIR="$(git rev-parse --show-toplevel)"
 LOG_DIR="$BASE_DIR/tests/logs"
+SQUASH_SCRIPT="$BASE_DIR/build/docker-squash/docker-squash.sh"
 
 mkdir -p "$LOG_DIR"
 
-if [ ! -x "$BASE_DIR/build/docker-squash/docker-squash.sh" ]; then
+if [ ! -x "$SQUASH_SCRIPT" ]; then
     echo "No squash script." 1>&2
     exit 1
 fi
@@ -75,7 +76,7 @@ fi
     if [ "$SKIP_SQUASH" = "1" ]; then
         command="docker buildx build --squash -f $BUILD_DOCKERFILE $BUILD_CONTEXT"
     else
-        command="$BASE_DIR/build/docker-squash/docker-squash.sh $BUILD_DOCKERFILE"
+        command="$SQUASH_SCRIPT $BUILD_DOCKERFILE"
     fi
 
     echo ""
