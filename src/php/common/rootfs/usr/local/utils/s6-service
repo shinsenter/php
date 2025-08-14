@@ -87,12 +87,12 @@ fi
 
 if [ "$type" = "oneshot" ]; then
     create "${s6}/${name}/up"   "exec ${s6}/${name}/run"
-    create "${s6}/${name}/down" "exec hook s6-post-${name}"
+    create "${s6}/${name}/down" "exec hook s6-exit-${name}"
 fi
 
 if [ "$type" = "longrun" ]; then
     create "${s6}/${name}/finish" "#!/command/with-contenv sh
-exec hook s6-post-${name}"
+exec hook s6-exit-${name}"
 fi
 
 create "${s6}/${name}/type" "$type"

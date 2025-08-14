@@ -27,33 +27,46 @@ done
 
 # packages="$(echo "$packages" | sed 's/^ *//')"
 
+################################################################################
+
 alpine() {
-    if [ "$#" -gt 0 ] || [ $upgrade -eq 1 ]; then
+    if [ "$#" -gt 0 ] || [ "$upgrade" -eq 1 ]; then
         \rm -rf /var/cache/apk && mkdir /var/cache/apk
-        apk update | debug-echo -l || true
+        apk update || true
     fi
-    if [ $upgrade -eq 1 ]; then
-        apk upgrade --available | debug-echo -l || true
+    if [ "$upgrade" -eq 1 ]; then
+        apk upgrade --available || true
     fi
     if [ "$#" -gt 0 ]; then
-        debug-echo -i "Install" $@
-        apk add "$@" | debug-echo -l
+        apk add "$@"
     fi
 }
 
 debian() {
-    local options="-yqq --allow-unauthenticated"
-    if [ "$#" -gt 0 ] || [ $upgrade -eq 1 ]; then
-        apt-get update $options 2>&1 | grep -vF 'GPG error' | debug-echo -l || true
+    local options="-y --allow-unauthenticated"
+    export DEBIAN_FRONTEND=noninteractive DEBCONF_NOWARNINGS=yes APT_LISTCHANGES_FRONTEND=none
+    if [ "$#" -gt 0 ] || [ "$upgrade" -eq 1 ]; then
+        apt-get $options -qq update || true
     fi
-    if [ $upgrade -eq 1 ]; then
-        apt-get full-upgrade $options | debug-echo -l || true
+    if [ "$upgrade" -eq 1 ]; then
+        apt-get $options -qq full-upgrade || true
     fi
     if [ "$#" -gt 0 ]; then
-        debug-echo -i "Install" $@
-        apt-get install $options --no-install-recommends --no-install-suggests "$@" 2>&1 | grep -vF ' warning: ' | debug-echo -l
+        apt-get $options -q --no-install-recommends --no-install-suggests install "$@"
     fi
 }
 
-if has-cmd apk; then alpine $APK_PACKAGES $packages; fi
-if has-cmd apt; then debian $APT_PACKAGES $packages; fi
+################################################################################
+
+if has-cmd apk; then
+    debug-echo -i "Installing" $APK_PACKAGES $packages
+    alpine $APK_PACKAGES $packages 2>&1 | while IFS= read -r line || [ -n "$line" ]; do
+        echo "$line" | debug-echo -l
+    done
+fi
+if has-cmd apt; then
+    debug-echo -i "Installing" $APT_PACKAGES $packages
+    debian $APT_PACKAGES $packages 2>&1 | while IFS= read -r line || [ -n "$line" ]; do
+        echo "$line" | grep -v ' warning:\|GPG error' | debug-echo -l
+    done
+fi

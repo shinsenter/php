@@ -11,25 +11,25 @@ default_config_path="config/"
 tmpfile=""
 
 cleanup() {
-    [[ -n "$tmpfile" && -f "$tmpfile" ]] && \rm -f "$tmpfile"
+    [ -n "$tmpfile" ] && [ -f "$tmpfile" ] && \rm -f "$tmpfile"
 }
 trap cleanup EXIT
 
 config_file="${1:-}"
 config_path="${2:-$default_config_path}"
 
-if [[ -z "$config_file" ]]; then
+if [ -z "$config_file" ]; then
     debug-echo -i "Usage: ${0##*/} /path/to/config.json [config/path]"
     exit 1
 fi
 
-if [[ ! -f "$config_file" ]]; then
+if [ ! -f "$config_file" ]; then
     debug-echo -e "Invalid config file: $config_file"
     exit 1
 fi
 
 envsubst_template() {
-    while IFS= read -r line || [[ -n "$line" ]]; do
+    while IFS= read -r line || [ -n "$line" ]; do
         while [[ "$line" =~ (\{\{[[:space:]]*([a-zA-Z_][a-zA-Z_0-9]*)[[:space:]]*\}\}) ]]; do
             full="${BASH_REMATCH[1]}"
             var="${BASH_REMATCH[2]}"
@@ -60,9 +60,9 @@ http_code=$(download -X PUT --data-binary @"$config_file" \
     -w "%{http_code}" -o "$http_body" \
     "http://localhost/$config_path")
 
-[[ "$(is-debug)" == "1" ]] && cat "$http_body"
+is-debug && cat "$http_body"
 
-if [[ "$http_code" != "200" ]]; then
+if [ "$http_code" != "200" ]; then
     debug-echo -e "HTTP response status code is '$http_code'."
     cat "$http_body"
     exit 1
