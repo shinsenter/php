@@ -1,2 +1,0 @@
-#!/usr/bin/env sh
-debug-echo "Your application path is at ${APP_PATH}."
