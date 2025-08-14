@@ -70,7 +70,7 @@ a2enmod \
     mpm_event negotiation proxy proxy_fcgi remoteip rewrite setenvif ssl status unixd 2>&1 || true
 
 # fix ProxyFCGIBackendType directive for Apache 2.4
-if apache-test 'ProxyFCGIBackendType'; then
+if apache-has-error 'ProxyFCGIBackendType'; then
     echo 'Disable ProxyFCGIBackendType because it is not supported in this Apache version'
     sed -i 's/ProxyFCGIBackendType/#ProxyFCGIBackendType/g' $CONF_FILE
 fi
@@ -81,9 +81,8 @@ if has-cmd s6-service; then
     s6-service apache longrun '#!/usr/bin/env sh
 if [ -f /etc/apache2/envvars ]; then source /etc/apache2/envvars; fi
 \rm -f "${APACHE_PID:-/run/apache2.pid}" || true
-exec wait-for-socket "$PHP_LISTEN" \
-    apache2 -E "$(log-path stderr)" -DFOREGROUND $(is-debug && echo '-X') \
-    || /run/s6/basedir/bin/halt
+exec wait-for "$PHP_LISTEN" \
+    apache2 -E "$(log-path stderr)" -DFOREGROUND $(is-debug && echo '-X')
 '
 fi
 

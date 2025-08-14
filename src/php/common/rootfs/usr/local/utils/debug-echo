@@ -1,31 +1,73 @@
 #!/usr/bin/env sh
-EX='-e'
-NC='\033[0m'
-PF=''
-case "$1" in
-    -c|--critical)  CL='\033[0;31m'; shift; [ "$#" -gt 0 ] && PF='‼️ Critical: ' ;;
-    -e|--error)     CL='\033[0;31m'; shift; [ "$#" -gt 0 ] && PF='❗️ Error: ' ;;
-    -w|--warn)      CL='\033[0;33m'; shift ;;
-    -s|--success)   CL='\033[0;32m'; shift ;;
-    -i|--info)      CL='\033[0;34m'; shift ;;
-    -l|--log)       CL='\033[0;90m'; shift ;;
-    -d|--debug)     CL='\033[0;90m'; is-debug || exit 0; shift; [ "$#" -gt 0 ] && PF='■ ' ;;
-    *)              CL='\033[0;90m'; is-debug || exit 0 ;;
-esac
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  SHIN Company <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+debug_only=1
+ansi=0
+ansi_code="2;90"
+prefix=""
+msg=""
 
-if [ ! -t 1 ]; then NC=; CL=; fi
-if [ "$(printf '%s' $(echo -e ''))" = "-e" ]; then EX=; fi
+# auto detect ANSI
+if [ -t 1 ]; then
+    ansi=1
+fi
 
-colorize() {
-    if [ "$#" -gt 0 ]; then
-        echo $EX "${CL}${PF}$*${NC}"
-    fi
+# parse arguments
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --no-ansi)     ansi=0 ;;
+        --ansi)        ansi=1 ;;
+        -c|--critical) debug_only=0; ansi_code="97;41"; prefix="Critical: " ;;
+        -e|--error)    debug_only=0; ansi_code="31"; prefix="Error: " ;;
+        -w|--warn)     debug_only=0; ansi_code="33" ;;
+        -s|--success)  debug_only=0; ansi_code="32" ;;
+        -i|--info)     debug_only=0; ansi_code="34" ;;
+        -l|--log)      debug_only=0; ansi_code="90" ;;
+        -d|--debug)    prefix="■ " ;;
+        *) [ -z "$msg" ] && msg="$1" || msg="$msg $1" ;;
+    esac
+    shift
+done
+
+################################################################################
+
+if [ "$debug_only" -eq 1 ] && ! is-debug; then
+    exit 0
+fi
+
+# format string
+if [ "$ansi" -eq 1 ]; then
+    format="\033[${ansi_code}m%s%s\033[0m\n"
+else
+    format="%s%s\n"
+fi
+
+################################################################################
+
+# print with color
+_color() {
+    text="$1"
+    case "$text" in
+        *$'\033['*) printf  "%s%s\n" "$prefix" "$text" ;;
+        *)          printf "$format" "$prefix" "$text" ;;
+    esac
 }
 
-colorize "$@"
-
-if [ ! -t 0 ]; then
-    while IFS= read -r line; do
-        colorize "$line"
+# print
+if [ -n "$msg" ]; then
+    _color "$msg"
+else
+    if [ -t 0 ]; then
+        exit 0
+    fi
+    while IFS= read -r line || [ -n "$line" ]; do
+        if [ -n "$line" ]; then
+            _color "$line"
+        fi
     done
 fi

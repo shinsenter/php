@@ -7,15 +7,12 @@
 ################################################################################
 
 # Set defaults from build arguments
-ARG DEBCONF_NOWARNINGS=yes
-ARG DEBIAN_FRONTEND=noninteractive
-ARG DOCKER_ENTRYPOINT=/usr/local/bin/docker-php-entrypoint
-
 ARG APP_PATH=${APP_PATH:-/var/www/html}
 ARG APP_GROUP=${APP_GROUP:-www-data}
 ARG APP_GID=${APP_GID:-33}
 ARG APP_USER=${APP_USER:-www-data}
 ARG APP_UID=${APP_UID:-33}
+ARG DOCKER_ENTRYPOINT=/usr/local/bin/docker-php-entrypoint
 
 ################################################################################
 

@@ -73,15 +73,17 @@ if [ -n "$S6_VERSION" ] && ! has-s6; then
         env-default S6_VERSION "$S6_VERSION"
     fi
 
-    if [ -x /init ]; then
-        # inject legacy entrypoint
-        if [ -x "$FALLBACK_ENTRYPOINT" ]; then
-            sed -i "s|^exec |if [ \"\$#\" -gt 0 ]; then set -- $FALLBACK_ENTRYPOINT \"\$@\"; fi\n\nexec |" /init
-        fi
+    # create oneshot service for checking web server
+    if has-cmd s6-service; then
+        s6-service \~verify-server oneshot '#!/usr/bin/env sh
+is-true "$DISABLE_ONLIVE_HOOK" || wait-for "http://127.0.0.1:80" hook onlive || true
+exit 0
+'
+    fi
 
-        # fix permissions of /init
-        chown root:root /init
-        chmod 4755 /init
+    # check whether to run the legacy entrypoint
+    if [ -x /init ] && [ -x "$FALLBACK_ENTRYPOINT" ]; then
+        sed -i "s~^exec ~if [ \"\$#\" -gt 0 ]; then is-true \"\$KEEP_S6_SERVICES\" && set -- $FALLBACK_ENTRYPOINT \"\$@\" || exec $FALLBACK_ENTRYPOINT \"\$@\"; fi\n\nexec ~" /init
     fi
 fi
 EOF

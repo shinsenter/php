@@ -8,7 +8,7 @@
 ################################################################################
 
 if has-cmd php && has-cmd php-envvars; then
-    debug-echo -d "Generate PHP config."
+    debug-echo "Generate PHP config."
     if is-true "$ALLOW_RUNTIME_PHP_ENVVARS"; then
         php-envvars write_dynamic_config 2>&1
     else

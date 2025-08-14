@@ -695,7 +695,7 @@ fi
 # See: https://github.com/mlocati/docker-php-extension-installer/issues/1141
 ################################################################################
 
-if [ "$BUILD_FROM_IMAGE" == "$BASE_REPO" ] && is_active_version "$PHP_VERSION"; then
+if [ "$OS_BASE" == "debian" ] && [ "$BUILD_FROM_IMAGE" == "$BASE_REPO" ] && is_active_version "$PHP_VERSION"; then
     PHP_VARIANT="$PHP_VARIANT-bookworm"
 fi
 
