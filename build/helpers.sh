@@ -30,6 +30,10 @@ verlt() {
     ! verlte "$2" "$1"
 }
 
+is_active_version() {
+    verlt "8.0" "$1"
+}
+
 # Function to get current timestamp
 timestamp() {
     date +%s
