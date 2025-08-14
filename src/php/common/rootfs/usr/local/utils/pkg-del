@@ -8,20 +8,30 @@
 ################################################################################
 alpine() {
     if [ "$#" -gt 0 ]; then
-        debug-echo -w "Remove" $@
-        apk del --no-cache --purge "$@" 2>&1 | grep -vF 'No such package' | debug-echo -l
+        apk del --no-cache --purge "$@"
     fi
 }
 
 debian() {
+    export DEBIAN_FRONTEND=noninteractive DEBCONF_NOWARNINGS=yes APT_LISTCHANGES_FRONTEND=none
     if [ "$#" -gt 0 ]; then
-        debug-echo -w "Remove" $@
-        apt-get -yqq remove --purge "$@" 2>&1 | grep -vF 'so not removed' | debug-echo -l
+        apt-get -yqq --purge remove "$@"
     fi
-
-    apt-get -yqq autoremove --purge | debug-echo -l || true
-    apt-get -yqq clean | debug-echo -l || true
+    apt-get -yqq --purge autoremove || true
+    apt-get -yqq clean || true
 }
 
-if has-cmd apk; then alpine $APK_PACKAGES "$@"; fi
-if has-cmd apt; then debian $APT_PACKAGES "$@"; fi
+################################################################################
+
+if has-cmd apk; then
+    debug-echo -w "Removing" $APK_PACKAGES $@
+    alpine $APK_PACKAGES "$@" 2>&1 | while IFS= read -r line || [ -n "$line" ]; do
+        echo "$line" | grep -vF 'No such package' | debug-echo -l
+    done
+fi
+if has-cmd apt; then
+    debug-echo -w "Removing" $APT_PACKAGES $@
+    debian $APT_PACKAGES "$@" 2>&1 | while IFS= read -r line || [ -n "$line" ]; do
+        echo "$line" | grep -vF 'so not removed' | debug-echo -l
+    done
+fi

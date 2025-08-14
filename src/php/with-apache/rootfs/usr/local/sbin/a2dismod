@@ -12,7 +12,7 @@ while [ "$#" -gt 0 ]; do
     pattern="/^LoadModule ${module}_module/s/^/#/g"
     shift
 
-    debug-echo -e "Disable apache module: $module"
+    debug-echo -w "Disable apache module: $module"
 
     if ! sed -i "$pattern" /etc/apache2/*.conf 2>/dev/null; then
         debug-echo -e "Failed to disable module: $module"

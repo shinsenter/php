@@ -41,9 +41,8 @@ if has-cmd s6-service; then
     s6-service nginx longrun '#!/usr/bin/env sh
 NGINX_PID="${NGINX_PID:-/run/nginx.pid}"
 \rm -rf "$NGINX_PID" || true
-exec wait-for-socket "$PHP_LISTEN" \
-    nginx -g "daemon off;user $APP_USER $APP_GROUP;pid $NGINX_PID;" \
-    || /run/s6/basedir/bin/halt
+exec wait-for "$PHP_LISTEN" \
+    nginx -g "daemon off;user $APP_USER $APP_GROUP;pid $NGINX_PID;"
 '
 fi
 

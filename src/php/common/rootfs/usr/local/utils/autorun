@@ -9,10 +9,14 @@
 export APP_PATH="$(app-path)"
 export APP_ROOT="$(app-root)"
 
+args=$(cat file.txt 2>/dev/null)
+
 run_cmd() {
     if [ -x "$1" ]; then
         debug-echo -d "Autorun: $1"
-        with-env "$@"
+        local command="$@"
+        eval "set -- $AUTORUN_ARGS"
+        with-env "$command" "$@"
     fi
 }
 

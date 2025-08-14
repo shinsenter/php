@@ -8,7 +8,6 @@
 ################################################################################
 # exit if required commands are missing
 if ! has-cmd php; then exit 1; fi
-if ! has-cmd install-php-extensions; then exit 1; fi
 
 # show usage if no arguments are passed
 if [ "$#" -eq 0 ]; then
@@ -16,6 +15,14 @@ if [ "$#" -eq 0 ]; then
     debug-echo -i "  Usage: ${0##*/} <module> [module] [...]" >&2
     debug-echo -l "  For example: ${0##*/} gd imagick" >&2
     exit 1
+fi
+
+if ! has-cmd install-php-extensions; then
+    source="https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions"
+    target="/usr/local/bin/install-php-extensions"
+    debug-echo -w "Binary for install-php-extensions is missing."
+    debug-echo -i "Try to download it from GitHub."
+    download "$source" -o "$target" && chmod +x "$target"
 fi
 
 if [ -n "$PHP_INI_DIR" ] && [ -d "$PHP_INI_DIR/conf.d" ]; then
@@ -29,7 +36,7 @@ new_mods=""
 
 for mod; do
     if [ -n "$mod" ] && printf '%s\n' "$installed_mods" | grep -q -w "$mod"; then
-        debug-echo -i "Module $mod is already installed."
+        debug-echo -l "Module $mod exists, skipping."
     else
         new_mods="${new_mods:+$new_mods }$mod"
     fi
@@ -40,9 +47,7 @@ done
 # install build tools if gcc is missing
 if ! has-cmd gcc >/dev/null 2>&1; then
     debug-echo -i "Install build tools."
-    APK_PACKAGES="tar xz" \
-    APT_PACKAGES="xz-utils" \
-    pkg-add "$PHPIZE_DEPS" curl
+    APK_PACKAGES="tar xz" APT_PACKAGES="xz-utils" pkg-add "$PHPIZE_DEPS" curl
 fi
 
 # download PHP source if required
@@ -57,9 +62,10 @@ pid="/tmp/$(php -r 'echo md5(uniqid());' 2>/dev/null || echo "${0##*/}-temp")"
 
 set -o pipefail
 debug-echo -i "Install PHP modules: $new_mods."
-is-debug && env-default | grep '^IPE_' | debug-echo -i
+is-debug && env-default | grep '^IPE_' | debug-echo
 
-with-env install-php-extensions $new_mods | while IFS= read -r line; do
+export DEBIAN_FRONTEND=noninteractive DEBCONF_NOWARNINGS=yes APT_LISTCHANGES_FRONTEND=none
+with-env install-php-extensions $new_mods | while IFS= read -r line || [ -n "$line" ]; do
     printf '%s\n' "$line"
     case "$line" in
         *"only for installation"*)

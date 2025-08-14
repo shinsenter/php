@@ -8,7 +8,13 @@
 ################################################################################
 if [ "$(id -u)" != "0" ]; then debug-echo -c "Please run this container as the root user!" >&2; exit 1; fi
 
-debug-echo -d "Initialize container $DOCKER_NAME"
+debug-echo -d "Starting container ${DOCKER_NAME:-$(hostname)}."
+
+# detect user-defined entrypoint
+if [ -n "$SUPERVISOR_PHP_COMMAND" ]; then
+    debug-echo "Start container with user-defined command: $SUPERVISOR_PHP_COMMAND"
+    set -- $SUPERVISOR_PHP_COMMAND
+fi
 
 ################################################################################
 
@@ -30,7 +36,16 @@ cd "$(app-path)"
 
 ################################################################################
 
-hook pre-boot
+# container boot hooks
+FIRST_RUN_FLAG="/var/local/first-run"
+if [ ! -e "$FIRST_RUN_FLAG" ]; then
+    date > "$FIRST_RUN_FLAG"
+    hook first-run
+else
+    hook rebooted
+fi
+
+hook onboot
 
 ################################################################################
 
@@ -51,35 +66,30 @@ fi
 
 # export all env variables for PHP
 if is-true "$ALLOW_RUNTIME_PHP_ENVVARS" && has-cmd php && has-cmd php-envvars; then
-    debug-echo -d "Export all env variables for PHP."
+    debug-echo "Export all env variables for PHP."
     php-envvars export_envvars 2>&1
 fi
 
 ################################################################################
 
-# activity logging
-touch /var/log/startup.log
-echo "$(date) $(whoami)@$(hostname):$(pwd)\$ ${0##*/} $SUPERVISOR_PHP_COMMAND $@" >>/var/log/startup.log
+# fallback for docker-php-entrypoint
+if [ -x "/init" ]; then set -- /init "$@"; fi
 
-################################################################################
-
-# detect entrypoint
-if [ -n "$SUPERVISOR_PHP_COMMAND" ]; then
-    # run custom command defined in $SUPERVISOR_PHP_COMMAND
-    debug-echo "Start container with custom user command: $SUPERVISOR_PHP_COMMAND $@"
-else
-    # fallback for docker-php-entrypoint
-    if [ -x "/init" ]; then set -- /init "$@"; fi
-
-    # fallback empty entrypoint
-    if [ "$#" -eq 0 ]; then set -- /bin/sh; fi
-fi
+# fallback empty entrypoint
+if [ "$#" -eq 0 ]; then set -- /bin/sh; fi
 
 # run bootstrap hook to initialize the container
 hook bootstrap $(! has-s6 && echo bootstrap-non-s6) post-boot onready
 
+# run hooks on exit (beta)
+trap "hook onexit" SIGINT SIGTERM SIGKILL SIGQUIT EXIT
+
+# activity logging
+touch /var/log/startup.log
+echo "$(date) $(whoami)@$(hostname):$(pwd)\$ ${0##*/} $@" >>/var/log/startup.log
+
 # start the container
-exec with-env $SUPERVISOR_PHP_COMMAND "$@"
+exec with-env "$@"
 
 ################################################################################
 #     These setups are part of the project: https://code.shin.company/php
