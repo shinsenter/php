@@ -68,7 +68,7 @@ echo 'Configure OS middlewares'
 [ -z "$DEBUG" ] || set -ex && set -e
 
 # Install common packages
-APK_PACKAGES='findutils inotify-tools run-parts shadow tar tzdata unzip xz' \
+APK_PACKAGES='findutils run-parts shadow tar tzdata unzip xz' \
 APT_PACKAGES='procps xz-utils' \
 pkg-add bash ca-certificates coreutils curl htop less openssl msmtp
 
