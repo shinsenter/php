@@ -44,10 +44,6 @@ if [ "$SKIP_BUILD" = "1" ]; then
     exit 0
 fi
 
-if [ ! -f "$BUILD_CONTEXT/meta.dockerfile" ]; then
-    cp -p "$BASE_DIR/src/php/meta.dockerfile" "$BUILD_CONTEXT/meta.dockerfile"
-fi
-
 if [ -n "${RECURSIVE:-1}" ] && [ -n "$BUILD_FROM_IMAGE" ]; then
     deps=""
     case "$BUILD_FROM_IMAGE" in
