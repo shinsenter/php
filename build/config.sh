@@ -582,6 +582,10 @@ if [ -n "$BUILD_DOCKERFILE" ] && [ -f "$BUILD_DOCKERFILE" ]; then
     BUILD_DOCKERFILE_SQUASHED="/tmp/squashed-$(basename "$BUILD_DOCKERFILE")"
     BUILD_CONTEXT="$(dirname "$BUILD_DOCKERFILE")"
 
+    if [ ! -d "$BUILD_CONTEXT/rootfs" ]; then
+        mkdir -p "$BUILD_CONTEXT/rootfs"
+    fi
+
     if [ ! -e "$BUILD_CONTEXT/meta.dockerfile" ]; then
         cp -pf "$BASE_DIR/src/php/meta.dockerfile" "$BUILD_CONTEXT/meta.dockerfile"
     fi
