@@ -1,5 +1,4 @@
 #!/usr/bin/env sh
-artisan storage:link || true
 
 if [ -f "$APP_PATH/.env" ]; then
     if grep -qx -- 'APP_KEY=' "$APP_PATH/.env"; then
@@ -20,3 +19,5 @@ if is-true "$LARAVEL_AUTO_MIGRATION"; then
 
     $MIGRATION_CMD $LARAVEL_AUTO_MIGRATION_OPTIONS || true
 fi
+
+artisan storage:link || true
