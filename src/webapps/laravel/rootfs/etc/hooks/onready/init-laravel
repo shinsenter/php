@@ -1,8 +1,14 @@
 #!/usr/bin/env sh
 artisan storage:link || true
 
-if [ -f "$APP_PATH/.env" ] && grep -qF -- 'DB_CONNECTION=sqlite' "$APP_PATH/.env"; then
-    web-do touch "$APP_PATH/database/database.sqlite" &>/dev/null
+if [ -f "$APP_PATH/.env" ]; then
+    if grep -qx -- 'APP_KEY=' "$APP_PATH/.env"; then
+        artisan key:generate || true
+    fi
+
+    if grep -qF -- 'DB_CONNECTION=sqlite' "$APP_PATH/.env"; then
+        web-do touch "$APP_PATH/database/database.sqlite" &>/dev/null
+    fi
 fi
 
 if is-true "$LARAVEL_AUTO_MIGRATION"; then

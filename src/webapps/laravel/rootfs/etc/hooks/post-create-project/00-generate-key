@@ -1,4 +1,0 @@
-#!/usr/bin/env sh
-if [ -f "$APP_PATH/.env" ] && ! grep -qF -- "APP_KEY=base64" "$APP_PATH/.env"; then
-    artisan key:generate || true
-fi
