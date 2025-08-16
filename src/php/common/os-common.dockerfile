@@ -16,7 +16,14 @@ ARG DOCKER_ENTRYPOINT=/usr/local/bin/docker-php-entrypoint
 
 ################################################################################
 
-ADD --link ./common/rootfs/ /
+ADD  --link ./common/rootfs/ /
+
+################################################################################
+
+# Install su-exec
+COPY --link --from=ghcr.io/shinsenter/su-exec:latest \
+    --chown=root:root --chmod=4755 \
+    /su-exec /usr/sbin/su-exec
 
 ################################################################################
 
@@ -101,6 +108,12 @@ env-default DEFAULT_USER  "$APP_GROUP"
 # Add default user and group
 ownership "$APP_GROUP" "$APP_GID" "$APP_USER" "$APP_UID"
 
+# Test su-exec
+if ! has-cmd su-exec || [ "$(web-do whoami)" != "$APP_USER" ]; then
+    echo 'Failed to install su-exec'
+    exit 1
+fi
+
 # Create default application directory
 web-mkdir "$APP_PATH"
 
@@ -153,16 +166,6 @@ env-default SMTP_USER ''
 env-default SMTP_PASSWORD ''
 env-default SMTP_AUTH ''
 env-default SMTP_TLS ''
-
-# Install su-exec
-su_exec_path=/sbin/su-exec
-su_exec_url=https://github.com/songdongsheng/su-exec/releases/download/1.3/su-exec-musl-static
-download "$su_exec_url" -o "$su_exec_path" && chmod 4755 "$su_exec_path"
-
-if ! has-cmd su-exec || [ "$(su-exec $APP_USER:$APP_GROUP whoami)" != "$APP_USER" ]; then
-    echo 'Failed to install su-exec'
-    exit 1
-fi
 
 # Add mail group
 if ! getent group mail >/dev/null 2>&1; then
