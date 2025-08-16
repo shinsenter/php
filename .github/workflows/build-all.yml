@@ -190,7 +190,7 @@ jobs:
   fpm-servers:
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
-    needs: [prepare, linux-s6, php-fpm]
+    needs: [prepare, s6-overlay, php-fpm]
     strategy:
       fail-fast: false
       matrix:
@@ -205,7 +205,7 @@ jobs:
   zts-servers:
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
-    needs: [prepare, linux-s6, php-zts]
+    needs: [prepare, s6-overlay, php-zts]
     strategy:
       fail-fast: false
       matrix:
@@ -220,7 +220,7 @@ jobs:
   cli-servers:
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
-    needs: [prepare, linux-s6, php-cli]
+    needs: [prepare, s6-overlay, php-cli]
     strategy:
       fail-fast: false
       matrix:

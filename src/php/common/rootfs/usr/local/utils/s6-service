@@ -23,7 +23,7 @@ s6="/etc/s6-overlay/s6-rc.d"
 slugify() {
     echo "$1" | \
         tr '[:upper:]' '[:lower:]' | \
-        sed -E 's/[^a-z0-9\.]+/-/g' | \
+        sed -E 's/[^a-z0-9\.~]+/-/g' | \
         sed -E 's/^-+|-+$//g'
 }
 

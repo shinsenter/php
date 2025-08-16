@@ -82,6 +82,13 @@ pkg-add bash ca-certificates coreutils curl htop less openssl msmtp
 # Setuid bit for some scripts
 chmod 4755 "$(command -v autorun)" "$(command -v ownership)" /usr/local/utils/web-*
 
+# Patch bashrc
+for bashrc in /etc/profile.d/*.sh /etc/bash.bashrc ~/.bashrc; do
+    if [ -f "$bashrc" ]; then
+        sed -i '/ return/ s/^#\?/#/' "$bashrc"
+    fi
+done
+
 # Replace sh binary with bash
 if has-cmd bash; then
     if has-cmd sh; then
@@ -95,7 +102,11 @@ fi
 if [ ! -e /sbin/nologin ] && has-cmd nologin; then
     ln -nsf "$(command -v nologin)" /sbin/nologin
 fi
+EOF
 
+################################################################################
+
+RUN <<'EOF'
 # Set default debug mode
 env-default '# Default debug mode'
 env-default DEBUG '0'
