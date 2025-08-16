@@ -50,7 +50,7 @@ hook onboot
 ################################################################################
 
 # load the $ENV in ~/.bashrc
-env_check='if [ -f "$ENV" ]; then source "$ENV"; fi'
+env_check='if [ -f "$ENV" ]; then source "$ENV" &>/dev/null; fi'
 bashrc=~/.bashrc
 touch "$bashrc"
 if ! grep -qF -- "$env_check" "$bashrc"; then
