@@ -9,16 +9,18 @@
 export APP_PATH="$(app-path)"
 export APP_ROOT="$(app-root)"
 
-args=$(cat file.txt 2>/dev/null)
-
 run_cmd() {
-    if [ -x "$1" ]; then
-        debug-echo -d "Autorun: $1"
-        local command="$@"
-        eval "set -- $AUTORUN_ARGS"
-        with-env "$command" "$@"
+    local script="$1"
+    eval "set -- ${AUTORUN_ARGS:-}"
+    if [ -x "$script" ]; then
+        with-env "$script" "$@"
     fi
 }
+
+run_parts_args=$(
+    eval "set -- ${AUTORUN_ARGS:-}"
+    [ "$#" -gt 0 ] && printf ' --arg=%s' "$@"
+)
 
 for path; do
     if [ -n "$path" ] && [ -e "$path" ]; then
@@ -26,7 +28,7 @@ for path; do
         if [ -d "$path" ]; then
             find $path -type f -name '*.sh' | xargs -r chmod +x &>/dev/null
             if has-cmd run-parts; then
-                with-env run-parts --new-session "$path"
+                with-env run-parts --regex '.*' --new-session $run_parts_args -- "$path"
             else
                 for script in $(find $path -type f -perm -111 | sort -dbfi); do
                     run_cmd "$script"
