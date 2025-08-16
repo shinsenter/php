@@ -11,5 +11,5 @@ mkdir -p /tmp/hooks 2>/dev/null
 for hook; do
     debug-echo -d "Hook: $hook"
     touch   "/tmp/hooks/$hook" || true
-    autorun "/etc/hooks/$hook"
+    autorun "/etc/hooks/$hook" "$APP_PATH/hooks/$hook"
 done
