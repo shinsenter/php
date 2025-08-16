@@ -18,6 +18,7 @@ Our Docker images cover PHP versions from 5.6 to 8.5 (beta), available in CLI, Z
 - [Adding PHP Extensions](#adding-php-extensions)
 - [Application Directory](#application-directory)
 - [Customizing Container User and Group in Docker](#customizing-container-user-and-group-in-docker)
+- [Hooks](#hooks)
 - [Autorun Scripts](#autorun-scripts)
 - [Using Cron Jobs](#using-cron-jobs)
 - [Customize Supervisor Command](#customize-supervisor-command)
@@ -299,6 +300,27 @@ services:
       APP_USER: "myapp"
       APP_UID: "5000"
 ```
+
+
+## Hooks
+
+Hooks are useful for customizing the behavior of a running container.<br/>
+These images support the following hooks:
+
+| Hook name   | Description                                          | Example usage              |
+|-------------|------------------------------------------------------|----------------------------|
+| `onboot`    | Runs when the container starts or restarts.          | Send startup notification. |
+| `first-run` | Runs only the first time the container starts.       | Initialize database.       |
+| `rebooted`  | Runs whenever the container restarts.                | Check crash logs.          |
+| `post-boot` | Runs after PHP setup and project initialization.     | Build NPM modules.         |
+| `migration` | Runs after `post-boot`, for migration scripts.       | Run DB migrations.         |
+| `onready`   | Runs after `migration`, when the app is nearly ready.| Warm up caches.            |
+| `onlive`    | Runs after the web server starts (if included).      | Trigger webhook.           |
+
+To use hooks, create a `hooks` folder inside `$APP_PATH` and add executable files named after the hook, or in subfolders with the same name.
+Example: to install PHP modules at `first-run`, add a script `hooks/first-run` or `hooks/first-run/install-modules`.
+
+Set `DEBUG=1` to see which hooks are executed.
 
 
 ## Autorun Scripts
