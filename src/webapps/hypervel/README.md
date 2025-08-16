@@ -113,8 +113,6 @@ services:
 
 You can optionally set the following environment variables in the container to enable certain services to run alongside the web server.
 
-> 📝 Note: you'll need to install the required packages and create the necessary configs yourself for features like Pulse or Hypervel Horizon.
-
 | Environment Variable             | Description             |
 |----------------------------------|-------------------------|
 | `LARAVEL_AUTO_MIGRATION`         | Whether to automatically run database migrations when the app boots. Set to `0` to disable running migration. **Default is `1`**. |

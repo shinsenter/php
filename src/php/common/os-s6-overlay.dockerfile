@@ -71,12 +71,18 @@ if [ -n "$S6_VERSION" ] && ! has-s6; then
         env-default S6_STAGE2_HOOK 'hook s6-boot'
         env-default S6_VERBOSITY '$(is-debug && echo 2 || echo 0)'
         env-default S6_VERSION "$S6_VERSION"
+
+        env-default '# Determine whether to keep s6 services alive when user-defined entrypoint exits'
+        env-default KEEP_S6_SERVICES '0'
+
+        env-default '# Add extra service for checking web server'
+        env-default DISABLE_ONLIVE_HOOK '1'
     fi
 
     # create oneshot service for checking web server
     if has-cmd s6-service; then
         s6-service \~verify-server oneshot '#!/usr/bin/env sh
-is-true "$DISABLE_ONLIVE_HOOK" || wait-for "http://127.0.0.1:80" hook onlive || true
+is-true "$DISABLE_ONLIVE_HOOK" || wait-for "http://127.0.0.1" hook onlive || true
 exit 0
 '
     fi

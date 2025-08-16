@@ -30,7 +30,9 @@ INCLUDE ./with-unit/unit-install
 INCLUDE ./with-unit/unit-config
 INCLUDE ./common/os-s6-overlay
 
-RUN unitd --version
+RUN with-env unitd --version
+
+RUN env-default DISABLE_ONLIVE_HOOK '0'
 RUN env-default '# Other user-defined environment variables are from here'
 
 ################################################################################
