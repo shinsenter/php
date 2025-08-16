@@ -79,7 +79,7 @@ if [ -x "/init" ]; then set -- /init "$@"; fi
 if [ "$#" -eq 0 ]; then set -- /bin/sh; fi
 
 # run bootstrap hook to initialize the container
-hook bootstrap $(! has-s6 && echo bootstrap-non-s6) post-boot onready
+hook bootstrap $(! has-s6 && echo bootstrap-non-s6) post-boot migration onready
 
 # run hooks on exit (beta)
 trap "hook onexit" SIGINT SIGTERM SIGKILL SIGQUIT EXIT
