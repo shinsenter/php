@@ -23,7 +23,7 @@ ADD  --link ./common/rootfs/ /
 # Install su-exec
 COPY --link --from=ghcr.io/shinsenter/su-exec:latest \
     --chown=root:root --chmod=4755 \
-    /su-exec /usr/sbin/su-exec
+    /su-exec /sbin/su-exec
 
 ################################################################################
 
@@ -109,7 +109,7 @@ env-default DEFAULT_USER  "$APP_GROUP"
 ownership "$APP_GROUP" "$APP_GID" "$APP_USER" "$APP_UID"
 
 # Test su-exec
-if ! has-cmd su-exec || [ "$(web-do whoami)" != "$APP_USER" ]; then
+if [ "$(web-do whoami)" != "$APP_USER" ]; then
     echo 'Failed to install su-exec'
     exit 1
 fi

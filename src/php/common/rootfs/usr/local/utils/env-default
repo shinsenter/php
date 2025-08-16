@@ -8,7 +8,7 @@
 ################################################################################
 conf_path="$(env-path)"
 
-if [[ ! -f "$conf_path" ]]; then
+if [ ! -f "$conf_path" ]; then
     mkdir -p "$(dirname $conf_path)"
     cat <<'ENVVARS' > "$conf_path"
 #!/bin/sh
@@ -26,7 +26,7 @@ done
 
 export PATH APP_PATH APP_ROOT
 
-web-mkdir "$APP_PATH" || true
+web-mkdir "$APP_PATH" &>/dev/null
 [ -d "$APP_PATH" ] && cd "$APP_PATH"
 
 # begin extra sources
