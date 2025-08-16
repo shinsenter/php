@@ -1,6 +1,21 @@
-# Linux Docker images with s6-overlay
+# Linux Docker images with s6-overlay <!-- omit from toc -->
 
 🌏 Latest Linux Docker base images featuring autorun and s6-overlay.
+
+
+## Table of Contents <!-- omit from toc -->
+- [Introduction](#introduction)
+- [Docker Image Variants](#docker-image-variants)
+- [Usage](#usage)
+- [Application Directory](#application-directory)
+- [Customizing Container User and Group in Docker](#customizing-container-user-and-group-in-docker)
+- [Hooks](#hooks)
+- [Autorun Scripts](#autorun-scripts)
+- [Using Cron Jobs](#using-cron-jobs)
+- [Debug Mode](#debug-mode)
+- [Other System Settings](#other-system-settings)
+- [Contributing](#contributing)
+- [License](#license)
 
 
 ## Introduction
@@ -12,17 +27,17 @@ Combine official [Ubuntu](http://hub.docker.com/_/ubuntu), [Debian](http://hub.d
 
 The Docker images are available for Debian, Ubuntu and Alpine versions.
 
-#### Ubuntu
+#### Ubuntu <!-- omit from toc -->
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/ubuntu-s6
 - GitHub Packages: https://code.shin.company/php/pkgs/container/ubuntu-s6
 
-#### Debian
+#### Debian <!-- omit from toc -->
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/debian-s6
 - GitHub Packages: https://code.shin.company/php/pkgs/container/debian-s6
 
-#### Alpine
+#### Alpine <!-- omit from toc -->
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/alpine-s6
 - GitHub Packages: https://code.shin.company/php/pkgs/container/alpine-s6
@@ -32,7 +47,7 @@ The Docker images are available for Debian, Ubuntu and Alpine versions.
 
 Build and try the following Dockerfile examples:
 
-#### Ubuntu
+#### Ubuntu <!-- omit from toc -->
 
 ```Dockerfile
 FROM shinsenter/ubuntu-s6:latest
@@ -42,7 +57,7 @@ FROM shinsenter/ubuntu-s6:latest
 # ADD --chown=$APP_USER:$APP_GROUP ./myproject/ /var/www/html/
 ```
 
-#### Debian
+#### Debian <!-- omit from toc -->
 
 ```Dockerfile
 FROM shinsenter/debian-s6:latest
@@ -52,7 +67,7 @@ FROM shinsenter/debian-s6:latest
 # ADD --chown=$APP_USER:$APP_GROUP ./myproject/ /var/www/html/
 ```
 
-#### Alpine
+#### Alpine <!-- omit from toc -->
 
 ```Dockerfile
 FROM shinsenter/alpine-s6:latest
@@ -105,12 +120,31 @@ services:
 ```
 
 
+## Hooks
+
+Hooks are useful for customizing the behavior of a running container.<br/>
+These images support the following hooks:
+
+| Hook name   | Description                                          | Example usage              |
+|-------------|------------------------------------------------------|----------------------------|
+| `onboot`    | Runs when the container starts or restarts.          | Send startup notification. |
+| `first-run` | Runs only the first time the container starts.       | Initialize database.       |
+| `rebooted`  | Runs whenever the container restarts.                | Check crash logs.          |
+| `migration` | Runs after `post-boot`, for migration scripts.       | Run DB migrations.         |
+| `onready`   | Runs after `migration`, when the app is nearly ready.| Warm up caches.            |
+
+To use hooks, create a `hooks` folder inside `$APP_PATH` and add executable files named after the hook, or in subfolders with the same name.
+Example: to install PHP modules at `first-run`, add a script `hooks/first-run` or `hooks/first-run/install-modules`.
+
+Set `DEBUG=1` to see which hooks are executed.
+
+
 ## Autorun Scripts
 
 Shell scripts placed in the `/startup/` directory will automatically run when the container starts, in alphabetical order by filename.
 This feature can initialize projects before the main program runs, saving time by executing initialization scripts automatically.
 
-#### Usage Example
+#### Usage Example <!-- omit from toc -->
 
 Copy a script called `00-migration` into `/startup/` via a Dockerfile:
 
@@ -129,7 +163,7 @@ RUN chmod +x /startup/00-migration
 
 > 👉🏻 Info: The startup directory already includes a script called `99-greeting` that prints a welcome message when the container starts.
 
-#### Disable Autorun Scripts
+#### Disable Autorun Scripts <!-- omit from toc -->
 
 To disable autorun scripts, set `DISABLE_AUTORUN_SCRIPTS=1` as an environment variable.
 
@@ -207,13 +241,13 @@ For more information on environment variables for cron jobs, refer to the [Other
 Enable "debug mode" for more verbose logging by setting `DEBUG=1` as an environment variable.
 This can be used both with `docker run` and in `docker-compose.yml`.
 
-#### Command Line
+#### Command Line <!-- omit from toc -->
 
 ```shell
 docker run -e DEBUG=1 shinsenter/debian-s6:latest bash
 ```
 
-#### docker-compose.yml
+#### docker-compose.yml <!-- omit from toc -->
 
 ```yaml
 services:
