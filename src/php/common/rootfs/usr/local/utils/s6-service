@@ -3,7 +3,7 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-#      - Author:  SHIN Company <shin@shin.company>
+#      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 # show usage if no arguments are passed
@@ -23,7 +23,7 @@ s6="/etc/s6-overlay/s6-rc.d"
 slugify() {
     echo "$1" | \
         tr '[:upper:]' '[:lower:]' | \
-        sed -E 's/[^a-z0-9\.]+/-/g' | \
+        sed -E 's/[^a-z0-9\.~]+/-/g' | \
         sed -E 's/^-+|-+$//g'
 }
 
@@ -52,6 +52,8 @@ if [ -n "$1" ]; then
 else
     type="oneshot"
 fi
+
+hook_name="s6-exit-${name//\~/}"
 
 # get script contents from existing file
 if [ -f "$1" ]; then set -- "$(cat $1)"; fi
@@ -87,12 +89,12 @@ fi
 
 if [ "$type" = "oneshot" ]; then
     create "${s6}/${name}/up"   "exec ${s6}/${name}/run"
-    create "${s6}/${name}/down" "exec hook s6-exit-${name}"
+    create "${s6}/${name}/down" "exec hook $hook_name"
 fi
 
 if [ "$type" = "longrun" ]; then
-    create "${s6}/${name}/finish" "#!/command/with-contenv sh
-exec hook s6-exit-${name}"
+    create "${s6}/${name}/finish" "#!/usr/bin/env sh
+exec hook $hook_name"
 fi
 
 create "${s6}/${name}/type" "$type"
