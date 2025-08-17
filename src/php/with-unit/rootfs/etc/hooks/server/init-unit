@@ -3,7 +3,7 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-#      - Author:  SHIN Company <shin@shin.company>
+#      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 unit_socket="${UNIT_CONTROL_SOCKET:-/run/control.unit.sock}"
@@ -15,7 +15,7 @@ else
     unitd_bin="$(command -v unitd)"
 fi
 
-if ! is-true "${DISABLE_GREETING:-}" && [[ -x "$unitd_bin" ]]; then
+if ! is-true "${DISABLE_GREETING:-}" && [ -x "$unitd_bin" ]; then
     "$unitd_bin" --version 2>&1 | grep version || true
 fi
 
@@ -29,7 +29,7 @@ init_unit() {
     web-mkdir /var/lib/unit
     web-chown fix /var/lib/unit /var/log/unit /run/unit
 
-    if [[ -d /var/lib/unit/conf.json ]]; then
+    if [ -d /var/lib/unit/conf.json ]; then
         return 0
     fi
 
@@ -50,7 +50,7 @@ init_unit() {
         configtest >&2
     fi
 
-    if [[ -f "$unit_pid_file" ]]; then
+    if [ -f "$unit_pid_file" ]; then
         local unit_pid
         unit_pid="$(cat "$unit_pid_file")"
         kill -TERM "$unit_pid" &>/dev/null || true
@@ -58,7 +58,7 @@ init_unit() {
     fi
 
     attempts=0
-    while [[ -f "$unit_socket" && "$attempts" -lt 20 ]]; do
+    while [ -f "$unit_socket" ] && [ "$attempts" -lt 20 ]; do
         sleep 0.5
         ((attempts++))
     done

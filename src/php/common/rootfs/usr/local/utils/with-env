@@ -3,7 +3,7 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-#      - Author:  SHIN Company <shin@shin.company>
+#      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 SYSTEM_ENV="/etc/environment"
@@ -17,13 +17,13 @@ print_env() {
 # load extra env variables
 if [ -f "$SYSTEM_ENV" ]; then
     set -a
-    source "$SYSTEM_ENV"
+    source "$SYSTEM_ENV" &>/dev/null
     set +a
 fi
 
 # load extra env variables
-if [ -f "$DEFAULT_ENV" ]; then source "$DEFAULT_ENV"; fi
-if [ -f "$ENV" ] && [ "$ENV" != "$DEFAULT_ENV" ]; then source "$ENV"; fi
+if [ -f "$DEFAULT_ENV" ]; then source "$DEFAULT_ENV" &>/dev/null; fi
+if [ -f "$ENV" ] && [ "$ENV" != "$DEFAULT_ENV" ]; then source "$ENV" &>/dev/null; fi
 
 if [ "$#" -eq 0 ]; then
     # print the environment variables

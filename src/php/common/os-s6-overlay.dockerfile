@@ -2,7 +2,7 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-#      - Author:  SHIN Company <shin@shin.company>
+#      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -72,7 +72,7 @@ if [ -n "$S6_VERSION" ] && ! has-s6; then
         env-default S6_VERBOSITY '$(is-debug && echo 2 || echo 0)'
         env-default S6_VERSION "$S6_VERSION"
 
-        env-default '# Determine whether to keep s6 services alive when user-defined entrypoint exits'
+        env-default '# Keep s6 services alive when $SUPERVISOR_PHP_COMMAND is set'
         env-default KEEP_S6_SERVICES '0'
 
         env-default '# Add extra service for checking web server'
@@ -82,8 +82,8 @@ if [ -n "$S6_VERSION" ] && ! has-s6; then
     # create oneshot service for checking web server
     if has-cmd s6-service; then
         s6-service \~verify-server oneshot '#!/usr/bin/env sh
-is-true "$DISABLE_ONLIVE_HOOK" || wait-for "http://127.0.0.1" hook onlive || true
-exit 0
+is-true "$DISABLE_ONLIVE_HOOK" && exit 0
+wait-for "http://127.0.0.1" hook onlive || true
 '
     fi
 
