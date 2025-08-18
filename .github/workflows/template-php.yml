@@ -2,7 +2,7 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-#      - Author:  SHIN Company <shin@shin.company>
+#      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -73,6 +73,11 @@ jobs:
       matrix:
         php_version: ["8.0", "7.4", "7.3", "7.2", "7.1", "7.0", "5.6"]
         os: ["", "alpine"]
+        exclude:
+          - os: "alpine"
+            php_version: "5.6"
+          - os: "alpine"
+            php_version: "7.0"
     with:
       os: ${{ matrix.os }}
       php_version: ${{ matrix.php_version }}
