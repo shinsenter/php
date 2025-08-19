@@ -16,7 +16,6 @@ source "$BASE_DIR/build/helpers.sh"
 ################################################################################
 # Helpers
 ################################################################################
-
 set_platforms() {
     case "$1" in
         ubuntu)        echo "linux/amd64,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x" ;;
@@ -106,9 +105,18 @@ wordpress:allow_rc=1 server=apache
 
 # https://www.yiiframework.com/doc/guide/2.0/en/start-installation
 yii:server=apache
-# inactive frameworks (kept for reference, commented out)
+
+## ------------------------------------------------------ ##
+## inactive frameworks (kept for reference, commented out)
+## ------------------------------------------------------ ##
+
+## https://docs.craterapp.com/installation.html
 # crater:min=7.4 latest=8.1 base=laravel server=apache
+
+## https://fuelphp.com/docs/installation/instructions.html
 # fuelphp:latest=8.0 server=apache
+
+## https://phpixie.com/quickstart.html
 # phpixie:latest=7.4 server=apache
 "
 
@@ -128,16 +136,6 @@ apply_app_rules() {
             allow_rc) ALLOW_RC=1 ;;
         esac
     done
-
-    # Exceptiosn for hyperf, hypervel
-    case "$app" in
-        hyperf|hypervel)
-            if verlte "8.3" "$PHP_VERSION"; then
-                PREFER_SERVER=""
-                BUILD_PLATFORM="linux/amd64,linux/arm64/v8"
-            fi
-            ;;
-    esac
 
     # Override the default server variant
     case "${PREFER_SERVER:-$USE_SERVER}" in
@@ -163,6 +161,19 @@ apply_app_rules() {
             ;;
         *) PREFER_SERVER="" ;;
     esac
+
+    # Exception for hyperf, hypervel, spiral
+    case "$app" in
+        hyperf|hypervel)
+            if verlte "8.3" "$PHP_VERSION"; then
+                PREFER_SERVER=""
+                BUILD_PLATFORM="linux/amd64,linux/arm64/v8"
+            fi
+            ;;
+        spiral)
+            PREFER_SERVER=""
+            ;;
+    esac
 }
 
 ################################################################################
@@ -179,6 +190,7 @@ OS="$1"; APP="$2"; PHP_VERSION="$3"; PREFER_SERVER="$4"
 ################################################################################
 LATEST_PHP="8.4"
 LATEST_S6=
+
 PHP_VARIANT="${PHP_VARIANT:-}"
 S6_VERSION="${S6_VERSION:-latest}"
 S6_PATH="${S6_PATH:-}"
@@ -226,14 +238,11 @@ if [ -n "$OS" ] && [ "$OS" != "debian" ]; then
     OS_BASE="$OS"
 fi
 
-if [ "$DEBUG" = "1" ]; then
-    SKIP_BUILD=1
-fi
+[ "$DEBUG" = "1" ] && SKIP_BUILD=1
 
 ################################################################################
 # Initialize build variables
 ################################################################################
-
 case "$APP" in
     base-os)
         PHP_VERSION=
@@ -322,14 +331,13 @@ esac
 ################################################################################
 # Skip build checks
 ################################################################################
-
 # Skip build if the latest supported PHP version is less than the build version
 if [ "$ALLOW_RC" != "1" ]; then
         verlt "$LATEST_PHP" "$PHP_VERSION" && SKIP_BUILD=1
 fi
 
-# Skip build if the PHP version is earlier than 7.1 and the OS is not Debian
-if [ -n "$PHP_VERSION" ] && verlt "$PHP_VERSION" "7.1" && [ "$OS_BASE" != "debian" ]; then
+# Skip build if the PHP version is earlier than 7.1 and the OS is Alpine
+if [ -n "$PHP_VERSION" ] && verlt "$PHP_VERSION" "7.1" && [ "$OS_BASE" = "alpine" ]; then
     BUILD_DOCKERFILE=
     SKIP_BUILD=1
 fi
@@ -370,7 +378,6 @@ fi
 ################################################################################
 # Generate build tags
 ################################################################################
-
 expand_tags() {
     local find="$1" add="$2" exclude="${3:-dummy}" out=""
     for item in ${BUILD_TAGS//,/ }; do
@@ -388,6 +395,7 @@ add_tag() {
     done
 }
 
+# Generate build tags
 if [ -n "$PHP_VERSION" ]; then
     if [ "$BUILD_NAME" = "$DEFAULT_BUILD_NAME" ]; then
         add_tag "$BUILD_NAME:$PHP_VERSION-$PREFIX$SUFFIX"
@@ -424,7 +432,7 @@ if [ -n "$PHP_VERSION" ]; then
         fi
     fi
 
-    # alias major version
+    # Alias major versions
     case "$PHP_VERSION" in
         5.6)
             expand_tags ":php5.6" ":php5"
@@ -450,8 +458,10 @@ else
     add_tag "$BUILD_NAME:s6-$S6_VERSION" "$BUILD_NAME:latest"
 fi
 
+# Remove alpha or rc versions from build tags
 BUILD_TAGS="${BUILD_TAGS//-rc/}"
 
+# Apply tag prefix for development branch
 if [ -n "$BUILD_TAG_PREFIX" ]; then
     BUILD_TAGS="${BUILD_TAGS//:/:$BUILD_TAG_PREFIX}"
     [ "$BUILD_FROM_IMAGE" != "$BASE_REPO" ] && BUILD_FROM_IMAGE="${BUILD_FROM_IMAGE//:/:$BUILD_TAG_PREFIX}"
@@ -473,7 +483,6 @@ unset suffix SERVER_SUFFIX major unique_id
 ################################################################################
 # Build context, readme, description etc.
 ################################################################################
-
 if [ "$DUMMY" = "1" ]; then
     BUILD_DOCKERFILE="$BASE_DIR/src/dummy.dockerfile"
     BUILD_CACHE_KEY="(dummy@$BUILD_REVISION)"
@@ -498,13 +507,17 @@ else
     BUILD_CONTEXT=
 fi
 
+# Main README.md
 if [ "$BUILD_NAME" = "$DEFAULT_BUILD_NAME" ] && \
     [ "$APP" = "cli" ] && [ "$PHP_VERSION" = "$LATEST_PHP" ]; then
     BUILD_README="$DEFAULT_README"
 fi
 
+# Parse description from README.md
 if [ -n "$BUILD_README" ] && [ -f "$BUILD_README" ]; then
     BUILD_DESC="$(sed '3q;d' "$BUILD_README")"
+
+    # update readme on latest tag and not dev branch
     if [[ "$BUILD_TAGS" == *'latest'* ]] && [ -z "$BUILD_TAG_PREFIX" ]; then
         UPDATE_README=1
     fi
@@ -513,13 +526,13 @@ else
     BUILD_DESC="$(sed '3q;d' "$DEFAULT_README")"
 fi
 
+# Skip build if there is no Dockerfile
 [ -z "$BUILD_DOCKERFILE" ] && SKIP_BUILD=1
 [ -z "$BUILD_DOCKERFILE_SQUASHED" ] && SKIP_SQUASH=1
 
 ################################################################################
 # Cache key
 ################################################################################
-
 if [ ! -e "$BUILD_CACHE_PATH" ]; then
     mkdir -p "$BUILD_CACHE_PATH" 2>&1
     mkdir -p "${BUILD_CACHE_PATH}-new" 2>&1
@@ -552,14 +565,13 @@ BUILD_TMP_NAME="localhost:5000/$(path_hash "$BUILD_CACHE_KEY" | head -c10)"
 ################################################################################
 # Fix build platforms
 ################################################################################
-
 remove_platform() {
     local platforms="$1"
     local new_string
     shift
     for search; do
         for item in ${platforms//,/ }; do
-            [ "$item" != *"$search"* ] && new_string="${new_string:+$new_string,}$item"
+            [[ "$item" != *"$search"* ]] && new_string="${new_string:+$new_string,}$item"
         done
         platforms="$new_string"
         unset new_string
@@ -567,6 +579,7 @@ remove_platform() {
     echo "$platforms"
 }
 
+# Remove some platforms for older PHP versions
 if [ -n "$PHP_VERSION" ]; then
     if verlt "$PHP_VERSION" "7.1"; then
         BUILD_PLATFORM="linux/amd64,linux/arm/v7"
@@ -577,6 +590,7 @@ fi
 
 ################################################################################
 # Temporary fix for Debian 13 (Trixie)
+# See: https://github.com/mlocati/docker-php-extension-installer/issues/1141
 ################################################################################
 if [ "$OS_BASE" = "debian" ] && [ "$BUILD_FROM_IMAGE" = "$BASE_REPO" ] && is_active_version "$PHP_VERSION"; then
     PHP_VARIANT="$PHP_VARIANT-bookworm"
@@ -585,9 +599,7 @@ fi
 ################################################################################
 # Fix image name for RC versions
 ################################################################################
-if [ "$BUILD_FROM_IMAGE" != "$BASE_REPO" ]; then
-    PHP_VERSION="${PHP_VERSION//-rc/}"
-fi
+[ "$BUILD_FROM_IMAGE" != "$BASE_REPO" ] && PHP_VERSION="${PHP_VERSION//-rc/}"
 
 ################################################################################
 # Use mirror repos for pulling docker images
@@ -597,14 +609,11 @@ fi
 ################################################################################
 # Correct the PHP variant for apps
 ################################################################################
-if [ "${APP:0:4}" = "app-" ]; then
-    PHP_VARIANT="$SUFFIX"
-fi
+[ "${APP:0:4}" = "app-" ] && PHP_VARIANT="$SUFFIX"
 
 ################################################################################
 # Export Git action environment variables
 ################################################################################
-
 github_env USE_BUILD_CACHE "$USE_BUILD_CACHE"
 github_env BUILD_CACHE_KEY "$BUILD_CACHE_KEY"
 github_env BUILD_CACHE_PATH "$BUILD_CACHE_PATH"
