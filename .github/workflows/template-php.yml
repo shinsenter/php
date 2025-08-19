@@ -84,4 +84,3 @@ jobs:
       app_name: ${{ inputs.app_name }}
       server: ${{ inputs.server }}
       tag_prefix: ${{ inputs.tag_prefix }}
-      continue-on-error: true
