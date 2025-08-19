@@ -371,19 +371,21 @@ fi
 # Generate build tags
 ################################################################################
 
-tag_update() {
-    local search="$1" replace="$2" exclude="${3:-dummy}" out=""
+expand_tags() {
+    local find="$1" add="$2" exclude="${3:-dummy}" out=""
     for item in ${BUILD_TAGS//,/ }; do
         out+="${out:+,}$item"
-        if [[ "$item" != *"$exclude"* ]] && echo "$item" | grep -Eq "$search"; then
-            out+="${out:+,}${item/$search/$replace}"
+        if [[ "$item" != *"$exclude"* ]] && echo "$item" | grep -Eq "$find"; then
+            out+="${out:+,}${item/$find/$add}"
         fi
     done
     BUILD_TAGS="$out"
 }
 
 add_tag() {
-    BUILD_TAGS="${BUILD_TAGS:+$BUILD_TAGS,}$1"
+    for tag; do
+        [ -n "$tag" ] && BUILD_TAGS="${BUILD_TAGS:+$BUILD_TAGS,}$tag"
+    done
 }
 
 if [ -n "$PHP_VERSION" ]; then
@@ -409,8 +411,8 @@ if [ -n "$PHP_VERSION" ]; then
         esac
 
         [ -n "$suffix" ] && {
-            tag_update "$BUILD_NAME:latest" "$DEFAULT_BUILD_NAME:$suffix"
-            tag_update "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-$suffix"
+            expand_tags "$BUILD_NAME:latest" "$DEFAULT_BUILD_NAME:$suffix"
+            expand_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-$suffix"
         }
     elif [ "${APP#app-}" != "$APP" ]; then
         SERVER_SUFFIX="${PREFER_SERVER:+-$PREFER_SERVER}"
@@ -418,37 +420,34 @@ if [ -n "$PHP_VERSION" ]; then
 
         if [ -z "$PREFER_SERVER" ] || [ "$PREFER_SERVER" = "$USE_SERVER" ]; then
             add_tag "$BUILD_NAME:php$PHP_VERSION$SUFFIX"
-            [ "$PHP_VERSION" = "$LATEST_PHP" ] && \
-                add_tag "$BUILD_NAME:latest$SUFFIX"
+            [ "$PHP_VERSION" = "$LATEST_PHP" ] && add_tag "$BUILD_NAME:latest$SUFFIX"
         fi
     fi
 
     # alias major version
     case "$PHP_VERSION" in
         5.6)
-            tag_update ":php5.6" ":php5"
-            tag_update ":5.6" ":5"
+            expand_tags ":php5.6" ":php5"
+            expand_tags ":5.6" ":5"
             ;;
         7.4)
-            tag_update ":php7.4" ":php7"
-            tag_update ":7.4" ":7"
+            expand_tags ":php7.4" ":php7"
+            expand_tags ":7.4" ":7"
             ;;
         8.4)
-            tag_update ":php8.4" ":php8"
-            tag_update ":8.4" ":8"
+            expand_tags ":php8.4" ":php8"
+            expand_tags ":8.4" ":8"
             ;;
         "$LATEST_PHP")
             major=${PHP_VERSION%%.*}
-            tag_update ":php$PHP_VERSION" ":php$major"
-            tag_update ":$PHP_VERSION" ":$major"
+            expand_tags ":php$PHP_VERSION" ":php$major"
+            expand_tags ":$PHP_VERSION" ":$major"
             ;;
     esac
 elif [ "$APP" = "base-s6" ]; then
-    add_tag "$BUILD_NAME:$S6_VERSION"
-    add_tag "$BUILD_NAME:latest"
+    add_tag "$BUILD_NAME:$S6_VERSION" "$BUILD_NAME:latest"
 else
-    add_tag "$BUILD_NAME:s6-$S6_VERSION"
-    add_tag "$BUILD_NAME:latest"
+    add_tag "$BUILD_NAME:s6-$S6_VERSION" "$BUILD_NAME:latest"
 fi
 
 BUILD_TAGS="${BUILD_TAGS//-rc/}"
@@ -461,12 +460,12 @@ fi
 [ -z "$BUILD_TAGS" ] && { echo "Failed to generate build tags" >&2; exit 1; }
 BUILD_TAG="${BUILD_TAGS%%,*}"
 
-[ -z "$BUILD_TAG_PREFIX" ] && tag_update ":" ":dev-"
-[ "$PUBLISH_TO_GHCR" = "1" ] && tag_update "$DEFAULT_REPO" "ghcr.io/$DEFAULT_REPO"
+[ -z "$BUILD_TAG_PREFIX" ] && expand_tags ":" ":dev-"
+[ "$PUBLISH_TO_GHCR" = "1" ] && expand_tags "$DEFAULT_REPO" "ghcr.io/$DEFAULT_REPO"
 
 if [ -n "$ARCHIVES_REPO" ] && [ -z "$BUILD_TAG_PREFIX" ]; then
     unique_id="$(date +%Y%m%d)"
-    tag_update "${DEFAULT_BUILD_NAME}:" "${ARCHIVES_REPO}:${unique_id}-" ":dev-"
+    expand_tags "${DEFAULT_BUILD_NAME}:" "${ARCHIVES_REPO}:${unique_id}-" ":dev-"
 fi
 
 unset suffix SERVER_SUFFIX major unique_id

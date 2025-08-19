@@ -20,7 +20,7 @@ fi
 
 if [ "$1" = "clean" ] || [ "$1" = "clear" ]; then
     docker system prune -af --volumes
-    rm -rf "$LOG_DIR/"*
+    rm -rf "$LOG_DIR/"* /tmp/helper_cache
     clear
     shift
 fi
@@ -60,7 +60,7 @@ if [ -n "${RECURSIVE:-1}" ] && [ -n "$BUILD_FROM_IMAGE" ]; then
 
     if [ -n "$deps" ]; then
         echo "INFO: $BUILD_TAG needs $BUILD_FROM_IMAGE"
-        $0 "$1" "$deps" "${3:-latest}" "${4:-latest}"
+        $0 "$1" "$deps" "$3" "$4"
         if [ $? -ne 0 ]; then
             echo "ERROR: Failed to build $BUILD_FROM_IMAGE"
             exit 1
