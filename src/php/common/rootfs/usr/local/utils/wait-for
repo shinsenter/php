@@ -21,7 +21,7 @@ if [ -n "$target" ]; then
     # detect if target is a URL or a path
     if [ "${target:0:4}" = "http" ]; then
         while true; do
-            if curl -sk --max-time 2 -o /dev/null "$target"; then break; fi
+            if curl -A "${DOCKER_NAME:-internal}-checker" -sk --max-time 2 -o /dev/null "$target"; then break; fi
             if [ "$timeout" -gt 0 ] && [ $(( $(date +%s) - start )) -ge "$timeout" ]; then
                 debug-echo -c "Timeout waiting for $target."
                 exit 1
