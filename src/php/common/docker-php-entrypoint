@@ -80,8 +80,8 @@ if [ "$#" -eq 0 ]; then set -- /bin/sh; fi
 
 # run bootstrap hooks to initialize the container
 hook bootstrap $(! has-s6 && echo bootstrap-non-s6) \
+    post-boot  $(! has-s6 && echo post-boot-non-s6) \
     application server \
-    post-boot $(! has-s6 && echo post-boot-non-s6) \
     migration \
     onready
 
