@@ -238,6 +238,7 @@ if [ -n "$OS" ] && [ "$OS" != "debian" ]; then
     OS_BASE="$OS"
 fi
 
+[ "$PREFER_SERVER" = "default" ] && PREFER_SERVER=""
 [ "$DEBUG" = "1" ] && SKIP_BUILD=1
 
 ################################################################################

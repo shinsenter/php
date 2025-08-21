@@ -320,6 +320,8 @@ jobs:
           - app-symfony
           - app-wordpress
           - app-yii
+        server:
+          - ""
         # include:
         #   - app: app-laravel
         #     server: apache
