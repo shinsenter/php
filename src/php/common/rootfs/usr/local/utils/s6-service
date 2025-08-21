@@ -71,9 +71,21 @@ fi
 
 ################################################################################
 # add service dependencies
-if [ "$type" = "depends" ] || [ "$type" = "needs" ]; then
+if [ "$type" = "requires" ] || [ "$type" = "needs" ]; then
     create "${s6}/${name}/dependencies.d/$1"
     exit $?
+fi
+
+# check dependencies
+if [ "$type" = "exists" ] || [ "$type" = "depends" ]; then
+    if [ "$#" -eq 0 ]; then
+        [ -f "${s6}/${name}/run" ] && exit 0
+    else
+        for dep; do
+            [ -f "${s6}/${name}/dependencies.d/${dep}" ] && exit 0
+        done
+    fi
+    exit 1
 fi
 
 ################################################################################

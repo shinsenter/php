@@ -56,7 +56,7 @@ exec app-exec artisan serve $LARAVEL_SERVE_OPTIONS
 
     s6-service php-fpm unset
     s6-service nginx unset php-fpm
-    s6-service nginx depends hypervel
+    s6-service nginx requires hypervel
 
     s6-service horizon unset
     s6-service pulse unset
