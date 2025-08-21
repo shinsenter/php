@@ -53,7 +53,7 @@ exec app-exec web-do php $(app-index) start
 '
     s6-service php-fpm unset
     s6-service nginx unset php-fpm
-    s6-service nginx depends hyperf
+    s6-service nginx requires hyperf
 fi
 
 EOF
