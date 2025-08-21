@@ -79,7 +79,7 @@ fi
     echo "-------------------------------------------------"
     echo "📦 $BUILD_DATE Build: $BUILD_TAG"
     $command --attest type=sbom \
-         --tag "$BUILD_TAG" \
+        --tag "$BUILD_TAG" \
         --platform  "linux/${PLATFORM:-$(uname -m)}" \
         --build-arg DEBUG=$DEBUG \
         --build-arg BUILD_DATE=$BUILD_DATE \
