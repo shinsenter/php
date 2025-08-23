@@ -1,17 +1,16 @@
-#!/usr/bin/env sh
+#!/bin/sh -e
 ################################################################################
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-#      - Author:  SHIN Company <shin@shin.company>
+#      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-if ! is-true "$ENABLE_CRONTAB"; then exit 0; fi
 
-if has-cmd crond; then
-    CROND_PID=/var/run/crond.pid
-    if [ -f "$CROND_PID" ]; then kill -TERM $(cat "$CROND_PID") &>/dev/null || \rm -f "$CROND_PID"; fi
+BASE_DIR="$(git rev-parse --show-toplevel)"
 
-    exec 2>&1
-    exec app-exec with-env crond $CRONTAB_OPTIONS
-fi
+act workflow_dispatch --dryrun \
+    --network host \
+    --container-architecture linux/amd64 \
+    --workflows "$BASE_DIR/.github/workflows/build-all.yml" \
+    "$@"

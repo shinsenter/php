@@ -3,7 +3,7 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-#      - Author:  SHIN Company <shin@shin.company>
+#      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 if ! has-cmd crond; then exit 0; fi
@@ -58,3 +58,6 @@ echo '' >>$CRONTAB
 
 chmod 0600 $CRONTAB
 debug-echo -i "Cron will run as $APP_USER.\n\n### Config:\n$(crontab -u $APP_USER -l 2>/dev/null)\n"
+
+# service settings
+s6-service crontab $(is-true "$ENABLE_CRONTAB" && echo enable || echo disable)
