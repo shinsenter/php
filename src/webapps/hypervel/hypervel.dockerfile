@@ -3,7 +3,7 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-#      - Author:  SHIN Company <shin@shin.company>
+#      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -56,7 +56,7 @@ exec app-exec artisan serve $LARAVEL_SERVE_OPTIONS
 
     s6-service php-fpm unset
     s6-service nginx unset php-fpm
-    s6-service nginx depends hypervel
+    s6-service nginx requires hypervel
 
     s6-service horizon unset
     s6-service pulse unset
