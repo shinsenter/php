@@ -9,13 +9,13 @@
 
 web-mkdir /config/caddy /data/caddy /etc/caddy
 
-if ! is-true "$DISABLE_GREETING" && has-cmd frankenphp; then
-    frankenphp version 2>&1
-fi
-
 if is-debug; then
     echo -e 'export CADDY_GLOBAL_OPTIONS="$CADDY_GLOBAL_OPTIONS\ndebug"' >/etc/caddy/envvars || true
     debug-echo -w "🐞 FrankenPHP is in DEBUG MODE 🐞"
 else
     \rm -f /etc/caddy/envvars || true
+fi
+
+if ! is-true "$DISABLE_GREETING" && has-cmd frankenphp; then
+    frankenphp version 2>&1
 fi
