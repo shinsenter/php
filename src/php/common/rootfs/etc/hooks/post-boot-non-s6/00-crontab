@@ -3,19 +3,15 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-#      - Author:  SHIN Company <shin@shin.company>
+#      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
+if ! is-true "$ENABLE_CRONTAB"; then exit 0; fi
 
-web-mkdir /config/caddy /data/caddy /etc/caddy
+if has-cmd crond; then
+    CROND_PID=/var/run/crond.pid
+    if [ -f "$CROND_PID" ]; then kill -TERM $(cat "$CROND_PID") &>/dev/null || \rm -f "$CROND_PID"; fi
 
-if ! is-true "$DISABLE_GREETING" && has-cmd frankenphp; then
-    frankenphp version 2>&1
-fi
-
-if is-debug; then
-    echo -e 'export CADDY_GLOBAL_OPTIONS="$CADDY_GLOBAL_OPTIONS\ndebug"' >/etc/caddy/envvars || true
-    debug-echo -w "🐞 FrankenPHP is in DEBUG MODE 🐞"
-else
-    \rm -f /etc/caddy/envvars || true
+    exec 2>&1
+    exec app-exec with-env crond $CRONTAB_OPTIONS
 fi

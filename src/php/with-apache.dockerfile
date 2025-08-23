@@ -3,7 +3,7 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-#      - Author:  SHIN Company <shin@shin.company>
+#      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -30,7 +30,9 @@ INCLUDE ./with-apache/apache-install
 INCLUDE ./with-apache/apache-config
 INCLUDE ./common/os-s6-overlay
 
-RUN apache2 -v
+RUN with-env apache2 -v
+
+RUN env-default DISABLE_ONLIVE_HOOK '0'
 RUN env-default '# Other user-defined environment variables are from here'
 
 ################################################################################
