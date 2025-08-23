@@ -2,7 +2,7 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-#      - Author:  SHIN Company <shin@shin.company>
+#      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -122,7 +122,7 @@ jobs:
     with:
       app_name: "base-s6"
       os: "alpine"
-      tag_prefix: ${{ inputs.tag_prefix }}
+      tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
 
   linux-s6:
     name: ${{ matrix.os == '' && 'debian' || matrix.os }}-s6
@@ -139,7 +139,7 @@ jobs:
     with:
       app_name: "base-os"
       os: ${{ matrix.os }}
-      tag_prefix: ${{ inputs.tag_prefix }}
+      tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
 
   ##########################################################
 
@@ -190,7 +190,7 @@ jobs:
   fpm-servers:
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
-    needs: [prepare, linux-s6, php-fpm]
+    needs: [prepare, s6-overlay, php-fpm]
     strategy:
       fail-fast: false
       matrix:
@@ -205,7 +205,7 @@ jobs:
   zts-servers:
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
-    needs: [prepare, linux-s6, php-zts]
+    needs: [prepare, s6-overlay, php-zts]
     strategy:
       fail-fast: false
       matrix:
@@ -220,7 +220,7 @@ jobs:
   cli-servers:
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
-    needs: [prepare, linux-s6, php-cli]
+    needs: [prepare, s6-overlay, php-cli]
     strategy:
       fail-fast: false
       matrix:
@@ -320,9 +320,13 @@ jobs:
           - app-symfony
           - app-wordpress
           - app-yii
+        server:
+          - ""
         # include:
         #   - app: app-laravel
-        #     server: [apache, nginx]
+        #     server: apache
+        #   - app: app-laravel
+        #     server: nginx
     with:
       app_name: ${{ matrix.app }}
       server: ${{ matrix.server }}

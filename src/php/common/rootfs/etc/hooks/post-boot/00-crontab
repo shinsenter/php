@@ -3,7 +3,7 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-#      - Author:  SHIN Company <shin@shin.company>
+#      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 if ! has-cmd crond; then exit 0; fi
@@ -12,20 +12,22 @@ APP_USER="${APP_USER:-root}"
 CRONTAB="/var/spool/cron/crontabs/$APP_USER"
 CRONTAB_DIR="${CRONTAB_DIR:-/etc/crontab.d}"
 
+# service settings
+s6-service crontab $(is-true "$ENABLE_CRONTAB" && echo enable || echo disable)
+
 if ! is-true "$ENABLE_CRONTAB"; then
     \rm -f "$CRONTAB"
     exit 0
-fi
+else
+    mkdir -p "$(dirname $CRONTAB)" $CRONTAB_DIR
 
-mkdir -p "$(dirname $CRONTAB)" $CRONTAB_DIR
+    if is-true "$ENABLE_CRONTAB_DEBUG"; then
+        echo '*  *  *  *  *  echo -e "$(date) DEBUG: Crontab is running as $(whoami).\\n\\n$(env -0 | sort -dbfiz | tr '\''\\0'\'' '\''\\n'\'' | grep -vF '\''_='\'')" | tee /tmp/cron-debug.txt' >$CRONTAB_DIR/debug
+    elif is-debug; then
+        echo '*  *  *  *  *  echo -e "$(date) DEBUG: Crontab is running as $(whoami).\\nTotal passed environment variables: $(env | wc -l)" | tee /tmp/cron-debug.txt' >$CRONTAB_DIR/debug
+    fi
 
-if is-true "$ENABLE_CRONTAB_DEBUG"; then
-    echo '*  *  *  *  *  echo -e "$(date) DEBUG: Crontab is running as $(whoami).\\n\\n$(env -0 | sort -dbfiz | tr '\''\\0'\'' '\''\\n'\'' | grep -vF '\''_='\'')" | tee /tmp/cron-debug.txt' >$CRONTAB_DIR/debug
-elif is-debug; then
-    echo '*  *  *  *  *  echo -e "$(date) DEBUG: Crontab is running as $(whoami).\\nTotal passed environment variables: $(env | wc -l)" | tee /tmp/cron-debug.txt' >$CRONTAB_DIR/debug
-fi
-
-cat <<CRONTAB >$CRONTAB
+    cat <<CRONTAB >$CRONTAB
 CRON_TZ=${CRONTAB_TZ:-${TZ:-UTC}}
 HOME=${CRONTAB_HOME:-$APP_PATH}
 PATH=${CRONTAB_PATH:-$PATH}
@@ -42,19 +44,20 @@ $(if [ -n "$CRONTAB_MAILTO" ]; then echo "MAILTO=${CRONTAB_MAILTO}"; fi)
 # *  *  *  *  *  command to be executed
 CRONTAB
 
-if [ -n "$CRONTAB_SETTINGS" ]; then
-    echo -e "\n# from \$CRONTAB_SETTINGS" >>$CRONTAB
-    echo "$CRONTAB_SETTINGS" >>$CRONTAB
+    if [ -n "$CRONTAB_SETTINGS" ]; then
+        echo -e "\n# from \$CRONTAB_SETTINGS" >>$CRONTAB
+        echo "$CRONTAB_SETTINGS" >>$CRONTAB
+    fi
+
+    if [ -d "$CRONTAB_DIR" ]; then
+        for script in $(find "$CRONTAB_DIR" -type f | sort -dbfi); do
+            echo -e "\n# $(realpath $script)" >>$CRONTAB
+            cat "$script" >>$CRONTAB
+        done
+    fi
+
+    echo '' >>$CRONTAB
+
+    chmod 0600 $CRONTAB
+    debug-echo -i "Cron will run as $APP_USER.\n\n### Config:\n$(crontab -u $APP_USER -l 2>/dev/null)\n"
 fi
-
-if [ -d "$CRONTAB_DIR" ]; then
-    for script in $(find "$CRONTAB_DIR" -type f | sort -dbfi); do
-        echo -e "\n# $(realpath $script)" >>$CRONTAB
-        cat "$script" >>$CRONTAB
-    done
-fi
-
-echo '' >>$CRONTAB
-
-chmod 0600 $CRONTAB
-debug-echo -i "Cron will run as $APP_USER.\n\n### Config:\n$(crontab -u $APP_USER -l 2>/dev/null)\n"

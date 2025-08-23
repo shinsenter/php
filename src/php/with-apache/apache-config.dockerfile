@@ -2,7 +2,7 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-#      - Author:  SHIN Company <shin@shin.company>
+#      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -77,11 +77,11 @@ fi
 
 # create s6 services
 if has-cmd s6-service; then
-    s6-service apache depends php-fpm
+    s6-service apache requires php-fpm
     s6-service apache longrun '#!/usr/bin/env sh
 if [ -f /etc/apache2/envvars ]; then source /etc/apache2/envvars; fi
 \rm -f "${APACHE_PID:-/run/apache2.pid}" || true
-exec wait-for "$PHP_LISTEN" \
+exec wait-for "$(s6-service nginx depends php-fpm && echo $PHP_LISTEN)" \
     apache2 -E "$(log-path stderr)" -DFOREGROUND $(is-debug && echo '-X')
 '
 fi

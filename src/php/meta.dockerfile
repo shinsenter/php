@@ -2,7 +2,7 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-#      - Author:  SHIN Company <shin@shin.company>
+#      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -24,7 +24,7 @@ ARG BUILD_DESC="${BUILD_DESC:-(PHP) A set of prebuilt PHP Docker images that sim
 ENV DOCKER_NAME="$BUILD_NAME"
 ENV DOCKER_TAG="$BUILD_TAG"
 ENV DOCKER_DATE="$BUILD_DATE"
-ENV MAINTAINER="SHIN Company <shin@shin.company>"
+ENV MAINTAINER="Mai Nhut Tan <shin@shin.company>"
 
 LABEL org.opencontainers.image.authors="$MAINTAINER"
 LABEL org.opencontainers.image.created="$BUILD_DATE"

@@ -3,99 +3,117 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-#      - Author:  SHIN Company <shin@shin.company>
+#      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-# show usage if no arguments are passed
-if [ "$#" -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; then
-    debug-echo -i "Simple wrapper for adding s6-overlay services."
-    debug-echo -i "  Usage: ${0##*/} [service-name] [longrun|oneshot|needs|finish|down|unset] [script file path|inline script]"
-    debug-echo -l "  For example: ${0##*/} greeting oneshot \"echo 'hello world!'\""
-    debug-echo -l "  For example: ${0##*/} apache longrun /path/to/apache/start.sh"
-    debug-echo -l "  For example: ${0##*/} apache needs php-fpm"
-    exit 1
-fi
-
-# s6-overlay service directory
+# service dirs
 s6="/etc/s6-overlay/s6-rc.d"
+disabled_s6="/etc/s6-overlay/s6-rc.d.disabled"
 
-################################################################################
+# show help if no args or help flag
+case "$1" in
+""|-h|--help|help)
+    debug-echo -i "Simple wrapper for adding s6-overlay services."
+    debug-echo -i "Usage: ${0##*/} [name] [type] [script path|inline script]"
+    debug-echo -l "  Example: ${0##*/} greeting oneshot \"echo 'hello world!'\""
+    debug-echo -l "  Example: ${0##*/} apache longrun /path/to/apache/start.sh"
+    debug-echo -l "  Example: ${0##*/} apache needs php-fpm"
+    exit 1
+    ;;
+esac
+
+# slugify string: lowercase, replace invalid chars with '-', trim '-'
 slugify() {
-    echo "$1" | \
-        tr '[:upper:]' '[:lower:]' | \
-        sed -E 's/[^a-z0-9\.]+/-/g' | \
-        sed -E 's/^-+|-+$//g'
+    tr '[:upper:]' '[:lower:]' <<EOF | \
+    sed -e 's/[^a-z0-9.~][^a-z0-9.~]*/-/g' -e 's/^-*//' -e 's/-*$//'
+$1
+EOF
 }
 
+# create file with optional content
 create() {
-    local path="$1"
-    local dir="$(dirname $path)"
-
-    shift
-    mkdir -p "$dir" && chmod 0755 $dir
-    touch "$path"   && chmod ugo+x $path
-
-    if [ -f "$path" ] && [ -n "$@" ]; then echo "$@" >| "$path"; fi
+    path=$1; dir=$(dirname "$path"); shift
+    mkdir -p "$dir" && chmod 0755 "$dir"
+    : >"$path" && chmod 0755 "$path"
+    if [ "$#" -gt 0 ]; then
+        printf '%s\n' "$*" >"$path"
+    fi
 }
 
-################################################################################
-# default name
-if [ -n "$1" ]; then
-    name="$(slugify "$1")"; shift
-else
-    name="00-default"
-fi
+############################################################
+# set defaults
+[ -n "$1" ] && name=$(slugify "$1") && shift || name="00-default"
+[ -n "$1" ] && type=$1 && shift || type="oneshot"
 
-# default type
-if [ -n "$1" ]; then
-    type="$1"; shift
-else
-    type="oneshot"
-fi
+# remove '~' from name for hook
+hook_name="s6-exit-$(printf '%s' "$name" | tr -d '~')"
+svc_path="${s6}/${name}"
+deps_path="${s6}/${name}/dependencies.d"
+flag_path="${s6}/user/contents.d/${name}"
 
-# get script contents from existing file
-if [ -f "$1" ]; then set -- "$(cat $1)"; fi
+# load file content if param is a file
+[ -n "$1" ] && [ -f "$1" ] && set -- "$(cat "$1")"
 
-################################################################################
-# delete service
-if [ "$type" = "unset" ] || [ "$type" = "delete" ]; then
-    if [ -z "$1" ]; then
-        \rm -rf "${s6}/${name}" "${s6}/user/contents.d/${name}" 2>/dev/null || true
+# handle simple commands
+case "$type" in
+enable)
+    if [ -d "${disabled_s6}/${name}" ]; then
+        mv "${disabled_s6}/${name}" "${s6}/"
+        create "${flag_path}"
+    fi
+    exit $?
+    ;;
+disable)
+    mkdir -p "${disabled_s6}"
+    [ -d "${s6}/${name}" ] && mv "${s6}/${name}" "${disabled_s6}/"
+    \rm -rf "${flag_path}"
+    exit $?
+    ;;
+isset|exists|depends)
+    [ "$#" -eq 0 ] && [ -f "${svc_path}/run" ] && exit 0
+    for dep in "$@"; do
+       [ -n "$dep" ] && [ -f "${deps_path}/${dep}" ] && exit 0
+    done
+    exit 1
+    ;;
+requires|needs)
+    create "${deps_path}/$1"
+    exit $?
+    ;;
+down|finish)
+    create "${svc_path}/${type}" "$@"
+    exit $?
+    ;;
+unset|delete)
+    if [ "$#" -eq 0 ]; then
+        \rm -rf "${svc_path}" "${flag_path}" 2>/dev/null || true
     else
-        \rm -f "${s6}/${name}/dependencies.d/$1" 2>/dev/null || true
+        for dep in "$@"; do
+           [ -n "$dep" ] && \rm -f "${deps_path}/${dep}" 2>/dev/null || true
+        done
     fi
     exit 0
-fi
+    ;;
+esac
 
-################################################################################
-# add service dependencies
-if [ "$type" = "depends" ] || [ "$type" = "needs" ]; then
-    create "${s6}/${name}/dependencies.d/$1"
-    exit $?
-fi
-
-################################################################################
-# Generate S6 service files
-# See: https://github.com/just-containers/s6-overlay#writing-a-service-script
-
+############################################################
+# service generation
 debug-echo -i "Creating s6 service: ${name} (${type})."
 
-if [ "$type" = "down" ] || [ "$type" = "finish" ]; then
-    create "${s6}/${name}/${type}" "$@"
-    exit $?
-fi
-
 if [ "$type" = "oneshot" ]; then
-    create "${s6}/${name}/up"   "exec ${s6}/${name}/run"
-    create "${s6}/${name}/down" "exec hook s6-exit-${name}"
+    create "${svc_path}/up"   "exec ${svc_path}/run"
+    create "${svc_path}/down" "exec hook ${hook_name}"
 fi
 
 if [ "$type" = "longrun" ]; then
-    create "${s6}/${name}/finish" "#!/command/with-contenv sh
-exec hook s6-exit-${name}"
+    create "${svc_path}/finish" "#!/usr/bin/env sh
+exec hook ${hook_name}"
 fi
 
-create "${s6}/${name}/type" "$type"
-create "${s6}/${name}/run" "$@"
-create "${s6}/${name}/dependencies.d/base"
-create "${s6}/user/contents.d/${name}"
+# common files
+create "${svc_path}/type" "$type"
+create "${svc_path}/run" "$@"
+create "${deps_path}/base"
+create "${flag_path}"
+
+exit 0

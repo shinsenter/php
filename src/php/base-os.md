@@ -130,7 +130,7 @@ These images support the following hooks:
 | `onboot`    | Runs when the container starts or restarts.          | Send startup notification. |
 | `first-run` | Runs only the first time the container starts.       | Initialize database.       |
 | `rebooted`  | Runs whenever the container restarts.                | Check crash logs.          |
-| `migration` | Runs after `post-boot`, for migration scripts.       | Run DB migrations.         |
+| `migration` | Runs migration scripts.                              | Run DB migrations.         |
 | `onready`   | Runs after `migration`, when the app is nearly ready.| Warm up caches.            |
 
 To use hooks, create a `hooks` folder inside `$APP_PATH` and add executable files named after the hook, or in subfolders with the same name.
