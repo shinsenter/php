@@ -3,36 +3,29 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-#      - Author:  SHIN Company <shin@shin.company>
+#      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-del_flg=/etc/.fix-ownership
+marker="/etc/.fix-ownership"
 
 case "$1" in
-fix)
-    shift
-
-    if [ "$#" -eq 0 ]; then
-        \rm -rf $del_flg
-        set -- "$(app-path)"
-    fi
-
-    for target; do
-        if [ -n "$target" ] && [ -e "$target" ]; then
-            debug-echo "Fix ownership for $target."
-            {
-                find "$target" -type f -exec chown "$APP_USER:$APP_GROUP" {} + &
-                find "$target" -type d -exec chown "$APP_USER:$APP_GROUP" {} + &
-                wait
-            } 2>/dev/null || chown -R "$APP_USER:$APP_GROUP" "$target" 2>/dev/null || true
-        fi
-    done
-    ;;
-path)
-    echo $del_flg
-    ;;
-*)
-    touch $del_flg
-    if [ -n "$@" ]; then debug-echo -l "$@"; fi
-    ;;
+marker) echo "$marker"; [ "$#" -eq 0 ] && exit 0 ;;
+dirty)  touch "$marker" &>/dev/null && exit 0 ;;
+fix)    shift ;;
 esac
+
+if [ "$#" -eq 0 ]; then
+    \rm -rf $marker
+    set -- "$(app-path)"
+fi
+
+for target; do
+    if [ -n "$target" ] && [ -e "$target" ]; then
+        debug-echo "Fix ownership for $target."
+        {
+            find "$target" -type f -exec chown "$APP_USER:$APP_GROUP" {} + &
+            find "$target" -type d -exec chown "$APP_USER:$APP_GROUP" {} + &
+            wait
+        } 2>/dev/null || chown -R "$APP_USER:$APP_GROUP" "$target" 2>/dev/null || true
+    fi
+done

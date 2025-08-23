@@ -3,12 +3,12 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-#      - Author:  SHIN Company <shin@shin.company>
+#      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 conf_dir="/etc/nginx"
 
-if [[ ! -d "$conf_dir" ]]; then exit 0; fi
+if [ ! -d "$conf_dir" ]; then exit 0; fi
 
 first_arg="$1"; shift
 directive="${first_arg/#\#/}"

@@ -4,6 +4,14 @@ license_txt=/license
 user="${APP_USER:=www-data}"
 group="${APP_GROUP:=www-data}"
 
+arch="$(uname -m)"
+case "$arch" in
+    x86_64) arch=amd64 ;;
+    aarch64) arch=arm64 ;;
+    armv7l|armv7*) arch=arm/v7 ;;
+    i?86) arch=386 ;;
+esac
+
 echo "
 $([ -f "$welcome_txt" ] && cat "$welcome_txt" | sed "s#%PATH%#$welcome_txt#g")
 ---------------
@@ -11,7 +19,7 @@ $([ -f "$license_txt" ] && cat "$license_txt" | sed "s#%EMAIL%#${MAINTAINER:-shi
 
 ---------------
 Container     : ${DOCKER_NAME:-shinsenter/php} (built: ${DOCKER_DATE:-$(date +'%Y-%m-%dT%T%z')})
-Distro        : $(source /etc/os-release && echo ${PRETTY_NAME:-Unknown})
+Distro        : $(source /etc/os-release && echo ${PRETTY_NAME:-Unknown}) (arch: linux/$arch)
 Timezone      : $(date +'%Z') (GMT$(date +'%z'))
 UID / GID     : $user:$group ($(id -u $user):$(id -g $user))
 App Root      : $APP_PATH

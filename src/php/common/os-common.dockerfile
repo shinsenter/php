@@ -2,7 +2,7 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-#      - Author:  SHIN Company <shin@shin.company>
+#      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -12,11 +12,22 @@ ARG APP_GROUP=${APP_GROUP:-www-data}
 ARG APP_GID=${APP_GID:-33}
 ARG APP_USER=${APP_USER:-www-data}
 ARG APP_UID=${APP_UID:-33}
+
+ARG APT_LISTCHANGES_FRONTEND=none
+ARG DEBCONF_NOWARNINGS=yes
+ARG DEBIAN_FRONTEND=noninteractive
 ARG DOCKER_ENTRYPOINT=/usr/local/bin/docker-php-entrypoint
 
 ################################################################################
 
-ADD --link ./common/rootfs/ /
+ADD  --link ./common/rootfs/ /
+
+################################################################################
+
+# Install su-exec
+COPY --link --from=ghcr.io/shinsenter/su-exec:latest \
+    --chown=root:root --chmod=4755 \
+    /su-exec /sbin/su-exec
 
 ################################################################################
 
@@ -88,7 +99,11 @@ fi
 if [ ! -e /sbin/nologin ] && has-cmd nologin; then
     ln -nsf "$(command -v nologin)" /sbin/nologin
 fi
+EOF
 
+################################################################################
+
+RUN <<'EOF'
 # Set default debug mode
 env-default '# Default debug mode'
 env-default DEBUG '0'
@@ -100,6 +115,12 @@ env-default DEFAULT_USER  "$APP_GROUP"
 
 # Add default user and group
 ownership "$APP_GROUP" "$APP_GID" "$APP_USER" "$APP_UID"
+
+# Test su-exec
+if [ "$(web-do whoami)" != "$APP_USER" ]; then
+    echo 'Failed to install su-exec'
+    exit 1
+fi
 
 # Create default application directory
 web-mkdir "$APP_PATH"
@@ -126,6 +147,7 @@ env-default 'alias ll="ls -alh"'
 
 # Set OS default settings
 env-default '# Environment variables for OS'
+env-default APT_LISTCHANGES_FRONTEND $APT_LISTCHANGES_FRONTEND
 env-default DEBCONF_NOWARNINGS $DEBCONF_NOWARNINGS
 env-default DEBIAN_FRONTEND $DEBIAN_FRONTEND
 env-default HISTCONTROL 'ignoreboth'
@@ -153,16 +175,6 @@ env-default SMTP_USER ''
 env-default SMTP_PASSWORD ''
 env-default SMTP_AUTH ''
 env-default SMTP_TLS ''
-
-# Install su-exec
-su_exec_path=/sbin/su-exec
-su_exec_url=https://github.com/songdongsheng/su-exec/releases/download/1.3/su-exec-musl-static
-download "$su_exec_url" -o "$su_exec_path" && chmod 4755 "$su_exec_path"
-
-if ! has-cmd su-exec || [ "$(su-exec $APP_USER:$APP_GROUP whoami)" != "$APP_USER" ]; then
-    echo 'Failed to install su-exec'
-    exit 1
-fi
 
 # Add mail group
 if ! getent group mail >/dev/null 2>&1; then

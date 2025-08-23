@@ -2,7 +2,7 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-#      - Author:  SHIN Company <shin@shin.company>
+#      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -37,11 +37,11 @@ mkdir -p /etc/nginx \
 
 # create s6 services
 if has-cmd s6-service; then
-    s6-service nginx depends php-fpm
+    s6-service nginx requires php-fpm
     s6-service nginx longrun '#!/usr/bin/env sh
 NGINX_PID="${NGINX_PID:-/run/nginx.pid}"
 \rm -rf "$NGINX_PID" || true
-exec wait-for "$PHP_LISTEN" \
+exec wait-for "$(s6-service nginx depends php-fpm && echo $PHP_LISTEN)" \
     nginx -g "daemon off;user $APP_USER $APP_GROUP;pid $NGINX_PID;"
 '
 fi

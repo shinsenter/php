@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+# fix missing APP_ROOT
+if [ "$APP_ROOT" != "$APP_PATH" ]; then
+    web-mkdir "$APP_ROOT"
+fi
+
+################################################################################
+
+# create logs directory if it doesn't exist
+if [ -n "$DEFAULT_LOG_PATH" ]; then
+    web-mkdir "$(dirname "$DEFAULT_LOG_PATH")" &>/dev/null || true
+fi
+
+################################################################################
+
+# fix .htaccess to allow uri path after index.php
+if [ -f "$APP_ROOT/.htaccess" ]; then
+    debug-echo "Fix .htaccess to allow uri path after index.php."
+    sed -i 's|index\.php/|index.php?/|g' "$APP_ROOT/.htaccess" &>/dev/null
+fi

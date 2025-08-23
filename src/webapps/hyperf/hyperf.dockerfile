@@ -3,7 +3,7 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-#      - Author:  SHIN Company <shin@shin.company>
+#      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -46,14 +46,15 @@ phpaddmod protobuf swoole
 
 web-cmd hyperf 'php "$(app-index)"'
 env-default PHP_SWOOLE_USE_SHORTNAME 'off'
+env-default HTTP_SERVER_PORT "9501"
 
 if has-cmd s6-service; then
     s6-service hyperf longrun '#!/usr/bin/env sh
 exec app-exec web-do php $(app-index) start
 '
-    s6-service php-fpm unset
+    s6-service php-fpm disable
     s6-service nginx unset php-fpm
-    s6-service nginx depends hyperf
+    s6-service nginx requires hyperf
 fi
 
 EOF

@@ -11,3 +11,6 @@ fi
 # find data custom client/custom -type d -exec chmod 775 {} + && find data custom client/custom -type f -exec chmod 664 {} +
 # chmod 775 application/Espo/Modules client/modules
 # chmod 754 bin/command
+
+# service settings
+s6-service espocrm-websocket $(is-true "$ESPOCRM_CONFIG_USE_WEB_SOCKET" && echo enable || echo disable)

@@ -4,6 +4,7 @@ debug-echo "Remove PHP source."
 
 if has-cmd composer; then
     debug-echo "Remove Composer cache."
+    composer global clearcache -q || true
     composer clearcache -q || true
 fi
 

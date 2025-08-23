@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+if ! has-cmd autorun; then exit 0; fi
+if is-true "$DISABLE_AUTORUN_SCRIPTS"; then exit 0; fi
+debug-echo -d "Autorun scripts"
+exec app-exec autorun /etc/autorun.d/ /startup/ 2>&1

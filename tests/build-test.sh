@@ -3,7 +3,7 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-#      - Author:  SHIN Company <shin@shin.company>
+#      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
@@ -20,7 +20,7 @@ fi
 
 if [ "$1" = "clean" ] || [ "$1" = "clear" ]; then
     docker system prune -af --volumes
-    rm -rf "$LOG_DIR/"*
+    rm -rf "$LOG_DIR/"* /tmp/helper_cache
     clear
     shift
 fi
@@ -60,7 +60,7 @@ if [ -n "${RECURSIVE:-1}" ] && [ -n "$BUILD_FROM_IMAGE" ]; then
 
     if [ -n "$deps" ]; then
         echo "INFO: $BUILD_TAG needs $BUILD_FROM_IMAGE"
-        $0 "$1" "$deps" "${3:-latest}" "${4:-latest}"
+        $0 "$1" "$deps" "$3" "$4"
         if [ $? -ne 0 ]; then
             echo "ERROR: Failed to build $BUILD_FROM_IMAGE"
             exit 1
@@ -78,8 +78,9 @@ fi
     echo ""
     echo "-------------------------------------------------"
     echo "📦 $BUILD_DATE Build: $BUILD_TAG"
-    $command --attest type=sbom \
-         --tag "$BUILD_TAG" \
+    $command --tag "$BUILD_TAG" \
+		--provenance=true --sbom=true \
+		--attest type=sbom \
         --platform  "linux/${PLATFORM:-$(uname -m)}" \
         --build-arg DEBUG=$DEBUG \
         --build-arg BUILD_DATE=$BUILD_DATE \

@@ -113,7 +113,7 @@ services:
 
 You can optionally set the following environment variables in the container to enable certain services to run alongside the web server.
 
-> 📝 Note: you'll need to install the required packages and create the necessary configs yourself for features like Pulse or Coolify Horizon.
+> 📝 Note: you'll need to install the required packages and create the necessary configs yourself for features like Laravel Pulse, Laravel Horizon or Laravel Reverb.
 
 | Environment Variable             | Description             |
 |----------------------------------|-------------------------|
@@ -124,7 +124,7 @@ You can optionally set the following environment variables in the container to e
 | `LARAVEL_ENABLE_SCHEDULER`       | Enables supervisor service for the Laravel scheduler. Set to `0` to disable running scheduled tasks. **Default is `1`**. |
 | `LARAVEL_SCHEDULER_OPTIONS`      | Specifies additional options for the scheduler execution. |
 | `LARAVEL_ENABLE_HORIZON`         | Enables supervisor service for Laravel Horizon, a dashboard for managing queues. **Default is `0`**. |
-| `LARAVEL_HORIZON_OPTIONS`        | Options for customizing Horizon behavior (e.g., environment, queue names). |
+| `LARAVEL_HORIZON_OPTIONS`        | Options for customizing Laravel Horizon behavior (e.g., environment, queue names). |
 | `LARAVEL_ENABLE_PULSE`           | Enables supervisor service for Laravel Pulse for application performance monitoring. **Default is `0`**. |
 | `LARAVEL_PULSE_OPTIONS`          | Configuration options for Laravel Pulse (e.g., port, storage). |
 | `LARAVEL_ENABLE_REVERB`          | Enables supervisor service for Laravel Reverb for real-time WebSocket communication. **Default is `0`**. |
