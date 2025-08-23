@@ -21,3 +21,10 @@ if is-true "$LARAVEL_AUTO_MIGRATION"; then
 fi
 
 artisan storage:link || true
+
+# service settings
+s6-service queue_worker $(is-true "$LARAVEL_ENABLE_QUEUE_WORKER" && echo enable || echo disable)
+s6-service scheduler    $(is-true "$LARAVEL_ENABLE_SCHEDULER"    && echo enable || echo disable)
+s6-service horizon      $(is-true "$LARAVEL_ENABLE_HORIZON"      && echo enable || echo disable)
+s6-service pulse        $(is-true "$LARAVEL_ENABLE_PULSE"        && echo enable || echo disable)
+s6-service reverb       $(is-true "$LARAVEL_ENABLE_REVERB"       && echo enable || echo disable)

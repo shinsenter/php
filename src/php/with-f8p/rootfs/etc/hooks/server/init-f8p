@@ -3,9 +3,19 @@
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
-#      - Author:  SHIN Company <shin@shin.company>
+#      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-if ! has-cmd autorun; then exit 0; fi
-if is-true "$DISABLE_AUTORUN_SCRIPTS"; then exit 0; fi
-exec app-exec autorun /etc/autorun.d/ /startup/ 2>&1
+
+web-mkdir /config/caddy /data/caddy /etc/caddy
+
+if ! is-true "$DISABLE_GREETING" && has-cmd frankenphp; then
+    frankenphp version 2>&1
+fi
+
+if is-debug; then
+    echo -e 'export CADDY_GLOBAL_OPTIONS="$CADDY_GLOBAL_OPTIONS\ndebug"' >/etc/caddy/envvars || true
+    debug-echo -w "🐞 FrankenPHP is in DEBUG MODE 🐞"
+else
+    \rm -f /etc/caddy/envvars || true
+fi
