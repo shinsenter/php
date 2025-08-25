@@ -42,6 +42,13 @@ RUN <<'EOF'
 echo 'Install PHP extensions'
 [ -z "$DEBUG" ] || set -ex && set -e
 
+env-default LARAVEL_AUTO_MIGRATION      '1'
+env-default LARAVEL_ENABLE_QUEUE_WORKER '0'
+env-default LARAVEL_ENABLE_SCHEDULER    '0'
+env-default LARAVEL_ENABLE_HORIZON      '0'
+env-default LARAVEL_ENABLE_PULSE        '0'
+env-default LARAVEL_ENABLE_REVERB       '0'
+
 env-default PHP_SWOOLE_USE_SHORTNAME 'off'
 env-default HTTP_SERVER_PORT "9501"
 
@@ -51,7 +58,7 @@ sed -i 's/ --isolated//g' /etc/hooks/onready/*
 
 if has-cmd s6-service; then
     s6-service hypervel longrun '#!/usr/bin/env sh
-exec app-exec artisan serve $LARAVEL_SERVE_OPTIONS
+exec app-exec artisan ${LARAVEL_SERVE_COMMAND:-"serve"} $LARAVEL_SERVE_OPTIONS
 '
 
     s6-service php-fpm disable
