@@ -19,8 +19,14 @@ Timeout ${PHP_MAX_EXECUTION_TIME}
 " >/etc/apache2/conf-enabled/timeout.conf
 fi
 
-if ! is-true "$DISABLE_GREETING" && has-cmd apache2; then
-    apache2 -v 2>&1
+web-mkdir "$APACHE_LOG_DIR" "$APACHE_LOCK_DIR" "$APACHE_RUN_DIR"
+web-chown fix \
+    "$APACHE_LOG_DIR" "$APACHE_LOCK_DIR" "$APACHE_RUN_DIR" \
+    /var/lib/apache2 /var/log/apache2 /run/apache2
+
+if is-true "$ENABLE_TUNING_MPM"; then
+    debug-echo -i "Tune Apache MPM."
+    apache-mpm
 fi
 
 if is-debug; then
@@ -31,14 +37,8 @@ else
     apache-conf 'LogLevel' '${APACHE_LOG_LEVEL}'
 fi
 
-web-mkdir "$APACHE_LOG_DIR" "$APACHE_LOCK_DIR" "$APACHE_RUN_DIR"
-web-chown fix \
-    "$APACHE_LOG_DIR" "$APACHE_LOCK_DIR" "$APACHE_RUN_DIR" \
-    /var/lib/apache2 /var/log/apache2 /run/apache2
-
-if is-true "$ENABLE_TUNING_MPM"; then
-    debug-echo -i "Tune Apache MPM."
-    apache-mpm
+if ! is-true "$DISABLE_GREETING"; then
+    apache2 -v 2>&1
 fi
 
 exec with-env apache2 -t

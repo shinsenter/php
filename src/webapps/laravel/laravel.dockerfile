@@ -55,7 +55,7 @@ if has-cmd s6-service; then
     # create queue service
     s6-service queue_worker longrun '#!/usr/bin/env sh
 if is-true "$LARAVEL_ENABLE_QUEUE_WORKER" && artisan queue:work --help &>/dev/null; then
-    exec app-exec artisan queue:work $LARAVEL_QUEUE_WORKER_OPTIONS
+    exec app-exec artisan ${LARAVEL_QUEUE_WORKER_COMMAND:-"queue:work"} $LARAVEL_QUEUE_WORKER_OPTIONS
 else
     debug-echo "Service for queue worker is not activated or artisan queue:work is not supported."
     exec s6-svc -Od .
@@ -65,7 +65,7 @@ fi
     # create scheduler service
     s6-service scheduler longrun '#!/usr/bin/env sh
 if is-true "$LARAVEL_ENABLE_SCHEDULER" && artisan schedule:work --help &>/dev/null; then
-    exec app-exec artisan schedule:work $LARAVEL_SCHEDULER_OPTIONS
+    exec app-exec artisan ${LARAVEL_SCHEDULER_COMMAND:-"schedule:work"} $LARAVEL_SCHEDULER_OPTIONS
 else
     debug-echo "Service for task scheduler is not activated or artisan schedule:work is not supported."
     exec s6-svc -Od .
@@ -75,7 +75,7 @@ fi
     # create Horizon service
     s6-service horizon longrun '#!/usr/bin/env sh
 if is-true "$LARAVEL_ENABLE_HORIZON" && artisan horizon --help &>/dev/null; then
-    exec app-exec artisan horizon $LARAVEL_HORIZON_OPTIONS
+    exec app-exec artisan ${LARAVEL_HORIZON_COMMAND:-"horizon"} $LARAVEL_HORIZON_OPTIONS
 else
     debug-echo "Service for Laravel Horizon is not activated or artisan horizon is not supported."
     exec s6-svc -Od .
@@ -85,7 +85,7 @@ fi
     # create Pulse service
     s6-service pulse longrun '#!/usr/bin/env sh
 if is-true "$LARAVEL_ENABLE_PULSE" && artisan pulse:check --help &>/dev/null; then
-    exec app-exec artisan pulse:check $LARAVEL_PULSE_OPTIONS
+    exec app-exec artisan ${LARAVEL_PULSE_COMMAND:-"pulse:check"} $LARAVEL_PULSE_OPTIONS
 else
     debug-echo "Service for Laravel Pulse is not activated or artisan pulse:check is not supported."
     exec s6-svc -Od .
@@ -95,7 +95,7 @@ fi
     # create Reverb service
     s6-service reverb longrun '#!/usr/bin/env sh
 if is-true "$LARAVEL_ENABLE_REVERB" && artisan reverb:start --help &>/dev/null; then
-    exec app-exec artisan reverb:start $(is-debug && echo --debug) $LARAVEL_REVERB_OPTIONS
+    exec app-exec artisan ${LARAVEL_REVERB_COMMAND:-"reverb:start"} reverb:start $(is-debug && echo --debug) $LARAVEL_REVERB_OPTIONS
 else
     debug-echo "Service for Laravel Reverb is not activated or artisan reverb:start is not supported."
     exec s6-svc -Od .
