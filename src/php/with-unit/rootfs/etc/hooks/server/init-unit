@@ -15,10 +15,6 @@ else
     unitd_bin="$(command -v unitd)"
 fi
 
-if ! is-true "${DISABLE_GREETING:-}" && [ -x "$unitd_bin" ]; then
-    "$unitd_bin" --version 2>&1 | grep version || true
-fi
-
 configtest() {
     download -X GET --unix-socket "$unit_socket" http://localhost/ || true
 }
@@ -69,4 +65,8 @@ if is-debug; then
     init_unit || true
 else
     init_unit &>/dev/null || true
+fi
+
+if ! is-true "${DISABLE_GREETING:-}" && [ -x "$unitd_bin" ]; then
+    "$unitd_bin" --version 2>&1 | grep version || true
 fi
