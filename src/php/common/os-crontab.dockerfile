@@ -5,7 +5,6 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 # install crontab
 RUN <<'EOF'
 echo 'Configure base crontab'

@@ -6,62 +6,122 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-INSTALL="0"
-CERT="domain.crt"
-KEY="domain.key"
-DAYS=365
-LENGTH=2048
+set -eu
 
-while [ "$#" -gt 0 ]; do
-    case $1 in
-    -l | -length)
-        shift
-        LENGTH="$1"
-        ;;
-    -c | -cert-file)
-        shift
-        CERT="$1"
-        ;;
-    -k | -key-file)
-        shift
-        KEY="$1"
-        ;;
-    -d | -days)
-        shift
-        DAYS="$1"
-        ;;
-    -i | -install)
-        INSTALL="1"
-        ;;
-    *)
-        DOMAINS="${DOMAINS}${DOMAINS:+,}$1"
-        ;;
-    esac
-    shift
+# defaults
+cert_file="domain.crt"
+key_file="domain.key"
+days=365
+dhparam_bits=2048
+
+usage() {
+  cat <<EOF
+Usage: ${0##*/} [options] domain1 [domain2 ...]
+
+Options:
+  -c, --cert-file  Certificate output file (default: $cert_file)
+  -k, --key-file   Private key output file (default: $key_file)
+  -d, --days       Certificate validity in days (default: $days)
+  -l, --length     DH parameters length in bits (default: $dhparam_bits)
+  -h, --help       Show this help message
+
+Example:
+  ${0##*/} -d 365 -l 1024 -c /etc/ssl/site/server.crt -k /etc/ssl/site/server.key localhost 127.0.0.1
+EOF
+  exit 0
+}
+
+# parse options
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -c|--cert-file) cert_file=$2; shift 2 ;;
+    -k|--key-file)  key_file=$2; shift 2 ;;
+    -d|--days)      days=$2; shift 2 ;;
+    -l|--length)    dhparam_bits=$2; shift 2 ;;
+    -h|--help)      usage ;;
+    --) shift; break ;;
+    -*) debug-echo -e "Invalid option: $1" >&2; usage ;;
+    *) break ;;
+  esac
 done
 
-if [ -z "$DOMAINS" ]; then
-    debug-echo -i "Usage: ${0##*/} example.com www.example.com [-c domain.crt] [-k domain.key] [-d 365] [-l 4096]"
-    exit 1
+if [ $# -lt 1 ]; then
+  debug-echo -e "Error: at least one domain must be specified." >&2
+  usage
 fi
 
-mkdir -p "$(dirname $CERT)" "$(dirname $KEY)"
-\rm -rf $CERT $KEY
+domains="$@"
+primary="$1"
 
-debug-echo -i "Generate self-signed CA for $DOMAINS."
-openssl dhparam -dsaparam -out "$(dirname $CERT)"/dhparam.pem $LENGTH
-openssl req -nodes -x509 -days $DAYS \
-    -newkey rsa:$LENGTH -sha256 \
-    -keyout $KEY -out $CERT \
-    -subj "/CN=${DOMAINS}"
+# ensure output dir if absolute path
+mkdir_p_if_abs() {
+  case "$1" in
+    /*) dir=$(dirname "$1"); [ -d "$dir" ] || mkdir -p "$dir" ;;
+  esac
+}
+mkdir_p_if_abs "$cert_file"
+mkdir_p_if_abs "$key_file"
 
-if [ "$INSTALL" = "1" ]; then
-    if [ -f /etc/ssl/certs/ca-certificates.crt ]; then
-        ln -nsf $(realpath -mqs $CERT) /etc/ssl/certs/
-    elif [ -d /usr/local/share/ca-certificates ]; then
-        ln -nsf $(realpath -mqs $CERT) /usr/local/share/ca-certificates/
-    fi
-    if has-cmd update-ca-certificates; then
-        update-ca-certificates
-    fi
+cert_dir=$(dirname "$cert_file")
+dhparam_file="$cert_dir/dhparam.pem"
+
+debug-echo "Using:"
+debug-echo "  Domains: $domains"
+debug-echo "  Cert:    $cert_file"
+debug-echo "  Key:     $key_file"
+debug-echo "  Days:    $days"
+debug-echo "  DHParam: $dhparam_file ($dhparam_bits bits)"
+
+# create dhparam if missing
+if [ ! -f "$dhparam_file" ]; then
+  debug-echo -i "Creating DH parameters..."
+  openssl dhparam -out "$dhparam_file" "$dhparam_bits"
+  chmod 644 "$dhparam_file"
 fi
+
+# cleanup san.cnf
+san_conf="$cert_dir/san.cnf"
+cleanup() { rm -f "$san_conf"; }
+trap cleanup EXIT
+
+# build SAN config
+{
+  echo "[req]"
+  echo "distinguished_name=dn"
+  echo "x509_extensions=v3_req"
+  echo "prompt=no"
+  echo
+  echo "[dn]"
+  echo "CN=$primary"
+  echo
+  echo "[v3_req]"
+  echo "keyUsage=digitalSignature,keyEncipherment"
+  echo "extendedKeyUsage=serverAuth"
+  echo "subjectAltName=@alt"
+  echo
+  echo "[alt]"
+  n=1
+  for d in $domains; do
+    case "$d" in
+      *:*)        echo "IP.$n = $d" ;;   # ipv6
+      *[!0-9.]* ) echo "DNS.$n = $d" ;;  # dns
+      * )         echo "IP.$n = $d" ;;   # ipv4
+    esac
+    n=$((n+1))
+  done
+} > "$san_conf"
+
+# generate ECDSA key
+debug-echo -i "Generating ECDSA key (prime256v1)..."
+openssl ecparam -name prime256v1 -genkey -noout -out "$key_file"
+
+# generate self-signed certificate
+debug-echo -i "Generating self-signed certificate..."
+openssl req -x509 -new -sha256 \
+  -key "$key_file" -out "$cert_file" \
+  -days "$days" -config "$san_conf" -extensions v3_req
+
+debug-echo "Done. Output:"
+debug-echo "  Cert:    $cert_file"
+debug-echo "  Key:     $key_file"
+debug-echo "  DHParam: $dhparam_file"
