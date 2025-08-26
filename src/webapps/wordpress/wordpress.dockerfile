@@ -6,14 +6,12 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 # Enable SBOM attestations
 # See: https://docs.docker.com/build/attestations/sbom/
 ARG BUILDKIT_SBOM_SCAN_CONTEXT=true
 ARG BUILDKIT_SBOM_SCAN_STAGE=true
 
 ################################################################################
-
 ARG BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-shinsenter/phpfpm-apache}
 ARG BUILD_TAG_PREFIX=${BUILD_TAG_PREFIX:-}
 
@@ -22,14 +20,11 @@ ARG PHP_VARIANT=${PHP_VARIANT:-}
 
 FROM ${BUILD_FROM_IMAGE}:${BUILD_TAG_PREFIX}php${PHP_VERSION}${PHP_VARIANT}
 ARG  DEBUG
-ONBUILD RUN hook onbuild
 
 ################################################################################
-
 ADD --link ./rootfs/ /
 
 ################################################################################
-
 # https://wordpress.org/documentation/category/installation/
 ENV DOCUMENT_ROOT=""
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
@@ -43,7 +38,6 @@ ENV PHP_POST_MAX_SIZE="48M"
 ENV PHP_UPLOAD_MAX_FILESIZE="32M"
 
 ################################################################################
-
 # installs wp-cli
 ARG WPCLI_URL=https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 ARG WPCLI_PATH=/usr/local/bin/wp-cli
@@ -69,7 +63,7 @@ web-cmd wp "$WPCLI_PATH --allow-root"
 EOF
 
 ################################################################################
-
 INCLUDE ./meta
+ONBUILD RUN hook onbuild
 
 ################################################################################

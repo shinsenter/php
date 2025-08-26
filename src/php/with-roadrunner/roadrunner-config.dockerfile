@@ -5,11 +5,9 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 ADD --link ./with-roadrunner/rootfs/ /
 
 ################################################################################
-
 RUN <<'EOF'
 
 # create s6 services

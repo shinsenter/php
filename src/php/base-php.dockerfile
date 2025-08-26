@@ -6,14 +6,12 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 # Enable SBOM attestations
 # See: https://docs.docker.com/build/attestations/sbom/
 ARG BUILDKIT_SBOM_SCAN_CONTEXT=true
 ARG BUILDKIT_SBOM_SCAN_STAGE=true
 
 ################################################################################
-
 ARG BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-php}
 ARG PHP_VERSION=${PHP_VERSION:-8.4}
 ARG PHP_VARIANT=${PHP_VARIANT:-fpm-alpine}
@@ -26,14 +24,12 @@ ARG PHP_VERSION=${PHP_VERSION:-8.4}
 ENV PHP_VERSION=${PHP_VERSION//-rc/}
 
 ################################################################################
-
 INCLUDE ./common/os-common
 INCLUDE ./common/os-crontab
 INCLUDE ./common/php-extensions
 INCLUDE ./common/php-ini-directives
 
 ################################################################################
-
 INCLUDE ./meta
 
 ################################################################################

@@ -5,11 +5,9 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 ADD --link ./with-unit/rootfs/ /
 
 ################################################################################
-
 RUN <<'EOF'
 echo 'Configure Nginx Unit'
 

@@ -11,9 +11,10 @@ if [ -f "$APP_PATH/.env" ]; then
 fi
 
 if is-true "$LARAVEL_AUTO_MIGRATION"; then
-    MIGRATION_CMD='artisan migrate --force -n'
+    LARAVEL_AUTO_MIGRATION_COMMAND="${LARAVEL_AUTO_MIGRATION_COMMAND:-"migrate"}"
+    MIGRATION_CMD="artisan $LARAVEL_AUTO_MIGRATION_COMMAND --force -n"
 
-    if artisan migrate --help | grep -qF -- '--isolated'; then
+    if artisan "$LARAVEL_AUTO_MIGRATION_COMMAND" --help | grep -qF -- '--isolated'; then
         MIGRATION_CMD="$MIGRATION_CMD --isolated"
     fi
 

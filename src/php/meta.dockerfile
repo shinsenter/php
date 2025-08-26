@@ -5,7 +5,6 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 # ARG BUILDPLATFORM
 # ARG BUILDOS
 # ARG BUILDARCH

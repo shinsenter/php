@@ -5,18 +5,15 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 ADD --link ./with-f8p/rootfs/ /
 
 ################################################################################
-
 # See https://caddyserver.com/docs/conventions#file-locations for details
 ENV GODEBUG="cgocheck=0"
 ENV XDG_CONFIG_HOME="/config"
 ENV XDG_DATA_HOME="/data"
 
 ################################################################################
-
 RUN <<'EOF'
 echo 'Configure FrankenPHP'
 

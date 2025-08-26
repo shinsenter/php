@@ -6,7 +6,6 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 if has-cmd php && has-cmd php-envvars; then
     debug-echo "Generate PHP config."
     if is-true "$ALLOW_RUNTIME_PHP_ENVVARS"; then

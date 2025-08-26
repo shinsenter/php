@@ -6,14 +6,12 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 # Enable SBOM attestations
 # See: https://docs.docker.com/build/attestations/sbom/
 ARG BUILDKIT_SBOM_SCAN_CONTEXT=true
 ARG BUILDKIT_SBOM_SCAN_STAGE=true
 
 ################################################################################
-
 ARG BUILD_FROM_IMAGE=${BUILD_FROM_IMAGE:-shinsenter/wordpress}
 ARG BUILD_TAG_PREFIX=${BUILD_TAG_PREFIX:-}
 
@@ -22,14 +20,11 @@ ARG PHP_VARIANT=${PHP_VARIANT:-}
 
 FROM ${BUILD_FROM_IMAGE}:${BUILD_TAG_PREFIX}php${PHP_VERSION}${PHP_VARIANT}
 ARG  DEBUG
-ONBUILD RUN hook onbuild
 
 ################################################################################
-
 ADD --link ./rootfs/ /
 
 ################################################################################
-
 # https://bedrock.org/documentation/category/installation/
 ENV DOCUMENT_ROOT="web"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
@@ -38,11 +33,10 @@ RUN env-default ENABLE_CRONTAB   '$(is-true "$DISABLE_WP_CRON" && echo 0 || echo
 RUN env-default CRONTAB_SETTINGS '*/5 * * * * curl http://localhost/wp/wp-cron.php 2>&1'
 
 ################################################################################
-
 RUN wp-cli --allow-root package install aaemnnosttv/wp-cli-dotenv-command:^2.0 || true
 
 ################################################################################
-
 INCLUDE ./meta
+ONBUILD RUN hook onbuild
 
 ################################################################################
