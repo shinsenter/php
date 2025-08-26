@@ -22,7 +22,6 @@ debian() {
 }
 
 ################################################################################
-
 if has-cmd apk; then
     debug-echo -w "Removing" $APK_PACKAGES $@
     alpine $APK_PACKAGES "$@" 2>&1 | while IFS= read -r line || [ -n "$line" ]; do

@@ -36,7 +36,7 @@ create() {
     mkdir -p "$dir" && chmod 0755 "$dir"
     : >"$path" && chmod 0755 "$path"
     if [ "$#" -gt 0 ]; then
-        printf '%s\n' "$*" >"$path"
+        printf '%b\n' "$*" >"$path"
     fi
 }
 

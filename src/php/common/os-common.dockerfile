@@ -5,7 +5,6 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 # Set defaults from build arguments
 ARG APP_PATH=${APP_PATH:-/var/www/html}
 ARG APP_GROUP=${APP_GROUP:-www-data}
@@ -19,18 +18,15 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG DOCKER_ENTRYPOINT=/usr/local/bin/docker-php-entrypoint
 
 ################################################################################
-
 ADD  --link ./common/rootfs/ /
 
 ################################################################################
-
 # Install su-exec
 COPY --link --from=ghcr.io/shinsenter/su-exec:latest \
     --chown=root:root --chmod=4755 \
     /su-exec /sbin/su-exec
 
 ################################################################################
-
 # Set APP_PATH, APP_USER and APP_GROUP
 ENV APP_PATH="$APP_PATH"
 ENV APP_USER="$APP_USER"
@@ -43,7 +39,6 @@ ENV PS1="\\u@\\h:\\w\\$ "
 ENV PRESQUASH_SCRIPTS="cleanup"
 
 ################################################################################
-
 RUN <<'EOF'
 sources="/etc/apt/sources.list"
 if [ -f "$sources" ]; then
@@ -63,7 +58,6 @@ pkg-add upgrade
 EOF
 
 ################################################################################
-
 # Temporary workaround to fix Let's Encrypt CA certificates for old distros
 # https://github.com/mlocati/docker-php-extension-installer/pull/450
 # https://github.com/mlocati/docker-php-extension-installer/pull/451
@@ -73,7 +67,6 @@ RUN --mount=type=bind,from=mlocati/php-extension-installer:latest,source=/usr/bi
     /usr/bin/install-php-extensions @fix_letsencrypt 2>&1 | grep -vF StandW || true
 
 ################################################################################
-
 RUN <<'EOF'
 echo 'Configure OS middlewares'
 [ -z "$DEBUG" ] || set -ex && set -e
@@ -102,7 +95,6 @@ fi
 EOF
 
 ################################################################################
-
 RUN <<'EOF'
 # Set default debug mode
 env-default '# Default debug mode'
@@ -128,13 +120,11 @@ web-mkdir "$APP_PATH"
 EOF
 
 ################################################################################
-
 # Run onbuild hook
 ONBUILD RUN hook onbuild
 RUN DOCKER_NAME="shinsenter/***" hook onbuild
 
 ################################################################################
-
 RUN <<'EOF'
 echo 'Configure base OS'
 [ -z "$DEBUG" ] || set -ex && set -e
@@ -193,9 +183,9 @@ if has-cmd msmtp-wrapper; then
 fi
 
 # Create self-signed certificate
-mkcert -days 3652 -install \
-    -cert-file /etc/ssl/site/server.crt \
-    -key-file  /etc/ssl/site/server.key \
+mkcert --days 3652 \
+    --cert-file /etc/ssl/site/server.crt \
+    --key-file  /etc/ssl/site/server.key \
     localhost
 
 # Backup entrypoint
@@ -204,7 +194,6 @@ if [ -f "$DOCKER_ENTRYPOINT" ]; then mv -f "$DOCKER_ENTRYPOINT" /init; fi
 EOF
 
 ################################################################################
-
 # Add new entrypoint
 COPY --chmod=4755 --link ./common/docker-php-entrypoint "$DOCKER_ENTRYPOINT"
 

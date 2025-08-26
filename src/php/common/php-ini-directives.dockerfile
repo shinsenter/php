@@ -5,7 +5,6 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 # Here are php.ini directives we can set to configure our PHP setup
 # See: https://www.php.net/manual/en/ini.list.php
 # See: https://www.php.net/manual/en/install.fpm.configuration.php

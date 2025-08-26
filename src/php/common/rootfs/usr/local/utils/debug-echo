@@ -35,25 +35,23 @@ while [ "$#" -gt 0 ]; do
 done
 
 ################################################################################
-
 if [ "$debug_only" -eq 1 ] && ! is-debug; then
     exit 0
 fi
 
 # format string
 if [ "$ansi" -eq 1 ]; then
-    format="\033[${ansi_code}m%s%s\033[0m\n"
+    format="\033[${ansi_code}m%s%b\033[0m\n"
 else
-    format="%s%s\n"
+    format="%s%b\n"
 fi
 
 ################################################################################
-
 # print with color
 _color() {
     text="$1"
     case "$text" in
-        *$'\033['*) printf  "%s%s\n" "$prefix" "$text" ;;
+        *$'\033['*) printf  "%s%b\n" "$prefix" "$text" ;;
         *)          printf "$format" "$prefix" "$text" ;;
     esac
 }

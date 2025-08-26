@@ -6,7 +6,6 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 # disable TLSv1.3 when not supported
 if nginx-has-error 'invalid value "TLSv1.3"'; then
     echo 'Disable TLSv1.3 because it is not supported in this Nginx version'

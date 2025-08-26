@@ -17,7 +17,6 @@ if [ -n "$SUPERVISOR_PHP_COMMAND" ]; then
 fi
 
 ################################################################################
-
 set -e
 
 # set timezone
@@ -35,7 +34,6 @@ web-mkdir "/var/www" "$(app-path)"
 cd "$(app-path)"
 
 ################################################################################
-
 # container boot hooks
 FIRST_RUN_FLAG="/var/local/first-run"
 if [ ! -e "$FIRST_RUN_FLAG" ]; then
@@ -48,7 +46,6 @@ fi
 hook onboot
 
 ################################################################################
-
 # load the $ENV in ~/.bashrc
 env_check='if [ -f "$ENV" ]; then source "$ENV" &>/dev/null; fi'
 bashrc=~/.bashrc
@@ -71,7 +68,6 @@ if is-true "$ALLOW_RUNTIME_PHP_ENVVARS" && has-cmd php && has-cmd php-envvars; t
 fi
 
 ################################################################################
-
 # fallback for docker-php-entrypoint
 if [ -x "/init" ]; then set -- /init "$@"; fi
 

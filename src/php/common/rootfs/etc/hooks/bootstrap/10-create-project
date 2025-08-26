@@ -15,7 +15,6 @@ has_composer="$(has-cmd composer && echo 1 || echo 0)"
 just_created=0
 
 ################################################################################
-
 install_deps() {
     [ -f "$CONF_PATH" ] || return 0
 
@@ -82,12 +81,10 @@ download_and_extract() {
 }
 
 ################################################################################
-
 web-mkdir "$APP_PATH" "$COMPOSER_HOME"
 cd "$APP_PATH"
 
 ################################################################################
-
 # case 1: project directory is empty
 if [ -z "$(ls -A "$APP_PATH")" ]; then
     hook pre-create-project
@@ -153,7 +150,6 @@ else
 fi
 
 ################################################################################
-
 vendor_dir="$APP_PATH/$(composer_exec config vendor-dir --quiet --absolute 2>/dev/null)"
 
 # case 2: project exists but vendor missing
@@ -179,7 +175,6 @@ if ! is-true "$DISABLE_AUTORUN_COMPOSER_INSTALL" && [ "$just_created" -ne 1 ]; t
 fi
 
 ################################################################################
-
 # optional autoload optimization
 if is-true "${COMPOSER_OPTIMIZE_AUTOLOADER:-}"; then
     allow_plugins

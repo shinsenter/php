@@ -5,7 +5,6 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 # Copy files from the official image
 COPY --link --from=frankenphp /usr/local/lib/libwatcher* /usr/local/lib/
 COPY --link --from=frankenphp /usr/local/bin/frankenphp /usr/local/bin/
@@ -15,7 +14,6 @@ COPY --link --from=frankenphp /etc/caddy /etc/caddy
 COPY --link --from=frankenphp /etc/frankenphp /etc/frankenphp
 
 ################################################################################
-
 # Install FrankenPHP
 RUN <<'EOF'
 echo 'Install FrankenPHP'

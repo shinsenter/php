@@ -28,7 +28,6 @@ done
 # packages="$(echo "$packages" | sed 's/^ *//')"
 
 ################################################################################
-
 alpine() {
     if [ "$#" -gt 0 ] || [ "$upgrade" -eq 1 ]; then
         \rm -rf /var/cache/apk && mkdir /var/cache/apk
@@ -57,7 +56,6 @@ debian() {
 }
 
 ################################################################################
-
 if has-cmd apk; then
     debug-echo -i "Installing" $APK_PACKAGES $packages
     alpine $APK_PACKAGES $packages 2>&1 | while IFS= read -r line || [ -n "$line" ]; do
