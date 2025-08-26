@@ -37,6 +37,7 @@ alpine() {
         apk upgrade --available || true
     fi
     if [ "$#" -gt 0 ]; then
+        debug-echo -i "Installing $*"
         apk add "$@"
     fi
 }
@@ -51,20 +52,19 @@ debian() {
         apt-get $options -qq full-upgrade || true
     fi
     if [ "$#" -gt 0 ]; then
+        debug-echo -i "Installing $*"
         apt-get $options -q --no-install-recommends --no-install-suggests install "$@"
     fi
 }
 
 ################################################################################
 if has-cmd apk; then
-    debug-echo -i "Installing" $APK_PACKAGES $packages
     alpine $APK_PACKAGES $packages 2>&1 | while IFS= read -r line || [ -n "$line" ]; do
-        echo "$line" | debug-echo -l
+        echo "$line" | debug-echo -m
     done
 fi
 if has-cmd apt; then
-    debug-echo -i "Installing" $APT_PACKAGES $packages
     debian $APT_PACKAGES $packages 2>&1 | while IFS= read -r line || [ -n "$line" ]; do
-        echo "$line" | grep -v ' warning:\|GPG error' | debug-echo -l
+        echo "$line" | grep -v ' warning:\|GPG error' | debug-echo -m
     done
 fi

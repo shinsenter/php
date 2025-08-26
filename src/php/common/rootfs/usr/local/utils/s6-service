@@ -36,7 +36,7 @@ create() {
     mkdir -p "$dir" && chmod 0755 "$dir"
     : >"$path" && chmod 0755 "$path"
     if [ "$#" -gt 0 ]; then
-        printf '%b\n' "$*" >"$path"
+        printf '%s\n' "$@" >"$path"
     fi
 }
 
@@ -110,9 +110,21 @@ if [ "$type" = "longrun" ]; then
 exec hook ${hook_name}"
 fi
 
+if [ -n "$@" ]; then
+    content="$@"
+else
+    if [ -t 0 ]; then
+        content=""
+    else
+        while IFS= read -r line || [ -n "$line" ]; do
+            content="${content}${content:+$'\n'}${line}"
+        done
+    fi
+fi
+
 # common files
 create "${svc_path}/type" "$type"
-create "${svc_path}/run" "$@"
+create "${svc_path}/run"  "$content"
 create "${deps_path}/base"
 create "${flag_path}"
 

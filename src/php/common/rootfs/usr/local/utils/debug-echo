@@ -28,7 +28,8 @@ while [ "$#" -gt 0 ]; do
         -s|--success)  debug_only=0; ansi_code="32" ;;
         -i|--info)     debug_only=0; ansi_code="34" ;;
         -l|--log)      debug_only=0; ansi_code="90" ;;
-        -d|--debug)    prefix="■ " ;;
+        -m|--muted)    debug_only=0; ansi_code="2;90" ;;
+        -d|--debug)    prefix="■ "; ansi_code="90" ;;
         *) [ -z "$msg" ] && msg="$1" || msg="$msg $1" ;;
     esac
     shift

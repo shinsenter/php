@@ -73,7 +73,7 @@ echo 'Configure OS middlewares'
 
 # Install common packages
 APK_PACKAGES='findutils ncurses ncurses-terminfo run-parts shadow tar tzdata unzip xz' \
-APT_PACKAGES='ncurses-base ncurses-bin procps xz-utils' \
+APT_PACKAGES='ncurses-base ncurses-bin procps vim-tiny xz-utils' \
 pkg-add bash ca-certificates coreutils curl htop less openssl msmtp
 
 # Setuid bit for some scripts
