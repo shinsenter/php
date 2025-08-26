@@ -12,6 +12,7 @@ ENV_PATH="$APP_PATH/.env"
 CONF_PATH="$APP_PATH/composer.json"
 
 has_composer="$(has-cmd composer && echo 1 || echo 0)"
+just_created=0
 
 ################################################################################
 
@@ -145,6 +146,8 @@ if [ -z "$(ls -A "$APP_PATH")" ]; then
 
     hook post-create-project
     web-chown fix "$APP_PATH"
+
+    just_created=1
 else
     debug-echo "Skip project creation because $APP_PATH is not empty."
 fi
@@ -154,7 +157,7 @@ fi
 vendor_dir="$APP_PATH/$(composer_exec config vendor-dir --quiet --absolute 2>/dev/null)"
 
 # case 2: project exists but vendor missing
-if ! is-true "$DISABLE_AUTORUN_COMPOSER_INSTALL" && ! hook-loaded post-create-project; then
+if ! is-true "$DISABLE_AUTORUN_COMPOSER_INSTALL" && [ "$just_created" -ne 1 ]; then
     if [ -f "$CONF_PATH" ]; then
         if [ ! -d "$vendor_dir" ] || [ ! -e "$vendor_dir/composer/ClassLoader.php" ]; then
             install_deps
