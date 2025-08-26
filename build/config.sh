@@ -424,13 +424,12 @@ if [ -n "$PHP_VERSION" ]; then
             expand_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-$suffix"
         }
     elif [ "${APP#app-}" != "$APP" ]; then
-        SERVER_SUFFIX="${PREFER_SERVER:+-$PREFER_SERVER}"
-        add_tag "$BUILD_NAME:php$PHP_VERSION$SERVER_SUFFIX$SUFFIX"
-
         if [ -z "$PREFER_SERVER" ] || [ "$PREFER_SERVER" = "$USE_SERVER" ]; then
             add_tag "$BUILD_NAME:php$PHP_VERSION$SUFFIX"
             [ "$PHP_VERSION" = "$LATEST_PHP" ] && add_tag "$BUILD_NAME:latest$SUFFIX"
         fi
+        SERVER_SUFFIX="${PREFER_SERVER:+-$PREFER_SERVER}"
+        add_tag "$BUILD_NAME:php$PHP_VERSION$SERVER_SUFFIX$SUFFIX"
     fi
 
     # Alias major versions

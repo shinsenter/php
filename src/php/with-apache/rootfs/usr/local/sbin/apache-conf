@@ -6,7 +6,6 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 conf_dir="/etc/apache2"
 disable="$( [ "${1:0:1}" = "#" ] && echo "# " || echo "" )"
 name="${1/#/}"; shift

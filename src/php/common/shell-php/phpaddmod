@@ -72,7 +72,7 @@ with-env install-php-extensions $new_mods | while IFS= read -r line || [ -n "$li
             printf '%s' "${line##*:}" | xargs printf '%s' > "$pid"
             ;;
     esac
-done | grep -vF StandW | debug-echo -l
+done | grep -vF StandW | debug-echo -m
 
 exit_code=$?
 

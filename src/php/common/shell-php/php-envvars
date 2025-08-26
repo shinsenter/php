@@ -19,7 +19,6 @@ define('DEBUG_MODE', (bool) trim((string) shell_exec('is-debug && echo 1 || echo
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
 ################################################################################
-
 function dd()
 {
     $data = func_get_args();
@@ -57,7 +56,6 @@ function run($command)
 }
 
 ################################################################################
-
 /**
  * @class  DockerPHP
  * @author Mai Nhut Tan <shin@shin.company>
@@ -405,7 +403,6 @@ final class DockerPHP
 }
 
 ################################################################################
-
 date_default_timezone_set(empty($_ENV['TZ']) ? 'UTC' : $_ENV['TZ']);
 
 $arguments = $argv;
@@ -441,5 +438,4 @@ foreach ($arguments as $action) {
 #     Please respect the intellectual effort that went into creating them.
 #     If you use or copy these ideas, proper credit would be appreciated.
 ################################################################################
-
 DockerPHP

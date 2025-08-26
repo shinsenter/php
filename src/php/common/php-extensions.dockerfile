@@ -5,7 +5,6 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-
 # Get IPE script
 # See: https://github.com/mlocati/docker-php-extension-installer
 # ARG IPE_SOURCE=https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions
@@ -16,17 +15,14 @@ COPY --link --from=mlocati/php-extension-installer:latest --chmod=755 \
     /usr/local/bin/
 
 ################################################################################
-
 # Add Composer to the PATH
 ENV COMPOSER_HOME="/.composer"
 ENV COMPOSER_ALLOW_SUPERUSER="1"
 
 ################################################################################
-
 ADD --link ./common/shell-php/ /usr/local/utils/
 
 ################################################################################
-
 RUN <<'EOF'
 echo 'Install Composer and PHP extensions'
 [ -z "$DEBUG" ] || set -ex && set -e
