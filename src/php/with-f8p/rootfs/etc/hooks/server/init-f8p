@@ -7,7 +7,7 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-web-mkdir /config/caddy /data/caddy /etc/caddy
+web-chown fix /config/caddy /data/caddy /etc/caddy /etc/ssl/site
 
 if is-debug; then
     echo -e 'export CADDY_GLOBAL_OPTIONS="$CADDY_GLOBAL_OPTIONS\ndebug"' >/etc/caddy/envvars || true

@@ -9,6 +9,10 @@
 # Copy files from the official image
 COPY --link --from=frankenphp /usr/local/lib/libwatcher* /usr/local/lib/
 COPY --link --from=frankenphp /usr/local/bin/frankenphp /usr/local/bin/
+COPY --link --from=frankenphp /config/caddy /config/caddy
+COPY --link --from=frankenphp /data/caddy /data/caddy
+COPY --link --from=frankenphp /etc/caddy /etc/caddy
+COPY --link --from=frankenphp /etc/frankenphp /etc/frankenphp
 
 ################################################################################
 
@@ -22,11 +26,9 @@ APK_PACKAGES='libstdc++ mailcap libcap' \
 APT_PACKAGES='libstdc++6 mailcap libcap2-bin' \
 pkg-add && ldconfig /usr/local/lib
 
-mkdir -p /config/caddy /data/caddy /etc/caddy
+mkdir -p /config/caddy /data/caddy /etc/caddy /etc/frankenphp
 
-if ! has-cmd frankenphp; then
-    exit 1
-fi
+! has-cmd frankenphp && exit 1
 
 setcap cap_net_bind_service=+ep "$(command -v frankenphp)"
 ln -nsf "$(command -v frankenphp)" /usr/local/sbin/caddy

@@ -34,7 +34,7 @@ fi
 if has-cmd s6-service; then
     s6-service frankenphp longrun '#!/usr/bin/env sh
 if [ -f /etc/caddy/envvars ]; then source /etc/caddy/envvars; fi
-exec app-exec with-env frankenphp run \
+exec app-exec with-env web-do frankenphp run \
     --config /etc/caddy/Caddyfile \
     --adapter caddyfile
 '
