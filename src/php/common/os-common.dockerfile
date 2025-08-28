@@ -186,7 +186,7 @@ fi
 mkcert --days 3652 \
     --cert-file /etc/ssl/site/server.crt \
     --key-file  /etc/ssl/site/server.key \
-    localhost
+    localhost 127.0.0.1 ::1
 
 # Backup entrypoint
 if [ -f "$DOCKER_ENTRYPOINT" ]; then mv -f "$DOCKER_ENTRYPOINT" /init; fi
