@@ -82,7 +82,7 @@ fi
 		--provenance=true --sbom=true \
 		--attest type=sbom \
         --platform  "linux/${PLATFORM:-$(uname -m)}" \
-        --build-arg DEBUG=$DEBUG \
+        --build-arg DEBUG=$BUILD_DEBUG \
         --build-arg BUILD_DATE=$BUILD_DATE \
         --build-arg BUILD_FROM_IMAGE=$BUILD_FROM_IMAGE \
         --build-arg BUILD_NAME=$BUILD_NAME \
