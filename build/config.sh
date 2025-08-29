@@ -589,14 +589,6 @@ if [ -n "$PHP_VERSION" ]; then
 fi
 
 ################################################################################
-# Temporary fix for Debian 13 (Trixie)
-# See: https://github.com/mlocati/docker-php-extension-installer/issues/1141
-################################################################################
-if [ "$OS_BASE" = "debian" ] && [ "$BUILD_FROM_IMAGE" = "$BASE_REPO" ] && is_active_version "$PHP_VERSION"; then
-    PHP_VARIANT="$PHP_VARIANT-bookworm"
-fi
-
-################################################################################
 # Fix image name for RC versions
 ################################################################################
 [ "$BUILD_FROM_IMAGE" != "$BASE_REPO" ] && PHP_VERSION="${PHP_VERSION//-rc/}"
