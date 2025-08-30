@@ -2,7 +2,7 @@
 debug-echo "Remove development packages."
 
 if is-true "$CLEANUP_DEV_PACKAGES"; then
-    EXTRA_DEPS='*-dev'
+    EXTRA_DEPS='*-dev git'
 fi
 
 APK_PACKAGES='.persistent-deps tar xz' \
