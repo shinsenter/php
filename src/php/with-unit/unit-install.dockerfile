@@ -5,7 +5,7 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-ARG BUILD_SOURCE_IMAGE=${BUILD_SOURCE_IMAGE:-https://codeload.github.com/nginx/unit/legacy.tar.gz/refs/heads/branches/default}
+ARG BUILD_SOURCE_IMAGE="https://codeload.github.com/nginx/unit/legacy.tar.gz/refs/heads/branches/default"
 ADD $BUILD_SOURCE_IMAGE /tmp/unit.tar.gz
 
 ENV UNIT_CONTROL_PID=/run/unit.pid
