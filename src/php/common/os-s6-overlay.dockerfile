@@ -6,8 +6,8 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 # S6 variables
-ARG S6_VERSION=${S6_VERSION:-}
-ARG S6_PATH=${S6_PATH:-}
+ARG S6_VERSION=""
+ARG S6_PATH=""
 
 ################################################################################
 RUN <<'EOF'
