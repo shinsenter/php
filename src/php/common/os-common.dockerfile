@@ -6,11 +6,11 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 # Set defaults from build arguments
-ARG APP_PATH=${APP_PATH:-/var/www/html}
-ARG APP_GROUP=${APP_GROUP:-www-data}
-ARG APP_GID=${APP_GID:-33}
-ARG APP_USER=${APP_USER:-www-data}
-ARG APP_UID=${APP_UID:-33}
+ARG APP_PATH="/var/www/html"
+ARG APP_GID="33"
+ARG APP_UID="33"
+ARG APP_GROUP="www-data"
+ARG APP_USER="www-data"
 
 ARG APT_LISTCHANGES_FRONTEND=none
 ARG DEBCONF_NOWARNINGS=yes
