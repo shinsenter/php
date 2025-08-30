@@ -592,8 +592,9 @@ fi
 # Temporary fix for Debian 13 (Trixie)
 # See: https://github.com/mlocati/docker-php-extension-installer/issues/1141
 ################################################################################
-if [ "$OS_BASE" = "debian" ] && [ "$BUILD_FROM_IMAGE" = "$BASE_REPO" ] && is_active_version "$PHP_VERSION"; then
-    PHP_VARIANT="$PHP_VARIANT-bookworm"
+if [ "$OS_BASE" = "debian" ] && is_active_version "$PHP_VERSION"; then
+    [ "$BUILD_FROM_IMAGE" = "$BASE_REPO" ] && PHP_VARIANT="$PHP_VARIANT-bookworm"
+    [ "$APP" = "with-f8p" ] && BUILD_SOURCE_IMAGE="$BUILD_SOURCE_IMAGE-bookworm"
 fi
 
 ################################################################################

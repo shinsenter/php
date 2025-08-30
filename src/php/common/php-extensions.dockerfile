@@ -51,162 +51,165 @@ env-default IPE_LZF_BETTERCOMPRESSION  '1'
 env-default IPE_SWOOLE_WITHOUT_IOURING '1'
 
 # Install Composer and popular PHP modules
-phpaddmod @composer \
-    # amqp \
-    apcu \
-    # apcu_bc \
-    # ast \
-    bcmath \
-    # bitset \
-    # blackfire \
-    # brotli \
-    # bz2 \
-    calendar \
-    # cassandra \
-    # cmark \
-    # csv \
-    # dba \
-    # ddtrace \
-    # decimal \
-    # ds \
-    # ecma_intl \
-    # enchant \
-    # ev \
-    # event \
-    # excimer \
-    exif \
-    # ffi \
-    # ftp \
-    gd \
-    # gearman \
-    # geoip \
-    # geos \
-    # geospatial \
-    gettext \
-    # gmagick \
-    # gmp \
-    # gnupg \
-    # grpc \
-    # http \
-    igbinary \
-    # imagick \
-    # imap \
-    # inotify \
-    # interbase \
-    intl \
-    # ion \
-    # ioncube_loader \
-    # jsmin \
-    # json_post \
-    # jsonpath \
-    # ldap \
-    # luasandbox \
-    # lz4 \
-    # lzf \
-    # mailparse \
-    # maxminddb \
-    # mcrypt \
-    # md4c \
-    # memcache \
-    # memcached \
-    # memprof \
-    # mongo \
-    # mongodb \
-    # mosquitto \
-    msgpack \
-    # mssql \
-    # mysql \
-    mysqli \
-    # newrelic \
-    # nsq \
-    # oauth \
-    # oci8 \
-    # odbc \
-    opcache \
-    # opencensus \
-    # openswoole \
-    # opentelemetry \
-    # parallel \
-    # parle \
-    pcntl \
-    # pcov \
-    # pdo_dblib \
-    # pdo_firebird \
-    pdo_mysql \
-    # pdo_oci \
-    # pdo_odbc \
-    pdo_pgsql \
-    # pdo_sqlsrv \
-    pgsql \
-    # phalcon \
-    # php_trie \
-    # phpy \
-    # pkcs11 \
-    # pq \
-    # propro \
-    # protobuf \
-    # pspell \
-    # psr \
-    # pthreads \
-    # raphf \
-    # rdkafka \
-    # recode \
-    redis \
-    # relay \
-    # saxon \
-    # seasclick \
-    # seaslog \
-    # shmop \
-    # simdjson \
-    # smbclient \
-    # snappy \
-    # snmp \
-    # snuffleupagus \
-    # soap \
-    # sockets \
-    sodium \
-    # solr \
-    # sourceguardian \
-    # spx \
-    # sqlsrv \
-    # ssh2 \
-    # stomp \
-    # swoole \
-    # sybase_ct \
-    # sync \
-    # sysvmsg \
-    # sysvsem \
-    # sysvshm \
-    # tensor \
-    # tideways \
-    tidy \
-    # timezonedb \
-    # translit \
-    # uopz \
-    # uploadprogress \
-    uuid \
-    # uv \
-    # vips \
-    # vld \
-    # wddx \
-    # wikidiff2 \
-    # xdebug \
-    # xdiff \
-    # xhprof \
-    # xlswriter \
-    # xmldiff \
-    # xmlrpc \
-    # xpass \
-    # xsl \
-    # yac \
-    yaml \
-    # yar \
-    # zephir_parser \
-    zip \
-    # zmq \
-    # zookeeper \
-    # zstd \
-    && php -m && composer -V
+modules=(
+    @composer
+    # amqp
+    apcu
+    # apcu_bc
+    # ast
+    bcmath
+    # bitset
+    # blackfire
+    # brotli
+    # bz2
+    calendar
+    # cassandra
+    # cmark
+    # csv
+    # dba
+    # ddtrace
+    # decimal
+    # ds
+    # ecma_intl
+    # enchant
+    # ev
+    # event
+    # excimer
+    exif
+    # ffi
+    # ftp
+    gd
+    # gearman
+    # geoip
+    # geos
+    # geospatial
+    gettext
+    # gmagick
+    # gmp
+    # gnupg
+    # grpc
+    # http
+    igbinary
+    # imagick
+    # imap
+    # inotify
+    # interbase
+    intl
+    # ion
+    # ioncube_loader
+    # jsmin
+    # json_post
+    # jsonpath
+    # ldap
+    # luasandbox
+    # lz4
+    # lzf
+    # mailparse
+    # maxminddb
+    # mcrypt
+    # md4c
+    # memcache
+    # memcached
+    # memprof
+    # mongo
+    # mongodb
+    # mosquitto
+    msgpack
+    # mssql
+    # mysql
+    mysqli
+    # newrelic
+    # nsq
+    # oauth
+    # oci8
+    # odbc
+    opcache
+    # opencensus
+    # openswoole
+    # opentelemetry
+    # operator
+    # parallel
+    # parle
+    pcntl
+    # pcov
+    # pdo_dblib
+    # pdo_firebird
+    pdo_mysql
+    # pdo_oci
+    # pdo_odbc
+    pdo_pgsql
+    # pdo_sqlsrv
+    pgsql
+    # phalcon
+    # php_trie
+    # phpy
+    # pkcs11
+    # pq
+    # propro
+    # protobuf
+    # pspell
+    # psr
+    # pthreads
+    # raphf
+    # rdkafka
+    # recode
+    redis
+    # relay
+    # saxon
+    # seasclick
+    # seaslog
+    # shmop
+    # simdjson
+    # smbclient
+    # snappy
+    # snmp
+    # snuffleupagus
+    # soap
+    # sockets
+    sodium
+    # solr
+    # sourceguardian
+    # spx
+    # sqlsrv
+    # ssh2
+    # stomp
+    # swoole
+    # sybase_ct
+    # sync
+    # sysvmsg
+    # sysvsem
+    # sysvshm
+    # tensor
+    # tideways
+    tidy
+    # timezonedb
+    # translit
+    # uopz
+    # uploadprogress
+    uuid
+    # uv
+    # vips
+    # vld
+    # wddx
+    # wikidiff2
+    # xdebug
+    # xdiff
+    # xhprof
+    # xlswriter
+    # xmldiff
+    # xmlrpc
+    # xpass
+    # xsl
+    # yac
+    yaml
+    # yar
+    # zephir_parser
+    zip
+    # zmq
+    # zookeeper
+    # zstd
+)
+phpaddmod "${modules[@]}" && php -m && composer -V
 
 # Install prestissimo for Composer v1.x
 major_version=$(composer --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | cut -d. -f1)
