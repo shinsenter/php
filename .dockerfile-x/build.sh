@@ -8,7 +8,7 @@
 ################################################################################
 
 BASE_DIR="$(git rev-parse --show-toplevel)"
-SOURCE="devthefuture/dockerfile-x:v1"
+SOURCE="devthefuture/dockerfile-x:1.5.0"
 
 TAGS=(
 shinsenter/dockerfile-x:v1
@@ -19,7 +19,7 @@ ghcr.io/shinsenter/dockerfile-x:v1
 
 echo "# syntax=docker/dockerfile:1
 FROM $SOURCE
-LABEL org.opencontainers.image.source=https://codeberg.org/devthefuture/dockerfile-x" | \
+LABEL org.opencontainers.image.source=$SOURCE" | \
 exec docker buildx build \
     --pull --push --squash \
     --platform linux/amd64,linux/arm64/v8 \
