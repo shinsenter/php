@@ -89,7 +89,7 @@ fi
     # create Reverb service
     s6-service reverb longrun '#!/usr/bin/env sh
 if is-true "$LARAVEL_ENABLE_REVERB" && artisan reverb:start --help &>/dev/null; then
-    exec app-exec artisan ${LARAVEL_REVERB_COMMAND:-"reverb:start"} reverb:start $(is-debug && echo --debug) $LARAVEL_REVERB_OPTIONS
+    exec app-exec artisan ${LARAVEL_REVERB_COMMAND:-"reverb:start"} $(is-debug && echo --debug) $LARAVEL_REVERB_OPTIONS
 else
     debug-echo "Service for Laravel Reverb is not activated or artisan reverb:start is not supported."
     exec s6-svc -Od .
