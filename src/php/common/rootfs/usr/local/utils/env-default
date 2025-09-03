@@ -12,25 +12,24 @@ if [ ! -f "$conf_path" ]; then
     mkdir -p "$(dirname $conf_path)"
     cat <<'ENVVARS' > "$conf_path"
 #!/bin/sh
-APP_PATH="$(app-path)"
-APP_ROOT="$(app-root)"
+composer_bin() { [ -x "$(command -v composer)" ] && composer "$@" config bin-dir --quiet --absolute 2>/dev/null; }
+add_to_path()  { dir="${1%/}"; [ -n "$dir" ] && [[ ":$PATH:" != *":$dir:"* ]] && PATH="${dir}${PATH:+:}${PATH}"; }
 PATH="${PATH#/usr/local/aliases:}"
-add_to_path() {
-    dir="${1%/}"
-    if [ -n "$dir" ] && [[ ":$PATH:" != *":$dir:"* ]]; then PATH="${dir}${PATH:+:}${PATH}"; fi
-}
+
 required_paths=(
-/bin /sbin
-/usr/bin /usr/sbin
+/bin /sbin /usr/bin /usr/sbin
 /usr/local/bin /usr/local/sbin
 /usr/local/utils
-"$(composer global config bin-dir --quiet --absolute 2>/dev/null)"
-"$(composer -d $APP_PATH config bin-dir --quiet --absolute 2>/dev/null)"
-)
-for dir in "${required_paths[@]}"; do add_to_path "$dir"; done
+) && for dir in "${required_paths[@]}"; do add_to_path "$dir"; done
+
+APP_PATH="$(app-path)"
+APP_ROOT="$(app-root)"
+web-mkdir "$APP_PATH" && cd "$APP_PATH" &>/dev/null || true
+
+add_to_path "$(composer_bin global)"
+add_to_path "$(composer_bin -d "$APP_PATH")"
 
 export PATH APP_PATH APP_ROOT
-web-mkdir "$APP_PATH" && cd "$APP_PATH" &>/dev/null || true
 
 # begin extra sources
 # end extra sources
