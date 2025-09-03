@@ -8,17 +8,15 @@
 ################################################################################
 set -e
 
-target="$1"
-if [ -z "$target" ]; then
-    shift
-elif [ "${target:0:1}" = "/" ] || [ "${target:0:4}" = "http" ]; then
-    shift
-else
-    target=""
+if [ "$#" -gt 0 ]; then
+    case "$1" in
+    http*|/*) target="$1"; shift ;;
+    *) target="" ;;
+    esac
 fi
 
 curl_status() {
-    curl -A "${DOCKER_NAME:-internal}-checker" \
+    curl -A "${DOCKER_NAME:-shinsenter/php}/health-checker" \
         -sk --max-time 2 \
         -o /dev/null \
         -w "%{http_code}" \
@@ -26,30 +24,37 @@ curl_status() {
 }
 
 if [ -n "$target" ]; then
-    start=$(date +%s)
     timeout="${TIMEOUT:-60}"
-    # detect if target is a URL or a path
-    if [ "${target:0:4}" = "http" ]; then
-        while true; do
-            if curl_status "$target" | grep -qE '^[2-4][0-9]{2}$'; then break; fi
-            if [ "$timeout" -gt 0 ] && [ $(( $(date +%s) - start )) -ge "$timeout" ]; then
-                debug-echo -c "Timeout waiting for $target."
-                exit 1
-            fi
-            sleep 5
-        done
+    start=$(date +%s)
+
+    # decide checking mode and sleep interval
+    if [ "${target#http}" != "$target" ]; then
+        mode="http"
+        sleep_interval=5
     else
-        while [ ! -S "$target" ]; do
-            sleep 0.5
-            if [ "$timeout" -gt 0 ] && [ $(( $(date +%s) - start )) -ge "$timeout" ]; then
-                debug-echo -c "Timeout waiting for $target."
-                exit 1
-            fi
-        done
+        mode="socket"
+        sleep_interval=1
     fi
 
-    debug-echo "Target $target is ready."
+    while true; do
+        elapsed=$(( $(date +%s) - start ))
+        remaining=$(( timeout - elapsed ))
+        if [ "$remaining" -le "$sleep_interval" ]; then
+            debug-echo -c "Timeout waiting for $target." >&2
+            exit 1
+        fi
+        if [ "$mode" = "http" ]; then
+            # check http
+            curl_status "$target" | grep -qE '^[1-4][0-9]{2}$' && break
+        else
+            # check socket
+            [ -S "$target" ] && break
+        fi
+        sleep "$sleep_interval"
+    done
+
+    debug-echo "Target $target is ready." >&2
 fi
 
-if [ "$#" -eq 0 ]; then exit 0; fi
+[ "$#" -eq 0 ] && exit 0
 exec in-app "$@"

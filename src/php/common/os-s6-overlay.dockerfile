@@ -81,7 +81,7 @@ if [ -n "$S6_VERSION" ] && ! has-s6; then
     if has-cmd s6-service; then
         s6-service \~verify-server oneshot '#!/usr/bin/env sh
 is-true "$DISABLE_ONLIVE_HOOK" && exit 0
-wait-for "http://127.0.0.1" hook onlive || true
+wait-for "${HEALTH_CHECK_URL:-http://127.0.0.1}" hook onlive || true
 '
     fi
 
