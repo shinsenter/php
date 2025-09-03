@@ -76,11 +76,10 @@ build() {
     make clean
 }
 
+# build unitd binaries
 build unitd-debug --debug
 build unitd
 
-cd "$HOME"
-
-# clean up
-\rm -rf /tmp/*
+# test unitd command
+unitd --version || exit 1
 EOF

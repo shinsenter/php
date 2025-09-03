@@ -26,8 +26,6 @@ INCLUDE ./with-roadrunner/roadrunner-install
 INCLUDE ./with-roadrunner/roadrunner-config
 INCLUDE ./common/os-s6-overlay
 
-RUN with-env /usr/local/bin/rr -v
-
 RUN env-default DISABLE_ONLIVE_HOOK '0'
 RUN env-default '# Other user-defined environment variables are from here'
 

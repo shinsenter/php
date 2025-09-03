@@ -46,20 +46,22 @@ fi
 hook onboot
 
 ################################################################################
-# load the $ENV in ~/.bashrc
+# load the $ENV in ~/.profile
 env_check='if [ -f "$ENV" ]; then source "$ENV" &>/dev/null; fi'
-bashrc=~/.bashrc
-touch "$bashrc"
-if ! grep -qF -- "$env_check" "$bashrc"; then
-    tmp_file="$(mktemp)"
-    {
-        echo "# load environment variables"
-        echo "$env_check"
-        echo ""
-        cat "$bashrc"
-    } >"$tmp_file"
-    mv -f "$tmp_file" "$bashrc"
-fi
+user_profile="$(realpath -mqs "$(getent passwd "${APP_USER:-www-data}" | cut -d: -f6)/.profile")"
+for profile in "$user_profile" ~/.profile; do
+    touch "$profile"
+    if ! grep -qF -- "$env_check" "$profile"; then
+        tmp_file="$(mktemp)"
+        {
+            echo "# load environment variables"
+            echo "$env_check"
+            echo ""
+            cat "$profile"
+        } >"$tmp_file"
+        mv -f "$tmp_file" "$profile"
+    fi
+done
 
 # export all env variables for PHP
 if is-true "$ALLOW_RUNTIME_PHP_ENVVARS" && has-cmd php && has-cmd php-envvars; then
@@ -89,7 +91,7 @@ touch /var/log/startup.log
 echo "$(date) $(whoami)@$(hostname):$(pwd)\$ ${0##*/} $@" >>/var/log/startup.log
 
 # start the container
-exec with-env "$@"
+exec in-app "$@"
 
 ################################################################################
 #     These setups are part of the project: https://code.shin.company/php

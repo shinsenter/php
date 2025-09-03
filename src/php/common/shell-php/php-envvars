@@ -9,7 +9,7 @@
 if ! has-cmd php; then exit 0; fi
 if [ -d "$PHP_INI_DIR" ]; then find "$PHP_INI_DIR"* -type f -name *generated-settings* -delete; fi
 
-with-env php -d variables_order=EGPCS -- "$@" <<'DockerPHP'
+exec with-env php -d variables_order=EGPCS -- "$@" <<'DockerPHP'
 <?php
 
 define('DEBUG_MODE', (bool) trim((string) shell_exec('is-debug && echo 1 || echo 0')));

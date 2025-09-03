@@ -13,5 +13,5 @@ if has-cmd crond; then
     if [ -f "$CROND_PID" ]; then kill -TERM $(cat "$CROND_PID") &>/dev/null || \rm -f "$CROND_PID"; fi
 
     exec 2>&1
-    exec app-exec with-env crond $CRONTAB_OPTIONS
+    exec in-app crond ${CROND_EXTRA_OPTIONS:=$CRONTAB_OPTIONS}
 fi

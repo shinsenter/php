@@ -6,8 +6,7 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-export APP_PATH="$(app-path)"
-export APP_ROOT="$(app-root)"
+if [ "$#" -eq 0 ]; then exit 0; fi
 
 run_cmd() {
     local script="$1"
