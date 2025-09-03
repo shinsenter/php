@@ -28,8 +28,6 @@ INCLUDE ./with-f8p/f8p-install
 INCLUDE ./with-f8p/f8p-config
 INCLUDE ./common/os-s6-overlay
 
-RUN with-env frankenphp version
-
 RUN env-default DISABLE_ONLIVE_HOOK '0'
 RUN env-default '# Other user-defined environment variables are from here'
 

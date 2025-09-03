@@ -44,7 +44,7 @@ env-default HTTP_SERVER_PORT "9501"
 
 if has-cmd s6-service; then
     s6-service hyperf longrun '#!/usr/bin/env sh
-exec app-exec web-do php $(app-index) start
+exec in-app web-do php $(app-index) start
 '
     s6-service php-fpm disable
     s6-service nginx unset php-fpm

@@ -28,7 +28,15 @@ mkdir -p /config/caddy /data/caddy /etc/caddy /etc/frankenphp
 
 ! has-cmd frankenphp && exit 1
 
-setcap cap_net_bind_service=+ep "$(command -v frankenphp)"
-ln -nsf "$(command -v frankenphp)" /usr/local/sbin/caddy
+# test frankenphp command
+FRANKENPHP_PATH="/usr/local/bin/frankenphp"
+setcap cap_net_bind_service=+ep "$FRANKENPHP_PATH"
+"$FRANKENPHP_PATH" version || exit 1
+
+# alias for frankenphp
+ln -nsf "$FRANKENPHP_PATH" /usr/local/sbin/caddy
+
+# make frankenphp command alias
+web-cmd frankenphp "$FRANKENPHP_PATH"
 
 EOF

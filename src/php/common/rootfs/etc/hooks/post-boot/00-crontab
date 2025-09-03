@@ -6,6 +6,8 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
+s6-service crontab $(is-true "$ENABLE_CRONTAB" && echo enable || echo disable)
+
 if ! has-cmd crond; then exit 0; fi
 
 APP_USER="${APP_USER:-root}"
@@ -13,7 +15,6 @@ CRONTAB="/var/spool/cron/crontabs/$APP_USER"
 CRONTAB_DIR="${CRONTAB_DIR:-/etc/crontab.d}"
 
 # service settings
-s6-service crontab $(is-true "$ENABLE_CRONTAB" && echo enable || echo disable)
 
 if ! is-true "$ENABLE_CRONTAB"; then
     \rm -f "$CRONTAB"

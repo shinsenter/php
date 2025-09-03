@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+cd "$(app-path)" &>/dev/null || true
+if [ "$#" -eq 0 ]; then exit 0; fi
+exec with-env "$@"

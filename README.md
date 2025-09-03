@@ -70,10 +70,6 @@ Examples:
 
 Explore all available tags on our [Docker Hub](https://hub.docker.com/r/shinsenter/php/tags).
 
-<!--
-For stable versions suitable for production, we also offer version tags on [another repository](https://hub.docker.com/r/shinsenter/php-archives/tags).
--->
-
 
 ### Examples <!-- omit from toc -->
 
@@ -516,6 +512,8 @@ These Docker images include additional environment variables for fine-tuning con
 | `DISABLE_AUTORUN_FIX_OWNER_GROUP`  | Not set          | Disables automatic correction of ownership for the application directory when set to `1`. | `1` |
 | `DISABLE_GREETING`                 | Not set          | Suppresses the startup greeting message when set to `1`. | `1` |
 | `COMPOSER_OPTIMIZE_AUTOLOADER`     | Not set          | When set to `1`, enables Composer's optimized autoloader (`--optimize-autoloader`) during install, improving performance in production. | `1` |
+| `ENABLE_SSHD`                      | Not set          | When set to `1`, enable the SSH server inside the container. | `1` |
+| `SSHD_AUTHORIZED_KEYS`             | Not set          | Public SSH keys (one per line) that will be added to the container's `~/.ssh/authorized_keys` for authentication. | `ssh-rsa XXXX...` |
 | `ENABLE_CRONTAB`                   | Not set          | Enables the Crontab service when set to `1`, loading job definitions from `$CRONTAB_DIR` (default: `/etc/crontab.d`). | `1` |
 | `ENABLE_CRONTAB_DEBUG`             | Not set          | When set to `1`, adds a debug cron job that runs every minute and prints environment variables visible to cron. | `1` |
 | `CRONTAB_DIR`                      | `/etc/crontab.d` | Directory where cron job definitions are located. Jobs run as the user specified in `$APP_USER`. | `/path/for/crontab/schedules` |
@@ -537,20 +535,10 @@ Check our [Docker Hub](https://hub.docker.com/r/shinsenter/php/tags) for all ava
 
 ## Stable Image Tags
 
-The release versions on [this GitHub repository](https://code.shin.company/php) don't guarantee
-that Docker images built from the same source code will always be identical.
-
-We build new Docker images daily to ensure they stay up-to-date
-with the latest upstream updates for PHP, base OS, Composer, etc.
-The images in this repo are regularly updated under the same tag names.
-
-For stable versions you can depend on in production,
+For stable versions (with date tagged) you can depend on in production,
 we also apply version tags on another repository.
 
 > 👉🏻 View Stable Tags: https://hub.docker.com/r/shinsenter/php-archives/tags
-
-This way, you get frequently updated images under static tags,
-providing both the latest code and production stability.
 
 
 ## Contributing

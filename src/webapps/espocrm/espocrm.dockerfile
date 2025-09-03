@@ -69,7 +69,7 @@ if is-true "$ESPOCRM_CONFIG_USE_WEB_SOCKET"; then
     export ESPOCRM_CONFIG_WEB_SOCKET_URL="ws://localhost:8080"
     export ESPOCRM_CONFIG_WEB_SOCKET_ZERO_M_Q_SUBMISSION_DSN="tcp://espocrm-websocket:5555"
     export ESPOCRM_CONFIG_WEB_SOCKET_ZERO_M_Q_SUBSCRIBER_DSN="tcp://*:5555"
-    exec app-exec web-do php "$APP_PATH/websocket.php"
+    exec in-app web-do php "$APP_PATH/websocket.php"
 else
     exec s6-svc -Od .
 fi

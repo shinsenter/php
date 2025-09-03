@@ -51,6 +51,5 @@ if [ -n "$target" ]; then
     debug-echo "Target $target is ready."
 fi
 
-if [ "$#" -gt 0 ]; then
-    exec app-exec with-env "$@"
-fi
+if [ "$#" -eq 0 ]; then exit 0; fi
+exec in-app "$@"

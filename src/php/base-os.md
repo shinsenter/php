@@ -270,6 +270,8 @@ These Docker images include additional environment variables for fine-tuning con
 | `DISABLE_AUTORUN_SCRIPTS`          | Not set          | Disables all autorun scripts when set to `1`. | `1` |
 | `DISABLE_AUTORUN_FIX_OWNER_GROUP`  | Not set          | Disables automatic correction of ownership for the application directory when set to `1`. | `1` |
 | `DISABLE_GREETING`                 | Not set          | Suppresses the startup greeting message when set to `1`. | `1` |
+| `ENABLE_SSHD`                      | Not set          | When set to `1`, enable the SSH server inside the container. | `1` |
+| `SSHD_AUTHORIZED_KEYS`             | Not set          | Public SSH keys (one per line) that will be added to the container's `~/.ssh/authorized_keys` for authentication. | `ssh-rsa XXXX...` |
 | `ENABLE_CRONTAB`                   | Not set          | Enables the Crontab service when set to `1`, loading job definitions from `$CRONTAB_DIR` (default: `/etc/crontab.d`). | `1` |
 | `ENABLE_CRONTAB_DEBUG`             | Not set          | When set to `1`, adds a debug cron job that runs every minute and prints environment variables visible to cron. | `1` |
 | `CRONTAB_DIR`                      | `/etc/crontab.d` | Directory where cron job definitions are located. Jobs run as the user specified in `$APP_USER`. | `/path/for/crontab/schedules` |

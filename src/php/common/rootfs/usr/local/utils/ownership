@@ -12,6 +12,7 @@
 ################################################################################
 OLD_GROUP="${DEFAULT_GROUP:-www-data}"
 OLD_USER="${DEFAULT_USER:-www-data}"
+DEFAULT_SHELL="$(command -v nologin)"
 
 # ensure group and user exist
 if ! getent group "$OLD_GROUP" >/dev/null 2>&1; then
@@ -19,7 +20,7 @@ if ! getent group "$OLD_GROUP" >/dev/null 2>&1; then
 fi
 
 if ! id "$OLD_USER" >/dev/null 2>&1; then
-    useradd -g "$OLD_GROUP" -M -s $(command -v nologin) "$OLD_USER"
+    useradd -g "$OLD_GROUP" -M -s "$DEFAULT_SHELL" "$OLD_USER"
 fi
 
 # get old IDs
@@ -71,9 +72,9 @@ else
     # copy supplementary groups from original user
     SUPP=$(id -Gn "$OLD_USER" | tr ' ' ',')
     if [ "$NEW_UID" -ne "$OLD_UID" ]; then
-        useradd -u "$NEW_UID" -g "$NEW_GROUP" -G "$SUPP" -M -s $(command -v nologin) "$NEW_USER"
+        useradd -u "$NEW_UID" -g "$NEW_GROUP" -G "$SUPP" -M -s "$DEFAULT_SHELL" "$NEW_USER"
     else
-        useradd -g "$NEW_GROUP" -G "$SUPP" -M -s $(command -v nologin) "$NEW_USER"
+        useradd -g "$NEW_GROUP" -G "$SUPP" -M -s "$DEFAULT_SHELL" "$NEW_USER"
     fi
     debug-echo -s "Created user $NEW_USER (UID=$(id -u "$NEW_USER")) with groups: $SUPP"
 fi
