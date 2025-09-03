@@ -7,9 +7,9 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 if [ "$#" -eq 0 ]; then exit 0; fi
-mkdir -p /tmp/hooks 2>/dev/null
+web-mkdir /tmp/hooks &>/dev/null
 for hook; do
     debug-echo -d "Hook: $hook"
-    touch   "/tmp/hooks/$hook" || true
-    autorun "/etc/hooks/$hook" "$APP_PATH/hooks/$hook"
+    touch "/tmp/hooks/$hook" || true
+    in-app autorun "/etc/hooks/$hook" "$APP_PATH/hooks/$hook"
 done

@@ -1,0 +1,121 @@
+#!/usr/bin/env sh
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+if ! is-true "$ENABLE_SSH" && ! is-true "$ENABLE_SSHD"; then s6-service sshd disable; exit 0; fi
+debug-echo -d "\$ENABLE_SSH is set to true. Container will try starting sshd service."
+
+# install openssh-server if sshd not found
+if ! has-cmd sshd; then
+    pkg-add openssh-server
+    s6-service sshd longrun '#!/usr/bin/env sh
+if is-true "$ENABLE_SSH" || is-true "$ENABLE_SSHD"; then
+    exec 2>&1
+    exec /usr/sbin/sshd -D $(is-debug && echo -d) -f "/run/sshd_env.conf" $SSHD_EXTRA_OPTIONS
+else
+    exec s6-svc -Od .
+fi
+'
+fi
+
+! has-cmd sshd && { debug-echo -e "sshd not found, cannot proceed." >&2; exit 1; }
+
+# defaults
+: "${SSHD_USER:=${SSH_USER:-$APP_USER}}"
+: "${SSHD_UID:=${SSH_UID:-$(id -u "$APP_USER")}}"
+: "${SSHD_GID:=${SSH_GID:-$(id -g "$APP_USER")}}"
+: "${SSHD_PASSWORD:=${SSH_PASSWORD:-}}"
+: "${SSHD_PASSWORD_AUTH:=${SSH_PASSWORD_AUTH:-0}}"
+: "${SSHD_AUTHORIZED_KEYS:=${SSH_AUTHORIZED_KEYS:-}}"
+: "${SSHD_PORT:=${SSH_PORT:-22}}"
+: "${SSHD_PERMIT_ROOT_LOGIN:=${SSH_PERMIT_ROOT_LOGIN:-0}}"
+: "${SSHD_SFTP_ONLY:=${SSH_SFTP_ONLY:-0}}"
+: "${SSHD_EXTRA_OPTIONS:=${SSHD_OPTIONS:-}}"
+
+# boolean normalization using is-true
+normalize_bool() {
+    if is-true "$1"; then echo "yes"; else echo "no"; fi
+}
+
+# accepts yes|no|prohibit-password|forced-commands-only
+case "$(printf '%s' "$SSHD_PERMIT_ROOT_LOGIN" | tr '[:upper:]' '[:lower:]')" in
+    prohibit-password|forced-commands-only) ;;
+    *) SSHD_PERMIT_ROOT_LOGIN=$(normalize_bool "$SSHD_PERMIT_ROOT_LOGIN") ;;
+esac
+
+# create group/user
+getent group "$SSHD_GID" >/dev/null 2>&1 || groupadd -g "$SSHD_GID" "$SSHD_USER" || true
+id -u "$SSHD_USER" >/dev/null 2>&1 || useradd -m -u "$SSHD_UID" -g "$SSHD_GID" -s /bin/sh "$SSHD_USER"
+
+# modify current shell
+CURRENT_SHELL=$(getent passwd "$SSHD_USER" | cut -d: -f7)
+if [ "$CURRENT_SHELL" = "$(command -v nologin)" ] || [ "$CURRENT_SHELL" = "$(command -v false)" ]; then
+    usermod -s /bin/bash "$SSHD_USER"
+fi
+
+# create home dir
+HOME_DIR="$(realpath -mqs $(getent passwd "$SSHD_USER" | cut -d: -f6))"
+SSH_KEYS_CONF="$HOME_DIR/.ssh/authorized_keys"
+mkdir -p "$HOME_DIR" "$HOME_DIR/.ssh" && chmod 700 "$HOME_DIR/.ssh"
+chown -R "$SSHD_USER:$SSHD_GID" "$HOME_DIR"
+
+# password auth
+if is-true "$SSHD_PASSWORD_AUTH" && [ -n "$SSHD_PASSWORD" ]; then
+    echo "$SSHD_USER:$SSHD_PASSWORD" | chpasswd
+elif [ "$(getent shadow "$SSHD_USER" | cut -d: -f2)" = "" ]; then
+    usermod -p '*' "$SSHD_USER"
+fi
+
+# authorized_keys
+if [ -n "$SSHD_AUTHORIZED_KEYS" ]; then
+    printf "%s\n" "$SSHD_AUTHORIZED_KEYS" > "$SSH_KEYS_CONF"
+    debug-echo "Authorized keys count: $(wc -l "$SSH_KEYS_CONF" | cut -d' ' -f1)"
+fi
+
+# host keys generation
+ssh-keygen -A >/dev/null 2>&1 || true
+
+# build ephemeral sshd config
+CONF="/run/sshd_env.conf"; mkdir -p /run/sshd /var/run/sshd
+{
+    echo "Port $SSHD_PORT"
+    echo "AuthorizedKeysFile $SSH_KEYS_CONF"
+    echo "PasswordAuthentication $(normalize_bool "$SSHD_PASSWORD_AUTH")"
+    echo "PermitRootLogin $SSHD_PERMIT_ROOT_LOGIN"
+    echo "PermitUserEnvironment yes"
+    echo "PubkeyAuthentication yes"
+    echo "Subsystem sftp internal-sftp"
+} > "$CONF"
+
+# SFTP-only mode
+if is-true "$SSHD_SFTP_ONLY"; then
+    chmod 755 "$HOME_DIR" && chown root:root "$HOME_DIR"
+    mkdir -p "$HOME_DIR/upload" && chown "$SSHD_USER:$SSHD_GID" "$HOME_DIR/upload"
+    {
+        echo "Match User $SSHD_USER"
+        echo "  ChrootDirectory %h"
+        echo "  ForceCommand internal-sftp"
+        echo "  AllowTcpForwarding no"
+        echo "  X11Forwarding no"
+    } >> "$CONF"
+fi
+
+# ensure authorized_keys exists
+touch "$SSH_KEYS_CONF"
+chmod 600 "$SSH_KEYS_CONF"
+chown "$SSHD_USER:$SSHD_GID" "$SSH_KEYS_CONF"
+
+# add environment variables
+with-env | grep -vF '/root' >"$HOME_DIR/.ssh/environment"
+
+# run sshd in foreground
+if has-s6; then
+    s6-service sshd enable
+else
+    exec 2>&1
+    exec /usr/sbin/sshd $(is-debug && echo -d) -f "$CONF" $SSHD_EXTRA_OPTIONS
+fi

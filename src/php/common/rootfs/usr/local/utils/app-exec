@@ -1,5 +1,0 @@
-#!/usr/bin/env sh
-export APP_PATH="$(app-path)"
-export APP_ROOT="$(app-root)"
-[ -d "$APP_PATH" ] && cd "$APP_PATH"
-exec "$@"

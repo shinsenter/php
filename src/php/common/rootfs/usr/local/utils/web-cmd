@@ -24,14 +24,14 @@ mkdir -p "/usr/local/sbin" "/usr/local/aliases"
 
 if [ "$allow_root" -eq 1 ]; then
     target="/usr/local/aliases/$name"
-    command="with-env"
+    command="$@"
     touch "$target" && chmod 4755 "$target"
 else
     target="/usr/local/sbin/$name"
-    command="web-do"
+    command="web-do $@"
 fi
 
 echo "#!/usr/bin/env sh
-exec app-exec $command $@ \"\$@\"
+exec in-app $command \"\$@\"
 " >$target
 chmod +x $target

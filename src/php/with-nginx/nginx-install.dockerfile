@@ -15,6 +15,9 @@ echo 'Install Nginx'
 # install nginx
 pkg-add nginx
 
+# test nginx command
+nginx -V || exit 1
+
 # clean up
 \rm -rf /var/www/localhost \
     /etc/init.d/nginx* \

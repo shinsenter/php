@@ -27,6 +27,8 @@ RUN echo $(source /etc/os-release && echo $NAME $VERSION) >/etc/welcome.txt
 RUN env-default '# Other user-defined environment variables are from here'
 
 ################################################################################
+EXPOSE 22
+
 ENTRYPOINT /usr/local/bin/docker-php-entrypoint
 
 ################################################################################
