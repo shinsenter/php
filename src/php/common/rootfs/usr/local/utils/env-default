@@ -14,22 +14,23 @@ if [ ! -f "$conf_path" ]; then
 #!/bin/sh
 APP_PATH="$(app-path)"
 APP_ROOT="$(app-root)"
-UTILS_DIR="/usr/local/utils"
-
 PATH="${PATH#/usr/local/aliases:}"
-if [[ ":$PATH:" != *":$UTILS_DIR:"* ]]; then PATH="$UTILS_DIR:$PATH"; fi
-for scope in "global" "-d $APP_PATH"; do
-    bin_dir="$(composer $scope config bin-dir --quiet --absolute 2>/dev/null)"
-    [ -n "$bin_dir" ] && case ":$PATH:" in
-        *":$bin_dir:"*) ;;
-        *) PATH="$bin_dir:$PATH" ;;
-    esac
-done
+add_to_path() {
+    dir="${1%/}"
+    if [ -n "$dir" ] && [[ ":$PATH:" != *":$dir:"* ]]; then PATH="${dir}${PATH:+:}${PATH}"; fi
+}
+required_paths=(
+/bin /sbin
+/usr/bin /usr/sbin
+/usr/local/bin /usr/local/sbin
+/usr/local/utils
+"$(composer global config bin-dir --quiet --absolute 2>/dev/null)"
+"$(composer -d $APP_PATH config bin-dir --quiet --absolute 2>/dev/null)"
+)
+for dir in "${required_paths[@]}"; do add_to_path "$dir"; done
 
 export PATH APP_PATH APP_ROOT
-
-web-mkdir "$APP_PATH" &>/dev/null
-[ -d "$APP_PATH" ] && cd "$APP_PATH"
+web-mkdir "$APP_PATH" && cd "$APP_PATH" &>/dev/null || true
 
 # begin extra sources
 # end extra sources

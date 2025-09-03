@@ -9,4 +9,4 @@
 if ! has-cmd autorun; then exit 0; fi
 if is-true "$DISABLE_AUTORUN_SCRIPTS"; then exit 0; fi
 debug-echo -d "Autorun scripts"
-exec app-exec autorun /etc/autorun.d/ /startup/ 2>&1
+exec in-app autorun /etc/autorun.d/ /startup/ 2>&1
