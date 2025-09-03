@@ -49,7 +49,9 @@ hook onboot
 # load the $ENV in ~/.profile
 env_check='if [ -f "$ENV" ]; then source "$ENV" &>/dev/null; fi'
 user_profile="$(realpath -mqs "$(getent passwd "${APP_USER:-www-data}" | cut -d: -f6)/.profile")"
-for profile in "$user_profile" ~/.profile; do
+if [ -n "$user_profile" ]; then web-mkdir "$(dirname "$user_profile")"; fi
+for profile in "$user_profile" /root/.profile; do
+    if [ -z "$profile" ]; then continue; fi
     touch "$profile"
     if ! grep -qF -- "$env_check" "$profile"; then
         tmp_file="$(mktemp)"
