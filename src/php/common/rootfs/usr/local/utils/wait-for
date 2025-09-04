@@ -10,7 +10,7 @@ set -e
 
 if [ "$#" -gt 0 ]; then
     case "$1" in
-    http*|/*) target="$1"; shift ;;
+    ""|http*|/*) target="$1"; shift ;;
     *) target="" ;;
     esac
 fi
