@@ -62,7 +62,7 @@ fi
 if id "$NEW_USER" >/dev/null 2>&1; then
     debug-echo "User $NEW_USER exists, skipping creation."
     PREV_UID="$(id -u "$NEW_USER")"
-    if [ "$NEW_GID" -ne "$PREV_UID" ]; then
+    if [ "$NEW_UID" -ne "$PREV_UID" ]; then
         CHANGE_USER=1
         usermod -u "$NEW_UID" -g "$NEW_GID" "$NEW_USER" \
             && debug-echo -s "Changed $NEW_USER UID: $PREV_UID → $NEW_UID"
