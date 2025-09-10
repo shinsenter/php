@@ -46,11 +46,11 @@ fi
 hook onboot
 
 ################################################################################
-# load the $ENV in ~/.profile
+# load the $ENV in ~/.bashrc
 env_check='if [ -f "$ENV" ]; then source "$ENV" &>/dev/null; fi'
-user_profile="$(realpath -mqs "$(getent passwd "${APP_USER:-www-data}" | cut -d: -f6)/.profile")"
+user_profile="$(realpath -mqs "$(getent passwd "${APP_USER:-www-data}" | cut -d: -f6)/.bashrc")"
 if [ -n "$user_profile" ]; then web-mkdir "$(dirname "$user_profile")"; fi
-for profile in "$user_profile" /root/.profile; do
+for profile in "$user_profile" /root/.bashrc; do
     if [ -z "$profile" ]; then continue; fi
     touch "$profile"
     if ! grep -qF -- "$env_check" "$profile"; then
