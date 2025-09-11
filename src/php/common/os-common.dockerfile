@@ -74,17 +74,16 @@ APK_PACKAGES='findutils ncurses ncurses-terminfo run-parts shadow tar tzdata unz
 APT_PACKAGES='ncurses-base ncurses-bin vim-tiny xz-utils' \
 pkg-add bash ca-certificates coreutils curl htop less openssl procps msmtp upgrade
 
+# Replace sh binary with bash
+BASH_PATH="$(command -v bash)"
+SH_PATH="$(command -v sh 2>/dev/null || echo '/bin/sh')"
+if [ -x "$BASH_PATH" ]; then
+    sed -i '1s|.*|#!/usr/bin/env bash|' /usr/local/utils/*
+    ln -nsf "$BASH_PATH" "$SH_PATH"
+fi
+
 # Setuid bit for some scripts
 chmod 4755 "$(command -v autorun)" "$(command -v ownership)" /usr/local/utils/web-*
-
-# Replace sh binary with bash
-if has-cmd bash; then
-    if has-cmd sh; then
-        ln -nsf "$(command -v bash)" "$(command -v sh)"
-    else
-        ln -nsf "$(command -v bash)" "/bin/sh"
-    fi
-fi
 
 # Patch nologin binary
 if [ ! -e /sbin/nologin ] && has-cmd nologin; then

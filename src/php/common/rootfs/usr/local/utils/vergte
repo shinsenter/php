@@ -1,2 +1,2 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 if [ "$(printf '%s\n' "$2" "$1" | sort -V | head -n1)" = "$2" ]; then exit 0; else exit 1; fi

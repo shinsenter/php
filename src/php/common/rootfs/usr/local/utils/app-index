@@ -1,2 +1,2 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 echo $(realpath -mqs "$(app-root)/${APP_INDEX:-index.php}")
