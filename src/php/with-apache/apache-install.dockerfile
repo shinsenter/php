@@ -49,7 +49,7 @@ fi
 
 # alias for apache2
 if has-cmd httpd && ! has-cmd apache2; then
-    ln -nsf "$(command -v httpd)" "/usr/local/sbin/apache2"
+    ln -nsf "$(type -P httpd)" "/usr/local/sbin/apache2"
 fi
 
 # test apache command

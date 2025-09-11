@@ -53,8 +53,6 @@ if [ -f "$sources" ]; then
         cat $sources
     fi
 fi
-
-pkg-add upgrade
 EOF
 
 ################################################################################
@@ -74,7 +72,7 @@ echo 'Configure OS middlewares'
 # Install common packages
 APK_PACKAGES='findutils ncurses ncurses-terminfo run-parts shadow tar tzdata unzip xz' \
 APT_PACKAGES='ncurses-base ncurses-bin vim-tiny xz-utils' \
-pkg-add bash ca-certificates coreutils curl htop less openssl procps msmtp
+pkg-add bash ca-certificates coreutils curl htop less openssl procps msmtp upgrade
 
 # Setuid bit for some scripts
 chmod 4755 "$(command -v autorun)" "$(command -v ownership)" /usr/local/utils/web-*
@@ -174,11 +172,11 @@ fi
 # Configure sendmail with msmtp
 if has-cmd msmtp-wrapper; then
     if has-cmd sendmail; then
-        old="$(command -v sendmail)"
+        old="$(type -P sendmail)"
         pkg-del sendmail && \rm -f "$old" || true
     fi
 
-    new="$(command -v msmtp-wrapper)"
+    new="$(type -P msmtp-wrapper)"
     mv -f $new "$(dirname $new)/sendmail"
 fi
 

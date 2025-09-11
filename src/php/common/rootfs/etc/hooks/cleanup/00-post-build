@@ -1,2 +1,2 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 if hook-loaded onbuild; then hook post-build || true; fi

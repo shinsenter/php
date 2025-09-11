@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 PMA_CONFIG="$APP_PATH/config.inc.php"
 
 web-mkdir "$APP_PATH/tmp" "$APP_PATH/tmp/save" "$APP_PATH/tmp/upload"

@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 ################################################################################
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
@@ -12,7 +12,7 @@
 ################################################################################
 OLD_GROUP="${DEFAULT_GROUP:-www-data}"
 OLD_USER="${DEFAULT_USER:-www-data}"
-DEFAULT_SHELL="$(command -v nologin)"
+DEFAULT_SHELL="$(type -P nologin)"
 
 # ensure group and user exist
 if ! getent group "$OLD_GROUP" >/dev/null 2>&1; then

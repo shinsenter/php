@@ -1,2 +1,2 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 if has-cmd /command/s6-env; then exit 0; else exit 1; fi

@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+user_dir="$(realpath -mqs "$(getent passwd "${APP_USER:-www-data}" | cut -d: -f6)")"
+if [ -n "$user_dir" ]; then web-mkdir "$(dirname "$user_dir")"; fi
+
+# load the $ENV in ~/.bashrc and ~/.profile
+env_check='[ -f "$ENV" ] && [ -z "$ENV_LOADED" ] && source "$ENV" &>/dev/null && ENV_LOADED=1'
+for profile in {"$user_dir",/root}/{.bashrc,.profile}; do
+    if [ -z "$profile" ]; then continue; fi
+    touch "$profile"
+    if ! grep -qF -- "$env_check" "$profile"; then
+        tmp_file="$(mktemp)"
+        {
+            echo "# load environment variables"
+            echo "$env_check"
+            echo ""
+            cat "$profile"
+        } >"$tmp_file"
+        mv -f "$tmp_file" "$profile"
+    fi
+done

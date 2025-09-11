@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 ##
 # Source: https://gist.github.com/onnimonni/e7f2a5199d6dc719ffd32dc4d6ac1902
 # This is a custom wrapper for msmtp to behave like sendmail.

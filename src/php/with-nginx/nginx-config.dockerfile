@@ -36,7 +36,7 @@ mkdir -p /etc/nginx \
 # create s6 services
 if has-cmd s6-service; then
     s6-service nginx requires php-fpm
-    s6-service nginx longrun '#!/usr/bin/env sh
+    s6-service nginx longrun '#!/usr/bin/env bash
 NGINX_PID="${NGINX_PID:-/run/nginx.pid}"
 \rm -rf "$NGINX_PID" || true
 exec wait-for "$(s6-service nginx depends php-fpm && echo $PHP_LISTEN)" \

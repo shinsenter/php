@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 if [ -n "$DEFAULT_LOG_PATH" ]; then
     echo "$DEFAULT_LOG_PATH"
 else

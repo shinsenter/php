@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 debug-echo "Remove PHP source."
 \rm -rf /usr/src/php* || true
 
@@ -10,7 +10,7 @@ fi
 
 if is-true "$CLEANUP_PHPDBG" && has-cmd phpdbg; then
     debug-echo -w 'Remove phpdbg binary.'
-    \rm -rf "$(command -v phpdbg)" || true
+    \rm -rf "$(type -P phpdbg)" || true
 fi
 
 if [ -d "$PHP_EXTENSION_DIR" ]; then

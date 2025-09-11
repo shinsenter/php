@@ -76,7 +76,7 @@ fi
 # create s6 services
 if has-cmd s6-service; then
     s6-service apache requires php-fpm
-    s6-service apache longrun '#!/usr/bin/env sh
+    s6-service apache longrun '#!/usr/bin/env bash
 if [ -f /etc/apache2/envvars ]; then source /etc/apache2/envvars; fi
 \rm -f "${APACHE_PID:-/run/apache2.pid}" || true
 exec wait-for "$(s6-service apache depends php-fpm && echo $PHP_LISTEN)" \

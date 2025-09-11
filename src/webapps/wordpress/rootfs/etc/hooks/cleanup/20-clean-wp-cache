@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 # clean WP-CLI cache
 wp-cli --allow-root cli cache clear || true
 \rm -rf "$WP_CLI_CACHE_DIR"/* "$WP_CLI_PACKAGES_DIR/cache" &>/dev/null || true

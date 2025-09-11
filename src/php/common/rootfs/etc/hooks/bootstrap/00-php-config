@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 ################################################################################
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
@@ -6,15 +6,19 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
+# generate PHP config
 if has-cmd php && has-cmd php-envvars; then
     debug-echo "Generate PHP config."
     if is-true "$ALLOW_RUNTIME_PHP_ENVVARS"; then
+        debug-echo "Export all env variables for PHP."
+        php-envvars export_envvars 2>&1
         php-envvars write_dynamic_config 2>&1
     else
         php-envvars write_static_config 2>&1
     fi
 fi
 
+# optimize PHP-FPM
 if has-cmd php-fpm && is-true "$ENABLE_TUNING_FPM"; then
     debug-echo -i "Tune PHP-FPM performance."
 

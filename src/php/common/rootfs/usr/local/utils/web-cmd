@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 ################################################################################
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
@@ -31,7 +31,7 @@ else
     command="web-do $@"
 fi
 
-echo "#!/usr/bin/env sh
+echo "#!/usr/bin/env bash
 exec in-app $command \"\$@\"
 " >$target
 chmod +x $target

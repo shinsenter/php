@@ -12,7 +12,7 @@ RUN <<'EOF'
 
 # create s6 services
 if has-cmd s6-service; then
-    s6-service roadrunner longrun '#!/usr/bin/env sh
+    s6-service roadrunner longrun '#!/usr/bin/env bash
 exec in-app /usr/local/bin/rr \
     -w "$APP_PATH" \
     -o server.user="$APP_USER" \

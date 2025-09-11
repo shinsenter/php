@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 ################################################################################
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
@@ -46,37 +46,11 @@ fi
 hook onboot
 
 ################################################################################
-# load the $ENV in ~/.bashrc
-env_check='if [ -f "$ENV" ]; then source "$ENV" &>/dev/null; fi'
-user_profile="$(realpath -mqs "$(getent passwd "${APP_USER:-www-data}" | cut -d: -f6)/.bashrc")"
-if [ -n "$user_profile" ]; then web-mkdir "$(dirname "$user_profile")"; fi
-for profile in "$user_profile" /root/.bashrc; do
-    if [ -z "$profile" ]; then continue; fi
-    touch "$profile"
-    if ! grep -qF -- "$env_check" "$profile"; then
-        tmp_file="$(mktemp)"
-        {
-            echo "# load environment variables"
-            echo "$env_check"
-            echo ""
-            cat "$profile"
-        } >"$tmp_file"
-        mv -f "$tmp_file" "$profile"
-    fi
-done
-
-# export all env variables for PHP
-if is-true "$ALLOW_RUNTIME_PHP_ENVVARS" && has-cmd php && has-cmd php-envvars; then
-    debug-echo "Export all env variables for PHP."
-    php-envvars export_envvars 2>&1
-fi
-
-################################################################################
 # fallback for docker-php-entrypoint
 if [ -x "/init" ]; then set -- /init "$@"; fi
 
 # fallback empty entrypoint
-if [ "$#" -eq 0 ]; then set -- /bin/sh; fi
+if [ "$#" -eq 0 ]; then set -- /bin/bash; fi
 
 # run bootstrap hooks to initialize the container
 hook bootstrap $(! has-s6 && echo bootstrap-non-s6) \
