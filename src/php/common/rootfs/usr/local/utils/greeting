@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 welcome_txt=/etc/welcome.txt
 license_txt=/license
 user="${APP_USER:=www-data}"

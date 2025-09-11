@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 ################################################################################
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
@@ -11,7 +11,7 @@ conf_path="$(env-path)"
 if [ ! -f "$conf_path" ]; then
     mkdir -p "$(dirname $conf_path)"
     cat <<'ENVVARS' > "$conf_path"
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 [ "$TERM" = "dumb" ] && export TERM=xterm
 PATH=$(echo "$PATH" | sed -E 's#(^|:)/usr/local/aliases(:|$)#\1\2#g; s#^:##; s#:$##; s#::#:#g')
 composer_bin() { [ -n "$(type -P composer)" ] && composer "$@" config bin-dir --quiet --absolute 2>/dev/null; }
