@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 ################################################################################
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
@@ -247,7 +247,7 @@ final class DockerPHP
     private function get_fpm_ini()
     {
         exec(
-            "$(command -v php-fpm) -n -d log_level=notice -tt 2>&1 | sed -e 's#^.*\?NOTICE:[ \t]*##' | uniq | grep '[=\[]'",
+            "php-fpm -n -d log_level=notice -tt 2>&1 | sed -e 's#^.*\?NOTICE:[ \t]*##' | uniq | grep '[=\[]'",
             $lines
         );
 

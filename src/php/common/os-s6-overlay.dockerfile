@@ -20,7 +20,7 @@ if [ -n "$S6_VERSION" ] && ! has-s6; then
     FALLBACK_ENTRYPOINT="/init-non-s6"
 
     # install deps
-    if [ ! -x "$(command -v xz)" ] || [ ! -x "$(command -v tar)" ]; then
+    if [ ! -x "$(type -P xz)" ] || [ ! -x "$(type -P tar)" ]; then
         APK_PACKAGES="tar xz" \
         APT_PACKAGES="xz-utils" \
         pkg-add
@@ -79,7 +79,7 @@ if [ -n "$S6_VERSION" ] && ! has-s6; then
 
     # create oneshot service for checking web server
     if has-cmd s6-service; then
-        s6-service \~verify-server oneshot '#!/usr/bin/env sh
+        s6-service \~verify-server oneshot '#!/usr/bin/env bash
 is-true "$DISABLE_ONLIVE_HOOK" && exit 0
 wait-for "${HEALTH_CHECK_URL:-http://127.0.0.1}" hook onlive || true
 '

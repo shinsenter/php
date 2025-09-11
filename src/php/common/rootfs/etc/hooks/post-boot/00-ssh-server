@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 ################################################################################
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
@@ -12,7 +12,7 @@ debug-echo -d "\$ENABLE_SSH is set to true. Container will try starting sshd ser
 # install openssh-server if sshd not found
 if ! has-cmd sshd; then
     pkg-add openssh-server
-    s6-service sshd longrun '#!/usr/bin/env sh
+    s6-service sshd longrun '#!/usr/bin/env bash
 if is-true "$ENABLE_SSH" || is-true "$ENABLE_SSHD"; then
     exec 2>&1
     exec /usr/sbin/sshd -D $(is-debug && echo -d) -f "/run/sshd_env.conf" $SSHD_EXTRA_OPTIONS
@@ -49,11 +49,11 @@ esac
 
 # create group/user
 getent group "$SSHD_GID" >/dev/null 2>&1 || groupadd -g "$SSHD_GID" "$SSHD_USER" || true
-id -u "$SSHD_USER" >/dev/null 2>&1 || useradd -m -u "$SSHD_UID" -g "$SSHD_GID" -s /bin/sh "$SSHD_USER"
+id -u "$SSHD_USER" >/dev/null 2>&1 || useradd -m -u "$SSHD_UID" -g "$SSHD_GID" -s /bin/bash "$SSHD_USER"
 
 # modify current shell
 CURRENT_SHELL=$(getent passwd "$SSHD_USER" | cut -d: -f7)
-if [ "$CURRENT_SHELL" = "$(command -v nologin)" ] || [ "$CURRENT_SHELL" = "$(command -v false)" ]; then
+if [ "$CURRENT_SHELL" = "$(type -P nologin)" ] || [ "$CURRENT_SHELL" = "$(type -P false)" ]; then
     usermod -s /bin/bash "$SSHD_USER"
 fi
 

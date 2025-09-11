@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 if [[ "$DOCKER_NAME" != 'shinsenter/'* ]]; then
 echo "
 

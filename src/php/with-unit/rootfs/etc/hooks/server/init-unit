@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 ################################################################################
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
@@ -10,9 +10,9 @@ unit_socket="${UNIT_CONTROL_SOCKET:-/run/control.unit.sock}"
 unit_pid_file="${UNIT_CONTROL_PID:-/run/unit.pid}"
 
 if is-debug && has-cmd unitd-debug; then
-    unitd_bin="$(command -v unitd-debug)"
+    unitd_bin="$(type -P unitd-debug)"
 else
-    unitd_bin="$(command -v unitd)"
+    unitd_bin="$(type -P unitd)"
 fi
 
 configtest() {

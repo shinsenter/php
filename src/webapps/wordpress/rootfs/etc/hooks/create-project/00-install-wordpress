@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 source=https://raw.githubusercontent.com/docker-library/wordpress/master/wp-config-docker.php
 
 debug-echo -i "Install Wordpress to $APP_PATH."

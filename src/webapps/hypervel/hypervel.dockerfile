@@ -51,7 +51,7 @@ phpaddmod protobuf swoole
 sed -i 's/ --isolated//g' /etc/hooks/onready/*
 
 if has-cmd s6-service; then
-    s6-service hypervel longrun '#!/usr/bin/env sh
+    s6-service hypervel longrun '#!/usr/bin/env bash
 exec artisan ${LARAVEL_SERVE_COMMAND:-"serve"} $LARAVEL_SERVE_OPTIONS
 '
 

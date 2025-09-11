@@ -29,7 +29,7 @@ fi
 
 # create s6 services
 if has-cmd s6-service; then
-    s6-service frankenphp longrun '#!/usr/bin/env sh
+    s6-service frankenphp longrun '#!/usr/bin/env bash
 if [ -f /etc/caddy/envvars ]; then source /etc/caddy/envvars; fi
 exec in-app frankenphp run \
     --config /etc/caddy/Caddyfile \

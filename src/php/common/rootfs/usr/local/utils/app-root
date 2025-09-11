@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 target="$DOCUMENT_ROOT"
 
 # falls back to old $APACHE_DOCUMENT_ROOT or $NGINX_DOCUMENT_ROOT if it is set

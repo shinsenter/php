@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 # falls back to old $WEBHOME if it is set
 if [ -n "$WEBHOME" ]; then
     echo "$WEBHOME"

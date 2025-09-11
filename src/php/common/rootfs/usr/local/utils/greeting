@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 welcome_txt=/etc/welcome.txt
 license_txt=/license
 user="${APP_USER:=www-data}"
@@ -29,3 +29,4 @@ Document Root : $APP_ROOT
 if [ -n "$S6_VERSION" ]; then echo "With s6-overlay $S6_VERSION"; fi
 if has-cmd php-fpm;  then php-fpm -v; elif has-cmd php; then php -v; fi
 if has-cmd composer; then composer -V 2>&1 | head -n1; fi
+echo ""

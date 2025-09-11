@@ -218,10 +218,10 @@ if [ -n "$major_version" ] && [ "$major_version" -lt 2 ]; then
 fi
 
 # Make alias for some commands
-has-cmd php      && web-cmd root php      "$(command -v php)"
-has-cmd php-fpm  && web-cmd root php-fpm  "$(command -v php-fpm)"
-has-cmd pecl     && web-cmd root pecl     "$(command -v pecl)"
-has-cmd composer && web-cmd root composer "$(command -v composer)"
+has-cmd php      && web-cmd root php      "$(type -P php)"
+has-cmd php-fpm  && web-cmd root php-fpm  "$(type -P php-fpm)"
+has-cmd pecl     && web-cmd root pecl     "$(type -P pecl)"
+has-cmd composer && web-cmd root composer "$(type -P composer)"
 
 # Patch entrypoint for PHP-FPM
 if grep -qF -- 'exec "$@"' /init && has-cmd php; then
@@ -242,7 +242,7 @@ fi
 
 # Create s6 services for PHP-FPM
 if has-cmd php-fpm && has-cmd s6-service; then
-    s6-service php-fpm longrun '#!/usr/bin/env sh
+    s6-service php-fpm longrun '#!/usr/bin/env bash
 exec in-app php-fpm --nodaemonize \
     --allow-to-run-as-root \
     -c "$(php-envvars php_conf)" \

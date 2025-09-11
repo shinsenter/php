@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 nginx_conf=/etc/nginx/sites-enabled/00-default.conf
 port="$HTTP_SERVER_PORT"
 if ! [[ "$port" =~ ^[0-9]+$ ]]; then

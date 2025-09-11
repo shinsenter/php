@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 ################################################################################
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
@@ -11,20 +11,17 @@ conf_path="$(env-path)"
 if [ ! -f "$conf_path" ]; then
     mkdir -p "$(dirname $conf_path)"
     cat <<'ENVVARS' > "$conf_path"
-#!/bin/sh
+#!/usr/bin/env bash
+[ "$TERM" = "dumb" ] && export TERM=xterm
 PATH=$(echo "$PATH" | sed -E 's#(^|:)/usr/local/aliases(:|$)#\1\2#g; s#^:##; s#:$##; s#::#:#g')
-composer_bin() { [ -x "$(command -v composer)" ] && timeout 1s composer "$@" config bin-dir --quiet --absolute 2>/dev/null; }
+composer_bin() { [ -n "$(type -P composer)" ] && composer "$@" config bin-dir --quiet --absolute 2>/dev/null; }
 add_to_path()  { dir="${1%/}"; [ -n "$dir" ] && [[ ":$PATH:" != *":$dir:"* ]] && PATH="${dir}${PATH:+:}${PATH}"; }
-required_paths=(
-    /bin /sbin /usr/bin /usr/sbin
-    /usr/local/bin /usr/local/sbin
-    /usr/local/utils
-) && for dir in "${required_paths[@]}"; do add_to_path "$dir"; done
+for dir in /{bin,sbin} /usr/{bin,sbin} /usr/local/{bin,sbin,utils}; do add_to_path "$dir"; done
 
 APP_PATH="$(app-path)"
 APP_ROOT="$(app-root)"
-web-mkdir "$APP_PATH" && cd "$APP_PATH" &>/dev/null || true
 
+web-mkdir "$APP_PATH" && cd "$APP_PATH" &>/dev/null || true
 add_to_path "$(composer_bin global)"
 add_to_path "$(composer_bin -d "$APP_PATH")"
 

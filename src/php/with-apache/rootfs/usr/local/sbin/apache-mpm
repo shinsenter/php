@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 ################################################################################
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
@@ -12,7 +12,7 @@ profile="${2:-balanced}"
 cpu_cores=$(grep -c ^processor /proc/cpuinfo)
 ram_mb=$(free -m | awk '/^Mem:/{print $2}')
 
-if ! command -v apache2 >/dev/null 2>&1; then
+if ! has-cmd apache2; then
     echo "Error: apache2 command not found" >&2
     exit 1
 fi

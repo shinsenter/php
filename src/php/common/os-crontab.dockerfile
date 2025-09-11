@@ -13,17 +13,17 @@ echo 'Configure base crontab'
 env-default '# Environment variables for crontab'
 env-default ENABLE_CRONTAB   '0'
 env-default CRONTAB_SETTINGS ''
-env-default CRONTAB_SHELL    '/bin/sh'
+env-default CRONTAB_SHELL    '/bin/bash'
 env-default CRONTAB_MAILTO   '$APP_ADMIN'
 env-default CRONTAB_OPTIONS  ''
 
 if ! has-cmd crond; then
     pkg-add cron
-    ln -nsf $(command -v cron) /usr/sbin/crond
+    ln -nsf $(type -P cron) /usr/sbin/crond
 fi
 
 if has-cmd s6-service; then
-    s6-service crontab longrun '#!/usr/bin/env sh
+    s6-service crontab longrun '#!/usr/bin/env bash
 if is-true "$ENABLE_CRONTAB"; then
     exec 2>&1
     exec in-app crond -f $CRONTAB_OPTIONS

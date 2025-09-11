@@ -21,14 +21,14 @@ mkdir -p /etc/unit /etc/unit/sites-enabled \
 
 # create s6 services
 if has-cmd s6-service; then
-    s6-service unit longrun '#!/usr/bin/env sh
+    s6-service unit longrun '#!/usr/bin/env bash
 unit_pid="${UNIT_CONTROL_PID:-/run/unit.pid}"
 unit_socket="${UNIT_CONTROL_SOCKET:-/run/control.unit.sock}"
 
 if is-debug && has-cmd unitd-debug; then
-    unitd="$(command -v unitd-debug)"
+    unitd="$(type -P unitd-debug)"
 else
-    unitd="$(command -v unitd)"
+    unitd="$(type -P unitd)"
 fi
 
 \rm -rf "$unit_pid" || true

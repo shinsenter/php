@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 ################################################################################
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
@@ -106,7 +106,7 @@ if [ "$type" = "oneshot" ]; then
 fi
 
 if [ "$type" = "longrun" ]; then
-    create "${svc_path}/finish" "#!/usr/bin/env sh
+    create "${svc_path}/finish" "#!/usr/bin/env bash
 exec hook ${hook_name}"
 fi
 
