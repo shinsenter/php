@@ -17,7 +17,6 @@ for profile in {"$user_dir",/root}/{.bashrc,.profile}; do
     if ! grep -qF -- "$env_check" "$profile"; then
         tmp_file="$(mktemp)"
         {
-            echo "# load environment variables"
             echo "$env_check"
             echo ""
             cat "$profile"
