@@ -6,26 +6,29 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-conf_path="$(env-path)"
+conf_path="$(env-path @)"
 
 if [ ! -f "$conf_path" ]; then
     mkdir -p "$(dirname $conf_path)"
     cat <<'ENVVARS' > "$conf_path"
-#!/usr/bin/env sh
-[ "$TERM" = "dumb" ] && export TERM=xterm
-PATH=$(echo "$PATH" | sed -E 's#(^|:)/usr/local/aliases(:|$)#\1\2#g; s#^:##; s#:$##; s#::#:#g')
-composer_bin() { [ -n "$(type -P composer)" ] && composer "$@" config bin-dir --quiet --absolute 2>/dev/null; }
-add_to_path()  { dir="${1%/}"; [ -n "$dir" ] && [[ ":$PATH:" != *":$dir:"* ]] && PATH="${dir}${PATH:+:}${PATH}"; }
-for dir in /{bin,sbin} /usr/{bin,sbin} /usr/local/{bin,sbin,utils}; do add_to_path "$dir"; done
-
+#!/usr/bin/env bash
+if [ ! -x "/usr/local/utils/env-path" ]; then return 1; fi
+[ "$TERM" = "dumb" ] && TERM=xterm
+PATH="$(/usr/local/utils/env-path)"
 APP_PATH="$(app-path)"
 APP_ROOT="$(app-root)"
-
-web-mkdir "$APP_PATH" && cd "$APP_PATH" &>/dev/null || true
-add_to_path "$(composer_bin global)"
-add_to_path "$(composer_bin -d "$APP_PATH")"
-
-export PATH APP_PATH APP_ROOT
+if command -v composer &>/dev/null; then
+    if [ -z "$CACHED_COMPOSER_BIN_DIR" ]; then
+        export CACHED_COMPOSER_BIN_DIR="$(
+            user_bin="$(composer -d "$APP_PATH" config bin-dir --absolute 2>/dev/null)"
+            global_bin="$(composer config bin-dir --global --absolute 2>/dev/null)"
+            printf '%s:%s' "$user_bin" "$global_bin"
+        )"
+    fi
+    PATH="$(env-path "$CACHED_COMPOSER_BIN_DIR")"
+fi
+export TERM PATH APP_PATH APP_ROOT
+[ -d "$APP_PATH" ] && cd "$APP_PATH"
 
 # begin extra sources
 # end extra sources

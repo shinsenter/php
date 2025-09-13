@@ -1,3 +1,43 @@
 #!/usr/bin/env sh
-DEFAULT_ENV="/usr/local/etc/.env"
-[ "$1" = "@" ] && echo "$DEFAULT_ENV" || echo "${ENV:-$DEFAULT_ENV}"
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+# print the env path and exit
+[ "$1" = "@" ] && echo "${ENV:-/usr/local/etc/.env}" && exit 0
+
+################################################################################
+# append necessary paths to $PATH
+ADD_PATHS="${1:-/usr/local/utils:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin}"
+DEL_PATHS="${2:-/usr/local/aliases}"
+IFS=:
+
+if [ -n "$DEL_PATHS" ]; then
+    PATH=":${PATH}:"
+    for part in $DEL_PATHS; do
+        part=${part%/}
+        [ -n "$part" ] && PATH="${PATH//:$part:/:}"
+    done
+    PATH="${PATH#:}"
+    PATH="${PATH%:}"
+fi
+
+if [ -n "$ADD_PATHS" ]; then
+    reversed=""
+    for part in $ADD_PATHS; do
+        part=${part%/}
+        [ -n "$part" ] && reversed=$part${reversed:+:}$reversed
+    done
+
+    for part in $reversed; do
+        [ -n "$part" ] && case ":$PATH:" in
+            *":$part:"*) ;;
+            *) PATH=$part${PATH:+:}$PATH ;;
+        esac
+    done
+fi
+
+echo "$PATH"
