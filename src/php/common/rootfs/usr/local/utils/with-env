@@ -11,7 +11,7 @@ DEFAULT_ENV="$(ENV= env-path @)"
 
 print_env() {
     # print environment variables sorted, excluding the special _= variable
-    env -0 | awk -v RS='\0' '!/^_=/ {print}' | sort -df
+    env -0 | sort -dbfiz | tr '\0' '\n' | grep -v '^_='
 }
 
 safe_source() {
