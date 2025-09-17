@@ -87,7 +87,7 @@ wait-for "${HEALTH_CHECK_URL:-http://127.0.0.1}" hook onlive || true
 
     # check whether to run the legacy entrypoint
     if [ -x /init ] && [ -x "$FALLBACK_ENTRYPOINT" ]; then
-        sed -i "s~^exec ~if [ \"\$#\" -gt 0 ]; then is-true \"\$KEEP_S6_SERVICES\" && set -- $FALLBACK_ENTRYPOINT \"\$@\" || exec $FALLBACK_ENTRYPOINT \"\$@\"; fi\n\nexec ~" /init
+        sed -i "s~^exec ~if [ \"\$#\" -gt 0 ]; then is-true \"\$KEEP_S6_SERVICES\" \&\& set -- $FALLBACK_ENTRYPOINT \"\$@\" || exec $FALLBACK_ENTRYPOINT \"\$@\"; fi\n\nexec ~" /init
     fi
 fi
 EOF
