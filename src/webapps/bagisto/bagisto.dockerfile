@@ -26,15 +26,8 @@ ADD  --link ./rootfs/ /
 # COPY --link --chmod=755 --from=minio/mc:latest /usr/bin/mc /usr/bin/mc
 
 ################################################################################
-# https://github.com/coollabsio/coolify
-RUN env-default INITIAL_PROJECT "https://codeload.github.com/coollabsio/coolify/legacy.tar.gz/refs/tags/$(download https://api.github.com/repos/coollabsio/coolify/releases/latest | grep "tag_name" | cut -d \" -f 4)?ext=.tar.gz"
-
-# https://coolify.io/docs/installation
-ENV PHP_POST_MAX_SIZE="256M"
-ENV PHP_UPLOAD_MAX_FILESIZE="256M"
-ENV QUEUE_CONNECTION="sync"
-ENV LARAVEL_ENABLE_HORIZON=1
-ENV LARAVEL_ENABLE_SCHEDULER=1
+# https://devdocs.bagisto.com/getting-started/installation
+RUN env-default INITIAL_PROJECT "bagisto/bagisto"
 
 ################################################################################
 INCLUDE ./meta

@@ -26,8 +26,6 @@ ADD --link ./rootfs/ /
 
 ################################################################################
 # https://statamic.dev/installing
-ENV DOCUMENT_ROOT="public"
-ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 ENV LARAVEL_ENABLE_SCHEDULER=1
 RUN env-default INITIAL_PROJECT "statamic/statamic"
 

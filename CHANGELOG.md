@@ -7,8 +7,10 @@ All notable changes to this project will be documented in this file.
 
 - Introducing [Hooks](https://github.com/shinsenter/php?tab=readme-ov-file#hooks).
 - Added Docker images for PHP versions [8.5](https://hub.docker.com/r/shinsenter/php/tags?name=8.5).
+- Added Docker images for [Bagisto](http://hub.docker.com/r/shinsenter/bagisto).
 - Added Docker images for [Flight framework](http://hub.docker.com/r/shinsenter/flightphp).
 - Added Docker images for [Hypervel](http://hub.docker.com/r/shinsenter/hypervel).
+- Added Docker images for [Matomo](http://hub.docker.com/r/shinsenter/matomo).
 - [Beta] Enable the SSH server (sshd) via the `ENABLE_SSHD` environment variable.
 
 
