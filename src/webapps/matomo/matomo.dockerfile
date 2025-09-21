@@ -12,7 +12,7 @@ ARG BUILDKIT_SBOM_SCAN_CONTEXT=true
 ARG BUILDKIT_SBOM_SCAN_STAGE=true
 
 ################################################################################
-ARG BUILD_FROM_IMAGE="shinsenter/laravel"
+ARG BUILD_FROM_IMAGE="shinsenter/phpfpm-apache"
 ARG BUILD_TAG_PREFIX=""
 
 ARG PHP_VERSION="8.4"
@@ -22,19 +22,13 @@ FROM ${BUILD_FROM_IMAGE}:${BUILD_TAG_PREFIX}php${PHP_VERSION}${PHP_VARIANT}
 ARG  DEBUG
 
 ################################################################################
-ADD  --link ./rootfs/ /
-# COPY --link --chmod=755 --from=minio/mc:latest /usr/bin/mc /usr/bin/mc
+ADD --link ./rootfs/ /
 
 ################################################################################
-# https://github.com/coollabsio/coolify
-RUN env-default INITIAL_PROJECT "https://codeload.github.com/coollabsio/coolify/legacy.tar.gz/refs/tags/$(download https://api.github.com/repos/coollabsio/coolify/releases/latest | grep "tag_name" | cut -d \" -f 4)?ext=.tar.gz"
-
-# https://coolify.io/docs/installation
-ENV PHP_POST_MAX_SIZE="256M"
-ENV PHP_UPLOAD_MAX_FILESIZE="256M"
-ENV QUEUE_CONNECTION="sync"
-ENV LARAVEL_ENABLE_HORIZON=1
-ENV LARAVEL_ENABLE_SCHEDULER=1
+# https://matomo.org/faq/on-premise/installing-matomo/
+ENV DOCUMENT_ROOT=""
+ENV DISABLE_AUTORUN_GENERATING_INDEX=1
+RUN env-default INITIAL_PROJECT "https://codeload.github.com/matomo-org/matomo/legacy.tar.gz/refs/tags/$(download https://api.github.com/repos/matomo-org/matomo/releases/latest | grep "tag_name" | cut -d \" -f 4)?ext=.tar.gz"
 
 ################################################################################
 INCLUDE ./meta

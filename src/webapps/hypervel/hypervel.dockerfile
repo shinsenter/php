@@ -26,8 +26,6 @@ ADD --link ./rootfs/ /
 
 ################################################################################
 # https://hypervel.org/docs/deployment
-ENV DOCUMENT_ROOT="public"
-ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 RUN env-default INITIAL_PROJECT "hypervel/hypervel"
 RUN env-default APP_INDEX "../artisan"
 

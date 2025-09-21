@@ -26,8 +26,6 @@ ADD --link ./rootfs/ /
 
 ################################################################################
 # https://github.com/crater-invoice/crater
-ENV DOCUMENT_ROOT="public"
-ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 RUN env-default INITIAL_PROJECT "bytefury/crater"
 
 ################################################################################

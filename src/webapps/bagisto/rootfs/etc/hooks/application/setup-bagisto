@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+if hook-loaded post-create-project && artisan list --no-ansi | grep -qF -- 'bagisto:install'; then
+    artisan bagisto:install
+fi

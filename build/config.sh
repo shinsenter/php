@@ -28,6 +28,9 @@ set_platforms() {
 # Application rules
 ################################################################################
 APP_RULES="
+# https://devdocs.bagisto.com/getting-started/installation
+bagisto:min=8.1 base=laravel
+
 # https://roots.io/bedrock/docs/installation
 bedrock:min=8.0 base=wordpress
 
@@ -78,6 +81,9 @@ laravel:server=nginx
 
 # https://experienceleague.adobe.com/en/docs/commerce-operations/installation-guide/system-requirements
 magento:min=7.4 latest=8.3 server=nginx
+
+# https://matomo.org/faq/on-premise/installing-matomo/
+matomo:min=7.2 server=apache
 
 # https://docs.mautic.org/en/5.x/getting_started/how_to_install_mautic.html#installing-with-composer
 mautic:min=7.4 latest=8.3 server=apache

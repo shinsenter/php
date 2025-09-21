@@ -314,6 +314,7 @@ jobs:
           - app-laminas
           - app-laravel
           - app-magento
+          - app-matomo
           - app-mautic
           - app-phpmyadmin
           - app-slim
@@ -357,6 +358,7 @@ jobs:
       fail-fast: false
       matrix:
         app:
+          - app-bagisto
           - app-bedrock
           - app-coolify
           - app-hypervel
