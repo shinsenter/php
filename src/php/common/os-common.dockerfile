@@ -131,6 +131,7 @@ env-default '# Aliases for common commands'
 env-default 'alias ls="ls --color=auto"'
 env-default 'alias l1="ls -1"'
 env-default 'alias ll="ls -alh"'
+env-default 'alias less="less -N"'
 
 # Set OS default settings
 env-default '# Environment variables for OS'

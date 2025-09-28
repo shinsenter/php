@@ -5,6 +5,6 @@ if is-true "$CLEANUP_DEV_PACKAGES"; then
     EXTRA_DEPS='*-dev git'
 fi
 
-APK_PACKAGES='.persistent-deps tar xz' \
+APK_PACKAGES='clang* .persistent-* .phpize-* tar xz' \
 APT_PACKAGES='cpp-* xz-utils' \
 exec pkg-del $PHPIZE_DEPS $EXTRA_DEPS

@@ -209,7 +209,11 @@ modules=(
     # zookeeper
     # zstd
 )
-phpaddmod "${modules[@]}" && php -m && composer -V
+phpaddmod "${modules[@]}" || true
+
+# Show installed PHP modules and Composer version
+php -m
+composer -V
 
 # Install prestissimo for Composer v1.x
 major_version=$(composer --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | cut -d. -f1)

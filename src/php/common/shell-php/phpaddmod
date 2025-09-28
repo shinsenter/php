@@ -58,7 +58,7 @@ if [ ! -e "/usr/src/php.tar.xz" ] && [ -n "$PHP_URL" ]; then
     [ -n "$PHP_ASC_URL" ] && download "$PHP_ASC_URL" -o /usr/src/php.tar.xz.asc
 fi
 
-pid="/tmp/$(php -r 'echo md5(uniqid());' 2>/dev/null || echo "${0##*/}-temp")"
+tmp="$(mktemp)"
 
 set -o pipefail
 debug-echo -i "Install PHP modules: $new_mods."
@@ -69,7 +69,7 @@ with-env install-php-extensions $new_mods | while IFS= read -r line || [ -n "$li
     printf '%s\n' "$line"
     case "$line" in
         *"only for installation"*)
-            printf '%s' "${line##*:}" | xargs printf '%s' > "$pid"
+            printf '%s' "${line##*:}" > "$tmp"
             ;;
     esac
 done | grep -vF StandW | debug-echo -m
@@ -77,9 +77,9 @@ done | grep -vF StandW | debug-echo -m
 exit_code=$?
 
 # clean up on failure
-if [ "$exit_code" -ne 0 ] && [ -f "$pid" ]; then
-    pkg-del "$(cat "$pid")"
-    \rm -f "$pid"
+if [ "$exit_code" -ne 0 ] && [ -f "$tmp" ]; then
+    pkg-del $(cat "$tmp")
+    \rm -f "$tmp"
 fi
 
 exit "$exit_code"
