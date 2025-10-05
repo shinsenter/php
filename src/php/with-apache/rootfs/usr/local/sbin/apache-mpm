@@ -6,7 +6,7 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-config="${1:-/etc/apache2/conf-enabled/mpm_tuning.conf}"
+config="${1:-/etc/apache2/mods-enabled/mpm_tuning.conf}"
 profile="${2:-balanced}"
 
 cpu_cores=$(grep -c ^processor /proc/cpuinfo)
