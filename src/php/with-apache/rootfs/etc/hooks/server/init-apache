@@ -16,7 +16,7 @@ Timeout ${PHP_MAX_EXECUTION_TIME}
 <IfModule proxy_module>
     ProxyTimeout ${PHP_MAX_EXECUTION_TIME}
 </IfModule>
-" >/etc/apache2/conf-enabled/timeout.conf
+" >/etc/apache2/mods-enabled/timeout.conf
 fi
 
 web-mkdir "$APACHE_LOG_DIR" "$APACHE_LOCK_DIR" "$APACHE_RUN_DIR"

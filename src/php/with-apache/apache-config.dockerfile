@@ -52,7 +52,6 @@ fi
 # create directories
 mkdir -p /etc/apache2 \
     /etc/apache2/custom.d \
-    /etc/apache2/conf-enabled \
     /etc/apache2/mods-enabled \
     /etc/apache2/sites-enabled \
     /run/apache2 \
