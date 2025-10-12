@@ -46,7 +46,6 @@ jobs:
           - with-nginx
           - with-roadrunner
           - with-f8p
-          - with-unit
     with:
       app_name: ${{ matrix.app }}
       tag_prefix: ${{ inputs.tag_prefix }}

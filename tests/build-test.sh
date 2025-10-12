@@ -50,7 +50,6 @@ if [ -n "${RECURSIVE:-1}" ] && [ -n "$BUILD_FROM_IMAGE" ]; then
         */php)              deps="${PHP_VARIANT/-$1/}" ;;
         */phpfpm-apache)    deps="with-apache" ;;
         */phpfpm-nginx)     deps="with-nginx" ;;
-        */unit-php)         deps="with-unit" ;;
         */roadrunner)       deps="with-roadrunner" ;;
         */frankenphp)       deps="with-f8p" ;;
         */laravel)          deps="app-laravel" ;;

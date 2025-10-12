@@ -163,8 +163,6 @@ path_hash() {
 
 # get_github_latest_tag    "just-containers/s6-overlay"
 # get_github_latest_sha    "just-containers/s6-overlay"
-# get_github_latest_tag    "nginx/unit"
-# get_github_latest_sha    "nginx/unit"
 # get_github_latest_tag    "roadrunner-server/roadrunner"
 # get_github_latest_sha    "roadrunner-server/roadrunner"
 # get_dockerhub_latest_tag "library/php"

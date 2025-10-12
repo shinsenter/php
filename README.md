@@ -1,7 +1,7 @@
 # PHP Docker Images <!-- omit from toc -->
 📦 Simplified PHP Docker images for effortless customization and extension setup.
 
-Our Docker images cover PHP versions from 5.6 to 8.5 (beta), available in CLI, ZTS, FPM, FPM/Apache2, FPM/Nginx, RoadRunner, FrankenPHP, and Nginx Unit variants. The Docker images are available for both Debian and Alpine versions.
+Our Docker images cover PHP versions from 5.6 to 8.5 (beta), available in CLI, ZTS, FPM, FPM/Apache2, FPM/Nginx, RoadRunner and FrankenPHP variants. The Docker images are available for both Debian and Alpine versions.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/php
 - GitHub Packages: https://code.shin.company/php/pkgs/container/php
@@ -40,7 +40,7 @@ These images facilitate the easy adjustment of PHP and PHP-FPM settings using en
 eliminating the need to rebuild images when making configuration changes.
 
 These images also come with the latest version of [Composer](https://getcomposer.org)
-and popular web servers like [Apache2](https://httpd.apache.org), [Nginx](https://nginx.org), [RoadRunner](https://roadrunner.dev), [FrankenPHP](https://frankenphp.dev) or [Nginx Unit](https://unit.nginx.org).
+and popular web servers like [Apache2](https://httpd.apache.org), [Nginx](https://nginx.org), [RoadRunner](https://roadrunner.dev) or [FrankenPHP](https://frankenphp.dev).
 This setup allows for faster project initiation without additional installations.
 
 > 🪶 Info: While built on the official PHP images and including more useful extensions,
@@ -52,7 +52,7 @@ This setup allows for faster project initiation without additional installations
 ## Docker Image Variants
 
 Our image tags cover PHP versions from 5.6 to 8.5 (beta),
-available in `cli`, `zts`, `fpm`, `fpm-nginx`, `fpm-apache`, `roadrunner`<sup>(1)</sup>, `frankenphp`<sup>(2)</sup>, and `unit-php`<sup>(3)</sup> variants. The Docker images are available for both Debian and Alpine versions.
+available in `cli`, `zts`, `fpm`, `fpm-nginx`, `fpm-apache`, `roadrunner`<sup>(1)</sup>, and `frankenphp`<sup>(2)</sup> variants. The Docker images are available for both Debian and Alpine versions.
 
 Examples:
 - `shinsenter/php:7.2-cli`
@@ -62,11 +62,9 @@ Examples:
 - `shinsenter/php:8.1-fpm-nginx`
 - `shinsenter/php:8.2-roadrunner` <sup>(1)</sup>
 - `shinsenter/php:8.3-frankenphp` <sup>(2)</sup>
-- `shinsenter/php:8.4-unit-php` <sup>(3)</sup>
 
 > <sup>(1)</sup>: PHP with RoadRunner server. The `roadrunner` variant supports PHP >= 8.0.<br>
 > <sup>(2)</sup>: FrankenPHP is still in BETA. The `frankenphp` variant supports PHP >= 8.2.<br>
-> <sup>(3)</sup>: PHP with Nginx Unit server. The `unit-php` variant supports PHP >= 7.4.
 
 Explore all available tags on our [Docker Hub](https://hub.docker.com/r/shinsenter/php/tags).
 
@@ -94,7 +92,7 @@ docker run -v ./myproject:/var/www/html -p 9000:9000 shinsenter/php:8.4-fpm
 ```
 
 
-#### PHP-FPM + Nginx (or Apache, RoadRunner, FrankenPHP, Nginx Unit) <!-- omit from toc -->
+#### PHP-FPM + Nginx (or Apache, RoadRunner, FrankenPHP) <!-- omit from toc -->
 
 ```shell
 # with Nginx
@@ -108,9 +106,6 @@ docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.3-r
 
 # with FrankenPHP
 docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.3-frankenphp
-
-# with Nginx Unit
-docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.3-unit-php
 ```
 
 
