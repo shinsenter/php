@@ -70,7 +70,6 @@ jobs:
           get_github_latest_tag "composer/composer"
           get_github_latest_tag "just-containers/s6-overlay"
           get_github_latest_tag "mlocati/docker-php-extension-installer"
-          get_github_latest_tag "nginx/unit"
           get_github_latest_tag "roadrunner-server/roadrunner"
           get_dockerhub_latest_sha "library/debian"
           get_dockerhub_latest_sha "library/alpine"
@@ -211,7 +210,6 @@ jobs:
       matrix:
         app:
           - with-f8p
-          - with-unit
     with:
       app_name: ${{ matrix.app }}
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}

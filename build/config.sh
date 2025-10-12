@@ -153,10 +153,6 @@ apply_app_rules() {
             PREFER_SERVER="nginx"
             BUILD_FROM_IMAGE="$DEFAULT_REPO/phpfpm-nginx"
             ;;
-        unit|nginx-unit)
-            PREFER_SERVER="unit"
-            BUILD_FROM_IMAGE="$DEFAULT_REPO/unit-php"
-            ;;
         f8p|frankenphp)
             PREFER_SERVER="frankenphp"
             BUILD_FROM_IMAGE="$DEFAULT_REPO/frankenphp"
@@ -287,17 +283,6 @@ case "$APP" in
         PHP_VARIANT="fpm$SUFFIX"
         ALLOW_RC=1
         ;;
-    with-unit)
-        verlt "$PHP_VERSION" "7.4" && SKIP_BUILD=1
-        unit_version="$(get_github_latest_tag nginx/unit)"
-        PREFIX="unit"
-        BUILD_NAME="$DEFAULT_REPO/unit-php"
-        BUILD_DOCKERFILE="$BASE_DIR/src/php/with-unit.dockerfile"
-        BUILD_SOURCE_IMAGE="https://codeload.github.com/nginx/unit/tar.gz/refs/tags/$unit_version"
-        BUILD_CACHE_KEY="(unit@$(echo "$unit_version" | head -c19))"
-        PHP_VARIANT="zts$SUFFIX"
-        ALLOW_RC=1
-        ;;
     with-f8p)
         verlt "$PHP_VERSION" "8.2" && SKIP_BUILD=1
         PREFIX="frankenphp"
@@ -422,7 +407,6 @@ if [ -n "$PHP_VERSION" ]; then
             with-nginx)      suffix=fpm-nginx ;;
             with-roadrunner) suffix=roadrunner ;;
             with-f8p)        suffix=frankenphp ;;
-            with-unit)       suffix=unit-php ;;
         esac
 
         [ -n "$suffix" ] && {
