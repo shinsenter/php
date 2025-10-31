@@ -108,8 +108,8 @@ exit $exit_code
 # PLATFORM=amd64 ./tests/build-test.sh '' 'base-os'
 # PLATFORM=amd64 ./tests/build-test.sh 'alpine' 'base-os'
 
-# PLATFORM=amd64 ./tests/build-test.sh '' 'with-nginx' 8.4
-# PLATFORM=amd64 ./tests/build-test.sh 'alpine' 'with-nginx' 8.4
+# PLATFORM=amd64 ./tests/build-test.sh '' 'with-nginx' 8.5
+# PLATFORM=amd64 ./tests/build-test.sh 'alpine' 'with-nginx' 8.5
 
-# PLATFORM=amd64 ./tests/build-test.sh '' 'app-laravel' 8.4
-# PLATFORM=amd64 ./tests/build-test.sh 'alpine' 'app-laravel' 8.4
+# PLATFORM=amd64 ./tests/build-test.sh '' 'app-laravel' 8.5
+# PLATFORM=amd64 ./tests/build-test.sh 'alpine' 'app-laravel' 8.5

@@ -13,14 +13,14 @@ ARG BUILDKIT_SBOM_SCAN_STAGE=true
 
 ################################################################################
 ARG BUILD_FROM_IMAGE="php"
-ARG PHP_VERSION="8.4"
+ARG PHP_VERSION="8.5"
 ARG PHP_VARIANT="fpm-alpine"
 
 FROM ${BUILD_FROM_IMAGE}:${PHP_VERSION}-${PHP_VARIANT}
 ARG  DEBUG
 
 # set PHP variables
-ARG PHP_VERSION="8.4"
+ARG PHP_VERSION="8.5"
 ENV PHP_VERSION=${PHP_VERSION//-rc/}
 
 ################################################################################

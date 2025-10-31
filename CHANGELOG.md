@@ -3,8 +3,9 @@
 All notable changes to this project will be documented in this file.
 
 
-## [5.6.0] - XXXX-XX-XX
+## [5.6.0] - 2025-11-20
 
+- Use [PHP 8.5](https://www.php.net/ChangeLog-8.php#PHP_8_5) for the latest tags.
 - Introducing [Hooks](https://github.com/shinsenter/php?tab=readme-ov-file#hooks).
 - Added Docker images for PHP versions [8.5](https://hub.docker.com/r/shinsenter/php/tags?name=8.5).
 - Added Docker images for [Bagisto](http://hub.docker.com/r/shinsenter/bagisto).
