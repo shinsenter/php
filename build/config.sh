@@ -190,7 +190,7 @@ OS="$1"; APP="$2"; PHP_VERSION="$3"; PREFER_SERVER="$4"
 ################################################################################
 # Build environment variables
 ################################################################################
-LATEST_PHP="8.4"
+LATEST_PHP="8.5"
 LATEST_S6=
 
 PHP_VARIANT="${PHP_VARIANT:-}"
@@ -432,9 +432,9 @@ if [ -n "$PHP_VERSION" ]; then
             expand_tags ":php7.4" ":php7"
             expand_tags ":7.4" ":7"
             ;;
-        8.4)
-            expand_tags ":php8.4" ":php8"
-            expand_tags ":8.4" ":8"
+        8.5)
+            expand_tags ":php8.5" ":php8"
+            expand_tags ":8.5" ":8"
             ;;
         "$LATEST_PHP")
             major=${PHP_VERSION%%.*}

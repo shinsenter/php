@@ -55,7 +55,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php_version: ["8.4", "8.3", "8.2", "8.1"]
+        php_version: ["8.5", "8.4", "8.3", "8.2"]
         os: ["", "alpine"]
     with:
       os: ${{ matrix.os }}
@@ -71,7 +71,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php_version: ["8.0", "7.4", "7.3", "7.2", "7.1", "7.0", "5.6"]
+        php_version: ["8.1", "8.0", "7.4", "7.3", "7.2", "7.1", "7.0", "5.6"]
         os: ["", "alpine"]
         exclude:
           - os: "alpine"

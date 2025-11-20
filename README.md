@@ -51,17 +51,17 @@ This setup allows for faster project initiation without additional installations
 
 ## Docker Image Variants
 
-Our image tags cover PHP versions from 5.6 to 8.5 (beta),
+Our image tags cover PHP versions from 5.6 to 8.5,
 available in `cli`, `zts`, `fpm`, `fpm-nginx`, `fpm-apache`, `roadrunner`<sup>(1)</sup>, and `frankenphp`<sup>(2)</sup> variants. The Docker images are available for both Debian and Alpine versions.
 
 Examples:
-- `shinsenter/php:7.2-cli`
-- `shinsenter/php:7.3-zts`
-- `shinsenter/php:7.4-fpm`
-- `shinsenter/php:8.0-fpm-apache`
-- `shinsenter/php:8.1-fpm-nginx`
-- `shinsenter/php:8.2-roadrunner` <sup>(1)</sup>
-- `shinsenter/php:8.3-frankenphp` <sup>(2)</sup>
+- `shinsenter/php:8.3-cli`
+- `shinsenter/php:8.4-zts`
+- `shinsenter/php:8.5-fpm`
+- `shinsenter/php:8.1-fpm-apache`
+- `shinsenter/php:8.2-fpm-nginx`
+- `shinsenter/php:8.3-roadrunner` <sup>(1)</sup>
+- `shinsenter/php:8.4-frankenphp` <sup>(2)</sup>
 
 > <sup>(1)</sup>: PHP with RoadRunner server. The `roadrunner` variant supports PHP >= 8.0.<br>
 > <sup>(2)</sup>: FrankenPHP is still in BETA. The `frankenphp` variant supports PHP >= 8.2.<br>
@@ -78,17 +78,17 @@ You can easily run a container by copying and pasting one of these `docker run` 
 
 ```shell
 # non-interactive
-docker run --rm shinsenter/php:8.4-cli php -m
+docker run --rm shinsenter/php:8.5-cli php -m
 
 # interactive
-docker run -it -v ./myproject:/var/www/html shinsenter/php:8.4-cli
+docker run -it -v ./myproject:/var/www/html shinsenter/php:8.5-cli
 ```
 
 
 #### PHP-FPM <!-- omit from toc -->
 
 ```shell
-docker run -v ./myproject:/var/www/html -p 9000:9000 shinsenter/php:8.4-fpm
+docker run -v ./myproject:/var/www/html -p 9000:9000 shinsenter/php:8.5-fpm
 ```
 
 
@@ -96,16 +96,16 @@ docker run -v ./myproject:/var/www/html -p 9000:9000 shinsenter/php:8.4-fpm
 
 ```shell
 # with Nginx
-docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.4-fpm-nginx
+docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.5-fpm-nginx
 
 # with Apache
-docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.4-fpm-apache
+docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.5-fpm-apache
 
 # with RoadRunner
-docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.3-roadrunner
+docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.4-roadrunner
 
 # with FrankenPHP
-docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.3-frankenphp
+docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.4-frankenphp
 ```
 
 
@@ -141,7 +141,7 @@ docker run \
     -e PHP_POST_MAX_SIZE='100M' \
     -e PHP_UPLOAD_MAX_FILESIZE='100M' \
     -e PHP_SESSION_COOKIE_HTTPONLY='1' \
-    shinsenter/php:8.4 php -i
+    shinsenter/php:8.5 php -i
 ```
 
 
@@ -150,7 +150,7 @@ docker run \
 ```yaml
 services:
   web:
-    image: shinsenter/php:8.4-fpm-nginx
+    image: shinsenter/php:8.5-fpm-nginx
     environment:
       PHP_DISPLAY_ERRORS: "1"
       PHP_POST_MAX_SIZE: "100M"
@@ -201,8 +201,8 @@ zip
 
 > 👉🏻 Info: The pre-installed PHP extensions from the official Docker images are excluded from this list.
 
-> 💡 Hint: Run `docker run --rm shinsenter/php:8.4-cli php -m` in the container
-to get a list of extensions (you can replace `8.4` with a specific PHP version).
+> 💡 Hint: Run `docker run --rm shinsenter/php:8.5-cli php -m` in the container
+to get a list of extensions (you can replace `8.5` with a specific PHP version).
 
 
 ## Adding PHP Extensions
@@ -215,7 +215,7 @@ or manually edit the `php.ini` file; `phpaddmod` handles the installation and co
 For example, in your `Dockerfile`:
 
 ```Dockerfile
-FROM shinsenter/php:8.4-fpm-nginx
+FROM shinsenter/php:8.5-fpm-nginx
 
 # Install imagick, swoole and xdebug
 RUN phpaddmod imagick swoole xdebug
@@ -240,7 +240,7 @@ The default application directory is `/var/www/html` and can be customized via t
 docker run -p 80:80 -p 443:443 -p 443:443/udp \
     -v "$PWD":/app \
     -e APP_PATH=/app \
-    shinsenter/php:8.4-fpm-nginx
+    shinsenter/php:8.5-fpm-nginx
 ```
 
 This changes the web application directory to `/app`.
@@ -254,7 +254,7 @@ docker run -p 80:80 -p 443:443 -p 443:443/udp \
     -v "$PWD":/app \
     -e APP_PATH=/app \
     -e DOCUMENT_ROOT=public \
-    shinsenter/php:8.4-fpm-nginx
+    shinsenter/php:8.5-fpm-nginx
 ```
 
 This would change the document root path to `/app/public`.
@@ -279,14 +279,14 @@ For example, to run a container as user `myapp` with UID `5000`:
 docker run -p 80:80 -p 443:443 -p 443:443/udp \
     -e APP_USER=myapp \
     -e APP_UID=5000 \
-    shinsenter/php:8.4-fpm-nginx
+    shinsenter/php:8.5-fpm-nginx
 ```
 
 Or in a `docker-compose.yml`:
 ```yaml
 services:
   web:
-    image: shinsenter/php:8.4-fpm-nginx
+    image: shinsenter/php:8.5-fpm-nginx
     environment:
       APP_USER: "myapp"
       APP_UID: "5000"
@@ -326,7 +326,7 @@ Copy a script called `00-migration` into `/startup/` via a Dockerfile:
 > Note: Ensure the script has executable permissions.
 
 ```Dockerfile
-FROM shinsenter/php:8.4-cli
+FROM shinsenter/php:8.5-cli
 
 ADD ./autorun/00-migration /startup/00-migration
 RUN chmod +x /startup/00-migration
@@ -403,7 +403,7 @@ When the container starts, these settings are loaded into crontab, giving you mo
 ```yml
 services:
   web:
-    image: shinsenter/php:8.4-fpm-nginx
+    image: shinsenter/php:8.5-fpm-nginx
     environment:
       ENABLE_CRONTAB: "1"
       CRONTAB_SETTINGS: "* * * * * echo 'This line will run every minute!' | tee /tmp/cron-every-minute.txt"
@@ -423,7 +423,7 @@ This environment variable will contain the command that the container will use t
 ```shell
 docker run \
     -e SUPERVISOR_PHP_COMMAND='php -S localhost:80 index.php' \
-    shinsenter/php:8.4
+    shinsenter/php:8.5
 ```
 
 
@@ -432,7 +432,7 @@ docker run \
 ```yml
 services:
   web:
-    image: shinsenter/php:8.4
+    image: shinsenter/php:8.5
     environment:
       SUPERVISOR_PHP_COMMAND: "php -S localhost:80 index.php"
 ```
@@ -473,7 +473,7 @@ This can be used both with `docker run` and in `docker-compose.yml`.
 #### Command Line <!-- omit from toc -->
 
 ```shell
-docker run -e DEBUG=1 shinsenter/php:8.4-fpm-nginx
+docker run -e DEBUG=1 shinsenter/php:8.5-fpm-nginx
 ```
 
 
@@ -482,7 +482,7 @@ docker run -e DEBUG=1 shinsenter/php:8.4-fpm-nginx
 ```yml
 services:
   web:
-    image: shinsenter/php:8.4-fpm-nginx
+    image: shinsenter/php:8.5-fpm-nginx
     environment:
       DEBUG: "1"
 ```
