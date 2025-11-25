@@ -48,7 +48,7 @@ echo 'Configure EspoCRM'
 [ -z "$DEBUG" ] || set -ex && set -e
 
 # install zmq php extension
-phpaddmod zmq
+phpaddmod zmq || true
 
 # enable preload to bring a significant performance boost
 # see: https://docs.espocrm.com/administration/performance-tweaking/#preloading
