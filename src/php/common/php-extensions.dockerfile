@@ -95,7 +95,6 @@ modules=(
     # gnupg
     # grpc
     # http
-    igbinary
     # imagick
     # imap
     # inotify
@@ -214,6 +213,7 @@ modules=(
     # zmq
     # zookeeper
     # zstd
+    igbinary
 )
 phpaddmod "${modules[@]}" || true
 
