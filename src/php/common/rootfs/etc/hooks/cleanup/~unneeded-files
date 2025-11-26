@@ -11,7 +11,7 @@ find /var/log -type f -name "*.log" -exec truncate -s 0 {} \; &>/dev/null || tru
 
 # clean documentation and locales
 \rm -rf /usr/share/doc/* /usr/share/man/* /usr/share/info/* /usr/share/locale/* &>/dev/null || true
-\rm -rf /usr/share/zoneinfo/* /usr/share/i18n/* /usr/share/X11/* /usr/games/* &>/dev/null || true
+\rm -rf /usr/share/i18n/* /usr/share/X11/* /usr/games/* &>/dev/null || true
 
 # clean temporary and cache files
 \rm -rf /tmp/* /var/tmp/* /root/.cache &>/dev/null || true
