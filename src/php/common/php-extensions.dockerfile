@@ -27,6 +27,12 @@ RUN <<'EOF'
 echo 'Install Composer and PHP extensions'
 [ -z "$DEBUG" ] || set -ex && set -e
 
+# Update PEAR
+if has-cmd pear; then
+    pear channel-update pear.php.net
+    pear upgrade --force || true
+fi
+
 # Set Composer default settings
 env-default '# Environment variables for Composer'
 env-default COMPOSER_ALLOW_XDEBUG        '$(is-debug && echo 1 || echo 0)'
@@ -89,7 +95,6 @@ modules=(
     # gnupg
     # grpc
     # http
-    igbinary
     # imagick
     # imap
     # inotify
@@ -208,6 +213,7 @@ modules=(
     # zmq
     # zookeeper
     # zstd
+    igbinary
 )
 phpaddmod "${modules[@]}" || true
 
