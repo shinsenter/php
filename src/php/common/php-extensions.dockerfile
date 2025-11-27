@@ -95,7 +95,7 @@ modules=(
     # gnupg
     # grpc
     # http
-    igbinary
+    # igbinary
     # imagick
     # imap
     # inotify
