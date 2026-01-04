@@ -151,7 +151,7 @@ else
 fi
 
 ################################################################################
-vendor_dir="$APP_PATH/$(composer_exec config vendor-dir --quiet --absolute 2>/dev/null)"
+vendor_dir="$(composer_exec config vendor-dir --quiet --absolute 2>/dev/null)"
 
 # case 2: project exists but vendor missing
 if ! is-true "$DISABLE_AUTORUN_COMPOSER_INSTALL" && [ "$just_created" -ne 1 ]; then
