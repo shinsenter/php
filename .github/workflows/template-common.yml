@@ -73,13 +73,13 @@ jobs:
       PUBLISH_TO_GHCR: "1"
     steps:
       -
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: helper_cache
           path: /tmp/helper_cache/
 
       -
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: 'true'
 
@@ -102,7 +102,7 @@ jobs:
       -
         id: cache
         if: ${{ success() && env.SKIP_BUILD != '1' && env.USE_BUILD_CACHE == '1' }}
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ env.BUILD_CACHE_PATH }}
           key: ${{ runner.os }}-${{ env.BUILD_CACHE_KEY }}
@@ -115,24 +115,24 @@ jobs:
 
       -
         if: ${{ success() && env.SKIP_BUILD != '1' }}
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
 
       -
         if: ${{ success() && env.SKIP_BUILD != '1' }}
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
         with:
           driver-opts: network=host
 
       -
         if: ${{ success() && env.SKIP_BUILD != '1' }}
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       -
         if: ${{ success() && env.SKIP_BUILD != '1' && env.PUBLISH_TO_GHCR }}
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -141,7 +141,7 @@ jobs:
       -
         if: ${{ success() && env.SKIP_BUILD != '1' && env.SKIP_SQUASH == '1' }}
         name: Build and push ${{ env.BUILD_TAG }} using ${{ env.OS_BASE }}
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         continue-on-error: ${{ inputs.continue-on-error }}
         with:
           pull: false
@@ -182,7 +182,7 @@ jobs:
       -
         if: ${{ success() && env.SKIP_BUILD != '1' && env.SKIP_SQUASH != '1' }}
         name: Build ${{ env.BUILD_TAG }} using ${{ env.OS_BASE }}
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         continue-on-error: ${{ inputs.continue-on-error }}
         with:
           pull: false
@@ -235,7 +235,7 @@ jobs:
       -
         if: ${{ success() && env.SKIP_BUILD != '1' && env.SKIP_SQUASH != '1' }}
         name: Squash and push ${{ env.BUILD_TAG }} using ${{ env.OS_BASE }}
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         continue-on-error: ${{ inputs.continue-on-error }}
         with:
           pull: false
@@ -251,7 +251,7 @@ jobs:
       -
         if: ${{ success() && env.BUILD_README != '' && env.UPDATE_README == '1' }}
         name: Update ${{ env.BUILD_NAME }}/README.md
-        uses: peter-evans/dockerhub-description@v4
+        uses: peter-evans/dockerhub-description@v5
         continue-on-error: true
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
