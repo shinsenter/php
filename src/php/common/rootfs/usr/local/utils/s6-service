@@ -12,7 +12,11 @@ disabled_s6="/etc/s6-overlay/s6-rc.d.disabled"
 user_bundle="${s6}/user"
 
 # s6-overlay 3.2.3.1 moved user bundle definitions outside s6-rc.d.
-[ -d "/etc/s6-overlay/user-bundles.d/user" ] && user_bundle="/etc/s6-overlay/user-bundles.d/user"
+# temporary workaround to support both locations
+if [ -d "/etc/s6-overlay/user-bundles.d/user" ]; then
+    rm -rf "${user_bundle}" 2>/dev/null || true
+    user_bundle="/etc/s6-overlay/user-bundles.d/user"
+fi
 
 # show help if no args or help flag
 case "$1" in
