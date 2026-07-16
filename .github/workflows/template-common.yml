@@ -87,6 +87,9 @@ jobs:
         name: Generate build config
         continue-on-error: ${{ inputs.continue-on-error }}
         env:
+          # temporary workaround for https://github.com/just-containers/s6-overlay/issues/643
+          # s6-overlay 3.2.3.1 moved user bundle definitions outside s6-rc.d.
+          S6_VERSION: "v3.2.3.0"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
