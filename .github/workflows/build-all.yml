@@ -33,7 +33,7 @@ jobs:
       tag_prefix: ${{ steps.init.outputs.tag_prefix }}
       build_all: ${{ steps.init.outputs.build_all == '1' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: pre-build debug
         id: init
@@ -106,7 +106,7 @@ jobs:
             done
           done
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: helper_cache
           overwrite: true
@@ -235,12 +235,12 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [prepare, cli-servers, fpm-servers]
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: helper_cache
           path: /tmp/helper_cache/
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Prepare cache
         env:
@@ -282,7 +282,7 @@ jobs:
 
           ls -lh /tmp/helper_cache/ | awk '{ if(NR>1) printf "%10s  %s\n", $5, $9 }'
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: helper_cache
           overwrite: true

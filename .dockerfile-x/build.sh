@@ -8,7 +8,7 @@
 ################################################################################
 
 BASE_DIR="$(git rev-parse --show-toplevel)"
-SOURCE="devthefuture/dockerfile-x:1.5.3"
+SOURCE="devthefuture/dockerfile-x:1.6.0"
 
 TAGS=(
 shinsenter/dockerfile-x:v1
