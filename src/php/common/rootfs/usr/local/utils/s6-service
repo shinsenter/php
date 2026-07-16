@@ -7,8 +7,10 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 # service dirs
-s6="/etc/s6-overlay/s6-rc.d"
-disabled_s6="/etc/s6-overlay/s6-rc.d.disabled"
+# s6-overlay 3.2.3.2 moved user bundle definitions outside s6-rc.d
+# see: https://github.com/just-containers/s6-overlay/blob/master/CHANGELOG.md#version-3232
+s6="${S6_RUNTIME_BUNDLEDIR:-/etc/s6-overlay/user-bundles.d}"
+disabled_s6="${s6}.disabled"
 
 # show help if no args or help flag
 case "$1" in

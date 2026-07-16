@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 
 
+## [5.7.0] - 2026-07-17
+- Remove cleanup of /usr/share/zoneinfo directory.
+- Remove beta job from template-php.yml.
+- Temporary workaround for installing igbinary.
+- Fix composer's vendor directory path.
+- Fix support s6-overlay 3.2.3.2 user-bundles.
+
+
 ## [5.6.0] - 2025-11-20
 
 - Use [PHP 8.5](https://www.php.net/ChangeLog-8.php#PHP_8_5) for the latest tags.

@@ -76,6 +76,14 @@ if [ -n "$S6_VERSION" ] && ! has-s6; then
         env-default '# Add extra service for checking web server'
         env-default DISABLE_ONLIVE_HOOK '1'
     fi
+    
+    # fix s6-overlay v3.2.3.2 migration
+    if [ -e "${S6_PATH}/${S6_RUNTIME_BUNDLEDIR:-/etc/s6-overlay/user-bundles.d}" ]; then
+        rm -rf "${S6_PATH}/etc/s6-overlay/s6-rc.d"/user{,2} &>/dev/null || true
+    else
+        env-default '# Set default user bundle path for s6-overlay'
+        env-default S6_RUNTIME_BUNDLEDIR '/etc/s6-overlay/s6-rc.d'
+    fi
 
     # create oneshot service for checking web server
     if has-cmd s6-service; then
