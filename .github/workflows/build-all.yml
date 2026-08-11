@@ -28,7 +28,7 @@ on:
 
 jobs:
   prepare:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
     outputs:
       tag_prefix: ${{ steps.init.outputs.tag_prefix }}
       build_all: ${{ steps.init.outputs.build_all == '1' }}
@@ -78,10 +78,10 @@ jobs:
           distros=(debian alpine)
           variants=(cli fpm zts)
           base_images=(phpfpm-nginx phpfpm-apache laravel)
-          php_versions=(8.5 8.4 8.3 8.2)
+          php_versions=(8.6-rc 8.5 8.4 8.3)
 
           if [ -n "$build_all" ]; then
-            php_versions+=(8.1 8.0 7.4 7.3 7.2 7.1 7.0 5.6)
+            php_versions+=(8.2 8.1 8.0 7.4 7.3 7.2 7.1 7.0 5.6)
           fi
 
           get_sha() {
@@ -232,7 +232,7 @@ jobs:
   ##########################################################
 
   server-cache:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
     needs: [prepare, cli-servers, fpm-servers]
     steps:
       - uses: actions/download-artifact@v8
@@ -256,10 +256,10 @@ jobs:
 
           distros=(debian alpine)
           base_images=(phpfpm-nginx phpfpm-apache roadrunner laravel)
-          php_versions=(8.5 8.4 8.3 8.2)
+          php_versions=(8.6-rc 8.5 8.4 8.3)
 
           if [ "$build_all" = "true" ]; then
-            php_versions+=(8.1 8.0 7.4 7.3 7.2 7.1 7.0 5.6)
+            php_versions+=(8.2 8.1 8.0 7.4 7.3 7.2 7.1 7.0 5.6)
           fi
 
           get_sha() {
