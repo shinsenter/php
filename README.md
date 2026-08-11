@@ -1,7 +1,7 @@
 # PHP Docker Images <!-- omit from toc -->
 📦 Simplified PHP Docker images for effortless customization and extension setup.
 
-Our Docker images cover PHP versions from 5.6 to 8.5 (beta), available in CLI, ZTS, FPM, FPM/Apache2, FPM/Nginx, RoadRunner and FrankenPHP variants. The Docker images are available for both Debian and Alpine versions.
+Our Docker images cover PHP versions from 5.6 to 8.6 (RC), available in CLI, ZTS, FPM, FPM/Apache2, FPM/Nginx, RoadRunner and FrankenPHP variants. The Docker images are available for both Debian and Alpine versions.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/php
 - GitHub Packages: https://code.shin.company/php/pkgs/container/php
@@ -51,7 +51,7 @@ This setup allows for faster project initiation without additional installations
 
 ## Docker Image Variants
 
-Our image tags cover PHP versions from 5.6 to 8.5,
+Our image tags cover PHP versions from 5.6 to 8.6-rc,
 available in `cli`, `zts`, `fpm`, `fpm-nginx`, `fpm-apache`, `roadrunner`<sup>(1)</sup>, and `frankenphp`<sup>(2)</sup> variants. The Docker images are available for both Debian and Alpine versions.
 
 Examples:
