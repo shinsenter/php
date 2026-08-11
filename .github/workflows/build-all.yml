@@ -28,7 +28,7 @@ on:
 
 jobs:
   prepare:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
     outputs:
       tag_prefix: ${{ steps.init.outputs.tag_prefix }}
       build_all: ${{ steps.init.outputs.build_all == '1' }}
@@ -232,7 +232,7 @@ jobs:
   ##########################################################
 
   server-cache:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
     needs: [prepare, cli-servers, fpm-servers]
     steps:
       - uses: actions/download-artifact@v8
