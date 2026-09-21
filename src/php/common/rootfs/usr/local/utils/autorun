@@ -25,7 +25,7 @@ for path; do
     if [ -n "$path" ] && [ -e "$path" ]; then
         path="$(realpath -mqs $path)"
         if [ -d "$path" ]; then
-            find $path -type f -name '*.sh' | xargs -r chmod +x &>/dev/null
+            find $path -type f -name '*.sh' | xargs -r chmod +x >/dev/null 2>&1
             if has-cmd run-parts; then
                 with-env run-parts --regex '.*' --new-session $run_parts_args -- "$path"
             else

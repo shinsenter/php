@@ -5,16 +5,15 @@
 - Docker Hub: https://hub.docker.com/r/shinsenter/phpfpm-apache
 - GitHub Packages: https://code.shin.company/php/pkgs/container/phpfpm-apache
 - You can also find and use [other pre-built Docker images for some popular PHP applications and frameworks here](https://hub.docker.com/u/shinsenter).
+- Main documentation: [shinsenter/php](https://code.shin.company/php)
 
 
 ## Introduction
 
 Our PHP Docker images, available on [Docker Hub](https://hub.docker.com/r/shinsenter/php),
-are designed for easy configuration of PHP and PHP-FPM settings via environment variables.
-This approach eliminates the need to rebuild images when making configuration changes.
+are designed for easy configuration of PHP and PHP-FPM settings via environment variables, with no image rebuild required.
 
-These images also come with the latest version of [Composer](https://getcomposer.org),
-enabling you to start projects quickly without additional installations.
+These images also come with the latest version of [Composer](https://getcomposer.org).
 
 
 ## Usage
@@ -32,17 +31,12 @@ Refer to [our documentation](https://hub.docker.com/r/shinsenter/php) to learn h
 
 ## Using HTTPS
 
-The Docker images come with pre-generated SSL certificate files for testing HTTPS websites locally.
+The Docker images come with pre-generated SSL certificate files for testing HTTPS locally:
 
-The files are:
 - /etc/ssl/site/server.crt
 - /etc/ssl/site/server.key
 
-To use valid HTTPS certificates for your production website,
-you need to replace these files with your own valid SSL certificates
-by copying or mounting them from the host machine into the container.
-Simply overwrite the default certificate files with your own valid
-certificate and key files to enable true HTTPS for your production website.
+To use valid HTTPS certificates in production, replace these files with your own certificate and key, either by copying or mounting them from the host into the container.
 
 #### Using Dockerfile
 
@@ -116,14 +110,12 @@ Then use the image `your-repo/phpfpm-apache:stable` as a base image to build con
 
 If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://code.shin.company/php/issues/new).
 
-Your support helps maintain and improve these images for the community.
-
 
 ## License
 
 This project is licensed under the terms of the [GNU General Public License v3.0](https://code.shin.company/php/blob/main/LICENSE).
 
-Thank you for recognizing the intellectual effort behind this project. If you plan to use or build upon any of its ideas, I kindly ask that you give appropriate credit.
+Please respect the work that went into these images. If you reuse ideas from this project, credit is appreciated.
 
 ---
 

@@ -29,10 +29,10 @@ set_platforms() {
 ################################################################################
 APP_RULES="
 # https://devdocs.bagisto.com/getting-started/installation
-bagisto:min=8.1 base=laravel
+bagisto:min=8.3 latest=8.4 base=laravel
 
 # https://roots.io/bedrock/docs/installation
-bedrock:min=8.0 base=wordpress
+bedrock:min=8.3 base=wordpress
 
 # https://book.cakephp.org/4/en/installation.html
 cakephp4:min=7.4 latest=8.3 server=apache
@@ -41,55 +41,55 @@ cakephp4:min=7.4 latest=8.3 server=apache
 cakephp5:min=8.1 server=apache
 
 # https://codeigniter.com/user_guide/installation/index.html
-codeigniter4:min=7.4 server=apache
+codeigniter4:min=8.2 server=apache
 
 # https://coolify.io/docs/installation
 coolify:min=8.2 base=laravel
 
 # https://www.drupal.org/docs/getting-started/system-requirements/php-requirements
-drupal:min=8.0 server=apache
+drupal:min=8.3 server=apache
 
 # https://docs.espocrm.com/administration/installation
-espocrm:min=8.1 server=apache
+espocrm:min=8.2 server=apache
 
 # https://docs.flarum.org/install
-flarum:min=7.3 server=nginx
+flarum:min=8.3 server=nginx
 
 # https://docs.flightphp.com
 flightphp:min=7.4 server=nginx
 
-# https://learn.getgrav.org/17/basics/installation
-grav:min=7.3 server=apache
+# https://learn.getgrav.org/2/basics/installation
+grav:min=8.3 server=apache
 
 # https://hyperf.wiki/3.1/#/en/quick-start/install
-hyperf:min=7.2 latest=8.3 server=nginx platform=linux/amd64,linux/arm/v7,linux/arm64/v8
+hyperf:min=8.2 server=nginx platform=linux/amd64,linux/arm/v7,linux/arm64/v8
 
 # https://hypervel.org/docs/deployment
 hypervel:min=8.2 base=laravel platform=linux/amd64,linux/arm/v7,linux/arm64/v8
 
 # https://docs.invoiceshelf.com/install/manual.html
-invoiceshelf:min=8.1 base=laravel
+invoiceshelf:min=8.2 base=laravel
 
 # https://getkirby.com/docs/cookbook/setup/composer
-kirby:min=7.4 server=apache
+kirby:min=8.3 server=apache
 
 # https://docs.laminas.dev/tutorials/getting-started/skeleton-application
-laminas:min=7.3 latest=8.3 server=nginx
+laminas:min=8.1 server=nginx
 
 # https://laravel.com/docs/master/installation
-laravel:server=nginx
+laravel:min=8.3 server=nginx
 
 # https://experienceleague.adobe.com/en/docs/commerce-operations/installation-guide/system-requirements
-magento:min=7.4 latest=8.3 server=nginx
+magento:min=8.3 latest=8.4 server=nginx
 
 # https://matomo.org/faq/on-premise/installing-matomo/
-matomo:min=7.2 server=apache
+matomo:min=8.1 server=apache
 
 # https://docs.mautic.org/en/5.x/getting_started/how_to_install_mautic.html#installing-with-composer
-mautic:min=7.4 latest=8.3 server=apache
+mautic:min=8.2 server=apache
 
 # https://docs.phpmyadmin.net/en/latest/setup.html
-phpmyadmin:server=nginx
+phpmyadmin:min=7.2 server=nginx
 
 # https://www.slimframework.com/docs/v4/start/installation.html
 slim:server=apache
@@ -98,10 +98,10 @@ slim:server=apache
 spiral:min=8.1 server=roadrunner variant=cli platform=linux/amd64,linux/arm64
 
 # https://statamic.dev/installing
-statamic:min=7.2 base=laravel
+statamic:min=8.3 base=laravel
 
 # https://symfony.com/doc/current/setup.html
-symfony:server=apache
+symfony:min=8.4 server=apache
 
 # https://github.com/sulu/skeleton
 sulu:base=symfony

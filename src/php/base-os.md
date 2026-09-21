@@ -2,6 +2,8 @@
 
 🌏 Latest Linux Docker base images featuring autorun and s6-overlay.
 
+- Main documentation: [shinsenter/php](https://code.shin.company/php)
+
 
 ## Table of Contents <!-- omit from toc -->
 - [Introduction](#introduction)
@@ -20,7 +22,7 @@
 
 ## Introduction
 
-Combine official [Ubuntu](http://hub.docker.com/_/ubuntu), [Debian](http://hub.docker.com/_/debian), and [Alpine Linux](http://hub.docker.com/_/alpine) Docker images with [s6-overlay](https://github.com/just-containers/s6-overlay) and an autorun mechanism. This setup simplifies the process of building portable, production-ready application containers across various architectures.
+Combine official [Ubuntu](http://hub.docker.com/_/ubuntu), [Debian](http://hub.docker.com/_/debian), and [Alpine Linux](http://hub.docker.com/_/alpine) Docker images with [s6-overlay](https://github.com/just-containers/s6-overlay) and an autorun mechanism, for building portable, production-ready containers across architectures.
 
 
 ## Docker Image Variants
@@ -141,8 +143,7 @@ Set `DEBUG=1` to see which hooks are executed.
 
 ## Autorun Scripts
 
-Shell scripts placed in the `/startup/` directory will automatically run when the container starts, in alphabetical order by filename.
-This feature can initialize projects before the main program runs, saving time by executing initialization scripts automatically.
+Shell scripts placed in the `/startup/` directory run automatically when the container starts, in alphabetical order by filename - useful for initializing a project before the main program runs.
 
 #### Usage Example <!-- omit from toc -->
 
@@ -221,8 +222,7 @@ The format of a crontab entry is as follows:
 # *  *  *  *  *  command to be executed
 ```
 
-You can also easily set up cron jobs through the `$CRONTAB_SETTINGS` environment variable in the `docker-compose.yml` file.
-When the container starts, these settings are loaded into crontab, giving you more flexibility to change them later.
+You can also set cron jobs directly via the `$CRONTAB_SETTINGS` environment variable in `docker-compose.yml`; these are loaded into crontab when the container starts.
 
 ```yml
 services:
@@ -289,15 +289,12 @@ These Docker images include additional environment variables for fine-tuning con
 If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter)
 or opening an issue on [GitHub](https://code.shin.company/php/issues/new).
 
-Your support helps maintain and improve these images for the community.
-
 
 ## License
 
 This project is licensed under the terms of the [GNU General Public License v3.0](https://code.shin.company/php/blob/main/LICENSE).
 
-Please respect the intellectual efforts involved in creating these images.
-If you intend to copy or use ideas from this project, proper credit is appreciated.
+Please respect the work that went into these images. If you reuse ideas from this project, credit is appreciated.
 
 ---
 

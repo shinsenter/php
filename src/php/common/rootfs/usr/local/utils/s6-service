@@ -118,8 +118,10 @@ else
     if [ -t 0 ]; then
         content=""
     else
+        nl='
+'
         while IFS= read -r line || [ -n "$line" ]; do
-            content="${content}${content:+$'\n'}${line}"
+            content="${content}${content:+$nl}${line}"
         done
     fi
 fi

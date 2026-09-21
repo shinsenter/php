@@ -49,11 +49,13 @@ fi
 
 ################################################################################
 # print with color
+esc="$(printf '\033')"
+
 _color() {
     text="$1"
     case "$text" in
-        *$'\033['*) printf  "%s%b\n" "$prefix" "$text" ;;
-        *)          printf "$format" "$prefix" "$text" ;;
+        *"${esc}["*) printf  "%s%b\n" "$prefix" "$text" ;;
+        *)           printf "$format" "$prefix" "$text" ;;
     esac
 }
 
