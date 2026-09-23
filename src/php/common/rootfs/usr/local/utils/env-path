@@ -16,13 +16,16 @@ DEL_PATHS="${2:-/usr/local/aliases}"
 IFS=:
 
 if [ -n "$DEL_PATHS" ]; then
-    PATH=":${PATH}:"
-    for part in $DEL_PATHS; do
-        part=${part%/}
-        [ -n "$part" ] && PATH="${PATH//:$part:/:}"
+    kept=""
+    for entry in $PATH; do
+        entry="${entry%/}"
+        skip=0
+        for part in $DEL_PATHS; do
+            [ "$entry" = "${part%/}" ] && skip=1 && break
+        done
+        [ "$skip" -eq 0 ] && [ -n "$entry" ] && kept="$kept${kept:+:}$entry"
     done
-    PATH="${PATH#:}"
-    PATH="${PATH%:}"
+    PATH="$kept"
 fi
 
 if [ -n "$ADD_PATHS" ]; then

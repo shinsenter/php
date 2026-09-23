@@ -25,7 +25,7 @@ ARG  DEBUG
 ADD --link ./rootfs/ /
 
 ################################################################################
-# https://learn.getgrav.org/17/basics/installation
+# https://learn.getgrav.org/2/basics/installation
 ENV DOCUMENT_ROOT=""
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 ENV COMPOSER_REQUIRES_GIT=1

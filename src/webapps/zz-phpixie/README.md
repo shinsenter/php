@@ -5,6 +5,7 @@
 - Docker Hub: https://hub.docker.com/r/shinsenter/phpixie
 - GitHub Packages: https://code.shin.company/php/pkgs/container/phpixie
 - You can also find and use [other pre-built Docker images for some popular PHP applications and frameworks here](https://hub.docker.com/u/shinsenter).
+- Main documentation: [shinsenter/php](https://code.shin.company/php)
 
 The Docker images are available for both Debian and Alpine versions.
 
@@ -17,11 +18,9 @@ The Docker images are available for both Debian and Alpine versions.
 ## Introduction
 
 Our PHP Docker images, available on [Docker Hub](https://hub.docker.com/r/shinsenter/php),
-are designed for easy configuration of PHP and PHP-FPM settings via environment variables.
-This approach eliminates the need to rebuild images when making configuration changes.
+let you configure PHP and PHP-FPM settings through environment variables, with no image rebuild required.
 
-These images also come with the latest version of [Composer](https://getcomposer.org),
-enabling you to start projects quickly without additional installations.
+These images also include the latest version of [Composer](https://getcomposer.org).
 
 
 ## Usage
@@ -58,10 +57,7 @@ The container will detect the empty directory mounted to `/var/www/html` and clo
 
 You can mount your application code from your host machine to the `/var/www/html` directory inside the container.
 
-Because the source code is mounted as a volume,
-any changes made on the host machine will be reflected inside the container.
-This setup allows you to run builds, tests,
-and other tasks within the container while keeping your code on the host.
+Because the source code is mounted as a volume, any changes made on the host machine are reflected inside the container.
 
 
 ## Using HTTPS
@@ -71,11 +67,8 @@ The Docker images come with pre-generated SSL certificate files for testing HTTP
 - /etc/ssl/site/server.crt
 - /etc/ssl/site/server.key
 
-To use valid HTTPS certificates for your production website,
-replace these files with your own valid SSL certificates.
-You can do this by copying or mounting your certificates from the host machine into the container.
-Simply overwrite the default certificate files with your valid certificate and key files
-to enable true HTTPS for your production website.
+To use valid HTTPS certificates in production, replace these files with your own certificate and key.
+Copy or mount your certificates from the host machine into the container, overwriting the default files.
 
 #### Using Dockerfile
 
@@ -140,14 +133,12 @@ Then use the image `your-repo/phpixie:stable` as a base image to build container
 
 If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://code.shin.company/php/issues/new).
 
-Your support helps maintain and improve these images for the community.
-
 
 ## License
 
 This project is licensed under the terms of the [GNU General Public License v3.0](https://code.shin.company/php/blob/main/LICENSE).
 
-Thank you for recognizing the intellectual effort behind this project. If you plan to use or build upon any of its ideas, I kindly ask that you give appropriate credit.
+Please respect the work that went into these images. If you reuse ideas from this project, credit is appreciated.
 
 ---
 

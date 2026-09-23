@@ -9,8 +9,7 @@ elif [ -n "$NGINX_DOCUMENT_ROOT" ]; then
 fi
 
 # check if the document root is an existing absolute path
-if [ -n "$target" ] && [[ "$target" = /* ]] && [ -d "$target" ]; then
-    echo $(realpath -mqs "$target")
-else
-    echo $(realpath -mqs "$(app-path)/$target")
-fi
+case "$target" in
+    /*) [ -d "$target" ] && { realpath -mqs "$target"; exit 0; } ;;
+esac
+realpath -mqs "$(app-path)/$target"

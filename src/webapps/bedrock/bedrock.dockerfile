@@ -25,7 +25,7 @@ ARG  DEBUG
 ADD --link ./rootfs/ /
 
 ################################################################################
-# https://bedrock.org/documentation/category/installation/
+# https://roots.io/bedrock/docs/installation/
 ENV DOCUMENT_ROOT="web"
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 RUN env-default INITIAL_PROJECT  'roots/bedrock'

@@ -1,7 +1,2 @@
 #!/usr/bin/env sh
-{
-    case "$(type -t .)" in
-        builtin) [ -n "$(type -t "$1")" ] ;;
-        *)       [ -x "$(command -v "$1")" ] ;;
-    esac
-} 2>/dev/null
+command -v "$1" >/dev/null 2>&1

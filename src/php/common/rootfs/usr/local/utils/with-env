@@ -15,15 +15,15 @@ print_env() {
 }
 
 safe_source() {
-    local file="$1"
+    file="$1"
     # only source if the file exists and is not this script itself
-    [ -f "$file" ] && [ "$file" != "${BASH_SOURCE[0]:-$0}" ] && source "$file" &>/dev/null
+    [ -f "$file" ] && [ "$file" != "$0" ] && . "$file" >/dev/null 2>&1
 }
 
 # load system environment variables
 if [ -f "$SYSTEM_ENV" ]; then
     set -a
-    source "$SYSTEM_ENV" &>/dev/null
+    . "$SYSTEM_ENV" >/dev/null 2>&1
     set +a
 fi
 

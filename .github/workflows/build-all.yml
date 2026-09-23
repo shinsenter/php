@@ -313,7 +313,7 @@ jobs:
           - app-laravel
           - app-magento
           - app-matomo
-          - app-mautic
+          # - app-mautic
           - app-phpmyadmin
           - app-slim
           - app-symfony

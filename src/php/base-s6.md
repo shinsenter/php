@@ -4,6 +4,7 @@
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/s6-overlay
 - GitHub Packages: https://code.shin.company/php/pkgs/container/s6-overlay
+- Main documentation: [shinsenter/php](https://code.shin.company/php)
 
 
 ## Introduction
@@ -45,15 +46,12 @@ ENTRYPOINT ["/init"]
 If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter)
 or opening an issue on [GitHub](https://code.shin.company/php/issues/new).
 
-Your support helps maintain and improve these images for the community.
-
 
 ## License
 
 This project is licensed under the terms of the [GNU General Public License v3.0](https://code.shin.company/php/blob/main/LICENSE).
 
-Please respect the intellectual efforts involved in creating these images.
-If you intend to copy or use ideas from this project, proper credit is appreciated.
+Please respect the work that went into these images. If you reuse ideas from this project, credit is appreciated.
 
 ---
 

@@ -37,9 +37,9 @@ Our images support PHP versions from 5.6 up to 8.6 (RC), with variants for CLI, 
 
 These images are based on the [official PHP Docker images](https://hub.docker.com/_/php) and make it easy to change PHP and PHP-FPM settings using environment variables. No image rebuild required.
 
-They include Composer (the latest version) and common web servers such as [Apache2](https://httpd.apache.org), [Nginx](https://nginx.org), [RoadRunner](https://roadrunner.dev), and [FrankenPHP](https://frankenphp.dev). This helps you start projects faster without extra installs.
+They include the latest Composer and common web servers - [Apache2](https://httpd.apache.org), [Nginx](https://nginx.org), [RoadRunner](https://roadrunner.dev), and [FrankenPHP](https://frankenphp.dev) - so you don't need to install them separately.
 
-> 🪶 Note: While based on the official images and including useful extensions, we have significantly reduced the image sizes to improve download times and resource usage, using the [docker-squash](https://code.shin.company/docker-squash) project.
+> 🪶 Note: We slim these images down with the [docker-squash](https://code.shin.company/docker-squash) project, so pulls are faster and they use less disk and memory than the official images they're based on.
 
 
 ## Docker Image Variants
@@ -55,8 +55,8 @@ Examples:
 - `shinsenter/php:8.3-roadrunner` <sup>(1)</sup>
 - `shinsenter/php:8.4-frankenphp` <sup>(2)</sup>
 
-> <sup>(1)</sup> RoadRunner variant — requires PHP >= 8.0.<br>
-> <sup>(2)</sup> FrankenPHP variant is BETA — requires PHP >= 8.2.<br>
+> <sup>(1)</sup> RoadRunner variant - requires PHP >= 8.0.<br>
+> <sup>(2)</sup> FrankenPHP variant is BETA - requires PHP >= 8.2.<br>
 
 See all tags on our [Docker Hub](https://hub.docker.com/r/shinsenter/php/tags).
 
@@ -112,7 +112,7 @@ Naming rules:
   - PHP-FPM directives: https://www.php.net/manual/en/install.fpm.configuration.php
 - Directive names are converted to CONSTANT_CASE (uppercase with underscores replacing dots or dashes).
 
-By following this convention you can quickly identify the environment variable that maps to each configuration directive.
+This convention lets you map any environment variable straight back to its ini/fpm directive.
 
 > 👉🏻 Note: By default, `$PHP_*` variables are applied only if set before the container starts. To allow changing PHP settings from an interactive shell inside a running container, start the container with `ALLOW_RUNTIME_PHP_ENVVARS=1`.
 
@@ -196,9 +196,7 @@ zip
 
 ## Adding PHP Extensions
 
-Use the `phpaddmod` helper to install extensions easily.
-
-You do not need to use `docker-php-ext-install` or manually edit php.ini — `phpaddmod` installs and configures extensions for you.
+Use the `phpaddmod` helper to install and configure extensions in one step - no need for `docker-php-ext-install` or manual php.ini edits.
 
 Example Dockerfile:
 
@@ -338,7 +336,7 @@ services:
 
 ## Using Cron Jobs
 
-This project supports simple cron jobs. For advanced cron features, consider building a custom image.
+This project supports simple cron jobs; build a custom image for advanced cron features.
 
 Enable cron with `ENABLE_CRONTAB=1`. The service loads jobs from `$CRONTAB_DIR` (default: `/etc/crontab.d`) and runs them as `$APP_USER:$APP_GROUP` (default `www-data:www-data`), with `$CRONTAB_HOME` (default: `/var/www/html`) as the home directory.
 
@@ -407,7 +405,7 @@ services:
 
 ## Sending Emails
 
-We use `msmtp` as a lightweight sendmail replacement. You can send mail with libraries like [PHPMailer](https://github.com/PHPMailer/PHPMailer).
+We use `msmtp` as a lightweight sendmail replacement, so libraries like [PHPMailer](https://github.com/PHPMailer/PHPMailer) work out of the box.
 
 To use PHP's `mail()` function, configure SMTP via these environment variables:
 
@@ -495,9 +493,7 @@ For stable, production-ready images we maintain dated tags in a separate reposit
 
 ## Contributing
 
-If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or open an issue on [GitHub](https://code.shin.company/php/issues/new).
-
-Your support helps maintain and improve these images for everyone.
+If these images are useful to you, donate via [PayPal](https://www.paypal.me/shinsenter) or open an issue on [GitHub](https://code.shin.company/php/issues/new).
 
 
 ## License
