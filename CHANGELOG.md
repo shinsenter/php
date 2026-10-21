@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 
 
+## [Unreleased]
+- Replace the daily build with the "Watch updates" workflow. Every 30 minutes it checks the official PHP images, Composer, IPE, s6-overlay, FrankenPHP, RoadRunner, the base OS images and the files in this repository. It starts "Build all" only for the PHP versions that changed.
+- Skip images that are already up to date. Each image index stores a fingerprint of its build inputs in the `org.shinsenter.build.fingerprint` annotation.
+- Remove the Actions build cache. On 2026-10-22 it held 11.9 GB in 7 entries, over the 10 GB repository limit, so entries were evicted before reuse.
+- Look up image digests by exact tag. The Docker Hub tag search matched substrings, so the cache key changed when a similar tag (for example `8.5-fpm-alpine3.23`) was updated.
+- Include the digest of the parent image in the fingerprint of servers and apps.
+- Composer, IPE and s6-overlay updates rebuild only the maintained versions (8.6 RC, 8.5, 8.4, 8.3, 8.2). PHP 8.2 is now in this list. Outdated versions are rebuilt when their official PHP image changes.
+- Add `php_versions` and `force_build` inputs to "Build all".
+- Build on push to `main` when files in `src/` or `build/` change.
+- Add `build/versions.sh` and `build/check-updates.sh`.
+- Add a security updates section to SECURITY.md.
+
+
 ## [5.7.0] - 2026-07-17
 - Remove cleanup of /usr/share/zoneinfo directory.
 - Remove beta job from template-php.yml.

@@ -12,6 +12,7 @@ SQUASH_CMD="$BASE_DIR/build/docker-squash/docker-squash.sh"
 
 set -e
 source "$BASE_DIR/build/helpers.sh"
+source "$BASE_DIR/build/versions.sh"
 
 ################################################################################
 # Helpers
@@ -222,12 +223,13 @@ BUILD_TAGS=
 BUILD_TAG_PREFIX="${BUILD_TAG_PREFIX:-}"
 BUILD_TMP_NAME=
 BUILD_CACHE_KEY=
-BUILD_CACHE_PATH="/tmp/.buildx-cache"
+BUILD_FINGERPRINT=
 BUILD_PLATFORM="$(set_platforms default)"
 
 SKIP_BUILD="${SKIP_BUILD:-0}"
 SKIP_SQUASH="${SKIP_SQUASH:-0}"
-USE_BUILD_CACHE="${USE_BUILD_CACHE:-1}"
+FORCE_BUILD="${FORCE_BUILD:-0}"
+CHECK_ONLY="${CHECK_ONLY:-0}"
 ALLOW_RC=0
 UPDATE_README=0
 
@@ -290,7 +292,7 @@ case "$APP" in
         BUILD_SOURCE_IMAGE="dunglas/frankenphp:1-php$PHP_VERSION$SUFFIX"
         BUILD_DOCKERFILE="$BASE_DIR/src/php/with-f8p.dockerfile"
         BUILD_PLATFORM="linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8"
-        BUILD_CACHE_KEY="(frankenphp@$(get_dockerhub_latest_sha "dunglas/frankenphp" 1 "1-php$PHP_VERSION$SUFFIX" | head -c19))"
+        BUILD_CACHE_KEY="(frankenphp@$(get_dockerhub_tag_digest_or_now "dunglas/frankenphp" "1-php$PHP_VERSION$SUFFIX"))"
         PHP_VARIANT="zts$SUFFIX"
         ;;
     with-roadrunner)
@@ -309,7 +311,7 @@ case "$APP" in
         BUILD_DOCKERFILE="$BASE_DIR/src/webapps/$APP_NAME/$APP_NAME.dockerfile"
         PHP_VARIANT="fpm$SUFFIX"
         apply_app_rules "$APP_NAME"
-        BUILD_CACHE_KEY="($BUILD_FROM_IMAGE@$(get_dockerhub_latest_sha "$BUILD_FROM_IMAGE" 1 "php${PHP_VERSION%-rc}${SUFFIX}" | head -c19))"
+        BUILD_CACHE_KEY="($BUILD_FROM_IMAGE@$(get_dockerhub_tag_digest_or_now "$BUILD_FROM_IMAGE" "${BUILD_TAG_PREFIX}php${PHP_VERSION%-rc}${SUFFIX}"))"
         ;;
     *)
         S6_VERSION=
@@ -521,38 +523,6 @@ fi
 [ -z "$BUILD_DOCKERFILE_SQUASHED" ] && SKIP_SQUASH=1
 
 ################################################################################
-# Cache key
-################################################################################
-if [ ! -e "$BUILD_CACHE_PATH" ]; then
-    mkdir -p "$BUILD_CACHE_PATH" 2>&1
-    mkdir -p "${BUILD_CACHE_PATH}-new" 2>&1
-fi
-
-if [ "$SKIP_BUILD" != "1" ]; then
-    BUILD_CACHE_KEY="($APP@$BUILD_TAG)${BUILD_CACHE_KEY:+/}$BUILD_CACHE_KEY"
-
-    [ -n "$S6_VERSION" ] && BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(s6@$S6_VERSION)"
-
-    if [ -n "$OS_BASE" ]; then
-        OS_SHA="$(get_dockerhub_latest_sha "library/$OS_BASE" 1 "$OS_VERSION" | head -c19)"
-        BUILD_CACHE_KEY="$BUILD_CACHE_KEY/($OS_BASE:$OS_VERSION@$OS_SHA)"
-    fi
-
-    if [ -n "$PHP_VERSION" ]; then
-        PHP_SHA="$(get_dockerhub_latest_sha "library/php" 1 "$PHP_VERSION-${PHP_VARIANT#-}" | head -c19)"
-        BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(php:$PHP_VERSION-${PHP_VARIANT#-}@$PHP_SHA)/(IPE:$IPE_VERSION)/(composer:$COMPOSER_VERSION)"
-    fi
-
-    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(buildfile:$(path_hash "$BUILD_DOCKERFILE" | head -c10))"
-    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(buildcontext:$(path_hash "$BUILD_CONTEXT" | shasum | head -c10))"
-    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(workflows:$(path_hash "$BASE_DIR/.github/workflows/template-"* | shasum | head -c10))"
-else
-    BUILD_CACHE_KEY=""
-fi
-
-BUILD_TMP_NAME="localhost:5000/$(path_hash "$BUILD_CACHE_KEY" | head -c10)"
-
-################################################################################
 # Fix build platforms
 ################################################################################
 remove_platform() {
@@ -579,6 +549,54 @@ if [ -n "$PHP_VERSION" ]; then
 fi
 
 ################################################################################
+# Build fingerprint
+################################################################################
+# The fingerprint covers everything that changes the content of the image.
+# It is stored in the published image (index annotation), so the next run can
+# skip the build when nothing changed, without any Actions cache.
+if [ "$SKIP_BUILD" != "1" ]; then
+    BUILD_CACHE_KEY="($APP@$BUILD_TAG)${BUILD_CACHE_KEY:+/}$BUILD_CACHE_KEY"
+    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(platform:$BUILD_PLATFORM)"
+
+    [ -n "$S6_VERSION" ] && BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(s6@$S6_VERSION)"
+
+    if [ -z "$PHP_VERSION" ] && [ -n "$OS_BASE" ]; then
+        # base-os and base-s6 are built FROM the OS image
+        OS_SHA="$(get_dockerhub_tag_digest_or_now "library/$OS_BASE" "$OS_VERSION")"
+        BUILD_CACHE_KEY="$BUILD_CACHE_KEY/($OS_BASE:$OS_VERSION@$OS_SHA)"
+    fi
+
+    if [ -n "$PHP_VERSION" ]; then
+        PHP_SHA="$(get_dockerhub_tag_digest_or_now "library/php" "$PHP_VERSION-${PHP_VARIANT#-}")"
+        BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(php:$PHP_VERSION-${PHP_VARIANT#-}@$PHP_SHA)"
+
+        # Outdated versions are only rebuilt when their official PHP image changes
+        if ! is_outdated_php "$PHP_VERSION"; then
+            BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(IPE:$IPE_VERSION)/(composer:$COMPOSER_VERSION)"
+        fi
+
+        # Servers are built FROM shinsenter/php, so their parent image matters too
+        if [ "${APP#with-}" != "$APP" ]; then
+            PARENT_TAG="${BUILD_TAG_PREFIX}${PHP_VERSION//-rc/}-${PHP_VARIANT}"
+            PARENT_SHA="$(get_dockerhub_tag_digest_or_now "$DEFAULT_BUILD_NAME" "$PARENT_TAG")"
+            BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(parent:$PARENT_TAG@$PARENT_SHA)"
+        fi
+    fi
+
+    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(buildfile:$(path_hash "$BUILD_DOCKERFILE" | head -c10))"
+    # Other Dockerfiles in the same folder are not part of this image
+    context_hash="$(find "$BUILD_CONTEXT" -type f ! -name '.*' ! -name '*.md' \
+        \( ! -name '*.dockerfile' -o -name 'meta.dockerfile' \) \
+        | sort -dbfi | xargs -r shasum 2>/dev/null | shasum | head -c10)"
+    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(buildcontext:$context_hash)"
+    BUILD_FINGERPRINT="$(echo -n "$BUILD_CACHE_KEY" | shasum | head -c32)"
+else
+    BUILD_CACHE_KEY=""
+fi
+
+BUILD_TMP_NAME="localhost:5000/$(path_hash "$BUILD_CACHE_KEY" | head -c10)"
+
+################################################################################
 # Fix image name for RC versions
 ################################################################################
 [ "$BUILD_FROM_IMAGE" != "$BASE_REPO" ] && PHP_VERSION="${PHP_VERSION//-rc/}"
@@ -594,11 +612,39 @@ fi
 [ "${APP:0:4}" = "app-" ] && PHP_VARIANT="$SUFFIX"
 
 ################################################################################
+# Skip the build when the published image is already up to date
+################################################################################
+CHECK_IMAGE=
+UP_TO_DATE=0
+if [ "$SKIP_BUILD" != "1" ]; then
+    CHECK_IMAGE="$BUILD_TAG"
+    [ "$PUBLISH_TO_GHCR" = "1" ] && CHECK_IMAGE="ghcr.io/$BUILD_TAG"
+
+    if [ "$(get_image_fingerprint "$CHECK_IMAGE")" = "$BUILD_FINGERPRINT" ]; then
+        UP_TO_DATE=1
+        echo "$CHECK_IMAGE is up to date (fingerprint $BUILD_FINGERPRINT)" >&2
+        [ "$FORCE_BUILD" != "1" ] && [ "$CHECK_ONLY" != "1" ] && SKIP_BUILD=1
+    else
+        echo "$CHECK_IMAGE needs a build (fingerprint $BUILD_FINGERPRINT)" >&2
+        echo "  from: $BUILD_CACHE_KEY" >&2
+    fi
+fi
+
+# Used by the update watcher: report and stop
+if [ "$CHECK_ONLY" = "1" ]; then
+    if [ "$SKIP_BUILD" = "1" ] || [ "$UP_TO_DATE" = "1" ]; then
+        echo "up-to-date"
+    else
+        echo "stale"
+    fi
+    exit 0
+fi
+
+################################################################################
 # Export Git action environment variables
 ################################################################################
-github_env USE_BUILD_CACHE "$USE_BUILD_CACHE"
 github_env BUILD_CACHE_KEY "$BUILD_CACHE_KEY"
-github_env BUILD_CACHE_PATH "$BUILD_CACHE_PATH"
+github_env BUILD_FINGERPRINT "$BUILD_FINGERPRINT"
 github_env BUILD_CONTEXT "$BUILD_CONTEXT"
 github_env BUILD_DATE "$BUILD_DATE"
 github_env BUILD_DESC "$BUILD_DESC"
@@ -635,6 +681,5 @@ github_env UPDATE_README "$UPDATE_README"
         echo "🐧 Debug:"
         path_hash "$BUILD_CONTEXT"
         path_hash "$BUILD_DOCKERFILE"
-        path_hash "$BASE_DIR/.github/workflows/template-"*
     fi
 } >&2

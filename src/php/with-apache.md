@@ -89,8 +89,8 @@ Check our [Docker Hub](https://hub.docker.com/r/shinsenter/phpfpm-apache/tags) f
 The release versions on [this GitHub repository](https://code.shin.company/php) don't guarantee
 that Docker images built from the same source code will always be identical.
 
-We build new Docker images daily to ensure they stay up-to-date
-with the latest upstream updates for PHP, base OS, Composer, etc.
+We rebuild the Docker images when upstream sources (PHP, base OS, Composer, etc.)
+publish an update, so they stay up-to-date.
 The images in this repo are regularly updated under the same tag names.
 
 But you can pull the image from `shinsenter/phpfpm-apache:latest`,

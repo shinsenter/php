@@ -25,7 +25,17 @@ on:
         required: false
         type: string
         default: ""
+      php_versions:
+        description: "JSON array of PHP versions to build (empty = the versions listed below)"
+        required: false
+        type: string
+        default: ""
       build_all:
+        description: "Include outdated versions when php_versions is empty"
+        required: false
+        type: boolean
+        default: false
+      force_build:
         required: false
         type: boolean
         default: false
@@ -34,29 +44,15 @@ on:
 ################################################################################
 
 jobs:
-  maintained:
+  build:
+    name: ${{ matrix.php_version }} ${{ matrix.os == '' && 'debian' || matrix.os }}
     uses: ./.github/workflows/template-common.yml
     secrets: inherit
     strategy:
       fail-fast: false
       matrix:
-        php_version: ["8.6-rc", "8.5", "8.4", "8.3"]
-        os: ["", "alpine"]
-    with:
-      os: ${{ matrix.os }}
-      php_version: ${{ matrix.php_version }}
-      app_name: ${{ inputs.app_name }}
-      server: ${{ inputs.server }}
-      tag_prefix: ${{ inputs.tag_prefix }}
-
-  outdated:
-    if: ${{ inputs.build_all }}
-    uses: ./.github/workflows/template-common.yml
-    secrets: inherit
-    strategy:
-      fail-fast: false
-      matrix:
-        php_version: ["8.2", "8.1", "8.0", "7.4", "7.3", "7.2", "7.1", "7.0", "5.6"]
+        # Keep these lists in sync with build/versions.sh
+        php_version: ${{ fromJSON(inputs.php_versions != '' && inputs.php_versions || (inputs.build_all && '["8.6-rc","8.5","8.4","8.3","8.2","8.1","8.0","7.4","7.3","7.2","7.1","7.0","5.6"]' || '["8.6-rc","8.5","8.4","8.3","8.2"]')) }}
         os: ["", "alpine"]
         exclude:
           - os: "alpine"
@@ -69,3 +65,4 @@ jobs:
       app_name: ${{ inputs.app_name }}
       server: ${{ inputs.server }}
       tag_prefix: ${{ inputs.tag_prefix }}
+      force_build: ${{ inputs.force_build }}

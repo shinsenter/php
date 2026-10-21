@@ -1,0 +1,85 @@
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+name: Watch updates
+
+################################################################################
+################################################################################
+
+# Replaces the old daily build. Every 30 minutes this workflow compares the
+# published images with their current inputs (official PHP images, Composer,
+# IPE, s6-overlay, FrankenPHP, RoadRunner, base OS images and the sources in
+# this repository). It reads registry manifests only. When something changed,
+# it starts "Build all" for the affected PHP versions.
+#
+# Composer, IPE and s6-overlay updates rebuild the maintained versions only.
+# Outdated versions are rebuilt when their own official PHP image changes.
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: watch-updates
+  cancel-in-progress: false
+
+################################################################################
+################################################################################
+
+jobs:
+  watch:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check published images
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
+        run: |
+          set -e
+          versions="$(./build/check-updates.sh)"
+          echo "PHP versions to build: ${versions:-none}"
+          echo "versions=$versions" >> "$GITHUB_OUTPUT"
+
+      - name: Start build
+        if: ${{ steps.check.outputs.versions != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSIONS: ${{ steps.check.outputs.versions }}
+        run: |
+          set -e
+
+          # Wait for the running build, it will pick up what changed so far
+          active="$(gh run list --workflow build-all.yml --limit 20 --json status \
+            --jq '[.[] | select(.status == "in_progress" or .status == "queued" or .status == "waiting" or .status == "pending")] | length')"
+          if [ "$active" != "0" ]; then
+            echo "Build all is still running ($active). Will check again later."
+            exit 0
+          fi
+
+          # Do not retry a failing build in a loop: wait 3 hours after a failed run
+          last="$(gh run list --workflow build-all.yml --limit 1 --json conclusion,createdAt \
+            --jq '.[0] | select(.conclusion == "failure") | .createdAt')"
+          if [ -n "$last" ]; then
+            age=$(( $(date +%s) - $(date -d "$last" +%s) ))
+            if [ "$age" -lt 10800 ]; then
+              echo "The last build failed ${age}s ago. Waiting before the next try."
+              exit 0
+            fi
+          fi
+
+          gh workflow run build-all.yml --ref main -f php_versions="$VERSIONS"
+          echo "Started Build all for: $VERSIONS"

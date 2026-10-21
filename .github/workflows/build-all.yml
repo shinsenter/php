@@ -6,22 +6,46 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-name: Daily build
+name: Build all
 
 ################################################################################
 ################################################################################
+
+# There is no scheduled run any more. The "Watch updates" workflow checks the
+# upstream sources and starts this workflow only for the PHP versions that need
+# a new build. Every image also compares its own fingerprint with the published
+# one and skips the build when nothing changed.
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 0 * * *"
+    inputs:
+      php_versions:
+        description: "PHP versions to build, separated by spaces (empty = all versions)"
+        required: false
+        type: string
+        default: ""
+      force_build:
+        description: "Build even when the published image is up to date"
+        required: false
+        type: boolean
+        default: false
   release:
     types: [released]
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'build/**'
+      - '!src/**.md'
   pull_request:
     types: [opened]
     paths:
       - 'src/**'
       - '!src/**.md'
+
+concurrency:
+  group: build-all-${{ github.ref }}
+  cancel-in-progress: false
 
 ################################################################################
 ################################################################################
@@ -31,7 +55,8 @@ jobs:
     runs-on: ubuntu-26.04
     outputs:
       tag_prefix: ${{ steps.init.outputs.tag_prefix }}
-      build_all: ${{ steps.init.outputs.build_all == '1' }}
+      php_versions: ${{ steps.init.outputs.php_versions }}
+      force_build: ${{ steps.init.outputs.force_build }}
     steps:
       - uses: actions/checkout@v7
 
@@ -42,69 +67,81 @@ jobs:
           DOCKERHUB_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
+          REQUESTED_VERSIONS: ${{ inputs.php_versions }}
+          FORCE_BUILD: ${{ inputs.force_build }}
         run: |
           set -e
           . ./build/helpers.sh
+          . ./build/versions.sh
 
           # Prepare variables
-          the_day=$(date -u +"%d")
-          event_name=${{ github.event_name }}
           ref_type=${{ github.ref_type }}
           ref=${{ github.ref }}
           tag_prefix=$(if [[ $ref_type != 'tag' ]] && [[ $ref != 'refs/heads/main' ]]; then echo 'dev-'; fi)
-          build_all=$(if [[ $event_name != 'schedule' ]] || [[ $the_day == '01' ]]; then echo '1'; fi)
+          force_build=$(if [ "$FORCE_BUILD" = "true" ]; then echo 'true'; else echo 'false'; fi)
+
+          # Select PHP versions: the requested ones, or all of them
+          php_versions=()
+          if [ -n "${REQUESTED_VERSIONS// /}" ]; then
+            for requested in ${REQUESTED_VERSIONS//,/ }; do
+              found=
+              for version in "${ALL_PHP_VERSIONS[@]}"; do
+                if [ "$version" = "$requested" ] || [ "${version%-rc}" = "$requested" ]; then
+                  php_versions+=("$version")
+                  found=1
+                fi
+              done
+              if [ -z "$found" ]; then
+                echo "Unknown PHP version: $requested" >&2
+                exit 1
+              fi
+            done
+          else
+            php_versions=("${ALL_PHP_VERSIONS[@]}")
+          fi
+          php_versions_json=$(printf '%s\n' "${php_versions[@]}" | jq -R . | jq -sc .)
 
           # For debugging purposes
-          echo "the_day=$the_day" >> "$GITHUB_OUTPUT"
           echo "tag_prefix=$tag_prefix" >> "$GITHUB_OUTPUT"
-          echo "build_all=$build_all" >> "$GITHUB_OUTPUT"
+          echo "php_versions=$php_versions_json" >> "$GITHUB_OUTPUT"
+          echo "force_build=$force_build" >> "$GITHUB_OUTPUT"
           echo "number_of_cores   = $(nproc)"
-          echo "github.event_name = $event_name"
+          echo "github.event_name = ${{ github.event_name }}"
           echo "github.ref_type   = $ref_type"
           echo "github.ref        = $ref"
           echo "tag_prefix        = $tag_prefix"
-          echo "build_all         = $(if [ -n "$build_all" ]; then echo 'yes, includes outdated versions'; else echo 'no, only maintained versions'; fi)"
+          echo "php_versions      = $php_versions_json"
+          echo "force_build       = $force_build"
 
-          # Cache requests
+          # Cache requests (shared by all jobs of this run)
           echo "Generating cache keys..."
           get_github_latest_tag "composer/composer"
           get_github_latest_tag "just-containers/s6-overlay"
           get_github_latest_tag "mlocati/docker-php-extension-installer"
           get_github_latest_tag "roadrunner-server/roadrunner"
-          get_dockerhub_latest_sha "library/debian"
-          get_dockerhub_latest_sha "library/alpine"
-          get_dockerhub_latest_sha "library/ubuntu"
 
           distros=(debian alpine)
           variants=(cli fpm zts)
-          base_images=(phpfpm-nginx phpfpm-apache laravel)
-          php_versions=(8.6-rc 8.5 8.4 8.3)
-
-          if [ -n "$build_all" ]; then
-            php_versions+=(8.2 8.1 8.0 7.4 7.3 7.2 7.1 7.0 5.6)
-          fi
 
           get_sha() {
-            get_dockerhub_latest_sha "$@" || true
+            get_dockerhub_tag_digest "$@" >/dev/null || true
           }
 
           for distro in "${distros[@]}"; do
-            get_sha "library/$distro"
+            get_sha "library/$distro" latest
             if [ "$distro" == "debian" ]; then
               distro=""
             fi
             for version in "${php_versions[@]}"; do
               for variant in "${variants[@]}"; do
-                get_sha "library/php" 1 "${version}-${variant}-${distro}"
+                get_sha "library/php" "${version}-${variant}${distro:+-$distro}"
                 if [ "$variant" == "zts" ] && verlte "8.2" "$version"; then
-                  get_sha "dunglas/frankenphp" 1 "1-php${version}-${distro}"
+                  get_sha "dunglas/frankenphp" "1-php${version}${distro:+-$distro}"
                 fi
               done
-              # for base in "${base_images[@]}"; do
-              #   get_sha "shinsenter/$base" 1 "${tag_prefix}php${version//-rc/}-${distro}"
-              # done
             done
           done
+          get_sha "library/ubuntu" latest
 
       - uses: actions/upload-artifact@v7
         with:
@@ -122,6 +159,7 @@ jobs:
       app_name: "base-s6"
       os: "alpine"
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
+      force_build: ${{ fromJSON(needs.prepare.outputs.force_build) }}
 
   linux-s6:
     name: ${{ matrix.os == '' && 'debian' || matrix.os }}-s6
@@ -139,6 +177,7 @@ jobs:
       app_name: "base-os"
       os: ${{ matrix.os }}
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
+      force_build: ${{ fromJSON(needs.prepare.outputs.force_build) }}
 
   ##########################################################
 
@@ -154,7 +193,8 @@ jobs:
     with:
       app_name: ${{ matrix.app }}
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
-      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
+      php_versions: ${{ needs.prepare.outputs.php_versions }}
+      force_build: ${{ fromJSON(needs.prepare.outputs.force_build) }}
 
   php-cli:
     uses: ./.github/workflows/template-php.yml
@@ -168,7 +208,8 @@ jobs:
     with:
       app_name: ${{ matrix.app }}
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
-      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
+      php_versions: ${{ needs.prepare.outputs.php_versions }}
+      force_build: ${{ fromJSON(needs.prepare.outputs.force_build) }}
 
   php-zts:
     uses: ./.github/workflows/template-php.yml
@@ -182,7 +223,8 @@ jobs:
     with:
       app_name: ${{ matrix.app }}
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
-      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
+      php_versions: ${{ needs.prepare.outputs.php_versions }}
+      force_build: ${{ fromJSON(needs.prepare.outputs.force_build) }}
 
   ##########################################################
 
@@ -199,7 +241,8 @@ jobs:
     with:
       app_name: ${{ matrix.app }}
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
-      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
+      php_versions: ${{ needs.prepare.outputs.php_versions }}
+      force_build: ${{ fromJSON(needs.prepare.outputs.force_build) }}
 
   zts-servers:
     uses: ./.github/workflows/template-php.yml
@@ -213,7 +256,8 @@ jobs:
     with:
       app_name: ${{ matrix.app }}
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
-      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
+      php_versions: ${{ needs.prepare.outputs.php_versions }}
+      force_build: ${{ fromJSON(needs.prepare.outputs.force_build) }}
 
   cli-servers:
     uses: ./.github/workflows/template-php.yml
@@ -227,7 +271,8 @@ jobs:
     with:
       app_name: ${{ matrix.app }}
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
-      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
+      php_versions: ${{ needs.prepare.outputs.php_versions }}
+      force_build: ${{ fromJSON(needs.prepare.outputs.force_build) }}
 
   ##########################################################
 
@@ -251,30 +296,25 @@ jobs:
         run: |
           set -e
           . ./build/helpers.sh
-          build_all="${{ needs.prepare.outputs.build_all }}"
-          echo "build_all = '$build_all' ($(if [ "$build_all" = "true" ]; then echo 'yes, includes outdated versions'; else echo 'no, only maintained versions'; fi))"
-
+          tag_prefix="${{ needs.prepare.outputs.tag_prefix }}"
+          php_versions=($(echo '${{ needs.prepare.outputs.php_versions }}' | jq -r '.[]'))
           distros=(debian alpine)
-          base_images=(phpfpm-nginx phpfpm-apache roadrunner laravel)
-          php_versions=(8.6-rc 8.5 8.4 8.3)
-
-          if [ "$build_all" = "true" ]; then
-            php_versions+=(8.2 8.1 8.0 7.4 7.3 7.2 7.1 7.0 5.6)
-          fi
+          # laravel is not listed: it is built after this job, its digest is fetched later
+          base_images=(phpfpm-nginx phpfpm-apache roadrunner)
 
           get_sha() {
-            get_dockerhub_latest_sha "$@" || true
+            get_dockerhub_tag_digest "$@" >/dev/null || true
           }
 
+          # Digests of the images that were just published (used by the app builds)
           for distro in "${distros[@]}"; do
-            get_sha "library/$distro"
             if [ "$distro" == "debian" ]; then
               distro=""
             fi
             for version in "${php_versions[@]}"; do
               if verlt "7.1" "$version" || [ "$distro" = "" ]; then
                 for base in "${base_images[@]}"; do
-                  get_sha "shinsenter/$base" 1 "${tag_prefix}php${version//-rc/}-${distro}"
+                  get_sha "shinsenter/$base" "${tag_prefix}php${version//-rc/}${distro:+-$distro}"
                 done
               fi
             done
@@ -330,7 +370,8 @@ jobs:
       app_name: ${{ matrix.app }}
       server: ${{ matrix.server }}
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
-      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
+      php_versions: ${{ needs.prepare.outputs.php_versions }}
+      force_build: ${{ fromJSON(needs.prepare.outputs.force_build) }}
 
   other-apps:
     name: ${{ matrix.app }}
@@ -345,7 +386,8 @@ jobs:
     with:
       app_name: ${{ matrix.app }}
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
-      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
+      php_versions: ${{ needs.prepare.outputs.php_versions }}
+      force_build: ${{ fromJSON(needs.prepare.outputs.force_build) }}
 
   extended-apps:
     name: ${{ matrix.app }}
@@ -366,7 +408,8 @@ jobs:
     with:
       app_name: ${{ matrix.app }}
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
-      build_all: ${{ fromJSON(needs.prepare.outputs.build_all) || false }}
+      php_versions: ${{ needs.prepare.outputs.php_versions }}
+      force_build: ${{ fromJSON(needs.prepare.outputs.force_build) }}
 
 ################################################################################
 ################################################################################

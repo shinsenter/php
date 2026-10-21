@@ -122,6 +122,36 @@ get_github_latest_sha () { parse_json "$(get_github_json "$1")" "${2:-1}" '.[] |
 get_dockerhub_latest_tag () { parse_json "$(get_dockerhub_json "$1" "name=${3:-latest}")" "${2:-1}" '.results[] | if type == "object" then (.name // empty) else empty end'; }
 get_dockerhub_latest_sha () { parse_json "$(get_dockerhub_json "$1" "name=${3:-latest}")" "${2:-1}" '.results[] | if type == "object" then (.digest // .tag_last_pushed // .id // empty) else . end'; }
 
+# Digest of one exact tag on Docker Hub (e.g. library/php 8.5-fpm).
+# Do not use the "name=" search of the tags API for this: it matches substrings
+# and returns whichever tag was updated last (8.5-fpm-alpine3.23, 8.5-fpm-bookworm...).
+get_dockerhub_tag_digest () {
+    local name="$1"
+    local tag="$2"
+    local options=
+    if [ -n "$DOCKERHUB_USERNAME" ] && [ -n "$DOCKERHUB_PASSWORD" ]; then
+        options="-u $DOCKERHUB_USERNAME:$DOCKERHUB_PASSWORD"
+    fi
+    local json
+    json="$(fetch_with_cache "https://registry.hub.docker.com/v2/repositories/$name/tags/$tag" "$options")" || return 1
+    parse_json "$json" 1 '.digest // empty'
+}
+
+# Same as above, but a failed lookup returns a value that changes on every run,
+# so the image is rebuilt instead of being wrongly treated as up to date.
+get_dockerhub_tag_digest_or_now () {
+    local digest
+    digest="$(get_dockerhub_tag_digest "$@")" || true
+    echo "${digest:-unknown-$(date +%s)}"
+}
+
+# Fingerprint stored in the index manifest of a published image (empty if none).
+# Reads the manifest only, no layer is pulled.
+get_image_fingerprint () {
+    docker buildx imagetools inspect --raw "$1" 2>/dev/null \
+        | jq -r '.annotations["org.shinsenter.build.fingerprint"] // empty' 2>/dev/null
+}
+
 # Function to set environment variables
 github_env() {
     local name="$1"; shift
