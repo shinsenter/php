@@ -7,7 +7,8 @@ Our images support PHP versions from 5.6 up to 8.6 (RC), with variants for CLI, 
 - GitHub Packages: https://code.shin.company/php/pkgs/container/php
 - You can also find other pre-built images for popular PHP applications and frameworks here: https://hub.docker.com/u/shinsenter
 
-[![Daily build](https://code.shin.company/php/actions/workflows/build-all.yml/badge.svg)](https://code.shin.company/php/actions/workflows/build-all.yml)
+[![Build all](https://code.shin.company/php/actions/workflows/build-all.yml/badge.svg)](https://code.shin.company/php/actions/workflows/build-all.yml)
+[![Watch updates](https://code.shin.company/php/actions/workflows/watch-updates.yml/badge.svg)](https://code.shin.company/php/actions/workflows/watch-updates.yml)
 
 
 ## Table of Contents <!-- omit from toc -->
@@ -27,6 +28,7 @@ Our images support PHP versions from 5.6 up to 8.6 (RC), with variants for CLI, 
 - [Other System Settings](#other-system-settings)
 - [Supported Platforms](#supported-platforms)
 - [Stable Image Tags](#stable-image-tags)
+- [How Images Are Updated](#how-images-are-updated)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -489,6 +491,27 @@ See our [Docker Hub](https://hub.docker.com/r/shinsenter/php/tags) for available
 For stable, production-ready images we maintain dated tags in a separate repository.
 
 > 👉🏻 View Stable Tags: https://hub.docker.com/r/shinsenter/php-archives/tags
+
+
+## How Images Are Updated
+
+Images are no longer rebuilt on a daily schedule. The [Watch updates](https://code.shin.company/php/actions/workflows/watch-updates.yml) workflow runs every 30 minutes and compares each published image with its current inputs:
+
+- the official `php` image of that version (new PHP release or security fix)
+- Composer, docker-php-extension-installer, s6-overlay, FrankenPHP, RoadRunner
+- the base OS images and the files in this repository
+
+When an input changes, only the affected PHP versions are built again. Images that are still up to date are skipped without being pulled or built. A Composer, extension installer or s6-overlay update rebuilds the maintained versions only. Outdated versions are rebuilt when their official PHP image changes.
+
+Each published image carries the fingerprint of its inputs in the `org.shinsenter.build.fingerprint` annotation of the image index:
+
+```sh
+docker buildx imagetools inspect --raw shinsenter/php:8.5-fpm | jq '.annotations'
+```
+
+These images are built from the official `php` image, so they can only be rebuilt after the official image for the new PHP release is published on Docker Hub. To check the PHP version in a container, run `php -v`.
+
+Maintainers can start a build by hand from the [Build all](https://code.shin.company/php/actions/workflows/build-all.yml) workflow. Use `php_versions` (for example `8.5 8.4`) to build selected versions, and `force_build` to build even when an image is up to date.
 
 
 ## Contributing

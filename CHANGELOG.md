@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 
 
+## [5.8.0] - 2026-10-22
+- Replace the daily build with a watcher that builds only the images that changed.
+- Skip images that are already up to date.
+- Remove the Actions build cache.
+- Rebuild maintained versions when Composer is updated.
+- Add PHP 8.2 to the maintained versions.
+
+
 ## [5.7.0] - 2026-07-17
 - Remove cleanup of /usr/share/zoneinfo directory.
 - Remove beta job from template-php.yml.
