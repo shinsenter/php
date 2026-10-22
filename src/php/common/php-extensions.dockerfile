@@ -222,6 +222,19 @@ phpaddmod "${modules[@]}" || true
 php -m
 composer -V
 
+# Stop the build if a popular module is missing.
+# Installation errors are ignored above, so this is the only check.
+required_modules=(bcmath exif gd intl mysqli pdo_mysql pdo_pgsql pgsql zip)
+installed_modules="$(php -m | tr '[:upper:]' '[:lower:]')"
+missing_modules=()
+for module in "${required_modules[@]}"; do
+    printf '%s\n' "$installed_modules" | grep -qx "$module" || missing_modules+=("$module")
+done
+if [ "${#missing_modules[@]}" -gt 0 ]; then
+    echo "ERROR: missing PHP modules: ${missing_modules[*]}" >&2
+    exit 1
+fi
+
 # Install prestissimo for Composer v1.x
 major_version=$(composer --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | cut -d. -f1)
 if [ -n "$major_version" ] && [ "$major_version" -lt 2 ]; then
