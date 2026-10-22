@@ -38,7 +38,7 @@ concurrency:
 
 jobs:
   watch:
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v7
 
