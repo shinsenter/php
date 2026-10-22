@@ -224,8 +224,9 @@ composer -V
 
 # Stop the build if a popular module is missing.
 # Installation errors are ignored above, so this is the only check.
-required_modules=(bcmath exif gd intl mysqli pdo_mysql pdo_pgsql pgsql zip)
-installed_modules="$(php -m | tr '[:upper:]' '[:lower:]')"
+required_modules=(bcmath curl gd mbstring mysqli openssl pdo pdo_mysql pdo_pgsql pdo_sqlite session opcache zip)
+# php -m lists opcache as "Zend OPcache", so normalize it to its module name.
+installed_modules="$(php -m | sed 's/^Zend OPcache$/opcache/' | tr '[:upper:]' '[:lower:]')"
 missing_modules=()
 for module in "${required_modules[@]}"; do
     printf '%s\n' "$installed_modules" | grep -qx "$module" || missing_modules+=("$module")
