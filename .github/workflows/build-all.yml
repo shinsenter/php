@@ -351,9 +351,9 @@ jobs:
           - app-kirby
           - app-laminas
           - app-laravel
-          # - app-magento
+          - app-magento
           - app-matomo
-          # - app-mautic
+          - app-mautic
           - app-phpmyadmin
           - app-slim
           - app-symfony
