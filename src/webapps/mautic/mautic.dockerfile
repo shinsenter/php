@@ -37,7 +37,6 @@ echo 'Install PHP extensions'
 [ -z "$DEBUG" ] || set -ex && set -e
 
 env-default PHP_MEMORY_LIMIT 1G
-env-default PHP_ZEND_ASSERTIONS '$(is-debug && echo 0 || echo -1)'
 
 phpaddmod imap sockets
 

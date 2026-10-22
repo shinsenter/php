@@ -47,6 +47,7 @@ env-default PHP_SESSION_COOKIE_SECURE '0'
 env-default PHP_SESSION_USE_COOKIES '1'
 env-default PHP_UPLOAD_MAX_FILESIZE '100M'
 env-default PHP_VARIABLES_ORDER 'EGPCS'
+env-default PHP_ZEND_ASSERTIONS '-1'
 
 # Override defaults for PHP-FPM
 env-default '# Override defaults for PHP-FPM'
