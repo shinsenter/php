@@ -52,7 +52,7 @@ concurrency:
 
 jobs:
   prepare:
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-26.04-arm
     outputs:
       tag_prefix: ${{ steps.init.outputs.tag_prefix }}
       php_versions: ${{ steps.init.outputs.php_versions }}
@@ -277,7 +277,7 @@ jobs:
   ##########################################################
 
   server-cache:
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-26.04-arm
     needs: [prepare, cli-servers, fpm-servers]
     steps:
       - uses: actions/download-artifact@v8
@@ -351,9 +351,9 @@ jobs:
           - app-kirby
           - app-laminas
           - app-laravel
-          # - app-magento
+          - app-magento
           - app-matomo
-          # - app-mautic
+          - app-mautic
           - app-phpmyadmin
           - app-slim
           - app-symfony
