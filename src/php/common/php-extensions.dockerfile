@@ -222,18 +222,23 @@ phpaddmod "${modules[@]}"   || true
 php -m
 composer -V
 
-# Stop the build if a popular module is missing.
+# Stop the build if a popular module is missing (stable releases only).
 # Installation errors are ignored above, so this is the only check.
-required_modules=(bcmath curl dom gd json mbstring mysqli opcache openssl pdo pdo_mysql pdo_pgsql pdo_sqlite phar session simplexml zlib)
-# php -m lists opcache as "Zend OPcache", so normalize it to its module name.
-installed_modules="$(php -m | sed 's/^Zend OPcache$/opcache/' | tr '[:upper:]' '[:lower:]')"
-missing_modules=()
-for module in "${required_modules[@]}"; do
-    printf '%s\n' "$installed_modules" | grep -qx "$module" || missing_modules+=("$module")
-done
-if [ "${#missing_modules[@]}" -gt 0 ]; then
-    echo "ERROR: missing PHP modules: ${missing_modules[*]}" >&2
-    exit 1
+php_version="$(php -r 'echo PHP_VERSION;')"
+if [[ "$php_version" =~ (alpha|beta|RC|dev) ]]; then
+    echo "WARN: skip required modules check for pre-release PHP $php_version"
+else
+    required_modules=(bcmath curl dom gd json mbstring mysqli opcache openssl pdo pdo_mysql pdo_pgsql pdo_sqlite phar session simplexml zlib)
+    # php -m lists opcache as "Zend OPcache", so normalize it to its module name.
+    installed_modules="$(php -m | sed 's/^Zend OPcache$/opcache/' | tr '[:upper:]' '[:lower:]')"
+    missing_modules=()
+    for module in "${required_modules[@]}"; do
+        printf '%s\n' "$installed_modules" | grep -qx "$module" || missing_modules+=("$module")
+    done
+    if [ "${#missing_modules[@]}" -gt 0 ]; then
+        echo "ERROR: missing PHP modules: ${missing_modules[*]}" >&2
+        exit 1
+    fi
 fi
 
 # Install prestissimo for Composer v1.x
