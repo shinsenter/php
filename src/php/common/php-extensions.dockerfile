@@ -95,7 +95,7 @@ modules=(
     # gnupg
     # grpc
     # http
-    # igbinary
+    igbinary
     # imagick
     # imap
     # inotify
@@ -215,8 +215,8 @@ modules=(
     # zookeeper
     # zstd
 )
-phpaddmod igbinary || true
-phpaddmod "${modules[@]}" || true
+has-cmd pecl && upgrade-all || true
+phpaddmod "${modules[@]}"   || true
 
 # Show installed PHP modules and Composer version
 php -m
@@ -224,7 +224,7 @@ composer -V
 
 # Stop the build if a popular module is missing.
 # Installation errors are ignored above, so this is the only check.
-required_modules=(bcmath curl gd mbstring mysqli openssl pdo pdo_mysql pdo_pgsql pdo_sqlite session opcache zip)
+required_modules=(bcmath curl dom gd json mbstring mysqli opcache openssl pdo pdo_mysql pdo_pgsql pdo_sqlite phar session simplexml zlib)
 # php -m lists opcache as "Zend OPcache", so normalize it to its module name.
 installed_modules="$(php -m | sed 's/^Zend OPcache$/opcache/' | tr '[:upper:]' '[:lower:]')"
 missing_modules=()
