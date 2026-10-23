@@ -95,7 +95,7 @@ modules=(
     # gnupg
     # grpc
     # http
-    # igbinary
+    igbinary
     # imagick
     # imap
     # inotify
@@ -215,8 +215,8 @@ modules=(
     # zookeeper
     # zstd
 )
-phpaddmod igbinary || true
-phpaddmod "${modules[@]}" || true
+has-cmd pecl && upgrade-all || true
+phpaddmod "${modules[@]}"   || true
 
 # Show installed PHP modules and Composer version
 php -m
