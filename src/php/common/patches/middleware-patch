@@ -115,7 +115,14 @@ fi
 brotli=0
 curl=0
 is_older brotli-libs "$BROTLI_VERSION" && brotli=1
-is_older curl "$CURL_VERSION" && curl=1
+# the latest curl needs OpenSSL 3 (libssl3 is Alpine 3.17 and newer)
+if is_older curl "$CURL_VERSION"; then
+    if apk info -e libssl3 >/dev/null; then
+        curl=1
+    else
+        echo "Skip curl $CURL_VERSION, it needs OpenSSL 3"
+    fi
+fi
 [ "$brotli" = 1 ] || [ "$curl" = 1 ] || exit 0
 
 work="$(mktemp -d)"
