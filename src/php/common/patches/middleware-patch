@@ -70,9 +70,10 @@ build_curl() {
     tar -xJf "$work/curl-$CURL_VERSION.tar.xz" -C "$work"
     cd "$work/curl-$CURL_VERSION"
     # same options as the Alpine package
+    # shellcheck disable=SC2086
     ./configure --prefix=/usr --disable-static --disable-manual --disable-ldap \
         --enable-ares --enable-ipv6 --enable-unix-sockets --enable-websockets \
-        --with-pic --with-libidn2 --with-nghttp2 --with-openssl --without-libssh2 \
+        --with-pic $idn --with-nghttp2 --with-openssl --without-libssh2 \
         --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt --with-ca-path=/etc/ssl/certs
     make -j"$(nproc)"
     make install-strip DESTDIR="$work/curl-root"
@@ -121,9 +122,15 @@ work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 deps='gcc make musl-dev'
 [ "$brotli" = 0 ] || deps="$deps cmake"
-[ "$curl" = 0 ] || deps="$deps brotli-dev c-ares-dev libidn2-dev libpsl-dev nghttp2-dev openssl-dev pkgconf zlib-dev zstd-dev"
+[ "$curl" = 0 ] || deps="$deps brotli-dev c-ares-dev libpsl-dev nghttp2-dev openssl-dev pkgconf zlib-dev zstd-dev"
+# libidn2-dev is missing on old Alpine (3.10), curl is built without IDN there
+idn=--without-libidn2
 # shellcheck disable=SC2086
-apk add --no-cache --virtual .libs-deps $deps
+if [ "$curl" = 1 ] && apk add --no-cache --virtual .libs-deps $deps libidn2-dev; then
+    idn=--with-libidn2
+else
+    apk add --no-cache --virtual .libs-deps $deps
+fi
 
 [ "$brotli" = 0 ] || build_brotli
 [ "$curl" = 0 ] || build_curl
