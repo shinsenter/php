@@ -26,7 +26,7 @@ ARG PHP_VARIANT="fpm-alpine"
 FROM ${BUILD_FROM_IMAGE}:${PHP_VERSION}-${PHP_VARIANT} AS php-base
 COPY ./php-backports/ /usr/src/php-backports/
 
-RUN --mount=type=bind,source=./common/distro-patch,target=/tmp/distro-patch <<'EOF'
+RUN --mount=type=bind,source=./common/patches/distro-patch,target=/tmp/distro-patch <<'EOF'
 set -eu
 
 # PHP_VERSION is the full version here (set by the official image)

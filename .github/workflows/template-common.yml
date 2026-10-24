@@ -172,6 +172,12 @@ jobs:
           . ./build/helpers.sh
           prepare_build_context "$BUILD_DOCKERFILE" "$BUILD_CONTEXT" "$PHP_VERSION"
 
+      - # brotli and curl sources for common/patches/middleware-patch
+        uses: actions/download-artifact@v8
+        with:
+          name: helper_cache
+          path: ${{ env.BUILD_CONTEXT }}/helper_cache/
+
       -
         if: ${{ matrix.qemu != '' }}
         uses: docker/setup-qemu-action@v4

@@ -39,7 +39,7 @@ ENV PS1="\\u@\\h:\\w\\$ "
 ENV PRESQUASH_SCRIPTS="cleanup"
 
 ################################################################################
-RUN --mount=type=bind,source=./common/distro-patch,target=/tmp/distro-patch \
+RUN --mount=type=bind,source=./common/patches/distro-patch,target=/tmp/distro-patch \
     sh /tmp/distro-patch
 
 ################################################################################
@@ -71,7 +71,8 @@ EOF
 
 ################################################################################
 # After the package upgrade above, which would overwrite the libraries
-RUN --mount=type=bind,source=./common/middleware-patch,target=/tmp/middleware-patch \
+RUN --mount=type=bind,source=./common/patches/middleware-patch,target=/tmp/middleware-patch \
+    --mount=type=bind,source=./helper_cache,target=/tmp/helper_cache \
     sh /tmp/middleware-patch
 
 ################################################################################

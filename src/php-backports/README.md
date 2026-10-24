@@ -42,7 +42,7 @@ What the patches change, as seen in the code:
 
 ## Alpine libraries: CVE-2026-111497 and CVE-2026-92392
 
-These two are not php-src bugs, so they are not patches in this folder. `src/php/common/middleware-patch` fixes them for every PHP version on Alpine. `os-common.dockerfile` runs it right after the package upgrade, because the upgrade would overwrite the result.
+These two are not php-src bugs, so they are not patches in this folder. `src/php/common/patches/middleware-patch` fixes them for every PHP version on Alpine. `os-common.dockerfile` runs it right after the package upgrade, because the upgrade would overwrite the result.
 
 | CVE | Library | Affected | Fixed | Alpine package at the time |
 |---|---|---|---|---|

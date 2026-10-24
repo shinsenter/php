@@ -11,6 +11,8 @@
 # keeps the old version. Other systems are left alone.
 # Run by common/os-common.dockerfile after the package upgrade, which would
 # overwrite these files (mounted from the build context, not part of any image).
+# The workflow puts the sources in /tmp/helper_cache (see cache_middleware_sources
+# in build/helpers.sh). Without them (a local build) they are looked up and downloaded.
 # build/config.sh adds both versions to the image fingerprint, so a new release
 # rebuilds the image.
 
@@ -32,9 +34,13 @@ is_older() {
     [ -n "$installed" ] && [ "$(apk version -t "$installed" "$2-r0")" = '<' ]
 }
 
-# download <url> <file>
+# download <url> <file>: copies the file from the helper cache when it is there
 download() {
-    wget -qO "$work/$2" "$1"
+    if [ -f "/tmp/helper_cache/$2" ]; then
+        cp "/tmp/helper_cache/$2" "$work/$2"
+    else
+        wget -qO "$work/$2" "$1"
+    fi
 }
 
 # swap_libs <staging dir> <file pattern in /usr/lib>
@@ -47,8 +53,8 @@ swap_libs() {
 
 build_brotli() {
     echo "Build brotli $BROTLI_VERSION"
-    download "https://github.com/google/brotli/archive/refs/tags/v$BROTLI_VERSION.tar.gz" brotli.tar.gz
-    tar -xzf "$work/brotli.tar.gz" -C "$work"
+    download "https://github.com/google/brotli/archive/refs/tags/v$BROTLI_VERSION.tar.gz" "brotli-$BROTLI_VERSION.tar.gz"
+    tar -xzf "$work/brotli-$BROTLI_VERSION.tar.gz" -C "$work"
     cmake -S "$work/brotli-$BROTLI_VERSION" -B "$work/brotli-build" \
         -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib \
         -DBUILD_SHARED_LIBS=ON -DBROTLI_DISABLE_TESTS=ON
@@ -60,8 +66,8 @@ build_brotli() {
 
 build_curl() {
     echo "Build curl $CURL_VERSION"
-    download "https://curl.se/download/curl-$CURL_VERSION.tar.xz" curl.tar.xz
-    tar -xJf "$work/curl.tar.xz" -C "$work"
+    download "https://curl.se/download/curl-$CURL_VERSION.tar.xz" "curl-$CURL_VERSION.tar.xz"
+    tar -xJf "$work/curl-$CURL_VERSION.tar.xz" -C "$work"
     cd "$work/curl-$CURL_VERSION"
     # same options as the Alpine package
     ./configure --prefix=/usr --disable-static --disable-manual --disable-ldap \
@@ -81,11 +87,25 @@ build_curl() {
     esac
 }
 
+# cached_version <name> <extension>: version of the source in the helper cache
+cached_version() {
+    f="$(ls /tmp/helper_cache/"$1"-*."$2" 2>/dev/null | head -n1)"
+    f="${f##*/}"
+    f="${f#"$1"-}"
+    echo "${f%."$2"}"
+}
+
 # brotli tags look like v1.2.1, curl tags like curl-8_23_0
-BROTLI_VERSION="$(latest_release google/brotli)"
-BROTLI_VERSION="${BROTLI_VERSION#v}"
-CURL_VERSION="$(latest_release curl/curl)"
-CURL_VERSION="$(echo "${CURL_VERSION#curl-}" | tr _ .)"
+BROTLI_VERSION="$(cached_version brotli tar.gz)"
+CURL_VERSION="$(cached_version curl tar.xz)"
+if [ -z "$BROTLI_VERSION" ]; then
+    BROTLI_VERSION="$(latest_release google/brotli)"
+    BROTLI_VERSION="${BROTLI_VERSION#v}"
+fi
+if [ -z "$CURL_VERSION" ]; then
+    CURL_VERSION="$(latest_release curl/curl)"
+    CURL_VERSION="$(echo "${CURL_VERSION#curl-}" | tr _ .)"
+fi
 if [ -z "$BROTLI_VERSION" ] || [ -z "$CURL_VERSION" ]; then
     echo "Cannot find the latest brotli or curl release" >&2
     exit 1

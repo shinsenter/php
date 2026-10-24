@@ -151,6 +151,29 @@ get_dockerhub_tag_digest_or_now () {
     echo "${digest:-unknown-$(date +%s)}"
 }
 
+# Download a file, fail on HTTP errors
+download_file () {
+    curl --retry 3 --retry-delay 5 -fsSLo "$2" "$1"
+}
+
+# Sources of the latest brotli and curl, for src/php/common/patches/middleware-patch.
+# Downloaded once per run into the helper cache, so the image builds do not
+# call the GitHub API (60 requests per hour without a token).
+cache_middleware_sources () {
+    local dir="/tmp/helper_cache" tag version
+    mkdir -p "$dir"
+
+    tag="$(get_github_latest_release "google/brotli")" || return 1
+    version="${tag#v}"
+    download_file "https://github.com/google/brotli/archive/refs/tags/v$version.tar.gz" \
+        "$dir/brotli-$version.tar.gz" || return 1
+
+    tag="$(get_github_latest_release "curl/curl")" || return 1
+    version="$(echo "${tag#curl-}" | tr _ .)"
+    download_file "https://curl.se/download/curl-$version.tar.xz" \
+        "$dir/curl-$version.tar.xz" || return 1
+}
+
 # Fingerprint stored in the index manifest of a published image (empty if none).
 # Reads the manifest only, no layer is pulled.
 get_image_fingerprint () {
@@ -171,6 +194,8 @@ prepare_build_context() {
     local dockerfile="$1" context="$2" php_version="$3" backports
 
     [ ! -d "$context/rootfs" ] && mkdir -p "$context/rootfs"
+    # Mounted by common/os-common.dockerfile, it is empty unless the workflow fills it
+    mkdir -p "$context/helper_cache"
     [ ! -e "$context/meta.dockerfile" ] && \
         cp -pf "$BASE_DIR/src/php/meta.dockerfile" "$context/meta.dockerfile"
 

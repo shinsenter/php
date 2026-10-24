@@ -8,6 +8,7 @@
 **/Dockerfile
 **/meta.dockerfile
 src/php/php-backports/
+src/php/helper_cache/
 myproject
 
 !.env.example
