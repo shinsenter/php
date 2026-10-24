@@ -60,6 +60,8 @@ Utilities inside the image: `pkg-add` and `pkg-del` (install and remove packages
 - Do not report test results without a run or a log to back them.
 - Work on a `feature/*` branch or the current branch. Never commit or push to `main`.
 - Conventional Commits: `feat:` `fix:` `refactor:` `docs:` `test:` `chore:`.
+- After each change, suggest a one-line commit message in English, with the type that matches semver: `feat:` is a minor bump, `fix:` is a patch bump, and a breaking change uses `!` (for example `feat!:`) for a major bump. `refactor:` `docs:` `test:` `chore:` do not bump the version. Do not commit unless the user asks.
+- Edit the code directly in the working tree of the current branch. Do not write changes to `_OUTPUTS/` first. This overrides the global rule that sends all output there.
 - `_OUTPUTS/` is a local scratch folder, ignored by git. Do not commit it.
 - Do not touch `.env`, secrets, `.secrets` or `build/.secrets.example`.
 

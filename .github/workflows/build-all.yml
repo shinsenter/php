@@ -20,7 +20,7 @@ on:
   workflow_dispatch:
     inputs:
       php_versions:
-        description: "PHP versions to build, separated by spaces (empty = all versions)"
+        description: "PHP versions to build, separated by spaces (empty = all versions and the base-os and base-s6 images)"
         required: false
         type: string
         default: ""
@@ -57,6 +57,7 @@ jobs:
       tag_prefix: ${{ steps.init.outputs.tag_prefix }}
       php_versions: ${{ steps.init.outputs.php_versions }}
       force_build: ${{ steps.init.outputs.force_build }}
+      build_base: ${{ steps.init.outputs.build_base }}
     steps:
       - uses: actions/checkout@v7
 
@@ -81,8 +82,11 @@ jobs:
           force_build=$(if [ "$FORCE_BUILD" = "true" ]; then echo 'true'; else echo 'false'; fi)
 
           # Select PHP versions: the requested ones, or all of them
+          # base-os and base-s6 are built only when no PHP version is requested
           php_versions=()
+          build_base=true
           if [ -n "${REQUESTED_VERSIONS// /}" ]; then
+            build_base=false
             for requested in ${REQUESTED_VERSIONS//,/ }; do
               found=
               for version in "${ALL_PHP_VERSIONS[@]}"; do
@@ -105,6 +109,7 @@ jobs:
           echo "tag_prefix=$tag_prefix" >> "$GITHUB_OUTPUT"
           echo "php_versions=$php_versions_json" >> "$GITHUB_OUTPUT"
           echo "force_build=$force_build" >> "$GITHUB_OUTPUT"
+          echo "build_base=$build_base" >> "$GITHUB_OUTPUT"
           echo "number_of_cores   = $(nproc)"
           echo "github.event_name = ${{ github.event_name }}"
           echo "github.ref_type   = $ref_type"
@@ -112,6 +117,7 @@ jobs:
           echo "tag_prefix        = $tag_prefix"
           echo "php_versions      = $php_versions_json"
           echo "force_build       = $force_build"
+          echo "build_base        = $build_base"
 
           # Cache requests (shared by all jobs of this run)
           echo "Generating cache keys..."
@@ -152,6 +158,7 @@ jobs:
   ##########################################################
 
   s6-overlay:
+    if: ${{ needs.prepare.outputs.build_base == 'true' }}
     uses: ./.github/workflows/template-common.yml
     secrets: inherit
     needs: [prepare]
@@ -163,6 +170,7 @@ jobs:
 
   linux-s6:
     name: ${{ matrix.os == '' && 'debian' || matrix.os }}-s6
+    if: ${{ needs.prepare.outputs.build_base == 'true' }}
     uses: ./.github/workflows/template-common.yml
     secrets: inherit
     needs: [prepare]
@@ -229,6 +237,7 @@ jobs:
   ##########################################################
 
   fpm-servers:
+    if: ${{ !cancelled() && !failure() }} # s6-overlay is skipped when php_versions is set
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
     needs: [prepare, s6-overlay, php-fpm]
@@ -245,6 +254,7 @@ jobs:
       force_build: ${{ fromJSON(needs.prepare.outputs.force_build) }}
 
   zts-servers:
+    if: ${{ !cancelled() && !failure() }} # s6-overlay is skipped when php_versions is set
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
     needs: [prepare, s6-overlay, php-zts]
@@ -260,6 +270,7 @@ jobs:
       force_build: ${{ fromJSON(needs.prepare.outputs.force_build) }}
 
   cli-servers:
+    if: ${{ !cancelled() && !failure() }} # s6-overlay is skipped when php_versions is set
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
     needs: [prepare, s6-overlay, php-cli]
