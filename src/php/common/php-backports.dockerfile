@@ -26,7 +26,7 @@ ARG PHP_VARIANT="fpm-alpine"
 FROM ${BUILD_FROM_IMAGE}:${PHP_VERSION}-${PHP_VARIANT} AS php-base
 COPY ./php-backports/ /usr/src/php-backports/
 
-RUN --mount=type=bind,source=./common/debian-patch,target=/tmp/debian-patch <<'EOF'
+RUN --mount=type=bind,source=./common/distro-patch,target=/tmp/distro-patch <<'EOF'
 set -eu
 
 # PHP_VERSION is the full version here (set by the official image)
@@ -65,7 +65,7 @@ if [ "$os" = alpine ]; then
     # PHP < 8 doesn't look deeper for GNU libiconv (php-src b480e68)
     [ "${minor%%.*}" -ge 8 ] || ln -sfv /usr/include/gnu-libiconv/iconv.h /usr/include/iconv.h
 else
-    sh /tmp/debian-patch
+    sh /tmp/distro-patch
     savedAptMark="$(apt-mark showmanual)"
     apt-get update
     apt-get install -y --no-install-recommends \

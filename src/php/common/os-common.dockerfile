@@ -39,17 +39,8 @@ ENV PS1="\\u@\\h:\\w\\$ "
 ENV PRESQUASH_SCRIPTS="cleanup"
 
 ################################################################################
-RUN --mount=type=bind,source=./common/debian-patch,target=/tmp/debian-patch \
-    sh /tmp/debian-patch
-
-################################################################################
-# Temporary workaround to fix Let's Encrypt CA certificates for old distros
-# https://github.com/mlocati/docker-php-extension-installer/pull/450
-# https://github.com/mlocati/docker-php-extension-installer/pull/451
-# https://github.com/mlocati/docker-php-extension-installer/pull/724
-# https://github.com/mlocati/docker-php-extension-installer/pull/737
-RUN --mount=type=bind,from=mlocati/php-extension-installer:latest,source=/usr/bin/install-php-extensions,target=/usr/bin/install-php-extensions \
-    /usr/bin/install-php-extensions @fix_letsencrypt 2>&1 | grep -vF StandW || true
+RUN --mount=type=bind,source=./common/distro-patch,target=/tmp/distro-patch \
+    sh /tmp/distro-patch
 
 ################################################################################
 RUN <<'EOF'
