@@ -9,6 +9,9 @@
 
 The Docker images are available for both Debian and Alpine versions.
 
+> <font color="orange">ℹ️ Note: These Docker images won't be updated anymore since it looks like the framework hasn't been active in a long time.
+> You can still use the old Docker images. If you hear about any updates to the framework, please let us know.</font>
+
 
 ## Introduction
 

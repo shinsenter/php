@@ -35,9 +35,6 @@ bagisto:min=8.3 latest=8.4 base=laravel
 # https://roots.io/bedrock/docs/installation
 bedrock:min=8.3 base=wordpress
 
-# https://book.cakephp.org/4/en/installation.html
-cakephp4:min=7.4 latest=8.3 server=apache
-
 # https://book.cakephp.org/5/en/installation.html
 cakephp5:min=8.1 server=apache
 
@@ -65,17 +62,11 @@ grav:min=8.3 server=apache
 # https://hyperf.wiki/3.1/#/en/quick-start/install
 hyperf:min=8.2 server=nginx
 
-# https://hypervel.org/docs/deployment
-hypervel:min=8.2 base=laravel
-
 # https://docs.invoiceshelf.com/install/manual.html
 invoiceshelf:min=8.2 base=laravel
 
 # https://getkirby.com/docs/cookbook/setup/composer
 kirby:min=8.3 server=apache
-
-# https://docs.laminas.dev/tutorials/getting-started/skeleton-application
-laminas:min=8.1 server=nginx
 
 # https://laravel.com/docs/master/installation
 laravel:min=8.3 server=nginx
@@ -91,9 +82,6 @@ mautic:min=8.2 server=apache
 
 # https://docs.phpmyadmin.net/en/latest/setup.html
 phpmyadmin:min=7.2 server=nginx
-
-# https://www.slimframework.com/docs/v4/start/installation.html
-slim:server=apache
 
 # https://spiral.dev/docs/start-installation/current/en
 spiral:min=8.1 server=roadrunner variant=cli platform=linux/amd64,linux/arm64
@@ -117,6 +105,9 @@ yii:server=apache
 ## inactive frameworks (kept for reference, commented out)
 ## ------------------------------------------------------ ##
 
+## https://book.cakephp.org/4/en/installation.html
+# cakephp4:min=7.4 latest=8.3 server=apache
+
 ## https://docs.craterapp.com/installation.html
 # crater:min=7.4 latest=8.1 base=laravel server=apache
 
@@ -125,6 +116,15 @@ yii:server=apache
 
 ## https://phpixie.com/quickstart.html
 # phpixie:latest=7.4 server=apache
+
+## https://hypervel.org/docs/deployment
+# hypervel:min=8.2 base=laravel
+
+## https://docs.laminas.dev/tutorials/getting-started/skeleton-application
+# laminas:min=8.1 server=nginx
+
+## https://www.slimframework.com/docs/v4/start/installation.html
+# slim:server=apache
 "
 
 apply_app_rules() {
@@ -165,9 +165,9 @@ apply_app_rules() {
         *) PREFER_SERVER="" ;;
     esac
 
-    # Exception for hyperf, hypervel, spiral
+    # Exception for hyperf, spiral
     case "$app" in
-        hyperf|hypervel)
+        hyperf)
             if verlte "8.3" "$PHP_VERSION"; then
                 PREFER_SERVER=""
             fi

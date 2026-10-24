@@ -1,13 +1,16 @@
-# shinsenter/cakephp4
+# shinsenter/laminas
 
-🔋 (PHP / CakePHP) Production-ready Docker images with automatic CakePHP installer.
+🔋 (PHP / Laminas) Production-ready Docker images with automatic Laminas installer.
 
-- Docker Hub: https://hub.docker.com/r/shinsenter/cakephp4
-- GitHub Packages: https://code.shin.company/php/pkgs/container/cakephp4
+- Docker Hub: https://hub.docker.com/r/shinsenter/laminas
+- GitHub Packages: https://code.shin.company/php/pkgs/container/laminas
 - You can also find and use [other pre-built Docker images for some popular PHP applications and frameworks here](https://hub.docker.com/u/shinsenter).
 - Main documentation: [shinsenter/php](https://code.shin.company/php)
 
 The Docker images are available for both Debian and Alpine versions.
+
+> <font color="orange">ℹ️ Note: These Docker images won't be updated anymore since it looks like the framework hasn't been active in a long time.
+> You can still use the old Docker images. If you hear about any updates to the framework, please let us know.</font>
 
 
 ## Introduction
@@ -34,15 +37,15 @@ When you mount an empty directory into the container, it will automatically down
 1. Create an empty directory on your host machine for your project code. For example:
 
 ```shell
-mkdir cakephp4
+mkdir laminas
 ```
 
 2. Run the container and mount the empty directory as a volume. For example:
 
 ```shell
 docker run -p 80:80 -p 443:443 -p 443:443/udp \
-    -v ./cakephp4:/var/www/html \
-    shinsenter/cakephp4:latest
+    -v ./laminas:/var/www/html \
+    shinsenter/laminas:latest
 ```
 
 The container will detect the empty directory mounted to `/var/www/html` and clone the framework source code into it.
@@ -68,7 +71,7 @@ Copy or mount your certificates from the host machine into the container, overwr
 #### Using Dockerfile
 
 ```Dockerfile
-FROM shinsenter/cakephp4:latest
+FROM shinsenter/laminas:latest
 
 # Copy your own certs into the container
 COPY my_domain.crt /etc/ssl/site/server.crt
@@ -76,17 +79,17 @@ COPY my_domain.key /etc/ssl/site/server.key
 
 # Add your instructions here
 # For example:
-# ADD --chown=$APP_USER:$APP_GROUP ./cakephp4/ /var/www/html/
+# ADD --chown=$APP_USER:$APP_GROUP ./laminas/ /var/www/html/
 ```
 
 #### Using docker run
 
 ```shell
 docker run -p 80:80 -p 443:443 -p 443:443/udp \
-    -v ./cakephp4:/var/www/html \
+    -v ./laminas:/var/www/html \
     -v ./my_domain.crt:/etc/ssl/site/server.crt \
     -v ./my_domain.key:/etc/ssl/site/server.key \
-    shinsenter/cakephp4:latest
+    shinsenter/laminas:latest
 ```
 
 #### Using docker-compose
@@ -94,9 +97,9 @@ docker run -p 80:80 -p 443:443 -p 443:443/udp \
 ```yml
 services:
   web:
-    image: shinsenter/cakephp4:latest
+    image: shinsenter/laminas:latest
     volumes:
-      - ./cakephp4:/var/www/html
+      - ./laminas:/var/www/html
       - ./my_domain.crt:/etc/ssl/site/server.crt
       - ./my_domain.key:/etc/ssl/site/server.key
 ```
@@ -111,22 +114,22 @@ We rebuild the Docker images when upstream sources (PHP, base OS, Composer, etc.
 publish an update, so they stay up-to-date.
 The images in this repo are regularly updated under the same tag names.
 
-But you can pull the image from `shinsenter/cakephp4:latest`,
+But you can pull the image from `shinsenter/laminas:latest`,
 and tag it with a name that indicates its stability,
-such as `your-repo/cakephp4:stable` using the below commands:
+such as `your-repo/laminas:stable` using the below commands:
 
 ```shell
-docker pull shinsenter/cakephp4:latest
-docker tag  shinsenter/cakephp4:latest your-repo/cakephp4:stable
-docker push your-repo/cakephp4:stable
+docker pull shinsenter/laminas:latest
+docker tag  shinsenter/laminas:latest your-repo/laminas:stable
+docker push your-repo/laminas:stable
 ```
 
-Then use the image `your-repo/cakephp4:stable` as a base image to build containers for production.
+Then use the image `your-repo/laminas:stable` as a base image to build containers for production.
 
 
 ## Supported Platforms
 
-Check our [Docker Hub](https://hub.docker.com/r/shinsenter/cakephp4/tags) for all available platforms. The Docker images are available for both Debian and Alpine versions.
+Check our [Docker Hub](https://hub.docker.com/r/shinsenter/laminas/tags) for all available platforms. The Docker images are available for both Debian and Alpine versions.
 
 > **Note:** From 2026-10-25, the rarely used platforms `linux/386`, `linux/arm/v7`, `linux/ppc64le` and `linux/s390x` are no longer built. Tags published before that date keep them until they are rebuilt.
 

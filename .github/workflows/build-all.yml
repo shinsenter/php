@@ -289,7 +289,6 @@ jobs:
       fail-fast: false
       matrix:
         app:
-          - app-cakephp4
           - app-cakephp5
           - app-codeigniter4
           - app-drupal
@@ -299,13 +298,11 @@ jobs:
           - app-grav
           - app-hyperf
           - app-kirby
-          - app-laminas
           - app-laravel
           - app-magento
           - app-matomo
           - app-mautic
           - app-phpmyadmin
-          - app-slim
           - app-symfony
           - app-wordpress
           - app-yii
@@ -351,7 +348,6 @@ jobs:
           - app-bagisto
           - app-bedrock
           - app-coolify
-          - app-hypervel
           - app-invoiceshelf
           - app-statamic
           - app-sulu
