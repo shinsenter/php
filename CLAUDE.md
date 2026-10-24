@@ -84,7 +84,7 @@ The official `php` images stop getting fixes at end of life. For those versions 
 Only data changes. Do not edit `php-backports.dockerfile`, `base-php.dockerfile` or `build/config.sh` for a new patch.
 
 1. Pick the version folder `src/php-backports/php<major.minor>/` (for example `php8.1/`). Use it only for versions the official image no longer updates. Never add a folder for a maintained version (see `MAINTAINED_PHP_VERSIONS` in `build/versions.sh`).
-2. Get the upstream fix as a patch (php-src commit URL plus `.patch`). Remove the hunks for files that are not in the release tarball, such as `ext/zend_test/tests/` and `NEWS`. The patch must apply with `patch -p1` to the last release of that minor.
+2. Get the upstream fix as a patch (php-src commit URL plus `.patch`). Remove the hunks that do not change code, such as `NEWS` and the test files (`*.phpt`), which may not apply to a release tarball. The patch must apply with `patch -p1` to the last release of that minor.
 3. Name it `<YYYYMMDD>-<NN>-<name>.patch`: release date, then the order within that day. Security fixes use `90`, build fixes use `10`. Add `.alpine` or `.debian` before `.patch` only when the patch is OS specific.
 4. Start the file with `Backport-Fix: <text>` lines (under 80 characters, one line per vulnerability unless several fit on one line). The build puts them in `php -v` and `phpinfo()`. Text before the first `diff` line is ignored by `patch`.
 5. If there is no upstream patch for that version, port it by hand from the nearest version. List every difference in the file header, and tell the user the port needs review and the PHP tests before it is trusted.

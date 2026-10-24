@@ -19,9 +19,9 @@ before the rest of `base-php.dockerfile` runs. Other versions are not touched.
 | same in `php8.0` | same | php-src `82f8f31b16a035c1b67cc253e79f7cc288f4cc20` |
 | same in `php8.1` | same | php-src `1d7dec178a094e6e75b229ce22754045f8c6070a` |
 | same in `php7.3` | same | ported by hand from the 7.4 patch (see the header of the file) |
-| `20240408-10-gh-11678-musl.alpine.patch`, `20240706-10-gh-14834-pear.alpine.patch` in `php8.1` | build fixes the official Alpine image applied | php-src `577b8ae`, `67259e4` (`NEWS` hunk removed) |
+| `20240408-10-gh-11678-musl.alpine.patch`, `20240706-10-gh-14834-pear.alpine.patch` in `php8.1` | build fixes the official Alpine image applied | php-src `577b8ae`, `67259e4` (`NEWS` hunk removed; the `compat.c` hunk of `67259e4` is adapted to 8.1.34, see the file header) |
 
-The CVE patches are the php-src commits without `ext/zend_test/tests`, which is not in the release tarball.
+The CVE patches are the php-src commits without the hunks that only update tests (`ext/zend_test/tests`, 3 files in the 8.1 patch). They do not change code.
 
 `php7.3` has no upstream patch. Its CVE patch is the 7.4 patch ported by hand to 7.3.33: same changes, adapted where the 7.3 source differs (the header of the file lists the differences). Review it and run the PHP tests before relying on it.
 
