@@ -129,6 +129,13 @@ docker push your-repo/phpixie:stable
 Then use the image `your-repo/phpixie:stable` as a base image to build containers for production.
 
 
+## Supported Platforms
+
+Check our [Docker Hub](https://hub.docker.com/r/shinsenter/zz-phpixie/tags) for all available platforms. The Docker images are available for both Debian and Alpine versions.
+
+> **Note:** From 2026-10-25, the rarely used platforms `linux/386`, `linux/arm/v7`, `linux/ppc64le` and `linux/s390x` are no longer built. Tags published before that date keep them until they are rebuilt.
+
+
 ## Contributing
 
 If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://code.shin.company/php/issues/new).

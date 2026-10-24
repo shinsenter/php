@@ -57,24 +57,21 @@ on:
 ################################################################################
 
 jobs:
-  build:
-    name: ${{ inputs.php_version }} ${{ inputs.app_name }} ${{ inputs.server }} ${{ inputs.os }}
+  # Runs build/config.sh once and hands the result to the jobs below. The build
+  # runs once per platform on a runner of the same architecture where possible
+  # (QEMU is only used for 32-bit ARM), then "merge" publishes one multi-platform tag.
+  prepare:
+    name: ${{ inputs.php_version }} ${{ inputs.app_name }} ${{ inputs.server }} ${{ inputs.os }} (prepare)
     runs-on: ubuntu-26.04-arm
-    permissions:
-      packages: write
-      contents: read
-    services:
-      registry:
-        image: registry:2
-        ports:
-          - '5000:5000'
     env:
       ARCHIVES_REPO: "shinsenter/php-archives"
       MIRROR_REPO: ghcr.io/shinsenter
-      DOCKER_BUILD_RECORD_UPLOAD: false
-      DOCKER_BUILD_SUMMARY: false
-      DOCKER_BUILDKIT: "1"
       PUBLISH_TO_GHCR: "1"
+    outputs:
+      skip: ${{ steps.plan.outputs.skip }}
+      matrix: ${{ steps.plan.outputs.matrix }}
+      fingerprint: ${{ steps.plan.outputs.fingerprint }}
+      env: ${{ steps.plan.outputs.env }}
     steps:
       -
         uses: actions/download-artifact@v8
@@ -97,49 +94,131 @@ jobs:
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
           BUILD_TAG_PREFIX: ${{ inputs.tag_prefix }}
           FORCE_BUILD: ${{ inputs.force_build && '1' || '0' }}
+          BUILD_ENV_FILE: /tmp/build.env
         run: |
           set -e
           ./build/config.sh "${{ inputs.os }}" "${{ inputs.app_name }}" "${{ inputs.php_version }}" "${{ inputs.server }}"
 
       -
-        if: ${{ success() && env.SKIP_BUILD != '1' }}
-        uses: docker/setup-qemu-action@v4
+        id: plan
+        name: Plan the platform builds
+        run: |
+          set -e
+          # amd64 and 386 build on x64, arm64 on arm. 32-bit ARM, ppc64le and s390x
+          # (base-os and base-s6 only) run under QEMU.
+          matrix="$(jq -cn --arg platforms "$BUILD_PLATFORM" '
+            $platforms | split(",") | map(select(. != "")) | map({
+              platform: .,
+              slug: gsub("/"; "-"),
+              runner: (if . == "linux/amd64" or . == "linux/386" then "ubuntu-latest" else "ubuntu-26.04-arm" end),
+              qemu: (if test("^linux/arm/") then "arm" elif test("ppc64le|s390x") then ltrimstr("linux/") else "" end)
+            })')"
+          skip="${SKIP_BUILD:-0}"
+          if [ "$matrix" = "[]" ]; then
+            skip=1
+            matrix='[{"platform":"none","slug":"none","runner":"ubuntu-latest","qemu":""}]'
+          fi
+          {
+            echo "skip=$skip"
+            echo "matrix=$matrix"
+            echo "fingerprint=$BUILD_FINGERPRINT"
+            echo "env<<EOF_BUILD_ENV"
+            cat /tmp/build.env 2>/dev/null || true
+            echo "EOF_BUILD_ENV"
+          } >> "$GITHUB_OUTPUT"
+          echo "skip=$skip matrix=$matrix"
+
+  ##############################################################################
+
+  build:
+    name: ${{ inputs.php_version }} ${{ inputs.app_name }} ${{ inputs.server }} ${{ inputs.os }} ${{ matrix.platform }}
+    needs: prepare
+    if: ${{ needs.prepare.outputs.skip != '1' }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    permissions:
+      packages: write
+      contents: read
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - '5000:5000'
+    env:
+      DOCKER_BUILD_RECORD_UPLOAD: false
+      DOCKER_BUILD_SUMMARY: false
+      DOCKER_BUILDKIT: "1"
+      PUBLISH_TO_GHCR: "1"
+    steps:
+      -
+        uses: actions/checkout@v7
+        with:
+          submodules: 'true'
 
       -
-        if: ${{ success() && env.SKIP_BUILD != '1' }}
+        name: Load build config
+        env:
+          BUILD_ENV: ${{ needs.prepare.outputs.env }}
+        run: printf '%s\n' "$BUILD_ENV" >> "$GITHUB_ENV"
+
+      -
+        name: Prepare build context
+        run: |
+          set -e
+          BASE_DIR="$(git rev-parse --show-toplevel)"
+          . ./build/helpers.sh
+          prepare_build_context "$BUILD_DOCKERFILE" "$BUILD_CONTEXT" "$PHP_VERSION"
+
+      -
+        if: ${{ matrix.qemu != '' }}
+        uses: docker/setup-qemu-action@v4
+        with:
+          platforms: ${{ matrix.qemu }}
+
+      -
         uses: docker/setup-buildx-action@v4
         with:
           driver-opts: network=host
 
       -
-        if: ${{ success() && env.SKIP_BUILD != '1' }}
         uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       -
-        if: ${{ success() && env.SKIP_BUILD != '1' && env.PUBLISH_TO_GHCR }}
+        if: ${{ env.PUBLISH_TO_GHCR }}
         uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - # Each platform is pushed by digest, "merge" puts the digests under the tags
+        id: stage
+        name: Set the staging repository
+        run: |
+          if [ "$PUBLISH_TO_GHCR" = "1" ]; then
+            echo "name=ghcr.io/$BUILD_NAME" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=$BUILD_NAME" >> "$GITHUB_OUTPUT"
+          fi
+
       -
-        if: ${{ success() && env.SKIP_BUILD != '1' && env.SKIP_SQUASH == '1' }}
-        name: Build and push ${{ env.BUILD_TAG }} using ${{ env.OS_BASE }}
+        if: ${{ env.SKIP_SQUASH == '1' }}
+        id: push_plain
+        name: Build and push ${{ env.BUILD_TAG }} for ${{ matrix.platform }}
         uses: docker/build-push-action@v7
         continue-on-error: ${{ inputs.continue-on-error }}
         with:
           pull: false
-          push: ${{ env.SKIP_PUSH != '1' }}
-          platforms: ${{ env.BUILD_PLATFORM }}
+          platforms: ${{ matrix.platform }}
           file: ${{ env.BUILD_DOCKERFILE }}
           context: ${{ env.BUILD_CONTEXT }}
-          tags: ${{ env.BUILD_TAGS }}
-          annotations: |
-            index:org.shinsenter.build.fingerprint=${{ env.BUILD_FINGERPRINT }}
+          outputs: type=image,name=${{ steps.stage.outputs.name }},push-by-digest=true,name-canonical=true,push=${{ env.SKIP_PUSH != '1' }}
           sbom: true
           build-args: |
             DEBUG=${{ env.DEBUG }}
@@ -165,14 +244,14 @@ jobs:
             S6_VERSION=${{ env.S6_VERSION }}
 
       -
-        if: ${{ success() && env.SKIP_BUILD != '1' && env.SKIP_SQUASH != '1' }}
-        name: Build ${{ env.BUILD_TAG }} using ${{ env.OS_BASE }}
+        if: ${{ env.SKIP_SQUASH != '1' }}
+        name: Build ${{ env.BUILD_TAG }} for ${{ matrix.platform }}
         uses: docker/build-push-action@v7
         continue-on-error: ${{ inputs.continue-on-error }}
         with:
           pull: false
           push: true
-          platforms: ${{ env.BUILD_PLATFORM }}
+          platforms: ${{ matrix.platform }}
           file: ${{ env.BUILD_DOCKERFILE }}
           context: ${{ env.BUILD_CONTEXT }}
           tags: ${{ env.BUILD_TMP_NAME }}
@@ -201,37 +280,128 @@ jobs:
             S6_VERSION=${{ env.S6_VERSION }}
 
       -
-        if: ${{ success() && env.SKIP_BUILD != '1' && env.SKIP_SQUASH != '1' }}
+        if: ${{ env.SKIP_SQUASH != '1' }}
         name: Make squashed Dockerfile for ${{ env.BUILD_TAG }}
         continue-on-error: ${{ inputs.continue-on-error }}
         run: |
-          # docker system prune -a --volumes -f
-          docker pull "${{ env.BUILD_TMP_NAME }}"
+          docker pull --platform "${{ matrix.platform }}" "${{ env.BUILD_TMP_NAME }}"
           DEBUG= ${{ env.SQUASH_CMD }} "${{ env.BUILD_TMP_NAME }}" -p >"${{ env.BUILD_DOCKERFILE_SQUASHED }}"
           cat "${{ env.BUILD_DOCKERFILE_SQUASHED }}"
           docker images
           df -h
 
       -
-        if: ${{ success() && env.SKIP_BUILD != '1' && env.SKIP_SQUASH != '1' }}
-        name: Squash and push ${{ env.BUILD_TAG }} using ${{ env.OS_BASE }}
+        if: ${{ env.SKIP_SQUASH != '1' }}
+        id: push_squash
+        name: Squash and push ${{ env.BUILD_TAG }} for ${{ matrix.platform }}
         uses: docker/build-push-action@v7
         continue-on-error: ${{ inputs.continue-on-error }}
         with:
           pull: false
-          push: ${{ env.SKIP_PUSH != '1' }}
-          platforms: ${{ env.BUILD_PLATFORM }}
+          platforms: ${{ matrix.platform }}
           file: ${{ env.BUILD_DOCKERFILE_SQUASHED }}
           context: ${{ env.BUILD_CONTEXT }}
-          tags: ${{ env.BUILD_TAGS }}
-          annotations: |
-            index:org.shinsenter.build.fingerprint=${{ env.BUILD_FINGERPRINT }}
+          outputs: type=image,name=${{ steps.stage.outputs.name }},push-by-digest=true,name-canonical=true,push=${{ env.SKIP_PUSH != '1' }}
           sbom: true
           build-args: |
             DEBUG=${{ env.DEBUG }}
 
+      -
+        id: digest
+        if: ${{ env.SKIP_PUSH != '1' }}
+        name: Save the digest
+        env:
+          DIGEST: ${{ steps.push_plain.outputs.digest || steps.push_squash.outputs.digest }}
+        run: |
+          [ -n "$DIGEST" ] || { echo "::error::No digest for ${{ matrix.platform }}"; exit 1; }
+          mkdir -p /tmp/digests
+          touch "/tmp/digests/${DIGEST#sha256:}"
+
+      -
+        if: ${{ env.SKIP_PUSH != '1' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: digest-${{ needs.prepare.outputs.fingerprint }}-${{ matrix.slug }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  ##############################################################################
+
+  merge:
+    name: ${{ inputs.php_version }} ${{ inputs.app_name }} ${{ inputs.server }} ${{ inputs.os }} (publish)
+    needs: [prepare, build]
+    if: ${{ needs.prepare.outputs.skip != '1' }}
+    runs-on: ubuntu-26.04-arm
+    permissions:
+      packages: write
+      contents: read
+    env:
+      PUBLISH_TO_GHCR: "1"
+    steps:
+      -
+        uses: actions/checkout@v7
+        with:
+          submodules: 'true'
+
+      -
+        name: Load build config
+        env:
+          BUILD_ENV: ${{ needs.prepare.outputs.env }}
+        run: printf '%s\n' "$BUILD_ENV" >> "$GITHUB_ENV"
+
+      -
+        if: ${{ env.SKIP_PUSH != '1' }}
+        uses: actions/download-artifact@v8
+        with:
+          path: /tmp/digests
+          pattern: digest-${{ needs.prepare.outputs.fingerprint }}-*
+          merge-multiple: true
+
+      -
+        uses: docker/setup-buildx-action@v4
+
+      -
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      -
+        if: ${{ env.PUBLISH_TO_GHCR }}
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      -
+        if: ${{ env.SKIP_PUSH != '1' }}
+        name: Publish ${{ env.BUILD_TAG }}
+        continue-on-error: ${{ inputs.continue-on-error }}
+        working-directory: /tmp/digests
+        run: |
+          set -e
+          stage="$BUILD_NAME"
+          [ "$PUBLISH_TO_GHCR" = "1" ] && stage="ghcr.io/$BUILD_NAME"
+
+          tags=()
+          for tag in ${BUILD_TAGS//,/ }; do
+              tags+=(-t "$tag")
+          done
+
+          sources=()
+          for digest in *; do
+              sources+=("$stage@sha256:$digest")
+          done
+
+          docker buildx imagetools create "${tags[@]}" \
+              --annotation "index:org.shinsenter.build.fingerprint=$BUILD_FINGERPRINT" \
+              "${sources[@]}"
+          docker buildx imagetools inspect "$BUILD_TAG"
+
       - # Without the fingerprint the next run would build this image again
-        if: ${{ success() && env.SKIP_BUILD != '1' && env.SKIP_PUSH != '1' }}
+        if: ${{ success() && env.SKIP_PUSH != '1' }}
         name: Verify the fingerprint of ${{ env.BUILD_TAG }}
         run: |
           set -e

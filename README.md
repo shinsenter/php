@@ -485,6 +485,8 @@ Additional environment variables for fine-tuning container behavior:
 
 See our [Docker Hub](https://hub.docker.com/r/shinsenter/php/tags) for available platforms. Images are built for both Debian and Alpine variants.
 
+> **Note:** From 2026-10-25, the rarely used platforms `linux/386`, `linux/arm/v7`, `linux/ppc64le` and `linux/s390x` are no longer built. Tags published before that date keep them until they are rebuilt.
+
 
 ## Stable Image Tags
 

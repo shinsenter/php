@@ -116,6 +116,12 @@ parse_json() {
 
 # For GitHub
 get_github_latest_tag () { parse_json "$(get_github_json "$1")" "${2:-1}" '.[] | if type == "object" then (.name // empty) else empty end'; }
+# Tag of the latest stable release (pre-releases are not included)
+get_github_latest_release () {
+    local json
+    json="$(TOKEN="$GITHUB_TOKEN" fetch_with_cache "https://api.github.com/repos/$1/releases/latest")" || return 1
+    parse_json "$json" 1 '.tag_name // empty'
+}
 get_github_latest_sha () { parse_json "$(get_github_json "$1")" "${2:-1}" '.[] | if type == "object" then (.commit.sha // .node_id // empty) else empty end'; }
 
 # For Docker Hub
@@ -152,6 +158,34 @@ get_image_fingerprint () {
         | jq -r '.annotations["org.shinsenter.build.fingerprint"] // empty' 2>/dev/null
 }
 
+# Folder with the security backports of a PHP version (empty when there is none)
+find_backport_dir() {
+    [ -n "$1" ] && [ -d "$BASE_DIR/src/php-backports/php$1" ] && echo "$BASE_DIR/src/php-backports/php$1"
+    return 0
+}
+
+# Files that config.sh adds to the build context. The build jobs of each
+# platform run this again, because they start from a clean checkout.
+# Usage: prepare_build_context <dockerfile> <context> <php-version>
+prepare_build_context() {
+    local dockerfile="$1" context="$2" php_version="$3" backports
+
+    [ ! -d "$context/rootfs" ] && mkdir -p "$context/rootfs"
+    [ ! -e "$context/meta.dockerfile" ] && \
+        cp -pf "$BASE_DIR/src/php/meta.dockerfile" "$context/meta.dockerfile"
+
+    # Security backports for end-of-life PHP versions
+    # (see src/php/common/php-backports.dockerfile). The folder is always there,
+    # it is empty for the versions without backports.
+    if [ "$dockerfile" = "$BASE_DIR/src/php/base-php.dockerfile" ] && [ "$CHECK_ONLY" != "1" ]; then
+        backports="$(find_backport_dir "$php_version")"
+        rm -rf "$context/php-backports"
+        mkdir -p "$context/php-backports"
+        [ -n "$backports" ] && cp -pR "$backports" "$context/php-backports/"
+    fi
+    return 0
+}
+
 # Function to set environment variables
 github_env() {
     local name="$1"; shift
@@ -160,6 +194,10 @@ github_env() {
     else
         echo "$name=$@"
         echo "$name=$@" >> $GITHUB_ENV
+        # Copy for the jobs that run after this one (see template-common.yml)
+        if [ -n "$BUILD_ENV_FILE" ]; then
+            echo "$name=$@" >> "$BUILD_ENV_FILE"
+        fi
     fi
 }
 
