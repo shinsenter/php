@@ -556,7 +556,7 @@ if [ "$SKIP_BUILD" != "1" ]; then
             BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(IPE:$IPE_VERSION)/(composer:$COMPOSER_VERSION)"
         fi
 
-        # Alpine images get the latest brotli and curl (see src/php/common/distro-patch)
+        # Alpine images get the latest brotli and curl (see src/php/common/middleware-patch)
         if [ "$OS_BASE" = "alpine" ] && [ "${APP#with-}" = "$APP" ] && [ "${APP#app-}" = "$APP" ]; then
             BROTLI_TAG="$(get_github_latest_release "google/brotli" || echo "unknown-$(date +%s)")"
             CURL_TAG="$(get_github_latest_release "curl/curl" || echo "unknown-$(date +%s)")"

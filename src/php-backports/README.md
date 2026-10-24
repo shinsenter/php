@@ -40,6 +40,21 @@ What the patches change, as seen in the code:
 - `session.upload_progress` no longer works (the session upload callback returns early).
 - Nested input names (`a[][]=1`) create arrays with the smallest table size.
 
+## Alpine libraries: CVE-2026-111497 and CVE-2026-92392
+
+These two are not php-src bugs, so they are not patches in this folder. `src/php/common/middleware-patch` fixes them for every PHP version on Alpine. `os-common.dockerfile` runs it right after the package upgrade, because the upgrade would overwrite the result.
+
+| CVE | Library | Affected | Fixed | Alpine package at the time |
+|---|---|---|---|---|
+| CVE-2026-111497 | brotli (out-of-bounds write in the decoder) | 1.0.3 to 1.2.0 | 1.2.1 | `brotli-libs` 1.2.0-r1 |
+| CVE-2026-92392 | curl (HTTP/2 upload use-after-free) | 8.12.0 to 8.22.0 | 8.23.0 | 3.23 has 8.22.0-r0; 3.21 and 3.22 have a backport in 8.14.1-r3 and -r4 |
+
+- The script looks up the latest stable release of brotli and curl on GitHub and builds a library only when the installed Alpine package is older. When Alpine ships a package that is as new, `pkg-add upgrade` installs it and the script does nothing.
+- `build/config.sh` adds both versions to the image fingerprint, so a new release rebuilds the Alpine images. The sources are downloaded over HTTPS without a checksum. curl uses the configure options of the Alpine package.
+- Only the shared libraries (`libbrotli*.so.*`, `libcurl.so.*`) and `/usr/bin/curl` are replaced. Build packages are removed in the same layer.
+- `apk info` still reports the old version, so an SBOM scan can still list the old one. Check the files instead: the build log prints `curl -V` and the `libbrotli` files.
+- curl 8.23.0 also fixes 23 other CVEs of 8.22.0 and older.
+
 ## Old operating systems
 
 - Debian `stretch`, `buster` and `bullseye` are moved to `archive.debian.org` in the build (and stay that way in the image, so later layers can install packages).

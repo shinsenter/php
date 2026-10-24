@@ -70,6 +70,11 @@ fi
 EOF
 
 ################################################################################
+# After the package upgrade above, which would overwrite the libraries
+RUN --mount=type=bind,source=./common/middleware-patch,target=/tmp/middleware-patch \
+    sh /tmp/middleware-patch
+
+################################################################################
 RUN <<'EOF'
 # Set default debug mode
 env-default '# Default debug mode'
