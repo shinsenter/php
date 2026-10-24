@@ -28,6 +28,9 @@ mkdir -p /config/caddy /data/caddy /etc/caddy /etc/frankenphp
 
 ! has-cmd frankenphp && exit 1
 
+# one Caddyfile for every frankenphp command, as in the official image
+ln -nsf /etc/caddy/Caddyfile /etc/frankenphp/Caddyfile
+
 # test frankenphp command
 FRANKENPHP_PATH="/usr/local/bin/frankenphp"
 setcap cap_net_bind_service=+ep "$FRANKENPHP_PATH"

@@ -17,11 +17,12 @@ ENV XDG_DATA_HOME="/data"
 RUN <<'EOF'
 echo 'Configure FrankenPHP'
 
-env-default '# Environment variables for Caddy'
+env-default '# Environment variables for FrankenPHP'
 env-default CADDY_GLOBAL_OPTIONS            'auto_https disable_redirects'
 env-default CADDY_EXTRA_CONFIG              ''
 env-default CADDY_SERVER_EXTRA_DIRECTIVES   ''
 env-default CADDY_LOG_LEVEL                 '$(is-debug && echo DEBUG || echo ERROR)'
+env-default FRANKENPHP_CONFIG               ''
 
 if [ -f /etc/caddy/Caddyfile ]; then
     frankenphp fmt --overwrite /etc/caddy/Caddyfile

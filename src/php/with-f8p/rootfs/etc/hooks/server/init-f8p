@@ -15,6 +15,17 @@ else
     \rm -f /etc/caddy/envvars || true
 fi
 
+# adjust max upload size, as init-nginx does
+mkdir -p /etc/caddy/Caddyfile.server.d
+BODY_CONF=/etc/caddy/Caddyfile.server.d/00-request-body.caddyfile
+if [ -n "$PHP_POST_MAX_SIZE" ] && [ "$PHP_POST_MAX_SIZE" != "0" ]; then
+    echo "request_body {
+	max_size ${PHP_POST_MAX_SIZE}
+}" >"$BODY_CONF"
+else
+    \rm -f "$BODY_CONF" || true
+fi
+
 if ! is-true "$DISABLE_GREETING" && has-cmd frankenphp; then
     frankenphp version 2>&1
 fi
