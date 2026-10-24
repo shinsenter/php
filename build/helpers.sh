@@ -116,6 +116,12 @@ parse_json() {
 
 # For GitHub
 get_github_latest_tag () { parse_json "$(get_github_json "$1")" "${2:-1}" '.[] | if type == "object" then (.name // empty) else empty end'; }
+# Tag of the latest stable release (pre-releases are not included)
+get_github_latest_release () {
+    local json
+    json="$(TOKEN="$GITHUB_TOKEN" fetch_with_cache "https://api.github.com/repos/$1/releases/latest")" || return 1
+    parse_json "$json" 1 '.tag_name // empty'
+}
 get_github_latest_sha () { parse_json "$(get_github_json "$1")" "${2:-1}" '.[] | if type == "object" then (.commit.sha // .node_id // empty) else empty end'; }
 
 # For Docker Hub
@@ -145,11 +151,64 @@ get_dockerhub_tag_digest_or_now () {
     echo "${digest:-unknown-$(date +%s)}"
 }
 
+# Download a file, fail on HTTP errors
+download_file () {
+    curl --retry 3 --retry-delay 5 -fsSLo "$2" "$1"
+}
+
+# Sources of the latest brotli and curl, for src/php/common/patches/middleware-patch.
+# Downloaded once per run into the helper cache, so the image builds do not
+# call the GitHub API (60 requests per hour without a token).
+cache_middleware_sources () {
+    local dir="/tmp/helper_cache" tag version
+    mkdir -p "$dir"
+
+    tag="$(get_github_latest_release "google/brotli")" || return 1
+    version="${tag#v}"
+    download_file "https://github.com/google/brotli/archive/refs/tags/v$version.tar.gz" \
+        "$dir/brotli-$version.tar.gz" || return 1
+
+    tag="$(get_github_latest_release "curl/curl")" || return 1
+    version="$(echo "${tag#curl-}" | tr _ .)"
+    download_file "https://curl.se/download/curl-$version.tar.xz" \
+        "$dir/curl-$version.tar.xz" || return 1
+}
+
 # Fingerprint stored in the index manifest of a published image (empty if none).
 # Reads the manifest only, no layer is pulled.
 get_image_fingerprint () {
     docker buildx imagetools inspect --raw "$1" 2>/dev/null \
         | jq -r '.annotations["org.shinsenter.build.fingerprint"] // empty' 2>/dev/null
+}
+
+# Folder with the security backports of a PHP version (empty when there is none)
+find_backport_dir() {
+    [ -n "$1" ] && [ -d "$BASE_DIR/src/php-backports/php$1" ] && echo "$BASE_DIR/src/php-backports/php$1"
+    return 0
+}
+
+# Files that config.sh adds to the build context. The build jobs of each
+# platform run this again, because they start from a clean checkout.
+# Usage: prepare_build_context <dockerfile> <context> <php-version>
+prepare_build_context() {
+    local dockerfile="$1" context="$2" php_version="$3" backports
+
+    [ ! -d "$context/rootfs" ] && mkdir -p "$context/rootfs"
+    # Mounted by common/os-common.dockerfile, it is empty unless the workflow fills it
+    mkdir -p "$context/helper_cache"
+    [ ! -e "$context/meta.dockerfile" ] && \
+        cp -pf "$BASE_DIR/src/php/meta.dockerfile" "$context/meta.dockerfile"
+
+    # Security backports for end-of-life PHP versions
+    # (see src/php/common/php-backports.dockerfile). The folder is always there,
+    # it is empty for the versions without backports.
+    if [ "$dockerfile" = "$BASE_DIR/src/php/base-php.dockerfile" ] && [ "$CHECK_ONLY" != "1" ]; then
+        backports="$(find_backport_dir "$php_version")"
+        rm -rf "$context/php-backports"
+        mkdir -p "$context/php-backports"
+        [ -n "$backports" ] && cp -pR "$backports" "$context/php-backports/"
+    fi
+    return 0
 }
 
 # Function to set environment variables
@@ -160,6 +219,10 @@ github_env() {
     else
         echo "$name=$@"
         echo "$name=$@" >> $GITHUB_ENV
+        # Copy for the jobs that run after this one (see template-common.yml)
+        if [ -n "$BUILD_ENV_FILE" ]; then
+            echo "$name=$@" >> "$BUILD_ENV_FILE"
+        fi
     fi
 }
 

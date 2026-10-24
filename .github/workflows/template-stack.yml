@@ -6,50 +6,66 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-name: Publish PHP Servers
+name: Build Template Stack
 
 ################################################################################
 ################################################################################
+
+# One PHP variant followed by the server images built on top of it. The servers
+# start after the variant is published. GitHub allows four levels of reusable
+# workflows (build-all > stack > php > common), so do not nest any deeper.
 
 on:
   workflow_call:
     inputs:
+      base:
+        description: "App name of the PHP variant (fpm, cli, zts)"
+        required: true
+        type: string
+      servers:
+        description: "JSON array of server apps built after the base"
+        required: false
+        type: string
+        default: "[]"
       tag_prefix:
         required: false
         type: string
         default: ""
-      build_all:
+      php_versions:
+        description: "JSON array of PHP versions to build"
+        required: true
+        type: string
+      force_build:
         required: false
         type: boolean
         default: false
-  workflow_dispatch:
-  workflow_run:
-    workflows: [Publish PHP]
-    types:
-      - completed
 
 ################################################################################
 ################################################################################
 
 jobs:
+  base:
+    name: ${{ inputs.base }}
+    uses: ./.github/workflows/template-php.yml
+    secrets: inherit
+    with:
+      app_name: ${{ inputs.base }}
+      tag_prefix: ${{ inputs.tag_prefix }}
+      php_versions: ${{ inputs.php_versions }}
+      force_build: ${{ inputs.force_build }}
 
-  php-servers:
-    # See: https://docs.github.com/en/webhooks/webhook-events-and-payloads#workflow_run
-    if: ${{ github.event.workflow_run.conclusion == '' || github.event.workflow_run.conclusion == 'success' }}
+  servers:
+    name: ${{ matrix.app }}
+    if: ${{ inputs.servers != '[]' }}
+    needs: base
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
     strategy:
       fail-fast: false
       matrix:
-        app:
-          - with-apache
-          - with-nginx
-          - with-roadrunner
-          - with-f8p
+        app: ${{ fromJSON(inputs.servers) }}
     with:
       app_name: ${{ matrix.app }}
       tag_prefix: ${{ inputs.tag_prefix }}
-      build_all: ${{ inputs.build_all }}
-
-################################################################################
-################################################################################
+      php_versions: ${{ inputs.php_versions }}
+      force_build: ${{ inputs.force_build }}

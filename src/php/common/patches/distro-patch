@@ -1,0 +1,62 @@
+#!/bin/sh
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+# Fix old distros so the next layers can install packages and reach HTTPS sites:
+#  - Debian releases that deb.debian.org no longer serve move to archive.debian.org
+#  - Debian 8 and 9, Alpine 3.7 and 3.8: stop trusting the expired DST Root CA X3
+#    (Let's Encrypt), same as @fix_letsencrypt of docker-php-extension-installer
+# Used by common/os-common.dockerfile and common/php-backports.dockerfile (mounted
+# from the build context, so it is not part of any image). Other systems are left alone.
+# The changes stay in the image.
+
+[ -f /etc/os-release ] || exit 0
+. /etc/os-release
+major="${VERSION_ID%%.*}"
+
+if [ "$ID" = debian ] && [ -d /etc/apt ] && [ "${major:-99}" -lt 12 ]; then
+    files="/etc/apt/sources.list /etc/apt/sources.list.d/*"
+    # shellcheck disable=SC2086
+    sed -i \
+        -e '/stretch-updates/d' \
+        -e 's|://deb.debian.org/debian-security|://archive.debian.org/debian-security|g' \
+        -e 's|://security.debian.org/debian-security|://archive.debian.org/debian-security|g' \
+        -e 's|://deb.debian.org/debian|://archive.debian.org/debian|g' \
+        $files 2>/dev/null || true
+    echo 'Acquire::Check-Valid-Until "false";' >/etc/apt/apt.conf.d/99-archive
+
+    # the signing keys of the oldest releases have expired
+    if [ "$major" -lt 11 ]; then
+        # shellcheck disable=SC2086
+        sed -i 's|^deb\(-src\)\{0,1\} http|deb\1 [trusted=yes] http|' $files 2>/dev/null || true
+    fi
+fi
+
+################################################################################
+case "$ID:$VERSION_ID" in
+    debian:8 | debian:9 | alpine:3.7.* | alpine:3.8.*) ;;
+    *) exit 0 ;;
+esac
+
+CA_CONF=/etc/ca-certificates.conf
+[ -f "$CA_CONF" ] || exit 0
+
+# an old ca-certificates package has no ISRG Root X1 yet
+if [ "$ID" = debian ] && ! grep -q 'mozilla/ISRG_Root_X1.crt' "$CA_CONF"; then
+    echo 'Install a newer ca-certificates package'
+    # the official images ship without package lists: clean up what we fetch
+    lists="$(ls -A /var/lib/apt/lists 2>/dev/null | grep -vx -e partial -e lock)"
+    [ -n "$lists" ] || apt-get update -qq
+    apt-get install -qqy --no-install-recommends ca-certificates
+    [ -n "$lists" ] || rm -rf /var/lib/apt/lists/*
+fi
+
+if grep -Eq '^mozilla/ISRG_Root_X1\.crt$' "$CA_CONF" && grep -Eq '^mozilla/DST_Root_CA_X3\.crt$' "$CA_CONF"; then
+    echo 'Disable the DST Root CA X3 certificate'
+    sed -i '/^mozilla\/DST_Root_CA_X3/s/^/!/' "$CA_CONF"
+    update-ca-certificates -f
+fi

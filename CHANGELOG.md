@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 
 
+## [5.9.0] - 2026-10-25
+- Add security backports for end-of-life PHP 7.3, 7.4, 8.0 and 8.1.
+- Build the latest stable brotli and curl on Alpine when the package is outdated.
+- Stop building `linux/386`, `linux/arm/v7`, `linux/ppc64le` and `linux/s390x`.
+- Use the exec form for `ENTRYPOINT`.
+- Fix Nginx and FrankenPHP builds.
+- Skip building base images when `php_versions` is set.
+- Stop maintaining Docker images for Slim, Laminas, Hypervel, and CakePHP 4 due to their inactive development.
+
+
 ## [5.8.0] - 2026-10-22
 - Replace the daily build with a watcher that builds only the images that changed.
 - Skip images that are already up to date.

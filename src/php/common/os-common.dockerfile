@@ -39,30 +39,8 @@ ENV PS1="\\u@\\h:\\w\\$ "
 ENV PRESQUASH_SCRIPTS="cleanup"
 
 ################################################################################
-RUN <<'EOF'
-sources="/etc/apt/sources.list"
-if [ -f "$sources" ]; then
-    . /etc/os-release
-    if [ "$ID" = "debian" ] && [ "${VERSION_ID%%.*}" -lt 11 ]; then
-        debug-echo -w "Patching sources.list for $ID $VERSION_ID"
-        sed  -i -e '/stretch-updates/d' \
-                -e 's|deb.debian.org/debian|archive.debian.org/debian|g' \
-                -e 's|security.debian.org/debian-security|archive.debian.org/debian-security|g' \
-                -e 's|^deb\(-src\)\? http|deb\1 [trusted=yes] http|g' \
-            $sources
-        cat $sources
-    fi
-fi
-EOF
-
-################################################################################
-# Temporary workaround to fix Let's Encrypt CA certificates for old distros
-# https://github.com/mlocati/docker-php-extension-installer/pull/450
-# https://github.com/mlocati/docker-php-extension-installer/pull/451
-# https://github.com/mlocati/docker-php-extension-installer/pull/724
-# https://github.com/mlocati/docker-php-extension-installer/pull/737
-RUN --mount=type=bind,from=mlocati/php-extension-installer:latest,source=/usr/bin/install-php-extensions,target=/usr/bin/install-php-extensions \
-    /usr/bin/install-php-extensions @fix_letsencrypt 2>&1 | grep -vF StandW || true
+RUN --mount=type=bind,source=./common/patches/distro-patch,target=/tmp/distro-patch \
+    sh /tmp/distro-patch
 
 ################################################################################
 RUN <<'EOF'
@@ -90,6 +68,12 @@ if [ ! -e /sbin/nologin ] && has-cmd nologin; then
     ln -nsf "$(command -v nologin)" /sbin/nologin
 fi
 EOF
+
+################################################################################
+# After the package upgrade above, which would overwrite the libraries
+RUN --mount=type=bind,source=./common/patches/middleware-patch,target=/tmp/middleware-patch \
+    --mount=type=bind,source=./helper_cache,target=/tmp/helper_cache \
+    sh /tmp/middleware-patch
 
 ################################################################################
 RUN <<'EOF'

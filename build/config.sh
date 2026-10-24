@@ -21,7 +21,7 @@ set_platforms() {
     case "$1" in
         ubuntu)        echo "linux/amd64,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x" ;;
         debian|alpine) echo "linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x" ;;
-        *)             echo "linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x" ;;
+        *)             echo "linux/amd64,linux/arm64/v8" ;;
     esac
 }
 
@@ -34,9 +34,6 @@ bagisto:min=8.3 latest=8.4 base=laravel
 
 # https://roots.io/bedrock/docs/installation
 bedrock:min=8.3 base=wordpress
-
-# https://book.cakephp.org/4/en/installation.html
-cakephp4:min=7.4 latest=8.3 server=apache
 
 # https://book.cakephp.org/5/en/installation.html
 cakephp5:min=8.1 server=apache
@@ -63,19 +60,13 @@ flightphp:min=7.4 server=nginx
 grav:min=8.3 server=apache
 
 # https://hyperf.wiki/3.1/#/en/quick-start/install
-hyperf:min=8.2 server=nginx platform=linux/amd64,linux/arm/v7,linux/arm64/v8
-
-# https://hypervel.org/docs/deployment
-hypervel:min=8.2 base=laravel platform=linux/amd64,linux/arm/v7,linux/arm64/v8
+hyperf:min=8.2 server=nginx
 
 # https://docs.invoiceshelf.com/install/manual.html
 invoiceshelf:min=8.2 base=laravel
 
 # https://getkirby.com/docs/cookbook/setup/composer
 kirby:min=8.3 server=apache
-
-# https://docs.laminas.dev/tutorials/getting-started/skeleton-application
-laminas:min=8.1 server=nginx
 
 # https://laravel.com/docs/master/installation
 laravel:min=8.3 server=nginx
@@ -91,9 +82,6 @@ mautic:min=8.2 server=apache
 
 # https://docs.phpmyadmin.net/en/latest/setup.html
 phpmyadmin:min=7.2 server=nginx
-
-# https://www.slimframework.com/docs/v4/start/installation.html
-slim:server=apache
 
 # https://spiral.dev/docs/start-installation/current/en
 spiral:min=8.1 server=roadrunner variant=cli platform=linux/amd64,linux/arm64
@@ -117,6 +105,9 @@ yii:server=apache
 ## inactive frameworks (kept for reference, commented out)
 ## ------------------------------------------------------ ##
 
+## https://book.cakephp.org/4/en/installation.html
+# cakephp4:min=7.4 latest=8.3 server=apache
+
 ## https://docs.craterapp.com/installation.html
 # crater:min=7.4 latest=8.1 base=laravel server=apache
 
@@ -125,6 +116,15 @@ yii:server=apache
 
 ## https://phpixie.com/quickstart.html
 # phpixie:latest=7.4 server=apache
+
+## https://hypervel.org/docs/deployment
+# hypervel:min=8.2 base=laravel
+
+## https://docs.laminas.dev/tutorials/getting-started/skeleton-application
+# laminas:min=8.1 server=nginx
+
+## https://www.slimframework.com/docs/v4/start/installation.html
+# slim:server=apache
 "
 
 apply_app_rules() {
@@ -165,12 +165,11 @@ apply_app_rules() {
         *) PREFER_SERVER="" ;;
     esac
 
-    # Exception for hyperf, hypervel, spiral
+    # Exception for hyperf, spiral
     case "$app" in
-        hyperf|hypervel)
+        hyperf)
             if verlte "8.3" "$PHP_VERSION"; then
                 PREFER_SERVER=""
-                BUILD_PLATFORM="linux/amd64,linux/arm64/v8"
             fi
             ;;
         spiral)
@@ -232,6 +231,7 @@ FORCE_BUILD="${FORCE_BUILD:-0}"
 CHECK_ONLY="${CHECK_ONLY:-0}"
 ALLOW_RC=0
 UPDATE_README=0
+BACKPORT_DIR=
 
 PREFIX="${APP#app-}"
 SUFFIX=
@@ -291,7 +291,6 @@ case "$APP" in
         BUILD_NAME="$DEFAULT_REPO/frankenphp"
         BUILD_SOURCE_IMAGE="dunglas/frankenphp:1-php$PHP_VERSION$SUFFIX"
         BUILD_DOCKERFILE="$BASE_DIR/src/php/with-f8p.dockerfile"
-        BUILD_PLATFORM="linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8"
         BUILD_CACHE_KEY="(frankenphp@$(get_dockerhub_tag_digest_or_now "dunglas/frankenphp" "1-php$PHP_VERSION$SUFFIX"))"
         PHP_VARIANT="zts$SUFFIX"
         ;;
@@ -484,9 +483,9 @@ if [ -n "$BUILD_DOCKERFILE" ] && [ -f "$BUILD_DOCKERFILE" ]; then
     BUILD_DOCKERFILE_SQUASHED="/tmp/squashed-$(basename "$BUILD_DOCKERFILE")"
     BUILD_CONTEXT="$(dirname "$BUILD_DOCKERFILE")"
 
-    [ ! -d "$BUILD_CONTEXT/rootfs" ] && mkdir -p "$BUILD_CONTEXT/rootfs"
-    [ ! -e "$BUILD_CONTEXT/meta.dockerfile" ] && \
-        cp -pf "$BASE_DIR/src/php/meta.dockerfile" "$BUILD_CONTEXT/meta.dockerfile"
+    prepare_build_context "$BUILD_DOCKERFILE" "$BUILD_CONTEXT" "$PHP_VERSION"
+    [ "$BUILD_DOCKERFILE" = "$BASE_DIR/src/php/base-php.dockerfile" ] && \
+        BACKPORT_DIR="$(find_backport_dir "$PHP_VERSION")"
 
     if [ -f "$BUILD_CONTEXT/README.md" ]; then
         BUILD_README="$BUILD_CONTEXT/README.md"
@@ -525,27 +524,9 @@ fi
 ################################################################################
 # Fix build platforms
 ################################################################################
-remove_platform() {
-    local platforms="$1"
-    local new_string
-    shift
-    for search; do
-        for item in ${platforms//,/ }; do
-            [[ "$item" != *"$search"* ]] && new_string="${new_string:+$new_string,}$item"
-        done
-        platforms="$new_string"
-        unset new_string
-    done
-    echo "$platforms"
-}
-
 # Remove some platforms for older PHP versions
-if [ -n "$PHP_VERSION" ]; then
-    if verlt "$PHP_VERSION" "7.1"; then
-        BUILD_PLATFORM="linux/amd64,linux/arm/v7"
-    elif [ "$OS_BASE" = "debian" ] && verlt "$PHP_VERSION" "8.1"; then
-        BUILD_PLATFORM="$(remove_platform "$BUILD_PLATFORM" 'ppc64le' 's390x')"
-    fi
+if [ -n "$PHP_VERSION" ] && verlt "$PHP_VERSION" "7.1"; then
+    BUILD_PLATFORM="linux/amd64"
 fi
 
 ################################################################################
@@ -575,6 +556,13 @@ if [ "$SKIP_BUILD" != "1" ]; then
             BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(IPE:$IPE_VERSION)/(composer:$COMPOSER_VERSION)"
         fi
 
+        # Alpine images get the latest brotli and curl (see src/php/common/patches/middleware-patch)
+        if [ "$OS_BASE" = "alpine" ] && [ "${APP#with-}" = "$APP" ] && [ "${APP#app-}" = "$APP" ]; then
+            BROTLI_TAG="$(get_github_latest_release "google/brotli" || echo "unknown-$(date +%s)")"
+            CURL_TAG="$(get_github_latest_release "curl/curl" || echo "unknown-$(date +%s)")"
+            BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(brotli:$BROTLI_TAG)/(curl:$CURL_TAG)"
+        fi
+
         # Servers are built FROM shinsenter/php, so their parent image matters too
         if [ "${APP#with-}" != "$APP" ]; then
             PARENT_TAG="${BUILD_TAG_PREFIX}${PHP_VERSION//-rc/}-${PHP_VARIANT}"
@@ -586,9 +574,17 @@ if [ "$SKIP_BUILD" != "1" ]; then
     BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(buildfile:$(path_hash "$BUILD_DOCKERFILE" | head -c10))"
     # Other Dockerfiles in the same folder are not part of this image
     context_hash="$(find "$BUILD_CONTEXT" -type f ! -name '.*' ! -name '*.md' \
+        ! -path '*/php-backports/*' \
         \( ! -name '*.dockerfile' -o -name 'meta.dockerfile' \) \
         | sort -dbfi | xargs -r shasum 2>/dev/null | shasum | head -c10)"
     BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(buildcontext:$context_hash)"
+
+    # The backports are copied into the context only when building, so they are
+    # hashed from their source (patches and the Dockerfile that applies them)
+    if [ -n "$BACKPORT_DIR" ]; then
+        backport_hash="$(path_hash "$BACKPORT_DIR" "$BASE_DIR/src/php/common/php-backports.dockerfile" | shasum | head -c10)"
+        BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(backports@$backport_hash)"
+    fi
     BUILD_FINGERPRINT="$(echo -n "$BUILD_CACHE_KEY" | shasum | head -c32)"
 else
     BUILD_CACHE_KEY=""

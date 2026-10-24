@@ -7,6 +7,8 @@
 **/*.working
 **/Dockerfile
 **/meta.dockerfile
+src/php/php-backports/
+src/php/helper_cache/
 myproject
 
 !.env.example
@@ -14,3 +16,6 @@ myproject
 
 # graft's local graph cache - regenerable, not committed (run `graft build`).
 graft/
+
+# Local drafts, not committed.
+_OUTPUTS/

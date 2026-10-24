@@ -29,7 +29,7 @@ RUN env-default '# Other user-defined environment variables are from here'
 ################################################################################
 EXPOSE 22
 
-ENTRYPOINT /usr/local/bin/docker-php-entrypoint
+ENTRYPOINT ["/usr/local/bin/docker-php-entrypoint"]
 
 ################################################################################
 INCLUDE ./meta

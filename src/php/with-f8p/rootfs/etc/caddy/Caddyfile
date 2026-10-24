@@ -22,9 +22,12 @@
 
 http://{$SERVER_NAME:localhost} {
 	root * {$APP_ROOT}
-	encode zstd br gzip
+	# Compressed SSE streams cost memory per subscriber and enable BREACH-style attacks.
+	@compressible not path /.well-known/mercure
+	encode @compressible zstd br gzip
 
 	{$CADDY_SERVER_EXTRA_DIRECTIVES}
+	import Caddyfile.server.d/*.caddyfile
 
 	php_server
 }
@@ -33,9 +36,12 @@ http://{$SERVER_NAME:localhost} {
 	tls /etc/ssl/site/server.crt /etc/ssl/site/server.key
 
 	root * {$APP_ROOT}
-	encode zstd br gzip
+	# Compressed SSE streams cost memory per subscriber and enable BREACH-style attacks.
+	@compressible not path /.well-known/mercure
+	encode @compressible zstd br gzip
 
 	{$CADDY_SERVER_EXTRA_DIRECTIVES}
+	import Caddyfile.server.d/*.caddyfile
 
 	php_server
 }

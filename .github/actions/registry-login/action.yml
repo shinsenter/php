@@ -1,0 +1,33 @@
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+name: Registry login
+description: Log in to Docker Hub, and to GHCR when PUBLISH_TO_GHCR is set
+
+inputs:
+  username:
+    description: Docker Hub user name
+    required: true
+  password:
+    description: Docker Hub access token
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: docker/login-action@v4
+      with:
+        username: ${{ inputs.username }}
+        password: ${{ inputs.password }}
+
+    - if: ${{ env.PUBLISH_TO_GHCR }}
+      uses: docker/login-action@v4
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ github.token }}

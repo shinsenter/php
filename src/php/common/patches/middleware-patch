@@ -1,0 +1,145 @@
+#!/bin/sh
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+# Alpine only: build the latest stable brotli and curl from source when the Alpine
+# package is older. Only the shared libraries and /usr/bin/curl are replaced, `apk`
+# keeps the old version. Other systems are left alone.
+# Run by common/os-common.dockerfile after the package upgrade, which would
+# overwrite these files (mounted from the build context, not part of any image).
+# The workflow puts the sources in /tmp/helper_cache (see cache_middleware_sources
+# in build/helpers.sh). Without them (a local build) they are looked up and downloaded.
+# build/config.sh adds both versions to the image fingerprint, so a new release
+# rebuilds the image.
+
+[ -f /etc/os-release ] || exit 0
+. /etc/os-release
+[ "$ID" = alpine ] || exit 0
+set -e
+
+# latest_release <owner/repo>: tag of the latest stable GitHub release
+latest_release() {
+    wget -qO- "https://api.github.com/repos/$1/releases/latest" |
+        sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | head -n1
+}
+
+# is_older <package> <version>: the installed package is older than <version>
+is_older() {
+    installed="$(apk info -v "$1" 2>/dev/null | head -n1)"
+    installed="${installed#"$1"-}"
+    [ -n "$installed" ] && [ "$(apk version -t "$installed" "$2-r0")" = '<' ]
+}
+
+# download <url> <file>: copies the file from the helper cache when it is there
+download() {
+    if [ -f "/tmp/helper_cache/$2" ]; then
+        cp "/tmp/helper_cache/$2" "$work/$2"
+    else
+        wget -qO "$work/$2" "$1"
+    fi
+}
+
+# swap_libs <staging dir> <file pattern in /usr/lib>
+swap_libs() {
+    for f in /usr/lib/$2; do
+        [ -e "$1/usr/lib/${f##*/}" ] || rm -f "$f"
+    done
+    cp -a "$1"/usr/lib/$2 /usr/lib/
+}
+
+build_brotli() {
+    echo "Build brotli $BROTLI_VERSION"
+    download "https://github.com/google/brotli/archive/refs/tags/v$BROTLI_VERSION.tar.gz" "brotli-$BROTLI_VERSION.tar.gz"
+    tar -xzf "$work/brotli-$BROTLI_VERSION.tar.gz" -C "$work"
+    cmake -S "$work/brotli-$BROTLI_VERSION" -B "$work/brotli-build" \
+        -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib \
+        -DBUILD_SHARED_LIBS=ON -DBROTLI_DISABLE_TESTS=ON
+    cmake --build "$work/brotli-build" -j"$(nproc)"
+    DESTDIR="$work/brotli-root" cmake --install "$work/brotli-build" --strip
+    swap_libs "$work/brotli-root" 'libbrotli*.so.*'
+    ls -l /usr/lib/libbrotli*.so.*
+}
+
+build_curl() {
+    echo "Build curl $CURL_VERSION"
+    download "https://curl.se/download/curl-$CURL_VERSION.tar.xz" "curl-$CURL_VERSION.tar.xz"
+    tar -xJf "$work/curl-$CURL_VERSION.tar.xz" -C "$work"
+    cd "$work/curl-$CURL_VERSION"
+    # same options as the Alpine package
+    # shellcheck disable=SC2086
+    ./configure --prefix=/usr --disable-static --disable-manual --disable-ldap \
+        --enable-ares --enable-ipv6 --enable-unix-sockets --enable-websockets \
+        --with-pic $idn --with-nghttp2 --with-openssl --without-libssh2 \
+        --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt --with-ca-path=/etc/ssl/certs
+    make -j"$(nproc)"
+    make install-strip DESTDIR="$work/curl-root"
+    cd /
+    swap_libs "$work/curl-root" 'libcurl.so.*'
+    cp -a "$work/curl-root/usr/bin/curl" /usr/bin/curl
+    info="$(curl -V)"
+    echo "$info"
+    case "$info" in
+        "curl $CURL_VERSION "*HTTP2*) ;;
+        *) echo "curl $CURL_VERSION was not installed correctly" >&2; exit 1 ;;
+    esac
+}
+
+# cached_version <name> <extension>: version of the source in the helper cache
+cached_version() {
+    f="$(ls /tmp/helper_cache/"$1"-*."$2" 2>/dev/null | head -n1)"
+    f="${f##*/}"
+    f="${f#"$1"-}"
+    echo "${f%."$2"}"
+}
+
+# brotli tags look like v1.2.1, curl tags like curl-8_23_0
+BROTLI_VERSION="$(cached_version brotli tar.gz)"
+CURL_VERSION="$(cached_version curl tar.xz)"
+if [ -z "$BROTLI_VERSION" ]; then
+    BROTLI_VERSION="$(latest_release google/brotli)"
+    BROTLI_VERSION="${BROTLI_VERSION#v}"
+fi
+if [ -z "$CURL_VERSION" ]; then
+    CURL_VERSION="$(latest_release curl/curl)"
+    CURL_VERSION="$(echo "${CURL_VERSION#curl-}" | tr _ .)"
+fi
+if [ -z "$BROTLI_VERSION" ] || [ -z "$CURL_VERSION" ]; then
+    echo "Cannot find the latest brotli or curl release" >&2
+    exit 1
+fi
+
+brotli=0
+curl=0
+is_older brotli-libs "$BROTLI_VERSION" && brotli=1
+# the latest curl needs OpenSSL 3 (libssl3 is Alpine 3.17 and newer)
+if is_older curl "$CURL_VERSION"; then
+    if apk info -e libssl3 >/dev/null; then
+        curl=1
+    else
+        echo "Skip curl $CURL_VERSION, it needs OpenSSL 3"
+    fi
+fi
+[ "$brotli" = 1 ] || [ "$curl" = 1 ] || exit 0
+
+work="$(mktemp -d)"
+trap 'rm -rf "$work"' EXIT
+deps='gcc make musl-dev'
+[ "$brotli" = 0 ] || deps="$deps cmake"
+[ "$curl" = 0 ] || deps="$deps brotli-dev c-ares-dev libpsl-dev nghttp2-dev openssl-dev pkgconf zlib-dev zstd-dev"
+# libidn2-dev is missing on old Alpine (3.10), curl is built without IDN there
+idn=--without-libidn2
+# shellcheck disable=SC2086
+if [ "$curl" = 1 ] && apk add --no-cache --virtual .libs-deps $deps libidn2-dev; then
+    idn=--with-libidn2
+else
+    apk add --no-cache --virtual .libs-deps $deps
+fi
+
+[ "$brotli" = 0 ] || build_brotli
+[ "$curl" = 0 ] || build_curl
+
+apk del .libs-deps
