@@ -189,95 +189,36 @@ jobs:
 
   ##########################################################
 
-  php-fpm:
-    uses: ./.github/workflows/template-php.yml
+  # A PHP variant, then the servers built on top of it
+  fpm:
+    uses: ./.github/workflows/template-stack.yml
     secrets: inherit
     needs: [prepare]
-    strategy:
-      fail-fast: false
-      matrix:
-        app:
-          - fpm
     with:
-      app_name: ${{ matrix.app }}
+      base: fpm
+      servers: '["with-apache","with-nginx"]'
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
       php_versions: ${{ needs.prepare.outputs.php_versions }}
       force_build: ${{ fromJSON(needs.prepare.outputs.force_build) }}
 
-  php-cli:
-    uses: ./.github/workflows/template-php.yml
+  cli:
+    uses: ./.github/workflows/template-stack.yml
     secrets: inherit
     needs: [prepare]
-    strategy:
-      fail-fast: false
-      matrix:
-        app:
-          - cli
     with:
-      app_name: ${{ matrix.app }}
+      base: cli
+      servers: '["with-roadrunner"]'
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
       php_versions: ${{ needs.prepare.outputs.php_versions }}
       force_build: ${{ fromJSON(needs.prepare.outputs.force_build) }}
 
-  php-zts:
-    uses: ./.github/workflows/template-php.yml
+  zts:
+    uses: ./.github/workflows/template-stack.yml
     secrets: inherit
     needs: [prepare]
-    strategy:
-      fail-fast: false
-      matrix:
-        app:
-          - zts
     with:
-      app_name: ${{ matrix.app }}
-      tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
-      php_versions: ${{ needs.prepare.outputs.php_versions }}
-      force_build: ${{ fromJSON(needs.prepare.outputs.force_build) }}
-
-  ##########################################################
-
-  fpm-servers:
-    uses: ./.github/workflows/template-php.yml
-    secrets: inherit
-    needs: [prepare, php-fpm]
-    strategy:
-      fail-fast: false
-      matrix:
-        app:
-          - with-apache
-          - with-nginx
-    with:
-      app_name: ${{ matrix.app }}
-      tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
-      php_versions: ${{ needs.prepare.outputs.php_versions }}
-      force_build: ${{ fromJSON(needs.prepare.outputs.force_build) }}
-
-  zts-servers:
-    uses: ./.github/workflows/template-php.yml
-    secrets: inherit
-    needs: [prepare, php-zts]
-    strategy:
-      fail-fast: false
-      matrix:
-        app:
-          - with-f8p
-    with:
-      app_name: ${{ matrix.app }}
-      tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
-      php_versions: ${{ needs.prepare.outputs.php_versions }}
-      force_build: ${{ fromJSON(needs.prepare.outputs.force_build) }}
-
-  cli-servers:
-    uses: ./.github/workflows/template-php.yml
-    secrets: inherit
-    needs: [prepare, php-cli]
-    strategy:
-      fail-fast: false
-      matrix:
-        app:
-          - with-roadrunner
-    with:
-      app_name: ${{ matrix.app }}
+      base: zts
+      servers: '["with-f8p"]'
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
       php_versions: ${{ needs.prepare.outputs.php_versions }}
       force_build: ${{ fromJSON(needs.prepare.outputs.force_build) }}
@@ -286,7 +227,7 @@ jobs:
 
   server-cache:
     runs-on: ubuntu-26.04-arm
-    needs: [prepare, cli-servers, fpm-servers]
+    needs: [prepare, cli, fpm]
     steps:
       - uses: actions/download-artifact@v8
         with:

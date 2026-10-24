@@ -40,7 +40,8 @@ PHP and FPM settings change through environment variables, so changing them does
 | `build/helpers.sh` | Shared functions (version compare, logging, version lookups) |
 | `src/php/common/distro-patch` | Moves old Debian releases to `archive.debian.org` and drops the expired DST Root CA X3 on Debian 8 and 9, Alpine 3.7 and 3.8. With the argument `libs` (run by `os-common.dockerfile` after the package upgrade) it builds the latest stable brotli and curl on Alpine when the package is older (`build/config.sh` adds both versions to the fingerprint). Mounted into `RUN` steps from the build context, not part of any image |
 | `tests/` | `build-test.sh`, `compose-test.sh`, `matrix-test.sh`, `sbom-test.sh`; logs in `tests/logs/` |
-| `.github/workflows/` | `build-all`, `watch-updates` and the templates. Images rebuild only when their inputs change |
+| `.github/workflows/` | `build-all`, `watch-updates` and the templates (`template-stack` > `template-php` > `template-common`, the four-level limit). A new server image is one entry in the `servers` list in `build-all`. Images rebuild only when their inputs change |
+| `.github/actions/` | Composite actions shared by the templates (`registry-login`) |
 
 Dockerfiles use the `INCLUDE ./path/name` syntax (dockerfile-x). `Dockerfile` and `meta.dockerfile` are generated at build time and are in `.gitignore`.
 

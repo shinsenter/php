@@ -184,18 +184,10 @@ jobs:
           driver-opts: network=host
 
       -
-        uses: docker/login-action@v4
+        uses: ./.github/actions/registry-login
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-
-      -
-        if: ${{ env.PUBLISH_TO_GHCR }}
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
 
       - # Each platform is pushed by digest, "merge" puts the digests under the tags
         id: stage
@@ -207,54 +199,19 @@ jobs:
             echo "name=$BUILD_NAME" >> "$GITHUB_OUTPUT"
           fi
 
-      -
-        if: ${{ env.SKIP_SQUASH == '1' }}
-        id: push_plain
-        name: Build and push ${{ env.BUILD_TAG }} for ${{ matrix.platform }}
-        uses: docker/build-push-action@v7
-        continue-on-error: ${{ inputs.continue-on-error }}
-        with:
-          pull: false
-          platforms: ${{ matrix.platform }}
-          file: ${{ env.BUILD_DOCKERFILE }}
-          context: ${{ env.BUILD_CONTEXT }}
-          outputs: type=image,name=${{ steps.stage.outputs.name }},push-by-digest=true,name-canonical=true,push=${{ env.SKIP_PUSH != '1' }}
-          sbom: true
-          build-args: |
-            DEBUG=${{ env.DEBUG }}
-            BUILD_CACHE_KEY=${{ env.BUILD_CACHE_KEY }}
-            BUILD_CONTEXT=${{ env.BUILD_CONTEXT }}
-            BUILD_DATE=${{ env.BUILD_DATE }}
-            BUILD_DESC=${{ env.BUILD_DESC }}
-            BUILD_FROM_IMAGE=${{ env.BUILD_FROM_IMAGE }}
-            BUILD_NAME=${{ env.BUILD_NAME }}
-            BUILD_PLATFORM=${{ env.BUILD_PLATFORM }}
-            BUILD_REVISION=${{ env.BUILD_REVISION }}
-            BUILD_SOURCE_IMAGE=${{ env.BUILD_SOURCE_IMAGE }}
-            BUILD_TAG_PREFIX=${{ env.BUILD_TAG_PREFIX }}
-            BUILD_TAG=${{ env.BUILD_TAG }}
-            BUILD_TAGS=${{ env.BUILD_TAGS }}
-            LATEST_PHP=${{ env.LATEST_PHP }}
-            LATEST_S6=${{ env.LATEST_S6 }}
-            OS_BASE=${{ env.OS_BASE }}
-            OS_VERSION=${{ env.OS_VERSION }}
-            PHP_VARIANT=${{ env.PHP_VARIANT }}
-            PHP_VERSION=${{ env.PHP_VERSION }}
-            S6_PATH=${{ env.S6_PATH }}
-            S6_VERSION=${{ env.S6_VERSION }}
-
-      -
-        if: ${{ env.SKIP_SQUASH != '1' }}
+      - # Squash mode builds a temporary image first, the squashed one is pushed below
+        id: build
         name: Build ${{ env.BUILD_TAG }} for ${{ matrix.platform }}
         uses: docker/build-push-action@v7
         continue-on-error: ${{ inputs.continue-on-error }}
         with:
           pull: false
-          push: true
+          push: ${{ env.SKIP_SQUASH != '1' }}
           platforms: ${{ matrix.platform }}
           file: ${{ env.BUILD_DOCKERFILE }}
           context: ${{ env.BUILD_CONTEXT }}
-          tags: ${{ env.BUILD_TMP_NAME }}
+          tags: ${{ env.SKIP_SQUASH != '1' && env.BUILD_TMP_NAME || '' }}
+          outputs: ${{ env.SKIP_SQUASH == '1' && format('type=image,name={0},push-by-digest=true,name-canonical=true,push={1}', steps.stage.outputs.name, env.SKIP_PUSH != '1') || '' }}
           sbom: true
           build-args: |
             DEBUG=${{ env.DEBUG }}
@@ -311,7 +268,7 @@ jobs:
         if: ${{ env.SKIP_PUSH != '1' }}
         name: Save the digest
         env:
-          DIGEST: ${{ steps.push_plain.outputs.digest || steps.push_squash.outputs.digest }}
+          DIGEST: ${{ steps.push_squash.outputs.digest || steps.build.outputs.digest }}
         run: |
           [ -n "$DIGEST" ] || { echo "::error::No digest for ${{ matrix.platform }}"; exit 1; }
           mkdir -p /tmp/digests
@@ -362,18 +319,10 @@ jobs:
         uses: docker/setup-buildx-action@v4
 
       -
-        uses: docker/login-action@v4
+        uses: ./.github/actions/registry-login
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-
-      -
-        if: ${{ env.PUBLISH_TO_GHCR }}
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
 
       -
         if: ${{ env.SKIP_PUSH != '1' }}
