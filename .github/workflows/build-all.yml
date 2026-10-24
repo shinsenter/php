@@ -237,10 +237,9 @@ jobs:
   ##########################################################
 
   fpm-servers:
-    if: ${{ !cancelled() && !failure() }} # s6-overlay is skipped when php_versions is set
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
-    needs: [prepare, s6-overlay, php-fpm]
+    needs: [prepare, php-fpm]
     strategy:
       fail-fast: false
       matrix:
@@ -254,10 +253,9 @@ jobs:
       force_build: ${{ fromJSON(needs.prepare.outputs.force_build) }}
 
   zts-servers:
-    if: ${{ !cancelled() && !failure() }} # s6-overlay is skipped when php_versions is set
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
-    needs: [prepare, s6-overlay, php-zts]
+    needs: [prepare, php-zts]
     strategy:
       fail-fast: false
       matrix:
@@ -270,10 +268,9 @@ jobs:
       force_build: ${{ fromJSON(needs.prepare.outputs.force_build) }}
 
   cli-servers:
-    if: ${{ !cancelled() && !failure() }} # s6-overlay is skipped when php_versions is set
     uses: ./.github/workflows/template-php.yml
     secrets: inherit
-    needs: [prepare, s6-overlay, php-cli]
+    needs: [prepare, php-cli]
     strategy:
       fail-fast: false
       matrix:
