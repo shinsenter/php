@@ -25,6 +25,12 @@ set_platforms() {
     esac
 }
 
+# Folder with the security backports of a PHP version (empty when there is none)
+find_backport_dir() {
+    [ -n "$1" ] && [ -d "$BASE_DIR/src/php-backports/php$1" ] && echo "$BASE_DIR/src/php-backports/php$1"
+    return 0
+}
+
 ################################################################################
 # Application rules
 ################################################################################
@@ -232,6 +238,7 @@ FORCE_BUILD="${FORCE_BUILD:-0}"
 CHECK_ONLY="${CHECK_ONLY:-0}"
 ALLOW_RC=0
 UPDATE_README=0
+BACKPORT_DIR=
 
 PREFIX="${APP#app-}"
 SUFFIX=
@@ -488,6 +495,18 @@ if [ -n "$BUILD_DOCKERFILE" ] && [ -f "$BUILD_DOCKERFILE" ]; then
     [ ! -e "$BUILD_CONTEXT/meta.dockerfile" ] && \
         cp -pf "$BASE_DIR/src/php/meta.dockerfile" "$BUILD_CONTEXT/meta.dockerfile"
 
+    # Security backports for end-of-life PHP versions
+    # (see src/php/common/php-backports.dockerfile). The folder is always there,
+    # it is empty for the versions without backports.
+    if [ "$BUILD_DOCKERFILE" = "$BASE_DIR/src/php/base-php.dockerfile" ]; then
+        BACKPORT_DIR="$(find_backport_dir "$PHP_VERSION")"
+        if [ "$CHECK_ONLY" != "1" ]; then
+            rm -rf "$BUILD_CONTEXT/php-backports"
+            mkdir -p "$BUILD_CONTEXT/php-backports"
+            [ -n "$BACKPORT_DIR" ] && cp -pR "$BACKPORT_DIR" "$BUILD_CONTEXT/php-backports/"
+        fi
+    fi
+
     if [ -f "$BUILD_CONTEXT/README.md" ]; then
         BUILD_README="$BUILD_CONTEXT/README.md"
     else
@@ -586,9 +605,17 @@ if [ "$SKIP_BUILD" != "1" ]; then
     BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(buildfile:$(path_hash "$BUILD_DOCKERFILE" | head -c10))"
     # Other Dockerfiles in the same folder are not part of this image
     context_hash="$(find "$BUILD_CONTEXT" -type f ! -name '.*' ! -name '*.md' \
+        ! -path '*/php-backports/*' \
         \( ! -name '*.dockerfile' -o -name 'meta.dockerfile' \) \
         | sort -dbfi | xargs -r shasum 2>/dev/null | shasum | head -c10)"
     BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(buildcontext:$context_hash)"
+
+    # The backports are copied into the context only when building, so they are
+    # hashed from their source (patches and the Dockerfile that applies them)
+    if [ -n "$BACKPORT_DIR" ]; then
+        backport_hash="$(path_hash "$BACKPORT_DIR" "$BASE_DIR/src/php/common/php-backports.dockerfile" | shasum | head -c10)"
+        BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(backports@$backport_hash)"
+    fi
     BUILD_FINGERPRINT="$(echo -n "$BUILD_CACHE_KEY" | shasum | head -c32)"
 else
     BUILD_CACHE_KEY=""

@@ -12,11 +12,14 @@ ARG BUILDKIT_SBOM_SCAN_CONTEXT=true
 ARG BUILDKIT_SBOM_SCAN_STAGE=true
 
 ################################################################################
-ARG BUILD_FROM_IMAGE="php"
-ARG PHP_VERSION="8.5"
-ARG PHP_VARIANT="fpm-alpine"
+# Security backports for end-of-life PHP versions
+INCLUDE ./common/php-backports
 
-FROM ${BUILD_FROM_IMAGE}:${PHP_VERSION}-${PHP_VARIANT}
+################################################################################
+
+# php-base is the official PHP image
+# rebuilt with the backports when the version has any
+FROM php-base
 ARG  DEBUG
 
 # set PHP variables

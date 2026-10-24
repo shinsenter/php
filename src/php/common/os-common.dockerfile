@@ -39,21 +39,8 @@ ENV PS1="\\u@\\h:\\w\\$ "
 ENV PRESQUASH_SCRIPTS="cleanup"
 
 ################################################################################
-RUN <<'EOF'
-sources="/etc/apt/sources.list"
-if [ -f "$sources" ]; then
-    . /etc/os-release
-    if [ "$ID" = "debian" ] && [ "${VERSION_ID%%.*}" -lt 11 ]; then
-        debug-echo -w "Patching sources.list for $ID $VERSION_ID"
-        sed  -i -e '/stretch-updates/d' \
-                -e 's|deb.debian.org/debian|archive.debian.org/debian|g' \
-                -e 's|security.debian.org/debian-security|archive.debian.org/debian-security|g' \
-                -e 's|^deb\(-src\)\? http|deb\1 [trusted=yes] http|g' \
-            $sources
-        cat $sources
-    fi
-fi
-EOF
+RUN --mount=type=bind,source=./common/debian-patch,target=/tmp/debian-patch \
+    sh /tmp/debian-patch
 
 ################################################################################
 # Temporary workaround to fix Let's Encrypt CA certificates for old distros
