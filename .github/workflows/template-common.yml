@@ -110,13 +110,13 @@ jobs:
             $platforms | split(",") | map(select(. != "")) | map({
               platform: .,
               slug: gsub("/"; "-"),
-              runner: (if . == "linux/amd64" or . == "linux/386" then "ubuntu-latest" else "ubuntu-26.04-arm" end),
+              runner: (if . == "linux/amd64" or . == "linux/386" then "ubuntu-26.04" else "ubuntu-26.04-arm" end),
               qemu: (if test("^linux/arm/") then "arm" elif test("ppc64le|s390x") then ltrimstr("linux/") else "" end)
             })')"
           skip="${SKIP_BUILD:-0}"
           if [ "$matrix" = "[]" ]; then
             skip=1
-            matrix='[{"platform":"none","slug":"none","runner":"ubuntu-latest","qemu":""}]'
+            matrix='[{"platform":"none","slug":"none","runner":"ubuntu-26.04","qemu":""}]'
           fi
           {
             echo "skip=$skip"
