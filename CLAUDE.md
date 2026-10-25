@@ -41,7 +41,7 @@ PHP and FPM settings change through environment variables, so changing them does
 | `src/php/common/patches/distro-patch` | Moves old Debian releases to `archive.debian.org` and drops the expired DST Root CA X3 on Debian 8 and 9, Alpine 3.7 and 3.8. Run by `os-common.dockerfile` before the package install and by `php-backports.dockerfile` on Debian. Mounted into `RUN` steps from the build context, not part of any image |
 | `src/php/common/patches/middleware-patch` | Alpine only: builds the latest stable brotli and curl when the package is older. `os-common.dockerfile` runs it after the package upgrade, which would overwrite the result. `build/config.sh` adds both versions to the fingerprint. Mounted the same way as `distro-patch` |
 | `.dockerfile-x/` | Build of the `shinsenter/dockerfile-x` image: `upstream/` submodule, `patches/go-deps` (Go modules raised for CVEs), `build.dockerfile` (single-layer image), `build.sh` |
-| `tests/` | `build-test.sh`, `compose-test.sh`, `matrix-test.sh`, `sbom-test.sh`; logs in `tests/logs/` |
+| `tests/` | Offline tests (`run.sh` runs `lint.sh`, `test-versions.sh`, `test-backports.sh`, `test-config.sh`, with helpers in `lib.sh`). Docker tests: `build-test.sh`, `compose-test.sh`. `tools/`: `act-dryrun.sh`, `sbom.sh`. Logs in `tests/logs/` |
 | `.github/workflows/` | `build-all`, `watch-updates` and the templates (`template-stack` > `template-php` > `template-common`, the four-level limit). A new server image is one entry in the `servers` list in `build-all`. Images rebuild only when their inputs change |
 | `.github/actions/` | Composite actions shared by the templates (`registry-login`) |
 
@@ -53,13 +53,35 @@ Utilities inside the image: `pkg-add` and `pkg-del` (install and remove packages
 
 - Trial build: `tests/build-test.sh <php-version> <variant> ...` (it also builds the images it depends on). Useful variables: `SKIP_SQUASH=1`, `BUILD_TAG_PREFIX`.
 - Checks that need no build: `sh -n`, `bash -n`, `git apply --check`, `git diff`.
+- Offline test suite (no Docker, no build): `tests/run.sh`. See Tests below.
 - `NGINX_VERSION` (`mainline` by default, `stable`, a number, or `os`) is resolved to a number by `build/config.sh` and passed as a build argument. A new Nginx release changes the fingerprint of the `with-nginx` images.
 - Each image has a fingerprint. `build/config.sh` adds a hash of its inputs, including `src/php-backports/php<X.Y>/`, to the cache key, so a changed patch triggers a rebuild.
+
+## Tests
+
+Offline tests live in `tests/`. They need no Docker and no build, so run them yourself after a change and report the real output.
+
+- Run all: `tests/run.sh`. Run one: `bash tests/test-versions.sh`. Each prints `<file>: N passed, M failed`, prints a `FAIL:` line per failed check and exits non-zero on failure.
+- Which test to run:
+
+| Changed | Run |
+|---|---|
+| Any shell script, hook or util | `lint.sh` |
+| `build/versions.sh`, `build/helpers.sh` | `test-versions.sh` |
+| `src/php-backports/` (patch, README) | `test-backports.sh` |
+| `build/config.sh` | `test-config.sh` |
+| Anything else in `build/`, or unsure | `run.sh` |
+
+- A failing check is a finding. Fix the cause or tell the user. Do not edit a test to make it pass, and do not edit a backport patch to satisfy a test without asking (it changes the fingerprint of every image of that version).
+- Add a test: create `tests/test-<topic>.sh` with the author header, `source "$(dirname "$0")/lib.sh"`, use `check`, `check_not`, `check_eq`, end with `finish`, then add the file to the list in `run.sh`. Keep it offline: no `docker`, no network.
+- `test-config.sh` runs only the paths of `build/config.sh` that end before any network call (Alpine on PHP below 7.1). Do not add cases that reach the registry or GitHub API.
+- Not covered, so still ask the user for a run: `patch -p1 --dry-run` on a source tree, image contents, runtime behavior of hooks and utils (`realpath -m` needs GNU, so `app-root` does not run on macOS). Use `tests/build-test.sh` and `tests/compose-test.sh` for those (see Working rules).
+- `tests/tools/` holds helpers (`act-dryrun.sh`, `sbom.sh`), not tests. `tests/logs/` is git-ignored output of `build-test.sh`.
 
 ## Working rules
 
 - Do not run build or compile commands on your own (`docker build`, `docker buildx`, `tests/build-test.sh`, `./configure`, `make`, building PHP from source). Ask first and give the reason and the command. Or the user runs it and asks for follow-up changes.
-- Allowed without asking: `sh -n`, `bash -n`, `git apply --check`, `grep`, `diff`.
+- Allowed without asking: `sh -n`, `bash -n`, `git apply --check`, `grep`, `diff`, `tests/run.sh` and the single `tests/*.sh` offline tests.
 - Do not report test results without a run or a log to back them.
 - Work on a `feature/*` branch or the current branch. Never commit or push to `main`.
 - Conventional Commits: `feat:` `fix:` `refactor:` `docs:` `test:` `chore:`.

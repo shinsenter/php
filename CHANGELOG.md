@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [6.0.0] - Unreleased
+- Remove the sources of the unmaintained images `zz-cakephp4`, `zz-crater`, `zz-fuelphp`, `zz-hypervel`, `zz-laminas`, `zz-phpixie` and `zz-slim`. Published tags stay on Docker Hub and are not updated.
+- Remove the `update-readme` workflow, which only served those images.
+- Breaking: remove the legacy variables `APACHE_DOCUMENT_ROOT`, `NGINX_DOCUMENT_ROOT` (use `DOCUMENT_ROOT`) and `ENABLE_SSH` (use `ENABLE_SSHD`).
+- Decide the Alpine support for a PHP version in one place (`has_alpine_php` in `build/versions.sh`).
+
+
 ## [5.9.0] - 2026-10-25
 - Add security backports for end-of-life PHP 7.3, 7.4, 8.0 and 8.1.
 - Build the latest stable brotli and curl on Alpine when the package is outdated.
