@@ -111,11 +111,6 @@ Only data changes. Do not edit `php-backports.dockerfile`, `base-php.dockerfile`
 - Debian bullseye, buster and stretch switch to `archive.debian.org` in the build, and stay that way in the image so later layers can install packages.
 - Alpine with PHP below 8.0 needs the gnu-libiconv `iconv.h` symlink. The script does it.
 
-## Notes
-
-- `.mcp.json`, `.ignore`, `fix-author.sh` and `fix-commits.sh` are the user's local files, untracked in git. Do not edit or commit them.
-- `.claude/settings.local.json` is local configuration. Do not edit it unless asked.
-
 ## Copyright and credit
 
 This project is the work of Mai Nhut Tan <shin@shin.company>, licensed under the terms in `LICENSE` (https://code.shin.company/php/blob/main/LICENSE).
