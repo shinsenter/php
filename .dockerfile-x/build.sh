@@ -7,7 +7,8 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 # Builds each platform, squashes it to one layer with docker-squash, pushes it
-# by digest, then joins the digests into the multi-platform tags.
+# to a per-platform tag, then joins those tags into the multi-platform tags.
+# The docker driver cannot push by digest, so the build-<platform> tags stay.
 set -e
 
 BASE_DIR="$(git rev-parse --show-toplevel)"
@@ -22,8 +23,7 @@ PLATFORMS=(linux/amd64 linux/arm64/v8)
 trap 'rm -rf "$WORK"' EXIT
 git -C "$BASE_DIR" submodule update --init .dockerfile-x/upstream
 
-names="$(IFS=,; echo "${REPOS[*]}")"
-digests=()
+sources=()
 
 for platform in "${PLATFORMS[@]}"; do
     slug="${platform//\//-}"
@@ -32,19 +32,18 @@ for platform in "${PLATFORMS[@]}"; do
     docker buildx build --pull --load --platform "$platform" -t "$temp" \
         -f "$CONTEXT/build.dockerfile" "$CONTEXT"
     "$SQUASH" "$temp" -p > "$WORK/$slug.dockerfile"
-    docker image rm -f "$temp" >/dev/null
 
     docker buildx build --platform "$platform" --provenance=true --sbom=true \
-        --metadata-file "$WORK/$slug.json" \
-        --output "type=image,\"name=$names\",push-by-digest=true,name-canonical=true,push=true" \
+        --push $(printf -- "-t %s:build-$slug " "${REPOS[@]}") \
         -f "$WORK/$slug.dockerfile" "$CONTEXT"
-    digests+=("$(jq -r '."containerimage.digest"' "$WORK/$slug.json")")
+    sources+=("build-$slug")
+    docker image rm -f "$temp" >/dev/null
 done
 
 for repo in "${REPOS[@]}"; do
     docker buildx imagetools create \
         $(printf -- "-t $repo:%s " "${VERSIONS[@]}") \
-        $(printf -- "$repo@%s " "${digests[@]}")
+        $(printf -- "$repo:%s " "${sources[@]}")
 done
 
 # docker scout cves shinsenter/dockerfile-x:latest
