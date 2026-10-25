@@ -11,4 +11,4 @@ exec docker buildx imagetools inspect "$@" \
     --format "{{ range .SBOM.SPDX.packages }}{{ .name }}@{{ .versionInfo }}{{ println }}{{ end }}"
 
 # Examples
-# ./tests/sbom-test.sh shinsenter/php:latest
+# ./tests/tools/sbom.sh shinsenter/php:latest

@@ -19,7 +19,6 @@ if [ ! -x "$SQUASH_SCRIPT" ]; then
 fi
 
 if [ "$1" = "clean" ] || [ "$1" = "clear" ]; then
-    docker system prune -af --volumes
     rm -rf "$LOG_DIR/"* /tmp/helper_cache
     clear
     shift
@@ -52,9 +51,9 @@ if [ -n "${RECURSIVE:-1}" ] && [ -n "$BUILD_FROM_IMAGE" ]; then
         */phpfpm-nginx)     deps="with-nginx" ;;
         */roadrunner)       deps="with-roadrunner" ;;
         */frankenphp)       deps="with-f8p" ;;
-        */laravel)          deps="app-laravel" ;;
-        */symfony)          deps="app-symfony" ;;
-        */wordpress)        deps="app-wordpress" ;;
+        *)  # a webapp image that another webapp is built from
+            [ -d "$BASE_DIR/src/webapps/${BUILD_FROM_IMAGE##*/}" ] && deps="app-${BUILD_FROM_IMAGE##*/}"
+            ;;
     esac
 
     if [ -n "$deps" ]; then
@@ -69,7 +68,7 @@ fi
 
 {
     if [ "$SKIP_SQUASH" = "1" ]; then
-        command="docker buildx build --squash -f $BUILD_DOCKERFILE $BUILD_CONTEXT"
+        command="docker buildx build -f $BUILD_DOCKERFILE $BUILD_CONTEXT"
     else
         command="$SQUASH_SCRIPT $BUILD_DOCKERFILE"
     fi
@@ -78,8 +77,7 @@ fi
     echo "-------------------------------------------------"
     echo "📦 $BUILD_DATE Build: $BUILD_TAG"
     $command --tag "$BUILD_TAG" \
-		--provenance=true --sbom=true \
-		--attest type=sbom \
+        --provenance=true --sbom=true \
         --platform  "linux/${PLATFORM:-$(uname -m)}" \
         --build-arg DEBUG=$BUILD_DEBUG \
         --build-arg BUILD_DATE=$BUILD_DATE \

@@ -9,12 +9,6 @@
 
 BASE_DIR="$(git rev-parse --show-toplevel)"
 
-if [ "$1" = "clean" ] || [ "$1" = "clear" ]; then
-    docker system prune -af --volumes
-    clear
-    shift
-fi
-
 compose_exec() {
     docker compose -f "$BASE_DIR/tests/docker-compose.yml" "$@"
 }
