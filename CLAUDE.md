@@ -66,6 +66,7 @@ Utilities inside the image: `pkg-add` and `pkg-del` (install and remove packages
 - After each change, suggest a one-line commit message in English, with the type that matches semver: `feat:` is a minor bump, `fix:` is a patch bump, and a breaking change uses `!` (for example `feat!:`) for a major bump. `refactor:` `docs:` `test:` `chore:` do not bump the version. Do not commit unless the user asks.
 - Edit the code directly in the working tree of the current branch. Do not write changes to `_OUTPUTS/` first. This overrides the global rule that sends all output there.
 - `_OUTPUTS/` is a local scratch folder, ignored by git. Do not commit it.
+- Indent and format every file you create or edit, and match the surrounding file. Dockerfiles: one command per `RUN` line chained with `&&`, continuation lines indented 4 spaces, deeper arguments 4 more. Shell: 4 spaces. YAML: 2 spaces. No tabs.
 - Do not touch `.env`, secrets, `.secrets` or `build/.secrets.example`.
 
 ## Security backports for EOL PHP
