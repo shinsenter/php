@@ -6,14 +6,14 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-if ! is-true "$ENABLE_SSH" && ! is-true "$ENABLE_SSHD"; then s6-service sshd disable; exit 0; fi
-debug-echo -d "\$ENABLE_SSH is set to true. Container will try starting sshd service."
+if ! is-true "$ENABLE_SSHD"; then s6-service sshd disable; exit 0; fi
+debug-echo -d "\$ENABLE_SSHD is set to true. Container will try starting sshd service."
 
 # install openssh-server if sshd not found
 if ! has-cmd sshd; then
     pkg-add openssh-server
     s6-service sshd longrun '#!/usr/bin/env bash
-if is-true "$ENABLE_SSH" || is-true "$ENABLE_SSHD"; then
+if is-true "$ENABLE_SSHD"; then
     exec 2>&1
     exec /usr/sbin/sshd -D $(is-debug && echo -d) -f "/run/sshd_env.conf" $SSHD_EXTRA_OPTIONS
 else

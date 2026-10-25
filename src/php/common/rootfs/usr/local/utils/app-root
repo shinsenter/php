@@ -1,13 +1,6 @@
 #!/usr/bin/env sh
 target="$DOCUMENT_ROOT"
 
-# falls back to old $APACHE_DOCUMENT_ROOT or $NGINX_DOCUMENT_ROOT if it is set
-if [ -n "$APACHE_DOCUMENT_ROOT" ]; then
-    target="$APACHE_DOCUMENT_ROOT"
-elif [ -n "$NGINX_DOCUMENT_ROOT" ]; then
-    target="$NGINX_DOCUMENT_ROOT"
-fi
-
 # check if the document root is an existing absolute path
 case "$target" in
     /*) [ -d "$target" ] && { realpath -mqs "$target"; exit 0; } ;;
