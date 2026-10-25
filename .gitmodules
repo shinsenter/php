@@ -1,3 +1,6 @@
 [submodule "build/docker-squash"]
 	path = build/docker-squash
 	url = https://github.com/shinsenter/docker-squash.git
+[submodule ".dockerfile-x/upstream"]
+	path = .dockerfile-x/upstream
+	url = https://github.com/devthefuture-org/dockerfile-x.git

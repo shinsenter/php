@@ -1,0 +1,5 @@
+# Go modules to raise before building (module@version, one per line).
+# Modules that a given source tree does not depend on are skipped.
+golang.org/x/crypto@v0.52.0
+golang.org/x/net@v0.60.0
+google.golang.org/grpc@v1.79.3

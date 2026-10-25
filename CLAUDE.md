@@ -40,6 +40,7 @@ PHP and FPM settings change through environment variables, so changing them does
 | `build/helpers.sh` | Shared functions (version compare, logging, version lookups) |
 | `src/php/common/patches/distro-patch` | Moves old Debian releases to `archive.debian.org` and drops the expired DST Root CA X3 on Debian 8 and 9, Alpine 3.7 and 3.8. Run by `os-common.dockerfile` before the package install and by `php-backports.dockerfile` on Debian. Mounted into `RUN` steps from the build context, not part of any image |
 | `src/php/common/patches/middleware-patch` | Alpine only: builds the latest stable brotli and curl when the package is older. `os-common.dockerfile` runs it after the package upgrade, which would overwrite the result. `build/config.sh` adds both versions to the fingerprint. Mounted the same way as `distro-patch` |
+| `.dockerfile-x/` | Build of the `shinsenter/dockerfile-x` image: `upstream/` submodule, `patches/go-deps` (Go modules raised for CVEs), `build.dockerfile` (single-layer image), `build.sh` |
 | `tests/` | `build-test.sh`, `compose-test.sh`, `matrix-test.sh`, `sbom-test.sh`; logs in `tests/logs/` |
 | `.github/workflows/` | `build-all`, `watch-updates` and the templates (`template-stack` > `template-php` > `template-common`, the four-level limit). A new server image is one entry in the `servers` list in `build-all`. Images rebuild only when their inputs change |
 | `.github/actions/` | Composite actions shared by the templates (`registry-login`) |
@@ -110,6 +111,28 @@ Only data changes. Do not edit `php-backports.dockerfile`, `base-php.dockerfile`
 - Not covered: 7.0 to 7.2 (no upstream patch, risky to port) and 5.6.
 - Debian bullseye, buster and stretch switch to `archive.debian.org` in the build, and stay that way in the image so later layers can install packages.
 - Alpine with PHP below 8.0 needs the gnu-libiconv `iconv.h` symlink. The script does it.
+
+## dockerfile-x image
+
+`.dockerfile-x/` builds `shinsenter/dockerfile-x`, the `# syntax` frontend that the other dockerfiles use. It builds from the `upstream/` submodule, not from `devthefuture/dockerfile-x`, so that vulnerable Go modules can be raised.
+
+### Rules
+
+- Keep the image minimal and single layer. `build.dockerfile` stays a plain multi-stage file. `build.sh` squashes each platform with `build/docker-squash/docker-squash.sh` (docker-squash handles one platform per run, so `build.sh` loops over platforms, pushes by digest and joins them with `imagetools create`). Do not use `buildx --squash`.
+- Clean files in the final `RUN` of `build.dockerfile` while still root. The pre-squash cleanup of docker-squash runs as the image `USER` and cannot remove root-owned files.
+- Runtime packages stay at `ca-certificates` and `git`. No `bash`, no ECR credential helper, no docs, man pages or apk cache. Add a package only when the frontend or the CLI needs it, and say why in the commit.
+- Keep multi-platform: `linux/amd64` and `linux/arm64/v8`. No arch-specific branches beyond `TARGETARCH`.
+- Do not edit files inside `upstream/`. Changes go in `patches/`. Moving the pin means `git -C .dockerfile-x/upstream checkout <tag>`, then updating `org.opencontainers.image.version` in `build.dockerfile`.
+- Fix a CVE in a Go module by raising its version in `patches/go-deps`, using the fix version that Docker Scout reports. `bump-go-deps.sh` skips modules that a source tree does not use. Do not pin fix versions you have not seen in a Scout report.
+- Fix an Alpine package CVE through `apk upgrade` in the final stage, not by pinning package versions.
+- Name the file `build.dockerfile`. `.gitignore` excludes `**/Dockerfile`.
+- Keep the author header in `build.dockerfile`, `build.sh` and `patches/*.sh`.
+
+### Verify
+
+- Without a build: `sh -n .dockerfile-x/patches/bump-go-deps.sh`, `bash -n .dockerfile-x/build.sh`, `git submodule status`.
+- With a build (ask first, see Working rules): run `.dockerfile-x/build.sh`, then `docker scout cves shinsenter/dockerfile-x:latest --only-severity critical,high`. The goal is no CRITICAL and a lower HIGH count than before. Report the numbers from the real output only.
+- Known residual risk: the CLI is packed by `pkg` with Node 18, which is end of life. Its CVEs cannot be fixed by `apk` or `patches/go-deps`.
 
 ## Copyright and credit
 
