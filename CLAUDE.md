@@ -90,6 +90,7 @@ Offline tests live in `tests/`. They need no Docker and no build, so run them yo
 - `_OUTPUTS/` is a local scratch folder, ignored by git. Do not commit it.
 - Indent and format every file you create or edit, and match the surrounding file. Dockerfiles: one command per `RUN` line chained with `&&`, continuation lines indented 4 spaces, deeper arguments 4 more. Shell: 4 spaces. YAML: 2 spaces. No tabs.
 - Do not touch `.env`, secrets, `.secrets` or `build/.secrets.example`.
+- When the user asks to fix a bug reported by a user (a GitHub issue), also record it in `KNOWN_ISSUES.md` in the same change. Add the entry under the release that will ship the fix, or under `Open` until the fix is merged. Each entry has the issue link, the symptom, the cause (or "not recorded"), and the fix. Do not write commit hashes, because a squash merge changes them. Read the issue and its comments first, and do not guess a cause.
 
 ## Security backports for EOL PHP
 

@@ -268,20 +268,20 @@ These Docker images include additional environment variables for fine-tuning con
 | `DEBUG` or `DEBUG_MODE`            | Not set          | Enables verbose logging when set to `1`. | `1` |
 | `TZ`                               | `UTC`            | Sets the container’s default timezone. See the [full list of timezones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). | `Asia/Tokyo` |
 | `DISABLE_AUTORUN_SCRIPTS`          | Not set          | Disables all autorun scripts when set to `1`. | `1` |
-| `DISABLE_AUTORUN_FIX_OWNER_GROUP`  | Not set          | Disables automatic correction of ownership for the application directory when set to `1`. | `1` |
+| `DISABLE_AUTORUN_FIX_OWNER_GROUP`  | Not set          | When set to `1`, no command changes the owner of files in `APP_PATH` or `DOCUMENT_ROOT`: no ownership fix, no owner on created directories, and no UID/GID migration there. The UID and GID change from `APP_UID` and `APP_GID` still runs for the rest of the image and never touches mount points, sockets or devices. | `1` |
 | `DISABLE_GREETING`                 | Not set          | Suppresses the startup greeting message when set to `1`. | `1` |
 | `ENABLE_SSHD`                      | Not set          | When set to `1`, enable the SSH server inside the container. | `1` |
-| `SSHD_AUTHORIZED_KEYS`             | Not set          | Public SSH keys (one per line) that will be added to the container's `~/.ssh/authorized_keys` for authentication. | `ssh-rsa XXXX...` |
+| `SSHD_AUTHORIZED_KEYS`             | Not set          | Public SSH keys (one per line) for authentication. When not empty, they replace the content of the container's `~/.ssh/authorized_keys` at every start. | `ssh-rsa XXXX...` |
 | `ENABLE_CRONTAB`                   | Not set          | Enables the Crontab service when set to `1`, loading job definitions from `$CRONTAB_DIR` (default: `/etc/crontab.d`). | `1` |
-| `ENABLE_CRONTAB_DEBUG`             | Not set          | When set to `1`, adds a debug cron job that runs every minute and prints environment variables visible to cron. | `1` |
+| `ENABLE_CRONTAB_DEBUG`             | Not set          | When set to `1`, adds a debug cron job that runs every minute and prints environment variables visible to cron. When set, it takes priority over `DEBUG`, so `0` removes the job even if `DEBUG=1`. | `1` |
 | `CRONTAB_DIR`                      | `/etc/crontab.d` | Directory where cron job definitions are located. Jobs run as the user specified in `$APP_USER`. | `/path/for/crontab/schedules` |
 | `CRONTAB_HOME`                     | `$APP_PATH`      | Sets the `$HOME` directory used during cron job execution. | `/path/for/crontab` |
 | `CRONTAB_MAILTO`                   | Not set          | Email address to receive cron job output. | `admin@example.com` |
 | `CRONTAB_PATH`                     | `$PATH`          | Defines the executable search path used by cron jobs. | `/path/for/crontab/bin` |
 | `CRONTAB_SETTINGS`                 | Not set          | Allows defining cron jobs directly in `docker-compose.yml`, making it easy to manage scheduled tasks inside the container. | `0 0 * * * echo "Hello new day!"` |
-| `CRONTAB_SHELL`                    | `/bin/sh`        | Specifies the default shell used for cron job execution. | `/bin/bash` |
+| `CRONTAB_SHELL`                    | `/bin/bash`      | Specifies the default shell used for cron job execution. | `/bin/bash` |
 | `CRONTAB_TZ`                       | `$TZ`            | Sets the timezone for cron jobs. See the [full list of timezones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). | `Asia/Tokyo` |
-| `SUPERVISOR_PHP_COMMAND`           | Not set          | Overrides the container’s default entrypoint with a custom PHP command to serve the application.  | `php -S localhost:80 index.php` |
+| `SUPERVISOR_PHP_COMMAND`           | Not set          | Overrides the container’s default entrypoint with a custom PHP command to serve the application. Quotes group arguments that contain spaces.  | `php -S localhost:80 index.php` |
 
 
 ## Contributing
