@@ -78,12 +78,12 @@ EOF
     fi
 fi
 
-# load the custom-*.conf files last, so they win over the generated settings
-# and the tuning. The other files in the directory are not loaded on purpose,
-# they would override the PHP_* variables.
+# load the custom-*.conf files last, so they win over the generated settings and the tuning.
+# the other files in the directory are not loaded on purpose, they would override the PHP_* variables.
 if has-cmd php-fpm && has-cmd php-envvars; then
     config_file="$(php-envvars fpm_conf)"
-    if [ -f "$config_file" ]; then
+    set -- "$(dirname "$config_file")"/custom-*.conf
+    if [ -f "$config_file" ] && [ -e "$1" ]; then
         printf '\n; Custom pool files\ninclude=%s/custom-*.conf\n' "$(dirname "$config_file")" >> "$config_file"
     fi
 fi

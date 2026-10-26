@@ -171,7 +171,7 @@ The images start PHP-FPM with one generated file, `/usr/local/etc/php-fpm.d/zz-d
 3. `ENABLE_TUNING_FPM=1`, which sets the `pm.*` values from the CPU limit of the container. A `PHP_PM*` variable you pass replaces the matching tuned value, and the other tuned values follow `PHP_PM_MAX_CHILDREN`.
 4. The defaults of the image.
 
-`PHP_*` variables are the main way to configure PHP-FPM. If you prefer a file, mount it with a name that matches `custom-*.conf`. A pool with the same name as the generated one (`[www]`) is merged, and your values win:
+`PHP_*` variables are the main way to configure PHP-FPM. If you prefer a file, mount it with a name that matches `custom-*.conf`. The container looks for these files when it starts, so restart it after you add one. A pool with the same name as the generated one (`[www]`) is merged, and your values win:
 
 ```shell
 docker run -v ./custom-www.conf:/usr/local/etc/php-fpm.d/custom-www.conf:ro \
