@@ -162,6 +162,29 @@ services:
 
 > 💡 Tip: Run `php-envvars` in the container to get a full list of default `$PHP_*` environment variables.
 
+### Customizing PHP-FPM <!-- omit from toc -->
+
+The images start PHP-FPM with one generated file, `/usr/local/etc/php-fpm.d/zz-docker-shinsenter-php.conf`. They do not load `php-fpm.conf` or the other files in `/usr/local/etc/php-fpm.d/`, so a mounted `www.conf` has no effect. These sources apply, and the first one wins:
+
+1. `custom-*.conf` files in `/usr/local/etc/php-fpm.d/`.
+2. `PHP_*` variables you pass to the container.
+3. `ENABLE_TUNING_FPM=1`, which sets the `pm.*` values from the CPU limit of the container. A `PHP_PM*` variable you pass replaces the matching tuned value, and the other tuned values follow `PHP_PM_MAX_CHILDREN`.
+4. The defaults of the image.
+
+`PHP_*` variables are the main way to configure PHP-FPM. If you prefer a file, mount it with a name that matches `custom-*.conf`. A pool with the same name as the generated one (`[www]`) is merged, and your values win:
+
+```shell
+docker run -v ./custom-www.conf:/usr/local/etc/php-fpm.d/custom-www.conf:ro \
+    shinsenter/php:8.3-fpm
+```
+
+```ini
+[www]
+pm = static
+pm.max_children = 10
+slowlog = /var/log/php-slow.log
+```
+
 
 ## Pre-installed PHP Extensions
 
@@ -478,7 +501,7 @@ Additional environment variables for fine-tuning container behavior:
 | `CRONTAB_SHELL`                    | `/bin/bash`      | Default shell for cron jobs.                                                 | `/bin/bash` |
 | `CRONTAB_TZ`                       | `$TZ`            | Timezone used for cron jobs.                                                 | `Asia/Tokyo` |
 | `SUPERVISOR_PHP_COMMAND`           | Not set          | Override the PHP command used by supervisor. Quotes group arguments that contain spaces. | `php -S localhost:80 index.php` |
-| `ENABLE_TUNING_FPM`                | Not enabled      | Enable automatic tuning of PHP-FPM settings when set to `1`. Uses the CPU limit of the container, or the host CPU count if there is none. | `1`     |
+| `ENABLE_TUNING_FPM`                | Not enabled      | Enable automatic tuning of PHP-FPM settings when set to `1`. Uses the CPU limit of the container, or the host CPU count if there is none. A `PHP_PM*` variable you pass replaces the tuned value. See [Customizing PHP-FPM](#customizing-php-fpm). | `1`     |
 | `ENABLE_TUNING_MPM`                | Not enabled      | Enable automatic tuning of Apache MPM settings when set to `1`. Uses the CPU and memory limits of the container, or the host values if there are none. | `1`     |
 
 

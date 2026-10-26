@@ -10,7 +10,7 @@ All notable changes to this project will be documented in this file.
 - Decide the Alpine support for a PHP version in one place (`has_alpine_php` in `build/versions.sh`).
 - Fix the startup ownership migration changing the owner of mounted files such as `/var/run/docker.sock` when `APP_GID` matches an existing group (#442).
 - Add `KNOWN_ISSUES.md` with the user-reported bugs fixed in 5.x and 6.x.
-- Fix environment variables that did not match the docs: `DISABLE_AUTORUN_FIX_OWNER_GROUP`, `ENABLE_TUNING_FPM`, `ENABLE_TUNING_MPM`, `ENABLE_CRONTAB_DEBUG`, `COMPOSER_OPTIMIZE_AUTOLOADER`, `SUPERVISOR_PHP_COMMAND`, `SMTP_FROM`, `ENABLE_SSHD`, `DEFAULT_USER` and `DEFAULT_GROUP`. Update the docs of `INITIAL_PROJECT`, `DISABLE_AUTORUN_COPYING_SOURCE`, `CRONTAB_SHELL` and `SSHD_AUTHORIZED_KEYS`.
+- Fix environment variables that did not match the docs: `DISABLE_AUTORUN_FIX_OWNER_GROUP`, `ENABLE_TUNING_FPM`, `ENABLE_TUNING_MPM`, `ENABLE_CRONTAB_DEBUG`, `COMPOSER_OPTIMIZE_AUTOLOADER`, `SUPERVISOR_PHP_COMMAND`, `SMTP_FROM`, `ENABLE_SSHD`, `DEFAULT_USER` and `DEFAULT_GROUP`. Load `custom-*.conf` files from `/usr/local/etc/php-fpm.d/` after the generated PHP-FPM settings, and let `PHP_PM*` variables win over `ENABLE_TUNING_FPM`. Update the docs of `INITIAL_PROJECT`, `DISABLE_AUTORUN_COPYING_SOURCE`, `CRONTAB_SHELL` and `SSHD_AUTHORIZED_KEYS`.
 
 
 ## [5.9.0] - 2026-10-25
