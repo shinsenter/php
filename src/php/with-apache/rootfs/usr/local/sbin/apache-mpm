@@ -9,8 +9,8 @@
 config="${1:-/etc/apache2/mods-enabled/mpm_tuning.conf}"
 profile="${2:-balanced}"
 
-cpu_cores=$(grep -c ^processor /proc/cpuinfo)
-ram_mb=$(free -m | awk '/^Mem:/{print $2}')
+cpu_cores=$(container-limits cpu)
+ram_mb=$(container-limits ram)
 
 if ! has-cmd apache2; then
     echo "Error: apache2 command not found" >&2

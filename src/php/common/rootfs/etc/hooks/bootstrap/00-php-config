@@ -28,8 +28,7 @@ if has-cmd php-fpm && is-true "$ENABLE_TUNING_FPM"; then
     sed -i '/^; Tuning PM/,$d' "$config_file" 2>/dev/null || true
 
     # gather system info
-    cpu_cores=$(grep -c ^processor /proc/cpuinfo)
-    ram_mb=$(free -m | awk '/^Mem:/{print $2}')
+    cpu_cores=$(container-limits cpu)
 
     # read scaling from env or fallback to defaults
     scale_children="${PHPFPM_SCALE_CHILDREN:-5}"

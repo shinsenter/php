@@ -20,11 +20,21 @@ fi
 # start building msmtp options
 options=""
 
+# look for -t and -f among the options only, not in addresses
+has_t=0
+has_f=0
+for arg; do
+    case "$arg" in
+        -t|--read-recipients) has_t=1 ;;
+        -f*|--from|--from=*)  has_f=1 ;;
+    esac
+done
+
 # add -t if not already present
-echo "$@" | grep -qF -- '-t' || options="$options -t"
+[ "$has_t" -eq 1 ] || options="$options -t"
 
 # set envelope from
-echo "$@" | grep -qF -- '-f' || {
+[ "$has_f" -eq 1 ] || {
     if [ -n "$SMTP_FROM" ]; then
         options="$options --from=$SMTP_FROM"
     else

@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+# keep-owner <path>
+# Exit 0 when DISABLE_AUTORUN_FIX_OWNER_GROUP is on and the path is inside the
+# application directory or the document root, so no command may change its owner.
+
+is-true "$DISABLE_AUTORUN_FIX_OWNER_GROUP" || exit 1
+
+path="$(realpath -mqs "$1")/"
+for base in "$(app-path)" "$(app-root)"; do
+    base="$(realpath -mqs "$base")"
+    case "$path" in "$base"/*) exit 0 ;; esac
+done
+exit 1

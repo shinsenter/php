@@ -8,6 +8,10 @@
 ################################################################################
 for dir; do
     if [ -n "$dir" ] && [ ! -d "$dir" ]; then
+        if keep-owner "$dir"; then
+            mkdir -p -m 0755 -- "$dir"
+            continue
+        fi
         install -d -v \
             -g "$APP_GROUP" \
             -o "$APP_USER" \

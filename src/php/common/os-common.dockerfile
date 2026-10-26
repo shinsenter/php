@@ -83,8 +83,8 @@ env-default DEBUG '0'
 
 # Set default user and group
 env-default '# Default user and group'
-env-default DEFAULT_GROUP "$APP_USER"
-env-default DEFAULT_USER  "$APP_GROUP"
+env-default DEFAULT_GROUP "$APP_GROUP"
+env-default DEFAULT_USER  "$APP_USER"
 
 # Add default user and group
 ownership "$APP_GROUP" "$APP_GID" "$APP_USER" "$APP_UID"

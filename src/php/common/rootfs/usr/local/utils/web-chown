@@ -20,12 +20,14 @@ if [ "$#" -eq 0 ]; then
 fi
 
 for target; do
-    if [ -n "$target" ] && [ -e "$target" ]; then
+    if keep-owner "$target"; then
+        debug-echo "Keep ownership of $target."
+    elif [ -n "$target" ] && [ -e "$target" ]; then
         debug-echo "Fix ownership for $target."
         {
-            find "$target" -type f -exec chown "$APP_USER:$APP_GROUP" {} + &
-            find "$target" -type d -exec chown "$APP_USER:$APP_GROUP" {} + &
+            find "$target" -type f -exec chown -h "$APP_USER:$APP_GROUP" {} + &
+            find "$target" -type d -exec chown -h "$APP_USER:$APP_GROUP" {} + &
             wait
-        } 2>/dev/null || chown -R "$APP_USER:$APP_GROUP" "$target" 2>/dev/null || true
+        } 2>/dev/null || chown -hR "$APP_USER:$APP_GROUP" "$target" 2>/dev/null || true
     fi
 done

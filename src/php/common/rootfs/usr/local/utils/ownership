@@ -44,9 +44,14 @@ if getent group "$NEW_GROUP" >/dev/null 2>&1; then
     debug-echo "Group $NEW_GROUP exists, skipping creation."
     PREV_GID="$(getent group "$NEW_GROUP" | cut -d: -f3)"
     if [ "$NEW_GID" -ne "$PREV_GID" ]; then
-        CHANGE_GROUP=1
-        groupmod -g "$NEW_GID" "$NEW_GROUP" \
-            && debug-echo -s "Changed $NEW_GROUP GID: $PREV_GID → $NEW_GID"
+        if groupmod -g "$NEW_GID" "$NEW_GROUP"; then
+            CHANGE_GROUP=1
+            debug-echo -s "Changed $NEW_GROUP GID: $PREV_GID → $NEW_GID"
+        else
+            # the GID belongs to another group: keep the current one so no file is moved to it
+            debug-echo -w "Cannot change $NEW_GROUP GID to $NEW_GID, keeping $PREV_GID."
+            NEW_GID="$PREV_GID"
+        fi
     fi
 else
     CHANGE_GROUP=1
@@ -84,7 +89,16 @@ if [ "$CHANGE_GROUP" -eq 1 ] || [ "$CHANGE_USER" -eq 1 ]; then
     FINAL_UID=$(id -u "$NEW_USER")
     FINAL_GID=$(getent group "$NEW_GROUP" | cut -d: -f3)
     debug-echo -w "Updating file ownership: ${OLD_UID}:${OLD_GID} → ${FINAL_UID}:${FINAL_GID}"
-    find / -xdev \( -uid "$OLD_UID" -o -gid "$OLD_GID" \) \
+    # skip mount points (host sockets and volumes), devices and sockets
+    set --
+    if is-true "$DISABLE_AUTORUN_FIX_OWNER_GROUP"; then
+        set -- -path "$(app-path)" -o -path "$(app-root)" -o
+    fi
+    while read -r _ _ _ _ mount_point _; do
+        [ "$mount_point" != "/" ] && set -- "$@" -path "$mount_point" -o
+    done </proc/self/mountinfo 2>/dev/null
+    find / -xdev \( "$@" -path /proc -o -path /sys -o -path /dev \) -prune -o \
+        \( -uid "$OLD_UID" -o -gid "$OLD_GID" \) \( -type f -o -type d -o -type l \) \
         -exec chown -h "$FINAL_UID":"$FINAL_GID" {} \; 2>/dev/null
 fi
 

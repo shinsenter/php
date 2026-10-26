@@ -22,10 +22,14 @@ if ! is-true "$ENABLE_CRONTAB"; then
 else
     mkdir -p "$(dirname $CRONTAB)" $CRONTAB_DIR
 
-    if is-true "$ENABLE_CRONTAB_DEBUG"; then
-        echo '*  *  *  *  *  echo -e "$(date) DEBUG: Crontab is running as $(whoami).\\n\\n$(env -0 | sort -dbfiz | tr '\''\\0'\'' '\''\\n'\'' | grep -vF '\''_='\'')" | tee /tmp/cron-debug.txt' >$CRONTAB_DIR/debug
+    # ENABLE_CRONTAB_DEBUG, when set, decides on its own. Otherwise DEBUG does.
+    \rm -f "$CRONTAB_DIR/.debug"
+    if [ -n "$ENABLE_CRONTAB_DEBUG" ]; then
+        if is-true "$ENABLE_CRONTAB_DEBUG"; then
+            echo '*  *  *  *  *  echo -e "$(date) DEBUG: Crontab is running as $(whoami).\\n\\n$(env -0 | sort -dbfiz | tr '\''\\0'\'' '\''\\n'\'' | grep -vF '\''_='\'')" | tee /tmp/cron-debug.txt' >$CRONTAB_DIR/.debug
+        fi
     elif is-debug; then
-        echo '*  *  *  *  *  echo -e "$(date) DEBUG: Crontab is running as $(whoami).\\nTotal passed environment variables: $(env | wc -l)" | tee /tmp/cron-debug.txt' >$CRONTAB_DIR/debug
+        echo '*  *  *  *  *  echo -e "$(date) DEBUG: Crontab is running as $(whoami).\\nTotal passed environment variables: $(env | wc -l)" | tee /tmp/cron-debug.txt' >$CRONTAB_DIR/.debug
     fi
 
     cat <<CRONTAB >$CRONTAB

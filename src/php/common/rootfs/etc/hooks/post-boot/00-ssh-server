@@ -10,8 +10,11 @@ if ! is-true "$ENABLE_SSHD"; then s6-service sshd disable; exit 0; fi
 debug-echo -d "\$ENABLE_SSHD is set to true. Container will try starting sshd service."
 
 # install openssh-server if sshd not found
-if ! has-cmd sshd; then
-    pkg-add openssh-server
+has-cmd sshd || pkg-add openssh-server
+
+# add the service unless it exists, enabled or disabled
+s6_dir="${S6_RUNTIME_BUNDLEDIR:-/etc/s6-overlay/user-bundles.d}"
+if [ ! -d "$s6_dir/sshd" ] && [ ! -d "$s6_dir.disabled/sshd" ]; then
     s6-service sshd longrun '#!/usr/bin/env bash
 if is-true "$ENABLE_SSHD"; then
     exec 2>&1
