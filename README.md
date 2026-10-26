@@ -463,7 +463,7 @@ Additional environment variables for fine-tuning container behavior:
 | `DISABLE_AUTORUN_COPYING_SOURCE`   | Not set          | Do not copy the files of `/source/` into the app directory when `1`. The copy runs only when the app directory is empty. | `1`     |
 | `DISABLE_AUTORUN_COMPOSER_INSTALL` | Not set          | Skip running `composer install` during startup when set to `1`. It does not stop `COMPOSER_OPTIMIZE_AUTOLOADER`. | `1`     |
 | `DISABLE_AUTORUN_GENERATING_INDEX` | Not set          | Do not generate `index.php` when set to `1`.                                 | `1`     |
-| `DISABLE_AUTORUN_FIX_OWNER_GROUP`  | Not set          | When `1`, no command changes the owner of files in `APP_PATH` or `DOCUMENT_ROOT`: no ownership fix, no owner on created directories, and no UID/GID migration there. | `1`     |
+| `DISABLE_AUTORUN_FIX_OWNER_GROUP`  | Not set          | When `1`, no command changes the owner of files in `APP_PATH` or `DOCUMENT_ROOT`: no ownership fix, no owner on created directories, and no UID/GID migration there. Files and directories the container creates there, such as a missing `DOCUMENT_ROOT` or `index.php`, belong to root, so set the owner of paths that `APP_USER` must write to yourself. | `1`     |
 | `DISABLE_GREETING`                 | Not set          | Suppress the startup greeting with `1`.                                      | `1`     |
 | `COMPOSER_OPTIMIZE_AUTOLOADER`     | Not set          | When `1`, run `composer dumpautoload --optimize --no-cache` at startup if `composer.lock` and the `vendor` directory exist. | `1`     |
 | `ENABLE_SSHD`                      | Not set          | Enable SSH server inside the container when `1`.                             | `1`     |
