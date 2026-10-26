@@ -40,7 +40,8 @@ PHP and FPM settings change through environment variables, so changing them does
 | `build/helpers.sh` | Shared functions (version compare, logging, version lookups) |
 | `src/php/common/patches/distro-patch` | Moves old Debian releases to `archive.debian.org` and drops the expired DST Root CA X3 on Debian 8 and 9, Alpine 3.7 and 3.8. Run by `os-common.dockerfile` before the package install and by `php-backports.dockerfile` on Debian. Mounted into `RUN` steps from the build context, not part of any image |
 | `src/php/common/patches/middleware-patch` | Alpine only: builds the latest stable brotli and curl when the package is older. `os-common.dockerfile` runs it after the package upgrade, which would overwrite the result. `build/config.sh` adds both versions to the fingerprint. Mounted the same way as `distro-patch` |
-| `tests/` | `build-test.sh`, `compose-test.sh`, `matrix-test.sh`, `sbom-test.sh`; logs in `tests/logs/` |
+| `.dockerfile-x/` | Build of the `shinsenter/dockerfile-x` image: `upstream/` submodule, `patches/go-deps` (Go modules raised for CVEs), `build.dockerfile` (single-layer image), `build.sh` |
+| `tests/` | Offline tests (`run.sh` runs `lint.sh`, `test-versions.sh`, `test-backports.sh`, `test-config.sh`, with helpers in `lib.sh`). Docker tests: `build-test.sh`, `compose-test.sh`, `ownership-test.sh` (runs an existing image, does not build). `tools/`: `act-dryrun.sh`, `sbom.sh`. Logs in `tests/logs/` |
 | `.github/workflows/` | `build-all`, `watch-updates` and the templates (`template-stack` > `template-php` > `template-common`, the four-level limit). A new server image is one entry in the `servers` list in `build-all`. Images rebuild only when their inputs change |
 | `.github/actions/` | Composite actions shared by the templates (`registry-login`) |
 
@@ -52,20 +53,44 @@ Utilities inside the image: `pkg-add` and `pkg-del` (install and remove packages
 
 - Trial build: `tests/build-test.sh <php-version> <variant> ...` (it also builds the images it depends on). Useful variables: `SKIP_SQUASH=1`, `BUILD_TAG_PREFIX`.
 - Checks that need no build: `sh -n`, `bash -n`, `git apply --check`, `git diff`.
+- Offline test suite (no Docker, no build): `tests/run.sh`. See Tests below.
 - `NGINX_VERSION` (`mainline` by default, `stable`, a number, or `os`) is resolved to a number by `build/config.sh` and passed as a build argument. A new Nginx release changes the fingerprint of the `with-nginx` images.
 - Each image has a fingerprint. `build/config.sh` adds a hash of its inputs, including `src/php-backports/php<X.Y>/`, to the cache key, so a changed patch triggers a rebuild.
+
+## Tests
+
+Offline tests live in `tests/`. They need no Docker and no build, so run them yourself after a change and report the real output.
+
+- Run all: `tests/run.sh`. Run one: `bash tests/test-versions.sh`. Each prints `<file>: N passed, M failed`, prints a `FAIL:` line per failed check and exits non-zero on failure.
+- Which test to run:
+
+| Changed | Run |
+|---|---|
+| Any shell script, hook or util | `lint.sh` |
+| `build/versions.sh`, `build/helpers.sh` | `test-versions.sh` |
+| `src/php-backports/` (patch, README) | `test-backports.sh` |
+| `build/config.sh` | `test-config.sh` |
+| Anything else in `build/`, or unsure | `run.sh` |
+
+- A failing check is a finding. Fix the cause or tell the user. Do not edit a test to make it pass, and do not edit a backport patch to satisfy a test without asking (it changes the fingerprint of every image of that version).
+- Add a test: create `tests/test-<topic>.sh` with the author header, `source "$(dirname "$0")/lib.sh"`, use `check`, `check_not`, `check_eq`, end with `finish`, then add the file to the list in `run.sh`. Keep it offline: no `docker`, no network.
+- `test-config.sh` runs only the paths of `build/config.sh` that end before any network call (Alpine on PHP below 7.1). Do not add cases that reach the registry or GitHub API.
+- Not covered, so still ask the user for a run: `patch -p1 --dry-run` on a source tree, image contents, runtime behavior of hooks and utils (`realpath -m` needs GNU, so `app-root` does not run on macOS). Use `tests/build-test.sh` and `tests/compose-test.sh` for those (see Working rules).
+- `tests/tools/` holds helpers (`act-dryrun.sh`, `sbom.sh`), not tests. `tests/logs/` is git-ignored output of `build-test.sh`.
 
 ## Working rules
 
 - Do not run build or compile commands on your own (`docker build`, `docker buildx`, `tests/build-test.sh`, `./configure`, `make`, building PHP from source). Ask first and give the reason and the command. Or the user runs it and asks for follow-up changes.
-- Allowed without asking: `sh -n`, `bash -n`, `git apply --check`, `grep`, `diff`.
+- Allowed without asking: `sh -n`, `bash -n`, `git apply --check`, `grep`, `diff`, `tests/run.sh` and the single `tests/*.sh` offline tests.
 - Do not report test results without a run or a log to back them.
 - Work on a `feature/*` branch or the current branch. Never commit or push to `main`.
 - Conventional Commits: `feat:` `fix:` `refactor:` `docs:` `test:` `chore:`.
 - After each change, suggest a one-line commit message in English, with the type that matches semver: `feat:` is a minor bump, `fix:` is a patch bump, and a breaking change uses `!` (for example `feat!:`) for a major bump. `refactor:` `docs:` `test:` `chore:` do not bump the version. Do not commit unless the user asks.
 - Edit the code directly in the working tree of the current branch. Do not write changes to `_OUTPUTS/` first. This overrides the global rule that sends all output there.
 - `_OUTPUTS/` is a local scratch folder, ignored by git. Do not commit it.
+- Indent and format every file you create or edit, and match the surrounding file. Dockerfiles: one command per `RUN` line chained with `&&`, continuation lines indented 4 spaces, deeper arguments 4 more. Shell: 4 spaces. YAML: 2 spaces. No tabs.
 - Do not touch `.env`, secrets, `.secrets` or `build/.secrets.example`.
+- When the user asks to fix a bug reported by a user (a GitHub issue), also record it in `KNOWN_ISSUES.md` in the same change. Add the entry under the release that will ship the fix, or under `Open` until the fix is merged. Each entry has the issue link, the symptom, the cause (or "not recorded"), and the fix. Do not write commit hashes, because a squash merge changes them. Read the issue and its comments first, and do not guess a cause.
 
 ## Security backports for EOL PHP
 
@@ -110,6 +135,28 @@ Only data changes. Do not edit `php-backports.dockerfile`, `base-php.dockerfile`
 - Not covered: 7.0 to 7.2 (no upstream patch, risky to port) and 5.6.
 - Debian bullseye, buster and stretch switch to `archive.debian.org` in the build, and stay that way in the image so later layers can install packages.
 - Alpine with PHP below 8.0 needs the gnu-libiconv `iconv.h` symlink. The script does it.
+
+## dockerfile-x image
+
+`.dockerfile-x/` builds `shinsenter/dockerfile-x`, the `# syntax` frontend that the other dockerfiles use. It builds from the `upstream/` submodule, not from `devthefuture/dockerfile-x`, so that vulnerable Go modules can be raised.
+
+### Rules
+
+- Keep the image minimal and single layer. `build.dockerfile` stays a plain multi-stage file. `build.sh` squashes each platform with `build/docker-squash/docker-squash.sh` (docker-squash handles one platform per run, so `build.sh` loops over platforms, pushes by digest and joins them with `imagetools create`). Do not use `buildx --squash`.
+- Clean files in the final `RUN` of `build.dockerfile` while still root. The pre-squash cleanup of docker-squash runs as the image `USER` and cannot remove root-owned files.
+- Runtime packages stay at `ca-certificates` and `git`. No `bash`, no ECR credential helper, no docs, man pages or apk cache. Add a package only when the frontend or the CLI needs it, and say why in the commit.
+- Keep multi-platform: `linux/amd64` and `linux/arm64/v8`. No arch-specific branches beyond `TARGETARCH`.
+- Do not edit files inside `upstream/`. Changes go in `patches/`. Moving the pin means `git -C .dockerfile-x/upstream checkout <tag>`, then updating `org.opencontainers.image.version` in `build.dockerfile`.
+- Fix a CVE in a Go module by raising its version in `patches/go-deps`, using the fix version that Docker Scout reports. `bump-go-deps.sh` skips modules that a source tree does not use. Do not pin fix versions you have not seen in a Scout report.
+- Fix an Alpine package CVE through `apk upgrade` in the final stage, not by pinning package versions.
+- Name the file `build.dockerfile`. `.gitignore` excludes `**/Dockerfile`.
+- Keep the author header in `build.dockerfile`, `build.sh` and `patches/*.sh`.
+
+### Verify
+
+- Without a build: `sh -n .dockerfile-x/patches/bump-go-deps.sh`, `bash -n .dockerfile-x/build.sh`, `git submodule status`.
+- With a build (ask first, see Working rules): run `.dockerfile-x/build.sh`, then `docker scout cves shinsenter/dockerfile-x:latest --only-severity critical,high`. The goal is no CRITICAL and a lower HIGH count than before. Report the numbers from the real output only.
+- Known residual risk: the CLI is packed by `pkg` with Node 18, which is end of life. Its CVEs cannot be fixed by `apk` or `patches/go-deps`.
 
 ## Copyright and credit
 

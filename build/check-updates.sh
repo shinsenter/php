@@ -42,8 +42,7 @@ trap 'rm -f "$jobs_file"' EXIT
 
 for version in "${versions[@]}"; do
     for os in debian alpine; do
-        # Alpine images do not exist for these versions
-        if [ "$os" = "alpine" ] && { [ "$version" = "5.6" ] || [ "$version" = "7.0" ]; }; then
+        if [ "$os" = "alpine" ] && ! has_alpine_php "$version"; then
             continue
         fi
 

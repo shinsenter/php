@@ -329,8 +329,8 @@ if [ "$ALLOW_RC" != "1" ]; then
         verlt "$LATEST_PHP" "$PHP_VERSION" && SKIP_BUILD=1
 fi
 
-# Skip build if the PHP version is earlier than 7.1 and the OS is Alpine
-if [ -n "$PHP_VERSION" ] && verlt "$PHP_VERSION" "7.1" && [ "$OS_BASE" = "alpine" ]; then
+# Skip build if there is no Alpine image for this PHP version
+if [ -n "$PHP_VERSION" ] && ! has_alpine_php "$PHP_VERSION" && [ "$OS_BASE" = "alpine" ]; then
     BUILD_DOCKERFILE=
     SKIP_BUILD=1
 fi

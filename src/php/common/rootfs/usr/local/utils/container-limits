@@ -1,0 +1,47 @@
+#!/usr/bin/env sh
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+# container-limits cpu|ram
+# Prints the CPU cores or the RAM (MB) this container can use: the cgroup limit
+# when there is one, otherwise the host value.
+
+case "$1" in
+cpu)
+    value=$(grep -c ^processor /proc/cpuinfo)
+    if [ -r /sys/fs/cgroup/cpu.max ]; then
+        read -r quota period </sys/fs/cgroup/cpu.max
+    elif [ -r /sys/fs/cgroup/cpu/cpu.cfs_quota_us ]; then
+        quota=$(cat /sys/fs/cgroup/cpu/cpu.cfs_quota_us)
+        period=$(cat /sys/fs/cgroup/cpu/cpu.cfs_period_us)
+    fi
+    case "$quota$period" in
+        ''|*[!0-9]*) ;;
+        *) limit=$(( (quota + period - 1) / period ))
+           [ "$limit" -ge 1 ] && [ "$limit" -lt "$value" ] && value=$limit ;;
+    esac
+    ;;
+ram)
+    value=$(free -m | awk '/^Mem:/{print $2}')
+    for file in /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory/memory.limit_in_bytes; do
+        [ -r "$file" ] || continue
+        bytes=$(cat "$file")
+        case "$bytes" in
+            ''|*[!0-9]*) ;;
+            *) limit=$(( bytes / 1048576 ))
+               [ "$limit" -ge 1 ] && [ "$limit" -lt "$value" ] && value=$limit ;;
+        esac
+        break
+    done
+    ;;
+*)
+    echo "Usage: ${0##*/} cpu|ram" >&2
+    exit 1
+    ;;
+esac
+
+echo "${value:-1}"

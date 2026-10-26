@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 
 
+## [6.0.0] - Unreleased
+- Remove the sources of the unmaintained images `zz-cakephp4`, `zz-crater`, `zz-fuelphp`, `zz-hypervel`, `zz-laminas`, `zz-phpixie` and `zz-slim`. Published tags stay on Docker Hub and are not updated.
+- Remove the `update-readme` workflow, which only served those images.
+- Breaking: remove the legacy variables `APACHE_DOCUMENT_ROOT`, `NGINX_DOCUMENT_ROOT` (use `DOCUMENT_ROOT`) and `ENABLE_SSH` (use `ENABLE_SSHD`).
+- Decide the Alpine support for a PHP version in one place (`has_alpine_php` in `build/versions.sh`).
+- Fix the startup ownership migration changing the owner of mounted files such as `/var/run/docker.sock` when `APP_GID` matches an existing group (#442).
+- Add `KNOWN_ISSUES.md` with the user-reported bugs fixed in 5.x and 6.x.
+- Fix environment variables that did not match the docs: `DISABLE_AUTORUN_FIX_OWNER_GROUP`, `ENABLE_TUNING_FPM`, `ENABLE_TUNING_MPM`, `ENABLE_CRONTAB_DEBUG`, `COMPOSER_OPTIMIZE_AUTOLOADER`, `SUPERVISOR_PHP_COMMAND`, `SMTP_FROM`, `ENABLE_SSHD`, `DEFAULT_USER` and `DEFAULT_GROUP`. Load `custom-*.conf` files from `/usr/local/etc/php-fpm.d/` after the generated PHP-FPM settings, and let `PHP_PM*` variables win over `ENABLE_TUNING_FPM`. Update the docs of `INITIAL_PROJECT`, `DISABLE_AUTORUN_COPYING_SOURCE`, `CRONTAB_SHELL` and `SSHD_AUTHORIZED_KEYS`.
+
+
 ## [5.9.0] - 2026-10-25
 - Add security backports for end-of-life PHP 7.3, 7.4, 8.0 and 8.1.
 - Build the latest stable brotli and curl on Alpine when the package is outdated.

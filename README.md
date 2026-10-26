@@ -162,6 +162,29 @@ services:
 
 > 💡 Tip: Run `php-envvars` in the container to get a full list of default `$PHP_*` environment variables.
 
+### Customizing PHP-FPM <!-- omit from toc -->
+
+The images start PHP-FPM with one generated file, `/usr/local/etc/php-fpm.d/zz-docker-shinsenter-php.conf`. They do not load `php-fpm.conf` or the other files in `/usr/local/etc/php-fpm.d/`, so a mounted `www.conf` has no effect. These sources apply, and the first one wins:
+
+1. `custom-*.conf` files in `/usr/local/etc/php-fpm.d/`.
+2. `PHP_*` variables you pass to the container.
+3. `ENABLE_TUNING_FPM=1`, which sets the `pm.*` values from the CPU limit of the container. A `PHP_PM*` variable you pass replaces the matching tuned value, and the other tuned values follow `PHP_PM_MAX_CHILDREN`.
+4. The defaults of the image.
+
+`PHP_*` variables are the main way to configure PHP-FPM. If you prefer a file, mount it with a name that matches `custom-*.conf`. The container looks for these files when it starts, so restart it after you add one. A pool with the same name as the generated one (`[www]`) is merged, and your values win:
+
+```shell
+docker run -v ./custom-www.conf:/usr/local/etc/php-fpm.d/custom-www.conf:ro \
+    shinsenter/php:8.3-fpm
+```
+
+```ini
+[www]
+pm = static
+pm.max_children = 10
+slowlog = /var/log/php-slow.log
+```
+
 
 ## Pre-installed PHP Extensions
 
@@ -456,29 +479,30 @@ Additional environment variables for fine-tuning container behavior:
 | `DEBUG` or `DEBUG_MODE`            | Not set          | Enable verbose logging when set to `1`.                                      | `1`     |
 | `TZ`                               | `UTC`            | Set the container's timezone. See the list of timezones.                     | `Asia/Tokyo` |
 | `ALLOW_RUNTIME_PHP_ENVVARS`        | Not set          | Allow `$PHP_*` variables to override PHP configuration at runtime.           | `1`     |
-| `INITIAL_PROJECT`                  | Not set          | Composer project to create if the app directory is empty. If this is a URL ending in `.zip`, `.tar.gz`, or similar, the archive will be downloaded and extracted. | `https://example.com/project.zip` |
-| `INITIAL_PROJECT_GIT_OPTIONS`      | Not set          | Options passed to `git clone` when `INITIAL_PROJECT` is a `.git` URL.        | `-b develop` |
+| `INITIAL_PROJECT`                  | Not set          | Used only when the app directory is empty. A URL starting with `http` and ending in `.zip` or `.tar.gz` is downloaded and extracted. A URL ending in `.git` is cloned. A value like `vendor/package` is created with `composer create-project`. Any other value runs the `create-project` hook. | `https://example.com/project.zip` |
+| `INITIAL_PROJECT_GIT_OPTIONS`      | Not set          | Options passed to `git clone` when `INITIAL_PROJECT` is a `http*.git` URL.   | `-b develop` |
 | `DISABLE_AUTORUN_SCRIPTS`          | Not set          | Set to `1` to disable autorun scripts.                                       | `1`     |
-| `DISABLE_AUTORUN_CREATING_PROJECT` | Not set          | Prevent automatic project creation when set to `1`.                          | `1`     |
-| `DISABLE_AUTORUN_COMPOSER_INSTALL` | Not set          | Skip running `composer install` during startup when set to `1`.              | `1`     |
+| `DISABLE_AUTORUN_CREATING_PROJECT` | Not set          | Do not create a project from `INITIAL_PROJECT` when `1`. It does not stop copying `/source/`. | `1`     |
+| `DISABLE_AUTORUN_COPYING_SOURCE`   | Not set          | Do not copy the files of `/source/` into the app directory when `1`. The copy runs only when the app directory is empty. | `1`     |
+| `DISABLE_AUTORUN_COMPOSER_INSTALL` | Not set          | Skip running `composer install` during startup when set to `1`. It does not stop `COMPOSER_OPTIMIZE_AUTOLOADER`. | `1`     |
 | `DISABLE_AUTORUN_GENERATING_INDEX` | Not set          | Do not generate `index.php` when set to `1`.                                 | `1`     |
-| `DISABLE_AUTORUN_FIX_OWNER_GROUP`  | Not set          | Do not automatically fix ownership of the application directory when `1`.    | `1`     |
+| `DISABLE_AUTORUN_FIX_OWNER_GROUP`  | Not set          | When `1`, no command changes the owner of files in `APP_PATH` or `DOCUMENT_ROOT`: no ownership fix, no owner on created directories, and no UID/GID migration there. Files and directories the container creates there, such as a missing `DOCUMENT_ROOT` or `index.php`, belong to root, so set the owner of paths that `APP_USER` must write to yourself. | `1`     |
 | `DISABLE_GREETING`                 | Not set          | Suppress the startup greeting with `1`.                                      | `1`     |
-| `COMPOSER_OPTIMIZE_AUTOLOADER`     | Not set          | When `1`, run Composer with `--optimize-autoloader` for production installs. | `1`     |
+| `COMPOSER_OPTIMIZE_AUTOLOADER`     | Not set          | When `1`, run `composer dumpautoload --optimize --no-cache` at startup if `composer.lock` and the `vendor` directory exist. | `1`     |
 | `ENABLE_SSHD`                      | Not set          | Enable SSH server inside the container when `1`.                             | `1`     |
-| `SSHD_AUTHORIZED_KEYS`             | Not set          | Public SSH keys to add to `~/.ssh/authorized_keys` (one per line).           | `ssh-rsa AAAA...` |
+| `SSHD_AUTHORIZED_KEYS`             | Not set          | Public SSH keys (one per line). When not empty, they replace the content of `~/.ssh/authorized_keys` at every start. | `ssh-rsa AAAA...` |
 | `ENABLE_CRONTAB`                   | Not set          | Enable Crontab service when `1`. Jobs are loaded from `$CRONTAB_DIR`.        | `1`     |
-| `ENABLE_CRONTAB_DEBUG`             | Not set          | Adds a debug cron job that runs every minute when `1`.                       | `1`     |
+| `ENABLE_CRONTAB_DEBUG`             | Not set          | Adds a debug cron job that runs every minute when `1`. When set, it takes priority over `DEBUG`, so `0` removes the job even if `DEBUG=1`. | `1`     |
 | `CRONTAB_DIR`                      | `/etc/crontab.d` | Directory for crontab definitions. Jobs run as `$APP_USER`.                  | `/path/for/crontab/schedules` |
 | `CRONTAB_HOME`                     | `$APP_PATH`      | Home directory for cron jobs.                                                | `/path/for/crontab` |
 | `CRONTAB_MAILTO`                   | Not set          | Email address to receive cron output.                                        | `admin@example.com` |
 | `CRONTAB_PATH`                     | `$PATH`          | Executable search path used by cron jobs.                                    | `/path/for/crontab/bin` |
 | `CRONTAB_SETTINGS`                 | Not set          | Define cron jobs directly via environment variable.                          | `0 0 * * * echo "..."` |
-| `CRONTAB_SHELL`                    | `/bin/sh`        | Default shell for cron jobs.                                                 | `/bin/bash` |
+| `CRONTAB_SHELL`                    | `/bin/bash`      | Default shell for cron jobs.                                                 | `/bin/bash` |
 | `CRONTAB_TZ`                       | `$TZ`            | Timezone used for cron jobs.                                                 | `Asia/Tokyo` |
-| `SUPERVISOR_PHP_COMMAND`           | Not set          | Override the PHP command used by supervisor.                                 | `php -S localhost:80 index.php` |
-| `ENABLE_TUNING_FPM`                | Not enabled      | Enable automatic tuning of PHP-FPM settings when set to `1`.                 | `1`     |
-| `ENABLE_TUNING_MPM`                | Not enabled      | Enable automatic tuning of Apache MPM settings when set to `1`.              | `1`     |
+| `SUPERVISOR_PHP_COMMAND`           | Not set          | Override the PHP command used by supervisor. Quotes group arguments that contain spaces. | `php -S localhost:80 index.php` |
+| `ENABLE_TUNING_FPM`                | Not enabled      | Enable automatic tuning of PHP-FPM settings when set to `1`. Uses the CPU limit of the container, or the host CPU count if there is none. A `PHP_PM*` variable you pass replaces the tuned value. See [Customizing PHP-FPM](#customizing-php-fpm). | `1`     |
+| `ENABLE_TUNING_MPM`                | Not enabled      | Enable automatic tuning of Apache MPM settings when set to `1`. Uses the CPU and memory limits of the container, or the host values if there are none. | `1`     |
 
 
 ## Supported Platforms

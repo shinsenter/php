@@ -176,8 +176,10 @@ if ! is-true "$DISABLE_AUTORUN_COMPOSER_INSTALL" && [ "$just_created" -ne 1 ]; t
 fi
 
 ################################################################################
-# optional autoload optimization
-if is-true "${COMPOSER_OPTIMIZE_AUTOLOADER:-}"; then
+# optional autoload optimization, only for an installed project with a lock file
+if is-true "${COMPOSER_OPTIMIZE_AUTOLOADER:-}" \
+    && [ -f "$APP_PATH/composer.lock" ] \
+    && [ -e "$vendor_dir/composer/ClassLoader.php" ]; then
     allow_plugins
     composer_exec dumpautoload --optimize --no-cache
     web-chown fix "$vendor_dir"

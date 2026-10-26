@@ -13,7 +13,12 @@ debug-echo -d "Starting container ${DOCKER_NAME:-$(hostname)}."
 # detect user-defined entrypoint
 if [ -n "$SUPERVISOR_PHP_COMMAND" ]; then
     debug-echo "Start container with user-defined command: $SUPERVISOR_PHP_COMMAND"
-    set -- $SUPERVISOR_PHP_COMMAND
+    # xargs reads quotes without running anything inside them
+    user_command=()
+    while IFS= read -r -d '' arg; do user_command+=("$arg"); done \
+        < <(printf '%s' "$SUPERVISOR_PHP_COMMAND" | xargs printf '%s\0' 2>/dev/null)
+    if [ "${#user_command[@]}" -eq 0 ]; then read -ra user_command <<<"$SUPERVISOR_PHP_COMMAND"; fi
+    set -- "${user_command[@]}"
 fi
 
 ################################################################################
