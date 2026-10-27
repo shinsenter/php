@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 
 
-## [6.0.0] - Unreleased
+## [6.0.0] - 2026-10-27
 - Remove the sources of the unmaintained images `zz-cakephp4`, `zz-crater`, `zz-fuelphp`, `zz-hypervel`, `zz-laminas`, `zz-phpixie` and `zz-slim`. Published tags stay on Docker Hub and are not updated.
 - Remove the `update-readme` workflow, which only served those images.
 - Breaking: remove the legacy variables `APACHE_DOCUMENT_ROOT`, `NGINX_DOCUMENT_ROOT` (use `DOCUMENT_ROOT`) and `ENABLE_SSH` (use `ENABLE_SSHD`).

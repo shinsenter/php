@@ -35,7 +35,7 @@ Our images support PHP versions from 5.6 up to 8.6 (RC), with variants for CLI, 
 
 ## Introduction
 
-[![shinsenter/php](https://repository-images.githubusercontent.com/458053748/5a05c8e4-1c00-440c-98f1-2cd4548bbaa2)](https://docker.shin.company/php)
+[![shinsenter/php](https://repository-images.githubusercontent.com/458053748/58e1c323-ab0b-46d2-94d2-f5472908e7f5)](https://docker.shin.company/php)
 
 These images are based on the [official PHP Docker images](https://hub.docker.com/_/php) and make it easy to change PHP and PHP-FPM settings using environment variables. No image rebuild required.
 
