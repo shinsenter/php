@@ -33,10 +33,12 @@ on:
     types: [released]
   push:
     branches: [main]
+    # Markdown files are not part of the fingerprint. A change there skips the
+    # build and only refreshes the Docker Hub README.
     paths:
       - 'src/**'
       - 'build/**'
-      - '!src/**.md'
+      - 'README.md'
   pull_request:
     types: [opened]
     paths:

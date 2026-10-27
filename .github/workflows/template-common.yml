@@ -369,8 +369,26 @@ jobs:
             exit 1
           fi
 
+  ##############################################################################
+
+  readme:
+    name: ${{ inputs.php_version }} ${{ inputs.app_name }} ${{ inputs.server }} ${{ inputs.os }} (readme)
+    needs: [prepare, build, merge]
+    # Runs even when build and merge are skipped (SKIP_BUILD), but not after a failure
+    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.build.result != 'failure' && needs.merge.result != 'failure' }}
+    runs-on: ubuntu-26.04-arm
+    steps:
       -
-        if: ${{ success() && env.BUILD_README != '' && env.UPDATE_README == '1' }}
+        uses: actions/checkout@v7
+
+      -
+        name: Load build config
+        env:
+          BUILD_ENV: ${{ needs.prepare.outputs.env }}
+        run: printf '%s\n' "$BUILD_ENV" >> "$GITHUB_ENV"
+
+      -
+        if: ${{ env.BUILD_README != '' && env.UPDATE_README == '1' }}
         name: Update ${{ env.BUILD_NAME }}/README.md
         uses: peter-evans/dockerhub-description@v5
         continue-on-error: true
