@@ -20,6 +20,7 @@ case "$1" in
     debug-echo -l "  Example: ${0##*/} greeting oneshot \"echo 'hello world!'\""
     debug-echo -l "  Example: ${0##*/} apache longrun /path/to/apache/start.sh"
     debug-echo -l "  Example: ${0##*/} apache needs php-fpm"
+    debug-echo -l "  Example: ${0##*/} nginx down-signal SIGQUIT"
     exit 1
     ;;
 esac
@@ -91,7 +92,7 @@ requires|needs)
     create "${deps_path}/$1"
     exit $?
     ;;
-down|finish)
+down|finish|down-signal)
     create "${svc_path}/${type}" "$@"
     exit $?
     ;;

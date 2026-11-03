@@ -7,8 +7,8 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 # container-limits cpu|ram
-# Prints the CPU cores or the RAM (MB) this container can use: the cgroup limit
-# when there is one, otherwise the host value.
+# Prints the CPU cores or the RAM (MB) this container can use:
+# the cgroup limit when there is one, otherwise the host value.
 
 case "$1" in
 cpu)

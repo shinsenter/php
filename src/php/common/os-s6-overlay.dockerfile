@@ -62,10 +62,10 @@ if [ -n "$S6_VERSION" ] && ! has-s6; then
         env-default S6_CMD_WAIT_FOR_SERVICES_MAXTIME 0
         env-default S6_KEEP_ENV 1
         env-default S6_KILL_FINISH_MAXTIME 3000
-        env-default S6_KILL_GRACETIME 3000
+        env-default S6_KILL_GRACETIME 25000
         env-default S6_LOGGING 0
         env-default S6_READ_ONLY_ROOT 0
-        env-default S6_SERVICES_GRACETIME 3000
+        env-default S6_SERVICES_GRACETIME 25000
         env-default S6_STAGE2_HOOK 'hook s6-boot'
         env-default S6_VERBOSITY '$(is-debug && echo 2 || echo 0)'
         env-default S6_VERSION "$S6_VERSION"
@@ -89,7 +89,7 @@ if [ -n "$S6_VERSION" ] && ! has-s6; then
     if has-cmd s6-service; then
         s6-service \~verify-server oneshot '#!/usr/bin/env bash
 is-true "$DISABLE_ONLIVE_HOOK" && exit 0
-wait-for "${HEALTH_CHECK_URL:-http://127.0.0.1}" hook onlive || true
+WAIT_FOR_CODES="$ONLIVE_WAIT_CODES" wait-for "${HEALTH_CHECK_URL:-http://127.0.0.1}" hook onlive || true
 '
     fi
 

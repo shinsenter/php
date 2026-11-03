@@ -32,6 +32,10 @@ env-default APACHE_MIN_SPARE_THREADS '10'
 env-default APACHE_START_SERVERS '2'
 env-default APACHE_THREADS_PER_CHILD '25'
 
+# port of the health checks (not exposed) and the URL that the startup check uses
+env-default HEALTH_PORT '2020'
+env-default HEALTH_CHECK_URL 'http://127.0.0.1:${HEALTH_PORT}/healthz'
+
 # disable PHP-FPM logging to stdout
 env-default PHP_LISTEN '/run/php-fpm.sock'
 env-default PHP_ACCESS_LOG '/var/log/php-fpm.log'
@@ -77,7 +81,7 @@ a2enmod \
 # fix ProxyFCGIBackendType directive for Apache 2.4
 if apache-has-error 'ProxyFCGIBackendType'; then
     echo 'Disable ProxyFCGIBackendType because it is not supported in this Apache version'
-    sed -i 's/ProxyFCGIBackendType/#ProxyFCGIBackendType/g' $CONF_FILE
+    sed -i 's/ProxyFCGIBackendType/#ProxyFCGIBackendType/g; s/ProxyFCGISetEnvIf/#ProxyFCGISetEnvIf/g' $CONF_FILE /etc/apache2/sites-enabled/01-health.conf
 fi
 
 # create s6 services
@@ -89,6 +93,9 @@ if [ -f /etc/apache2/envvars ]; then source /etc/apache2/envvars; fi
 exec wait-for "$(s6-service apache depends php-fpm && echo $PHP_LISTEN)" \
     apache2 -E "$(log-path stderr)" -DFOREGROUND $(is-debug && echo '-X')
 '
+    # SIGWINCH is the graceful stop of Apache: it finishes the running requests before it exits
+    s6-service apache down-signal SIGWINCH
+    s6-service shutdown-delay requires apache
 fi
 
 EOF

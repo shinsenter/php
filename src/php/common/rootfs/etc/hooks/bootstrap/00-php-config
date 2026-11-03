@@ -82,8 +82,10 @@ EOF
     fi
 fi
 
-# load the custom-*.conf files last, so they win over the generated settings and the tuning.
-# the other files in the directory are not loaded on purpose, they would override the PHP_* variables.
+# load the custom-*.conf files last,
+# so they win over the generated settings and the tuning.
+# the other files in the directory are not loaded on purpose,
+# they would override the PHP_* variables.
 if has-cmd php-fpm && has-cmd php-envvars; then
     config_file="$(php-envvars fpm_conf)"
     set -- "$(dirname "$config_file")"/custom-*.conf

@@ -278,6 +278,8 @@ exec in-app php-fpm --nodaemonize \
     -c "$(php-envvars php_conf)" \
     -y "$(php-envvars fpm_conf)" \
     -d clear_env=no'
+    # SIGQUIT lets PHP-FPM finish the running requests before it exits
+    s6-service php-fpm down-signal SIGQUIT
 fi
 
 EOF

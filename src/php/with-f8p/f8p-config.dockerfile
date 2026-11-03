@@ -25,6 +25,10 @@ env-default CADDY_SERVER_EXTRA_DIRECTIVES   ''
 env-default CADDY_LOG_LEVEL                 '$(is-debug && echo DEBUG || echo ERROR)'
 env-default FRANKENPHP_CONFIG               ''
 
+# port of the health checks (not exposed) and the URL that the startup check uses
+env-default HEALTH_PORT                     '2020'
+env-default HEALTH_CHECK_URL                'http://127.0.0.1:${HEALTH_PORT}/healthz'
+
 if [ -f /etc/caddy/Caddyfile ]; then
     frankenphp fmt --overwrite /etc/caddy/Caddyfile
 fi
@@ -37,6 +41,7 @@ exec in-app frankenphp run \
     --config /etc/caddy/Caddyfile \
     --adapter caddyfile
 '
+    s6-service shutdown-delay requires frankenphp
 fi
 
 EOF

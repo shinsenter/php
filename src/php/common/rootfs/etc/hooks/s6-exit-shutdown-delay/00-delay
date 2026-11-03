@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+# s6 runs this when the container stops, before the servers stop.
+# The delay gives a load balancer time to remove this container from its pool.
+delay="${SHUTDOWN_DELAY:-0}"
+
+if [ "$delay" -gt 0 ] 2>/dev/null; then
+    debug-echo -i "Wait ${delay}s before stopping the servers."
+    sleep "$delay"
+fi

@@ -6,18 +6,21 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-# Build Nginx $NGINX_VERSION from https://nginx.org with the configure flags of
-# the OS package. It only compiles into /usr/src/nginx and installs nothing:
-# with-nginx/nginx-install.dockerfile runs "make install" when this script
-# succeeds, so a failure leaves the OS package untouched.
+# Build Nginx $NGINX_VERSION from https://nginx.org
+# with the configure flags of the OS package.
+# It only compiles into /usr/src/nginx and installs nothing.
+# with-nginx/nginx-install.dockerfile runs "make install" when this script succeeds,
+# so a failure leaves the OS package untouched.
 # Mounted into a RUN step from the build context, not part of any image.
 ################################################################################
 set -e
 echo "Build Nginx $NGINX_VERSION"
 
-# configure flags of the OS package, without the parts that cannot be rebuilt here:
-# third-party modules (--add-dynamic-module), modules that need extra libraries
-# (geoip, image_filter, perl, xslt) and options removed from Nginx
+# configure flags of the OS package,
+# without the parts that cannot be rebuilt here:
+# third-party modules (--add-dynamic-module),
+# modules that need extra libraries (geoip, image_filter, perl, xslt)
+# and options removed from Nginx
 eval "set -- $(nginx -V 2>&1 | sed -n 's/^configure arguments: //p')"
 [ "$#" -gt 0 ]
 n=$#
