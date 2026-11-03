@@ -24,6 +24,8 @@ env-default CADDY_EXTRA_CONFIG              ''
 env-default CADDY_SERVER_EXTRA_DIRECTIVES   ''
 env-default CADDY_LOG_LEVEL                 '$(is-debug && echo DEBUG || echo ERROR)'
 env-default FRANKENPHP_CONFIG               ''
+env-default CADDY_REFERRER_POLICY           'strict-origin-when-cross-origin'
+env-default CADDY_READ_HEADER_TIMEOUT       '10s'
 
 # port of the health checks (not exposed) and the URL that the startup check uses
 env-default HEALTH_PORT                     '2020'

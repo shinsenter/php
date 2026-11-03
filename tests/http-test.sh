@@ -144,6 +144,9 @@ for server in $SERVERS; do
     if [ "$server" != roadrunner ]; then
         [ "$dot" -ge 400 ] 2>/dev/null || problems="$problems .env=$dot(exposed)"
         curl -s -m 5 "http://127.0.0.1:$port/index.php" | grep -q '^ok ' || problems="$problems body"
+        echo "$hdr" | grep -qi '^x-content-type-options: *nosniff' || problems="$problems no-nosniff"
+        # The Server header may name the server but must not show a version
+        ! echo "$hdr" | grep -i '^server:' | grep -q '[0-9]' || problems="$problems server-version"
     fi
     if [ -n "$problems" ]; then
         echo "FAIL $server:$problems (see $log)"
