@@ -10,19 +10,11 @@ ADD --link ./with-apache/rootfs/ /
 ################################################################################
 RUN <<'EOF'
 echo 'Configure Apache2'
-[ -z "$DEBUG" ] || set -x; set -e
 
 env-default '# Environment variables for Apache2'
 env-default APACHE_LOG_LEVEL 'error'
 env-default APACHE_ERROR_LOG '$(log-path stderr)'
 env-default APACHE_ACCESS_LOG '$(log-path stdout)'
-env-default APACHE_ALLOW_OVERRIDE 'all'
-env-default APACHE_DEFLATE_LEVEL '5'
-env-default APACHE_DISABLE_MODULES ''
-env-default APACHE_EXPIRES 'access plus 1 month'
-env-default APACHE_KEEPALIVE_TIMEOUT '5'
-env-default APACHE_REFERRER_POLICY 'strict-origin-when-cross-origin'
-env-default APACHE_REQUEST_READ_TIMEOUT 'header=20-40,MinRate=500 body=20,MinRate=500'
 env-default APACHE_MAX_CONNECTIONS_PER_CHILD '0'
 env-default APACHE_MAX_REQUEST_WORKERS '150'
 env-default APACHE_MAX_SPARE_SERVERS '10'
@@ -31,10 +23,6 @@ env-default APACHE_MIN_SPARE_SERVERS '5'
 env-default APACHE_MIN_SPARE_THREADS '10'
 env-default APACHE_START_SERVERS '2'
 env-default APACHE_THREADS_PER_CHILD '25'
-
-# port of the health checks (not exposed) and the URL that the startup check uses
-env-default HEALTH_PORT '2020'
-env-default HEALTH_CHECK_URL 'http://127.0.0.1:${HEALTH_PORT}/healthz'
 
 # disable PHP-FPM logging to stdout
 env-default PHP_LISTEN '/run/php-fpm.sock'
@@ -72,16 +60,16 @@ mkdir -p /etc/apache2 \
     /usr/logs
 
 # configure default modules
-a2dismod ado auth_digest autoindex cache cgi cgid dav dbd include info mime_magic mpm_prefork php userdir 2>&1 || true
+a2dismod ado auth_digest autoindex cgi dav dbd include info mpm_prefork php reqtimeout userdir 2>&1 || true
 a2enmod \
     access_compat alias auth_basic authn_core authn_file authz_core authz_host \
-    deflate dir env expires filter headers http2 log_config mime \
-    mpm_event negotiation proxy proxy_fcgi remoteip reqtimeout rewrite setenvif ssl status unixd 2>&1 || true
+    cache cgid deflate dir env expires filter headers http2 log_config mime mime_magic \
+    mpm_event negotiation proxy proxy_fcgi remoteip rewrite setenvif ssl status unixd 2>&1 || true
 
 # fix ProxyFCGIBackendType directive for Apache 2.4
 if apache-has-error 'ProxyFCGIBackendType'; then
     echo 'Disable ProxyFCGIBackendType because it is not supported in this Apache version'
-    sed -i 's/ProxyFCGIBackendType/#ProxyFCGIBackendType/g; s/ProxyFCGISetEnvIf/#ProxyFCGISetEnvIf/g' $CONF_FILE /etc/apache2/sites-enabled/01-health.conf
+    sed -i 's/ProxyFCGIBackendType/#ProxyFCGIBackendType/g' $CONF_FILE
 fi
 
 # create s6 services
@@ -93,9 +81,6 @@ if [ -f /etc/apache2/envvars ]; then source /etc/apache2/envvars; fi
 exec wait-for "$(s6-service apache depends php-fpm && echo $PHP_LISTEN)" \
     apache2 -E "$(log-path stderr)" -DFOREGROUND $(is-debug && echo '-X')
 '
-    # SIGWINCH is the graceful stop of Apache: it finishes the running requests before it exits
-    s6-service apache down-signal SIGWINCH
-    s6-service shutdown-delay requires apache
 fi
 
 EOF

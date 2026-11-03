@@ -8,7 +8,7 @@
 # install crontab
 RUN <<'EOF'
 echo 'Configure base crontab'
-[ -z "$DEBUG" ] || set -x; set -e
+[ -z "$DEBUG" ] || set -ex && set -e
 
 env-default '# Environment variables for crontab'
 env-default ENABLE_CRONTAB   '0'

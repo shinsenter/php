@@ -20,7 +20,6 @@ case "$1" in
     debug-echo -l "  Example: ${0##*/} greeting oneshot \"echo 'hello world!'\""
     debug-echo -l "  Example: ${0##*/} apache longrun /path/to/apache/start.sh"
     debug-echo -l "  Example: ${0##*/} apache needs php-fpm"
-    debug-echo -l "  Example: ${0##*/} nginx down-signal SIGQUIT"
     exit 1
     ;;
 esac
@@ -35,7 +34,7 @@ EOF
 
 # create file with optional content
 create() {
-    path=$1; dir="${path%/*}"; shift
+    path=$1; dir=$(dirname "$path"); shift
     mkdir -p "$dir" && chmod 0755 "$dir"
     : >"$path" && chmod 0755 "$path"
     if [ "$#" -gt 0 ]; then
@@ -45,16 +44,7 @@ create() {
 
 ############################################################
 # set defaults
-if [ -n "$1" ]; then
-    # a name that is already a slug needs no tr and sed
-    case "$1" in
-        *[!a-z0-9.~-]*|-*|*-) name=$(slugify "$1") ;;
-        *) name="$1" ;;
-    esac
-    shift
-else
-    name="00-default"
-fi
+[ -n "$1" ] && name=$(slugify "$1") && shift || name="00-default"
 [ -n "$1" ] && type=$1 && shift || type="oneshot"
 
 # remove '~' from name for hook
@@ -92,7 +82,7 @@ requires|needs)
     create "${deps_path}/$1"
     exit $?
     ;;
-down|finish|down-signal)
+down|finish)
     create "${svc_path}/${type}" "$@"
     exit $?
     ;;

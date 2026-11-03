@@ -80,12 +80,7 @@ elif [ -n "$SMTP_USER" ] || [ -n "$SMTP_PASSWORD" ]; then
     options="$options --auth=on"
 fi
 
-# credentials must not travel in clear text, so TLS is on by default when they are set
-if [ -n "$SMTP_TLS" ]; then
-    options="$options --tls=$SMTP_TLS"
-elif [ -n "$SMTP_USER" ] || [ -n "$SMTP_PASSWORD" ]; then
-    options="$options --tls=on"
-fi
+[ -n "$SMTP_TLS" ] && options="$options --tls=$SMTP_TLS"
 
 # finally, invoke msmtp with built options
 exec msmtp $options "$@"

@@ -6,15 +6,15 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-# Alpine only: build the latest stable brotli and curl from source when the Alpine package is older.
-# Only the shared libraries and /usr/bin/curl are replaced, `apk` keeps the old version.
-# Other systems are left alone.
-# Run by common/os-common.dockerfile after the package upgrade,
-# which would overwrite these files (mounted from the build context, not part of any image).
-# The workflow puts the sources in /tmp/helper_cache
-# (see cache_middleware_sources in build/helpers.sh).
-# Without them (a local build) they are looked up and downloaded.
-# build/config.sh adds both versions to the image fingerprint, so a new release rebuilds the image.
+# Alpine only: build the latest stable brotli and curl from source when the Alpine
+# package is older. Only the shared libraries and /usr/bin/curl are replaced, `apk`
+# keeps the old version. Other systems are left alone.
+# Run by common/os-common.dockerfile after the package upgrade, which would
+# overwrite these files (mounted from the build context, not part of any image).
+# The workflow puts the sources in /tmp/helper_cache (see cache_middleware_sources
+# in build/helpers.sh). Without them (a local build) they are looked up and downloaded.
+# build/config.sh adds both versions to the image fingerprint, so a new release
+# rebuilds the image.
 
 [ -f /etc/os-release ] || exit 0
 . /etc/os-release

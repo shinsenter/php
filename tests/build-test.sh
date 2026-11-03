@@ -20,6 +20,7 @@ fi
 
 if [ "$1" = "clean" ] || [ "$1" = "clear" ]; then
     rm -rf "$LOG_DIR/"* /tmp/helper_cache
+    clear
     shift
 fi
 
@@ -34,6 +35,7 @@ slugify() {
 
 ################################################################################
 
+set -e
 eval $(BUILD_TAG_PREFIX=${BUILD_TAG_PREFIX:-local-} $BASE_DIR/build/config.sh "$@" 2>/dev/null | grep -vF 'BUILD_DESC')
 
 if [ "$SKIP_BUILD" = "1" ]; then
@@ -85,7 +87,6 @@ fi
         --build-arg BUILD_DESC=$BUILD_TAG \
         --build-arg BUILD_SOURCE_IMAGE=$BUILD_SOURCE_IMAGE \
         --build-arg BUILD_TAG_PREFIX=$BUILD_TAG_PREFIX \
-        --build-arg NGINX_VERSION=$NGINX_VERSION \
         --build-arg OS_BASE=$OS_BASE \
         --build-arg OS_VERSION=$OS_VERSION \
         --build-arg PHP_VARIANT=$PHP_VARIANT \

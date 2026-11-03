@@ -15,18 +15,6 @@ else
     \rm -f /etc/caddy/envvars || true
 fi
 
-# trust X-Forwarded-For and X-Forwarded-Proto from more proxies (CIDRs separated by comma or space)
-proxies=""
-for cidr in $(echo "$TRUSTED_PROXIES" | tr ',' ' '); do
-    case "$cidr" in
-        *[!0-9a-fA-F:./]*) debug-echo -w "Skip invalid TRUSTED_PROXIES entry: $cidr" ;;
-        *) proxies="$proxies $cidr" ;;
-    esac
-done
-if [ -n "$proxies" ]; then
-    echo "export CADDY_TRUSTED_PROXIES=\"$proxies\"" >>/etc/caddy/envvars || true
-fi
-
 # adjust max upload size, as init-nginx does
 mkdir -p /etc/caddy/Caddyfile.server.d
 BODY_CONF=/etc/caddy/Caddyfile.server.d/00-request-body.caddyfile

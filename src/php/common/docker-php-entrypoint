@@ -8,8 +8,7 @@
 ################################################################################
 if [ "$(id -u)" != "0" ]; then debug-echo -c "Please run this container as the root user!" >&2; exit 1; fi
 
-# the guard keeps $(hostname) from running when nothing is printed
-[ -z "$DEBUG$DEBUG_MODE" ] || debug-echo -d "Starting container ${DOCKER_NAME:-$(hostname)}."
+debug-echo -d "Starting container ${DOCKER_NAME:-$(hostname)}."
 
 # detect user-defined entrypoint
 if [ -n "$SUPERVISOR_PHP_COMMAND" ]; then
@@ -36,10 +35,8 @@ fi
 ownership "${APP_GROUP:-www-data}" "${APP_GID:-}" "${APP_USER:-www-data}" "${APP_UID:-}"
 
 # ensure application directory exist
-# same value as app-path, without its process
-app_path="${WEBHOME:-${APP_PATH:-/var/www/html}}"
-web-mkdir "/var/www" "$app_path"
-cd "$app_path"
+web-mkdir "/var/www" "$(app-path)"
+cd "$(app-path)"
 
 ################################################################################
 # container boot hooks
@@ -60,23 +57,9 @@ if [ -x "/init" ]; then set -- /init "$@"; fi
 # fallback empty entrypoint
 if [ "$#" -eq 0 ]; then set -- /bin/bash; fi
 
-# same check as has-s6, without its two processes
-s6_suffix=""
-if [ ! -x /command/s6-env ]; then s6_suffix="-non-s6"; fi
-
 # run bootstrap hooks to initialize the container
-hook bootstrap ${s6_suffix:+bootstrap$s6_suffix}
-
-# find the composer bin dirs once.
-# Every with-env after this reuses the value instead of starting composer twice,
-# and bootstrap may have created composer.json.
-if [ -z "$CACHED_COMPOSER_BIN_DIR" ] && command -v composer &>/dev/null; then
-    # || true: a composer error must not stop the container under set -e
-    CACHED_COMPOSER_BIN_DIR="$(composer -d "$app_path" config bin-dir --absolute 2>/dev/null || true):$(composer config bin-dir --global --absolute 2>/dev/null || true)"
-    export CACHED_COMPOSER_BIN_DIR
-fi
-
-hook post-boot ${s6_suffix:+post-boot$s6_suffix} \
+hook bootstrap $(! has-s6 && echo bootstrap-non-s6) \
+    post-boot  $(! has-s6 && echo post-boot-non-s6) \
     application server \
     migration \
     onready
@@ -85,8 +68,8 @@ hook post-boot ${s6_suffix:+post-boot$s6_suffix} \
 trap "hook onexit" SIGINT SIGTERM SIGKILL SIGQUIT EXIT
 
 # activity logging
-# the entrypoint runs as root and bash sets HOSTNAME: no whoami or hostname process
-echo "$(date) root@${HOSTNAME:-$(hostname)}:$PWD\$ ${0##*/} $@" >>/var/log/startup.log
+touch /var/log/startup.log
+echo "$(date) $(whoami)@$(hostname):$(pwd)\$ ${0##*/} $@" >>/var/log/startup.log
 
 # start the container
 exec in-app "$@"

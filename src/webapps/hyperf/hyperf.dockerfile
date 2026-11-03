@@ -34,7 +34,7 @@ RUN env-default APP_INDEX "bin/hyperf.php"
 ################################################################################
 RUN <<'EOF'
 echo 'Install PHP extensions'
-[ -z "$DEBUG" ] || set -x; set -e
+[ -z "$DEBUG" ] || set -ex && set -e
 
 phpaddmod protobuf swoole
 

@@ -6,26 +6,14 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-# apache-conf [#]<directive> <value>...
-# Sets the value of a directive in every *.conf file.
-# A leading # in the directive comments it out.
-
 conf_dir="/etc/apache2"
-
-if [ "$#" -lt 2 ]; then
-    echo "Usage: apache-conf [#]<directive> <value>..." >&2
-    exit 1
-fi
-
 disable="$( [ "${1:0:1}" = "#" ] && echo "# " || echo "" )"
-name="${1#\#}"; shift
-# escape the characters that sed treats as special in a replacement
-value="$(printf '%s' "$*" | sed 's/[\\&~]/\\&/g')"
+name="${1/#/}"; shift
 
 if [ -d "$conf_dir" ]; then
     find "$conf_dir" -type f -name "*.conf" -print0 | while IFS= read -r -d '' file; do
         if grep -qE "^\s*#*\s*${name}\s" "$file"; then
-            sed -i -E "s~^\s*#*\s*${name}\s+.*\$~${disable}${name} ${value}~g" "$file"
+            sed -i -E "s~^\s*#*\s*${name}\s+.*\$~${disable}${name} $*~g" "$file"
         fi
     done
 fi

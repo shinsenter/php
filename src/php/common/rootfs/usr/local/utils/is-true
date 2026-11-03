@@ -8,9 +8,8 @@
 ################################################################################
 if [ "$#" -eq 0 ]; then exit 1; fi
 
-# case-insensitive match in the shell itself, so no tr or subshell is spawned
-case "$1" in
-    ''|0|[Ff][Aa][Ll][Ss][Ee]|[Nn][Oo][Nn][Ee]|[Nn][Uu][Ll][Ll]|[Oo][Ff][Ff]|[Uu][Nn][Dd][Ee][Ff][Ii][Nn][Ee][Dd]|[Nn][Oo])
+case "$(echo "$1" | tr '[:upper:]' '[:lower:]')" in
+    ''|'false'|'none'|'null'|'off'|'undefined'|0|false|no)
         exit 1 ;;
     *)  exit 0 ;;
 esac

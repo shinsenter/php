@@ -1,11 +1,2 @@
 #!/usr/bin/env sh
-# Exit 0 when DEBUG_MODE or DEBUG is true.
-# Same values as is-true, checked in the shell itself because this runs on almost every log line.
-case "$DEBUG_MODE" in
-    ''|0|[Ff][Aa][Ll][Ss][Ee]|[Nn][Oo][Nn][Ee]|[Nn][Uu][Ll][Ll]|[Oo][Ff][Ff]|[Uu][Nn][Dd][Ee][Ff][Ii][Nn][Ee][Dd]|[Nn][Oo])
-        case "$DEBUG" in
-            ''|0|[Ff][Aa][Ll][Ss][Ee]|[Nn][Oo][Nn][Ee]|[Nn][Uu][Ll][Ll]|[Oo][Ff][Ff]|[Uu][Nn][Dd][Ee][Ff][Ii][Nn][Ee][Dd]|[Nn][Oo])
-                exit 1 ;;
-        esac ;;
-esac
-exit 0
+if is-true "$DEBUG_MODE" || is-true "$DEBUG"; then exit 0; else exit 1; fi

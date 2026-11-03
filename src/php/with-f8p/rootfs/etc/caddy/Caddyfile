@@ -3,18 +3,6 @@
 
 	{$CADDY_GLOBAL_OPTIONS}
 
-	# Let running requests finish on stop, within the s6 stop timeout
-	grace_period {$CADDY_GRACE_PERIOD:20s}
-
-	# Trust X-Forwarded-For and X-Forwarded-Proto from private networks and from TRUSTED_PROXIES
-	servers {
-		trusted_proxies static private_ranges {$CADDY_TRUSTED_PROXIES}
-		# Close connections that send their request headers too slowly
-		timeouts {
-			read_header {$CADDY_READ_HEADER_TIMEOUT:10s}
-		}
-	}
-
 	frankenphp {
 		# worker {$APP_ROOT}/index.php
 		{$FRANKENPHP_CONFIG}
@@ -32,31 +20,6 @@
 
 {$CADDY_EXTRA_CONFIG}
 
-# Health checks on their own port, so they answer for any Host header and without TLS
-http://:{$HEALTH_PORT:2020} {
-	respond /healthz "ok" 200
-	respond /readyz "ok" 200
-	respond 404
-}
-
-# Same headers as the nginx and apache images, and no server name in responses
-(security-headers) {
-	header {
-		X-Content-Type-Options nosniff
-		Referrer-Policy {$CADDY_REFERRER_POLICY:strict-origin-when-cross-origin}
-		-Server
-	}
-}
-
-# Hide dotfiles such as .env and .git, except .well-known, as the nginx and apache images do
-(deny-dotfiles) {
-	@dotfiles {
-		path_regexp (^|/)\.
-		not path /.well-known/*
-	}
-	respond @dotfiles 404
-}
-
 http://{$SERVER_NAME:localhost} {
 	root * {$APP_ROOT}
 	# Compressed SSE streams cost memory per subscriber and enable BREACH-style attacks.
@@ -65,8 +28,6 @@ http://{$SERVER_NAME:localhost} {
 
 	{$CADDY_SERVER_EXTRA_DIRECTIVES}
 	import Caddyfile.server.d/*.caddyfile
-	import deny-dotfiles
-	import security-headers
 
 	php_server
 }
@@ -81,8 +42,6 @@ http://{$SERVER_NAME:localhost} {
 
 	{$CADDY_SERVER_EXTRA_DIRECTIVES}
 	import Caddyfile.server.d/*.caddyfile
-	import deny-dotfiles
-	import security-headers
 
 	php_server
 }

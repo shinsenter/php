@@ -6,14 +6,13 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-if [ -z "$DISABLE_AUTORUN_FIX_OWNER_GROUP" ] || ! is-true "$DISABLE_AUTORUN_FIX_OWNER_GROUP"; then
+if ! is-true "$DISABLE_AUTORUN_FIX_OWNER_GROUP"; then
     index_path="$(app-index)"
     need_fixed=0
-    if { [ -n "$FIX_APP_PATH_PERMISSION" ] && is-true "$FIX_APP_PATH_PERMISSION"; } \
-        || { [ -n "$FIX_WEBHOME_PERMISSION" ] && is-true "$FIX_WEBHOME_PERMISSION"; }; then
+    if is-true "$FIX_APP_PATH_PERMISSION" || is-true "$FIX_WEBHOME_PERMISSION"; then
         need_fixed=1
     elif [ -f "$index_path" ]; then
-        owner="$(stat -c '%U:%G' "$index_path" 2>/dev/null || ls -ld "$index_path" | awk '{print $3 ":" $4}')"
+        owner="$(ls -ld "$index_path" | awk '{print $3 ":" $4}')"
         debug-echo "Verify ownership for the application path."
         debug-echo "Detected owner: $owner"
         debug-echo "Expected owner: $APP_USER:$APP_GROUP"

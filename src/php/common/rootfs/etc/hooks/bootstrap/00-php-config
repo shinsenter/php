@@ -38,11 +38,7 @@ if has-cmd php-fpm && is-true "$ENABLE_TUNING_FPM"; then
     max_requests="${PHPFPM_MAX_REQUESTS:-500}"
 
     # a value the user passed to the container wins: tuning only replaces the defaults
-    # read /proc/1/environ once and match in the shell: no tr or grep per call
-    nl='
-'
-    proc_env="$nl$(tr '\0' '\n' </proc/1/environ 2>/dev/null)$nl"
-    user_set() { case "$proc_env" in *"$nl$1="*) return 0 ;; esac; return 1; }
+    user_set() { tr '\0' '\n' </proc/1/environ 2>/dev/null | grep -q "^$1="; }
 
     # calculate values
     [ "$scale_children" -gt 0 ] 2>/dev/null || scale_children=1
@@ -83,8 +79,7 @@ EOF
 fi
 
 # load the custom-*.conf files last, so they win over the generated settings and the tuning.
-# the other files in the directory are not loaded on purpose,
-# they would override the PHP_* variables.
+# the other files in the directory are not loaded on purpose, they would override the PHP_* variables.
 if has-cmd php-fpm && has-cmd php-envvars; then
     config_file="$(php-envvars fpm_conf)"
     set -- "$(dirname "$config_file")"/custom-*.conf

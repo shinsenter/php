@@ -10,8 +10,8 @@ ARG S6_VERSION=""
 ARG S6_PATH=""
 
 ################################################################################
-RUN --mount=type=bind,source=./helper_cache,target=/tmp/helper_cache <<'EOF'
-[ -z "$DEBUG" ] || set -x; set -e
+RUN <<'EOF'
+[ -z "$DEBUG" ] || set -ex && set -e
 
 if [ -n "$S6_VERSION" ] && ! has-s6; then
     echo 'Configure s6-overlay'
@@ -43,13 +43,7 @@ if [ -n "$S6_VERSION" ] && ! has-s6; then
         local url="$1"
         local path="${2:-$S6_PATH}/"
         if [ ! -e "$path" ]; then mkdir -p "$path"; fi
-        # the workflow puts the archives in /tmp/helper_cache
-        local cached="/tmp/helper_cache/s6-$S6_VERSION-${url##*/}"
-        if [ -f "$cached" ]; then
-            tar Jxp -C "$path" -f "$cached"
-        else
-            download "$url" | tar Jxp -C "$path"
-        fi
+        download "$url" | tar Jxp -C "$path"
     }
 
     # backup existing entrypoint
@@ -68,10 +62,10 @@ if [ -n "$S6_VERSION" ] && ! has-s6; then
         env-default S6_CMD_WAIT_FOR_SERVICES_MAXTIME 0
         env-default S6_KEEP_ENV 1
         env-default S6_KILL_FINISH_MAXTIME 3000
-        env-default S6_KILL_GRACETIME 25000
+        env-default S6_KILL_GRACETIME 3000
         env-default S6_LOGGING 0
         env-default S6_READ_ONLY_ROOT 0
-        env-default S6_SERVICES_GRACETIME 25000
+        env-default S6_SERVICES_GRACETIME 3000
         env-default S6_STAGE2_HOOK 'hook s6-boot'
         env-default S6_VERBOSITY '$(is-debug && echo 2 || echo 0)'
         env-default S6_VERSION "$S6_VERSION"
@@ -95,7 +89,7 @@ if [ -n "$S6_VERSION" ] && ! has-s6; then
     if has-cmd s6-service; then
         s6-service \~verify-server oneshot '#!/usr/bin/env bash
 is-true "$DISABLE_ONLIVE_HOOK" && exit 0
-WAIT_FOR_CODES="$ONLIVE_WAIT_CODES" wait-for "${HEALTH_CHECK_URL:-http://127.0.0.1}" hook onlive || true
+wait-for "${HEALTH_CHECK_URL:-http://127.0.0.1}" hook onlive || true
 '
     fi
 

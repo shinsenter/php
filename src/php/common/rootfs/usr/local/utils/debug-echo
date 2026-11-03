@@ -36,8 +36,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 ################################################################################
-# both variables empty is the usual case: skip the is-debug process
-if [ "$debug_only" -eq 1 ] && { [ -z "$DEBUG$DEBUG_MODE" ] || ! is-debug; }; then
+if [ "$debug_only" -eq 1 ] && ! is-debug; then
     exit 0
 fi
 

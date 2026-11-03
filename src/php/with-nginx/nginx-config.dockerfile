@@ -10,16 +10,11 @@ ADD --link ./with-nginx/rootfs/ /
 ################################################################################
 RUN <<'EOF'
 echo 'Configure Nginx'
-[ -z "$DEBUG" ] || set -x; set -e
 
 # add user to nginx group
 SUPP_GROUPS=$(id -Gn "$APP_USER" | tr ' ' ',')
 usermod -G $APP_GROUP,nginx nginx &>/dev/null || true
 usermod -G $SUPP_GROUPS,nginx $APP_USER &>/dev/null || true
-
-# port of the health checks (not exposed) and the URL that the startup check uses
-env-default HEALTH_PORT '2020'
-env-default HEALTH_CHECK_URL 'http://127.0.0.1:${HEALTH_PORT}/healthz'
 
 # disable PHP-FPM logging to stdout
 env-default PHP_LISTEN '/run/php-fpm.sock'
@@ -29,7 +24,6 @@ env-default PHP_ACCESS_LOG '/var/log/php-fpm.log'
 mkdir -p /etc/nginx \
     /etc/nginx/custom.d \
     /etc/nginx/modules-enabled \
-    /etc/nginx/proxies.d \
     /etc/nginx/sites-enabled \
     /var/tmp/nginx \
     /var/tmp/nginx/client_body \
@@ -48,9 +42,6 @@ NGINX_PID="${NGINX_PID:-/run/nginx.pid}"
 exec wait-for "$(s6-service nginx depends php-fpm && echo $PHP_LISTEN)" \
     nginx -g "daemon off;user $APP_USER $APP_GROUP;pid $NGINX_PID;"
 '
-    # SIGQUIT lets Nginx finish the running requests before it exits
-    s6-service nginx down-signal SIGQUIT
-    s6-service shutdown-delay requires nginx
 fi
 
 EOF

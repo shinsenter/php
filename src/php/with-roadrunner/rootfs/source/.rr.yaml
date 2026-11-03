@@ -7,9 +7,6 @@ server:
   command: "php index.php"
   relay: pipes
 
-status:
-  address: 0.0.0.0:2020
-
 http:
   address: 0.0.0.0:80
   middleware: [ "gzip", "static" ]

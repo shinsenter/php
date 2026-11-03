@@ -34,7 +34,7 @@ RUN env-default INITIAL_PROJECT "mautic/recommended-project"
 ################################################################################
 RUN <<'EOF'
 echo 'Install PHP extensions'
-[ -z "$DEBUG" ] || set -x; set -e
+[ -z "$DEBUG" ] || set -ex && set -e
 
 env-default PHP_MEMORY_LIMIT 1G
 

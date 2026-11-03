@@ -42,9 +42,9 @@ ENV PHP_UPLOAD_MAX_FILESIZE="32M"
 ARG WPCLI_URL=https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 ARG WPCLI_PATH=/usr/local/bin/wp-cli
 
-RUN --mount=type=bind,source=./helper_cache,target=/tmp/helper_cache <<'EOF'
+RUN <<'EOF'
 echo 'Install WP-CLI'
-[ -z "$DEBUG" ] || set -x; set -e
+[ -z "$DEBUG" ] || set -ex && set -e
 
 env-default "alias wp-cli='$WPCLI_PATH --allow-root'"
 env-default INITIAL_PROJECT     'manual'
@@ -56,13 +56,7 @@ env-default WP_DEBUG            '$(is-debug && echo 1 || echo 0)'
 env-default WP_DEBUG_LOG        '$(log-path stdout)'
 env-default WORDPRESS_DEBUG     '$(is-debug && echo 1 || echo 0)'
 
-# the workflow puts the file in /tmp/helper_cache
-if [ -f /tmp/helper_cache/wp-cli.phar ]; then
-    cp /tmp/helper_cache/wp-cli.phar "$WPCLI_PATH"
-else
-    php -r "copy('$WPCLI_URL', '$WPCLI_PATH');"
-fi
-chmod +xr "$WPCLI_PATH"
+php -r "copy('$WPCLI_URL', '$WPCLI_PATH');" && chmod +xr "$WPCLI_PATH"
 $WPCLI_PATH --allow-root --version
 
 web-cmd wp "$WPCLI_PATH --allow-root"

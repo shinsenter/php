@@ -7,8 +7,7 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 SYSTEM_ENV="/etc/environment"
-# what `ENV= env-path @` prints, without the process
-DEFAULT_ENV="/usr/local/etc/.env"
+DEFAULT_ENV="$(ENV= env-path @)"
 
 print_env() {
     # print environment variables sorted, excluding the special _= variable
@@ -45,7 +44,7 @@ else
 
     # execute the given command
     if [ "$#" -gt 0 ]; then
-        export APP_PATH="${WEBHOME:-${APP_PATH:-/var/www/html}}"
+        export APP_PATH="$(app-path)"
         export APP_ROOT="$(app-root)"
         exec "$@"
     fi

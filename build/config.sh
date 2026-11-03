@@ -195,7 +195,6 @@ LATEST_S6=
 
 PHP_VARIANT="${PHP_VARIANT:-}"
 S6_VERSION="${S6_VERSION:-latest}"
-NGINX_VERSION="${NGINX_VERSION:-mainline}"
 S6_PATH="${S6_PATH:-}"
 OS_BASE="${OS_BASE:-debian}"
 OS_VERSION="${OS_VERSION:-latest}"
@@ -367,11 +366,6 @@ if [ "$SKIP_BUILD" != "1" ]; then
         fi
         S6_VERSION="$LATEST_S6"
     fi
-
-    # Nginx, built from source in with-nginx (see src/php/with-nginx/nginx-build)
-    if [ "$APP" = "with-nginx" ]; then
-        NGINX_VERSION="$(resolve_nginx_version "$NGINX_VERSION")"
-    fi
 fi
 
 ################################################################################
@@ -539,14 +533,13 @@ fi
 # Build fingerprint
 ################################################################################
 # The fingerprint covers everything that changes the content of the image.
-# It is stored in the published image (index annotation), so the next run can skip the build
-# when nothing changed, without any Actions cache.
+# It is stored in the published image (index annotation), so the next run can
+# skip the build when nothing changed, without any Actions cache.
 if [ "$SKIP_BUILD" != "1" ]; then
     BUILD_CACHE_KEY="($APP@$BUILD_TAG)${BUILD_CACHE_KEY:+/}$BUILD_CACHE_KEY"
     BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(platform:$BUILD_PLATFORM)"
 
     [ -n "$S6_VERSION" ] && BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(s6@$S6_VERSION)"
-    [ "$APP" = "with-nginx" ] && BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(nginx@$NGINX_VERSION)"
 
     if [ -z "$PHP_VERSION" ] && [ -n "$OS_BASE" ]; then
         # base-os and base-s6 are built FROM the OS image
@@ -570,12 +563,6 @@ if [ "$SKIP_BUILD" != "1" ]; then
             BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(brotli:$BROTLI_TAG)/(curl:$CURL_TAG)"
         fi
 
-        # WP-CLI is downloaded at build time, the published checksum tells when it changes
-        if [ "$APP" = "app-wordpress" ]; then
-            WPCLI_SUM="$(fetch_with_cache "$WPCLI_URL.sha512" 2>/dev/null | head -c 12)"
-            BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(wpcli:${WPCLI_SUM:-unknown-$(date +%s)})"
-        fi
-
         # Servers are built FROM shinsenter/php, so their parent image matters too
         if [ "${APP#with-}" != "$APP" ]; then
             PARENT_TAG="${BUILD_TAG_PREFIX}${PHP_VERSION//-rc/}-${PHP_VARIANT}"
@@ -592,8 +579,8 @@ if [ "$SKIP_BUILD" != "1" ]; then
         | sort -dbfi | xargs -r shasum 2>/dev/null | shasum | head -c10)"
     BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(buildcontext:$context_hash)"
 
-    # The backports are copied into the context only when building,
-    # so they are hashed from their source (patches and the Dockerfile that applies them)
+    # The backports are copied into the context only when building, so they are
+    # hashed from their source (patches and the Dockerfile that applies them)
     if [ -n "$BACKPORT_DIR" ]; then
         backport_hash="$(path_hash "$BACKPORT_DIR" "$BASE_DIR/src/php/common/php-backports.dockerfile" | shasum | head -c10)"
         BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(backports@$backport_hash)"
@@ -671,7 +658,6 @@ github_env BUILD_TAGS "$BUILD_TAGS"
 github_env BUILD_TMP_NAME "$BUILD_TMP_NAME"
 github_env LATEST_PHP "$LATEST_PHP"
 github_env LATEST_S6 "$LATEST_S6"
-github_env NGINX_VERSION "$NGINX_VERSION"
 github_env OS_BASE "$OS_BASE"
 github_env OS_VERSION "$OS_VERSION"
 github_env PHP_VARIANT "$PHP_VARIANT"

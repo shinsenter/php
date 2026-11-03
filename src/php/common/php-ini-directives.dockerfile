@@ -11,7 +11,7 @@
 
 RUN <<'EOF'
 echo 'Configure PHP'
-[ -z "$DEBUG" ] || set -x; set -e
+[ -z "$DEBUG" ] || set -ex && set -e
 
 # Choose default php.ini
 if [ ! -e ${PHP_INI_DIR}/php.ini ] && [ -f ${PHP_INI_DIR}/php.ini-production ]; then
@@ -33,14 +33,10 @@ env-default PHP_MEMORY_LIMIT '256M'
 env-default PHP_OPCACHE_ENABLE '1'
 env-default PHP_OPCACHE_ERROR_LOG '$(log-path stderr)'
 env-default PHP_OPCACHE_FAST_SHUTDOWN '1'
-env-default PHP_OPCACHE_INTERNED_STRINGS_BUFFER '32'
 env-default PHP_OPCACHE_JIT_DEBUG '$(is-debug && echo 1 || echo 0)'
 env-default PHP_OPCACHE_MAX_ACCELERATED_FILES '130987'
-env-default PHP_OPCACHE_MEMORY_CONSUMPTION '256'
 env-default PHP_OPCACHE_PRELOAD_USER '$APP_USER'
 env-default PHP_POST_MAX_SIZE '100M'
-env-default PHP_REALPATH_CACHE_SIZE '4M'
-env-default PHP_REALPATH_CACHE_TTL '120'
 env-default PHP_REPORT_ZEND_DEBUG '$(is-debug && echo 1 || echo 0)'
 env-default PHP_REQUEST_ORDER 'GP'
 env-default PHP_SENDMAIL_PATH '$(type -P sendmail) -t'
@@ -49,11 +45,9 @@ env-default PHP_SESSION_COOKIE_LIFETIME '0'
 env-default PHP_SESSION_COOKIE_SAMESITE 'Lax'
 env-default PHP_SESSION_COOKIE_SECURE '0'
 env-default PHP_SESSION_USE_COOKIES '1'
-env-default PHP_SESSION_USE_STRICT_MODE '1'
 env-default PHP_UPLOAD_MAX_FILESIZE '100M'
 env-default PHP_VARIABLES_ORDER 'EGPCS'
 env-default PHP_ZEND_ASSERTIONS '-1'
-env-default PHP_ZEND_EXCEPTION_IGNORE_ARGS '1'
 
 # Override defaults for PHP-FPM
 env-default '# Override defaults for PHP-FPM'

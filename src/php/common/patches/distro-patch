@@ -10,10 +10,8 @@
 #  - Debian releases that deb.debian.org no longer serve move to archive.debian.org
 #  - Debian 8 and 9, Alpine 3.7 and 3.8: stop trusting the expired DST Root CA X3
 #    (Let's Encrypt), same as @fix_letsencrypt of docker-php-extension-installer
-# Used by common/os-common.dockerfile
-# and common/php-backports.dockerfile (mounted from the build context,
-# so it is not part of any image).
-# Other systems are left alone.
+# Used by common/os-common.dockerfile and common/php-backports.dockerfile (mounted
+# from the build context, so it is not part of any image). Other systems are left alone.
 # The changes stay in the image.
 
 [ -f /etc/os-release ] || exit 0

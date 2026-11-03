@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-with-env nginx -t 2>&1 | grep -qF -- "$1"
+exec with-env nginx -t 2>&1 | grep -qF -- "$@"
