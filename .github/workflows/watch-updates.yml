@@ -11,14 +11,16 @@ name: Watch updates
 ################################################################################
 ################################################################################
 
-# Replaces the old daily build. Every 30 minutes this workflow compares the
-# published images with their current inputs (official PHP images, Composer,
-# IPE, s6-overlay, FrankenPHP, RoadRunner, base OS images and the sources in
-# this repository). It reads registry manifests only. When something changed,
-# it starts "Build all" for the affected PHP versions.
+# Replaces the old daily build.
+# Every 30 minutes this workflow compares the published images with their current inputs
+# (official PHP images, Composer, IPE, s6-overlay, FrankenPHP, RoadRunner,
+# base OS images and the sources in this repository). It reads registry manifests only.
+# When something changed, it starts "Build all" for the affected PHP versions.
 #
 # Composer, IPE and s6-overlay updates rebuild the maintained versions only.
 # Outdated versions are rebuilt when their own official PHP image changes.
+#
+# It also deletes finished runs older than 7 days. Runs started by a release are kept.
 
 on:
   schedule:
@@ -83,3 +85,15 @@ jobs:
 
           gh workflow run build-all.yml --ref main -f php_versions="$VERSIONS"
           echo "Started Build all for: $VERSIONS"
+
+      - name: Delete old runs
+        if: ${{ always() }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh run list --limit 1000 --json databaseId,event,status,createdAt \
+            --jq '.[] | select(.status == "completed" and .event != "release" and (.createdAt | fromdateiso8601) < (now - 604800)) | .databaseId' |
+            while read -r id; do
+                gh run delete "$id"
+            done

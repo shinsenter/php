@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 
 
+## [6.1.0] - 2026-11-03
+- Raise the Go modules `grpc`, `containerd/v2`, `otel`, `otel/sdk` and `klauspost/compress` in the `shinsenter/dockerfile-x` image to clear HIGH CVEs. `moby/buildkit` stays at 0.23.2 because 0.28.1 does not compile with the upstream frontend.
+- Add environment variables for Apache deflate, keep-alive, expires, overrides and the MPM profile.
+- Harden the default PHP session settings, Nginx and Apache security headers, Apache `reqtimeout` and SMTP TLS.
+- Add Nginx fallbacks for old `listen` parameters, `real_ip`, `dhparam` and IPv6.
+- Trust `X-Forwarded-For` in Apache `remoteip` and Nginx `real_ip` only from private network ranges (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `169.254.0.0/16`, `127.0.0.0/8`, `fd00::/8`), so a direct client cannot fake its IP.
+- Delete workflow runs older than 7 days in `Watch updates`, except release builds.
+- Fix the Docker Hub README refresh after a merge that changes only markdown files.
+- Faster responses: larger Opcache (`PHP_OPCACHE_MEMORY_CONSUMPTION=256`, `PHP_OPCACHE_INTERNED_STRINGS_BUFFER=32`), and a bigger realpath cache (`PHP_REALPATH_CACHE_SIZE=4M`).
+- Nginx keeps connections to PHP-FPM open (`keepalive`, `fastcgi_keep_conn`) and caches file metadata (`open_file_cache`).
+- Make images smaller.
+- Fix the cleanup of backup and package config files.
+
+
 ## [6.0.0] - 2026-10-27
 - Remove the sources of the unmaintained images `zz-cakephp4`, `zz-crater`, `zz-fuelphp`, `zz-hypervel`, `zz-laminas`, `zz-phpixie` and `zz-slim`. Published tags stay on Docker Hub and are not updated.
 - Remove the `update-readme` workflow, which only served those images.
