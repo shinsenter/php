@@ -49,8 +49,11 @@ echo 'Configure OS middlewares'
 
 # Install common packages
 APK_PACKAGES='findutils ncurses ncurses-terminfo run-parts shadow tar tzdata unzip xz' \
-APT_PACKAGES='ncurses-base ncurses-bin vim-tiny xz-utils' \
+APT_PACKAGES='ncurses-base ncurses-bin xz-utils' \
 pkg-add bash ca-certificates coreutils curl htop less openssl procps msmtp upgrade
+
+# Install vim-tiny apart, so a mirror lagging behind vim-common does not break the build
+APT_PACKAGES='vim-tiny' pkg-add || true
 
 # Replace sh binary with bash
 BASH_PATH="$(command -v bash)"
