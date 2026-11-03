@@ -4,7 +4,20 @@ Bugs that users reported on [GitHub issues](https://github.com/shinsenter/php/is
 
 Not listed: usage questions, behavior that works as designed, problems caused by the host or by upstream projects, and reports the maintainer could not reproduce.
 
+`Open` lists limits that are known and not fixed yet.
+
 Where an entry says "cause not recorded", the issue thread does not say what was wrong. The fix shipped in rebuilt images and the issue thread links no change.
+
+## Open
+
+### Setuid root helpers give a compromised app user a path to root
+
+Not reported on GitHub. Found while reviewing the default security settings (2026-11-03).
+
+Code that runs as the application user (`www-data` by default), for example through a PHP vulnerability, can call helpers that are installed with the setuid bit and run commands as root.
+
+- Cause: by design. `web-do`, `autorun`, `ownership` and the `web-*` utilities need root to switch users and fix owners. `os-common.dockerfile` installs `/sbin/su-exec`, `autorun`, `ownership`, `web-*` and the entrypoint with mode 4755. Whether this `su-exec` build refuses to switch to root is not checked.
+- Fix: not fixed. Needs a design change, for example limiting these helpers to root or to a dedicated group.
 
 ## 6.0.0
 
