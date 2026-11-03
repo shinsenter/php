@@ -36,6 +36,12 @@ done
 # Debian leaves --sbin-path to its packaging scripts
 [ -n "$has_sbin" ] || set -- "$@" --sbin-path=/usr/sbin/nginx
 
+# "error_log ... debug" (DEBUG mode) logs nothing without this flag
+case " $* " in
+    *" --with-debug "*) ;;
+    *) set -- "$@" --with-debug ;;
+esac
+
 mkdir -p /usr/src/nginx
 cd /usr/src/nginx
 # the workflow puts the source in /tmp/helper_cache
