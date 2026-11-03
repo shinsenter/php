@@ -17,7 +17,7 @@
 # uses, so `groupmod` fails as in the issue. Needs Docker and a privileged
 # container (bind mounts). It does not build anything.
 
-source "$(dirname "$0")/lib.sh"
+source "$(dirname "$0")/run.sh"
 
 IMAGE="${1:?Usage: $0 <image> [app-uid]}"
 APP_UID="${2:-1001}"
