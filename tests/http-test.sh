@@ -7,6 +7,7 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 # Build the web server images, start each one and check HTTP on port 80.
+# Requests send "Host: localhost", the default SERVER_NAME of the frankenphp image.
 # Usage: tests/http-test.sh [php-version] [server...]
 #        tests/http-test.sh clean   (delete all logs, prune all Docker data, then exit)
 #   php-version  default 8.5
@@ -118,7 +119,7 @@ for server in $SERVERS; do
     docker rm -f "httptest-$server" >/dev/null 2>&1
     docker run -d --name "httptest-$server" -p "$port:80" $mount "$tag" >>"$log" 2>&1
 
-    code() { curl -s -o /dev/null -m 5 -w '%{http_code}' "http://127.0.0.1:$port$1"; }
+    code() { curl -s -H 'Host: localhost' -o /dev/null -m 5 -w '%{http_code}' "http://127.0.0.1:$port$1"; }
     echo "    wait for HTTP answer (up to 80s)"
     up=0
     for _ in $(seq 1 40); do
@@ -136,14 +137,14 @@ for server in $SERVERS; do
     root=$(code /)
     php=$(code /index.php)
     dot=$(code /.env)
-    hdr=$(curl -sI -m 5 "http://127.0.0.1:$port/index.php" | tr -d '\r')
+    hdr=$(curl -sI -H 'Host: localhost' -m 5 "http://127.0.0.1:$port/index.php" | tr -d '\r')
     echo "$hdr" >>"$log"
     problems=""
     [ "$root" = 200 ] || problems="$problems /=$root"
     [ "$php" = 200 ] || problems="$problems index.php=$php"
     if [ "$server" != roadrunner ]; then
         [ "$dot" -ge 400 ] 2>/dev/null || problems="$problems .env=$dot(exposed)"
-        curl -s -m 5 "http://127.0.0.1:$port/index.php" | grep -q '^ok ' || problems="$problems body"
+        curl -s -H 'Host: localhost' -m 5 "http://127.0.0.1:$port/index.php" | grep -q '^ok ' || problems="$problems body"
         echo "$hdr" | grep -qi '^x-content-type-options: *nosniff' || problems="$problems no-nosniff"
         # The Server header may name the server but must not show a version
         ! echo "$hdr" | grep -i '^server:' | grep -q '[0-9]' || problems="$problems server-version"
