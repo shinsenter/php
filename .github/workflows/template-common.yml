@@ -235,6 +235,7 @@ jobs:
             BUILD_TAGS=${{ env.BUILD_TAGS }}
             LATEST_PHP=${{ env.LATEST_PHP }}
             LATEST_S6=${{ env.LATEST_S6 }}
+            NGINX_VERSION=${{ env.NGINX_VERSION }}
             OS_BASE=${{ env.OS_BASE }}
             OS_VERSION=${{ env.OS_VERSION }}
             PHP_VARIANT=${{ env.PHP_VARIANT }}

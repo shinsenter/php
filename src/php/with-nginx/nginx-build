@@ -41,6 +41,12 @@ done
 
 mkdir -p /usr/src/nginx
 cd /usr/src/nginx
-curl -fsSL "https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz" | tar -xz --strip-components=1
+# the workflow puts the source in /tmp/helper_cache
+cached="/tmp/helper_cache/nginx-$NGINX_VERSION.tar.gz"
+if [ -f "$cached" ]; then
+    tar -xzf "$cached" --strip-components=1
+else
+    curl -fsSL "https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz" | tar -xz --strip-components=1
+fi
 ./configure "$@"
 make -j "$(nproc)"

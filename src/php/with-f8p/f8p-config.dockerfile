@@ -30,7 +30,11 @@ env-default HEALTH_PORT                     '2020'
 env-default HEALTH_CHECK_URL                'http://127.0.0.1:${HEALTH_PORT}/healthz'
 
 if [ -f /etc/caddy/Caddyfile ]; then
-    frankenphp fmt --overwrite /etc/caddy/Caddyfile
+    # Without "--overwrite", fmt prints the result but exits non-zero when the input changes.
+    # An empty result means a real error, so the build still stops.
+    frankenphp fmt /etc/caddy/Caddyfile >/tmp/Caddyfile.fmt || [ -s /tmp/Caddyfile.fmt ]
+    cat /tmp/Caddyfile.fmt >/etc/caddy/Caddyfile
+    rm -f /tmp/Caddyfile.fmt
 fi
 
 # create s6 services

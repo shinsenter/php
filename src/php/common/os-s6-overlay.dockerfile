@@ -10,7 +10,7 @@ ARG S6_VERSION=""
 ARG S6_PATH=""
 
 ################################################################################
-RUN <<'EOF'
+RUN --mount=type=bind,source=./helper_cache,target=/tmp/helper_cache <<'EOF'
 [ -z "$DEBUG" ] || set -x; set -e
 
 if [ -n "$S6_VERSION" ] && ! has-s6; then
@@ -43,7 +43,13 @@ if [ -n "$S6_VERSION" ] && ! has-s6; then
         local url="$1"
         local path="${2:-$S6_PATH}/"
         if [ ! -e "$path" ]; then mkdir -p "$path"; fi
-        download "$url" | tar Jxp -C "$path"
+        # the workflow puts the archives in /tmp/helper_cache
+        local cached="/tmp/helper_cache/s6-$S6_VERSION-${url##*/}"
+        if [ -f "$cached" ]; then
+            tar Jxp -C "$path" -f "$cached"
+        else
+            download "$url" | tar Jxp -C "$path"
+        fi
     }
 
     # backup existing entrypoint

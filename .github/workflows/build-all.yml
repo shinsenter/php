@@ -128,6 +128,9 @@ jobs:
           get_github_latest_tag "mlocati/docker-php-extension-installer"
           get_github_latest_tag "roadrunner-server/roadrunner"
           cache_middleware_sources
+          cache_nginx_source
+          cache_s6_sources
+          cache_wpcli_source
 
           distros=(debian alpine)
           variants=(cli fpm zts)

@@ -26,5 +26,6 @@ Paths and build behavior beyond the core table in `CLAUDE.md`.
 
 ## Build notes
 
+- `build-all` downloads the Nginx source, the s6-overlay archives and `wp-cli.phar` once into the `helper_cache` artifact (`cache_nginx_source`, `cache_s6_sources`, `cache_wpcli_source` in `build/helpers.sh`, next to the brotli and curl sources). `nginx-build`, `os-s6-overlay.dockerfile` and `wordpress.dockerfile` use the cached file and download it only when it is missing, so a local build works without the artifact. `wp-cli.phar` has no version, so `build/config.sh` adds its published checksum to the fingerprint of the WordPress image.
 - `NGINX_VERSION` (`mainline` by default, `stable`, a number, or `os`) is resolved to a number by `build/config.sh` and passed as a build argument. A new Nginx release changes the fingerprint of the `with-nginx` images.
 - Each image has a fingerprint. `build/config.sh` adds a hash of its inputs, including `src/php-backports/php<X.Y>/`, to the cache key, so a changed patch triggers a rebuild.

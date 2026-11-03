@@ -14,7 +14,8 @@ ENV NGINX_PID=/run/nginx.pid
 ARG NGINX_VERSION=""
 
 # Install Nginx
-RUN --mount=type=bind,source=./with-nginx/nginx-build,target=/tmp/nginx-build <<'EOF'
+RUN --mount=type=bind,source=./with-nginx/nginx-build,target=/tmp/nginx-build \
+    --mount=type=bind,source=./helper_cache,target=/tmp/helper_cache <<'EOF'
 echo 'Install Nginx'
 [ -z "$DEBUG" ] || set -x; set -e
 
@@ -24,6 +25,9 @@ pkg-add nginx
 
 # replace the binary with the official source
 if [ -n "$NGINX_VERSION" ] && [ "$NGINX_VERSION" != os ]; then
+    # keep the runtime library: autoremove drops it with the build tools otherwise
+    APT_PACKAGES='libpcre2-8-0' pkg-add
+
     # build tools, removed right after the build
     export APK_PACKAGES='--virtual .nginx-deps build-base linux-headers openssl-dev pcre2-dev zlib-dev'
     export APT_PACKAGES='build-essential libssl-dev libpcre2-dev zlib1g-dev'

@@ -138,6 +138,47 @@ test_versions() {
     check_not "active 8.2" is_active_version 8.2
     check_not "active 7.4" is_active_version 7.4
 
+    # Nginx keywords, with a stub of the download page (no network)
+    fetch_with_cache() {
+        echo '<h4>Mainline version</h4><table><tr><td><a href="/download/nginx-1.31.8.tar.gz">nginx-1.31.8</a></td></tr></table><h4>Stable version</h4><table><tr><td><a href="/download/nginx-1.30.6.tar.gz">nginx-1.30.6</a></td></tr></table><h4>Legacy versions</h4><a href="/download/nginx-1.28.3.tar.gz">'
+    }
+    check_eq "nginx mainline" "1.31.8" "$(resolve_nginx_version mainline)"
+    check_eq "nginx stable" "1.30.6" "$(resolve_nginx_version stable)"
+    check_eq "nginx number" "1.29.0" "$(resolve_nginx_version 1.29.0)"
+    check_eq "nginx os" "os" "$(resolve_nginx_version os)"
+    check_eq "nginx empty" "" "$(resolve_nginx_version '')"
+    unset -f fetch_with_cache
+
+    # Helper cache downloads, with stubs (no network)
+    local cache_dir
+    cache_dir="$(mktemp -d)"
+    HELPER_CACHE_DIR="$cache_dir"
+    resolve_nginx_version() { echo 1.31.8; }
+    get_github_latest_tag() { echo v3.2.1.0; }
+    download_file() { echo "$1" >"$2"; }
+    fetch_with_cache() { echo "bad  wp-cli.phar"; }
+
+    cache_nginx_source 2>/dev/null
+    check "cache: nginx source" [ -f "$cache_dir/nginx-1.31.8.tar.gz" ]
+    cache_s6_sources 2>/dev/null
+    check "cache: s6 noarch" [ -f "$cache_dir/s6-v3.2.1.0-s6-overlay-noarch.tar.xz" ]
+    check "cache: s6 syslogd" [ -f "$cache_dir/s6-v3.2.1.0-syslogd-overlay-noarch.tar.xz" ]
+    check "cache: s6 x86_64" [ -f "$cache_dir/s6-v3.2.1.0-s6-overlay-x86_64.tar.xz" ]
+    check "cache: s6 aarch64" [ -f "$cache_dir/s6-v3.2.1.0-s6-overlay-aarch64.tar.xz" ]
+    cache_wpcli_source 2>/dev/null
+    check_not "cache: wp-cli with a wrong checksum is removed" [ -f "$cache_dir/wp-cli.phar" ]
+    download_file() { echo "phar" >"$2"; }
+    fetch_with_cache() { echo "$(echo phar | shasum -a 512 | awk '{print $1}')  wp-cli.phar"; }
+    cache_wpcli_source 2>/dev/null
+    check "cache: wp-cli with a matching checksum is kept" [ -f "$cache_dir/wp-cli.phar" ]
+    NGINX_VERSION=os; resolve_nginx_version() { echo os; }
+    rm -f "$cache_dir"/nginx-*
+    cache_nginx_source 2>/dev/null
+    check_eq "cache: nginx os is not downloaded" "" "$(ls "$cache_dir" | grep '^nginx-' || true)"
+    rm -rf "$cache_dir"
+    unset -f fetch_with_cache download_file get_github_latest_tag resolve_nginx_version
+    source "$BASE_DIR/build/helpers.sh"
+
     finish
 }
 
