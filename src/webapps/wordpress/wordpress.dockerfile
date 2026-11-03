@@ -44,7 +44,7 @@ ARG WPCLI_PATH=/usr/local/bin/wp-cli
 
 RUN <<'EOF'
 echo 'Install WP-CLI'
-[ -z "$DEBUG" ] || set -ex && set -e
+[ -z "$DEBUG" ] || set -x; set -e
 
 env-default "alias wp-cli='$WPCLI_PATH --allow-root'"
 env-default INITIAL_PROJECT     'manual'

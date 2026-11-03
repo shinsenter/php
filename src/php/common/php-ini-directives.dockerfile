@@ -11,7 +11,7 @@
 
 RUN <<'EOF'
 echo 'Configure PHP'
-[ -z "$DEBUG" ] || set -ex && set -e
+[ -z "$DEBUG" ] || set -x; set -e
 
 # Choose default php.ini
 if [ ! -e ${PHP_INI_DIR}/php.ini ] && [ -f ${PHP_INI_DIR}/php.ini-production ]; then

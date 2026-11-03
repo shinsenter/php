@@ -16,6 +16,7 @@ ENV XDG_DATA_HOME="/data"
 ################################################################################
 RUN <<'EOF'
 echo 'Configure FrankenPHP'
+[ -z "$DEBUG" ] || set -x; set -e
 
 env-default '# Environment variables for FrankenPHP'
 env-default CADDY_GLOBAL_OPTIONS            'auto_https disable_redirects'

@@ -24,9 +24,12 @@ for target; do
         debug-echo "Keep ownership of $target."
     elif [ -n "$target" ] && [ -e "$target" ]; then
         debug-echo "Fix ownership for $target."
+        # chown only what has a wrong owner: unchanged files cost a stat, not a write
         {
-            find "$target" -type f -exec chown -h "$APP_USER:$APP_GROUP" {} + &
-            find "$target" -type d -exec chown -h "$APP_USER:$APP_GROUP" {} + &
+            find "$target" -type f \( ! -user "$APP_USER" -o ! -group "$APP_GROUP" \) \
+                -exec chown -h "$APP_USER:$APP_GROUP" {} + &
+            find "$target" -type d \( ! -user "$APP_USER" -o ! -group "$APP_GROUP" \) \
+                -exec chown -h "$APP_USER:$APP_GROUP" {} + &
             wait
         } 2>/dev/null || chown -hR "$APP_USER:$APP_GROUP" "$target" 2>/dev/null || true
     fi

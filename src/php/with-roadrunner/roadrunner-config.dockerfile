@@ -9,6 +9,8 @@ ADD --link ./with-roadrunner/rootfs/ /
 
 ################################################################################
 RUN <<'EOF'
+echo 'Configure RoadRunner'
+[ -z "$DEBUG" ] || set -x; set -e
 
 # create s6 services
 if has-cmd s6-service; then

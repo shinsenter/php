@@ -10,6 +10,7 @@ ADD --link ./with-nginx/rootfs/ /
 ################################################################################
 RUN <<'EOF'
 echo 'Configure Nginx'
+[ -z "$DEBUG" ] || set -x; set -e
 
 # add user to nginx group
 SUPP_GROUPS=$(id -Gn "$APP_USER" | tr ' ' ',')

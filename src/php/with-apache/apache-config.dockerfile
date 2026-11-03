@@ -10,6 +10,7 @@ ADD --link ./with-apache/rootfs/ /
 ################################################################################
 RUN <<'EOF'
 echo 'Configure Apache2'
+[ -z "$DEBUG" ] || set -x; set -e
 
 env-default '# Environment variables for Apache2'
 env-default APACHE_LOG_LEVEL 'error'

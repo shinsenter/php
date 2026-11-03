@@ -11,7 +11,7 @@ ARG S6_PATH=""
 
 ################################################################################
 RUN <<'EOF'
-[ -z "$DEBUG" ] || set -ex && set -e
+[ -z "$DEBUG" ] || set -x; set -e
 
 if [ -n "$S6_VERSION" ] && ! has-s6; then
     echo 'Configure s6-overlay'

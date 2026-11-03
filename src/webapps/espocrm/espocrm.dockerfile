@@ -45,7 +45,7 @@ ENV PHP_UPLOAD_MAX_FILESIZE="50M"
 ################################################################################
 RUN <<'EOF'
 echo 'Configure EspoCRM'
-[ -z "$DEBUG" ] || set -ex && set -e
+[ -z "$DEBUG" ] || set -x; set -e
 
 # install zmq php extension
 phpaddmod zmq || true

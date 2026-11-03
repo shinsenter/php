@@ -13,8 +13,9 @@ if [ -n "$user_dir" ]; then web-mkdir "$user_dir"; fi
 env_check='[ -f "$ENV" ] && [ -z "$ENV_LOADED" ] && source "$ENV" &>/dev/null && ENV_LOADED=1'
 for profile in {"$user_dir",/root}/{.bashrc,.profile}; do
     if [ -z "$profile" ]; then continue; fi
-    touch "$profile"
-    if ! grep -qF -- "$env_check" "$profile"; then
+    [ -e "$profile" ] || touch "$profile"
+    # bash reads the file itself: no grep process for a profile that is already patched
+    if [[ "$(<"$profile")" != *"$env_check"* ]]; then
         tmp_file="$(mktemp)"
         {
             echo "$env_check"
