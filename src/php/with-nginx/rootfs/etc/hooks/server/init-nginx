@@ -36,6 +36,22 @@ fi
 
 web-chown fix /var/lib/nginx /var/log/nginx /run/nginx
 
+# the dhparam file is created at build time, a volume on /etc/ssl/site can hide it
+if [ -f /etc/ssl/site/dhparam.pem ]; then
+    nginx-conf 'ssl_dhparam' '/etc/ssl/site/dhparam.pem'
+else
+    debug-echo -w "Disable ssl_dhparam because /etc/ssl/site/dhparam.pem is missing"
+    nginx-conf '#ssl_dhparam' '/etc/ssl/site/dhparam.pem'
+fi
+
+# listen on IPv6 only when the kernel supports it
+if [ -e /proc/net/if_inet6 ]; then
+    sed -i 's/^\([[:space:]]*\)# listen \[::\]/\1listen [::]/' /etc/nginx/sites-enabled/*.conf /etc/nginx/custom.d/*.conf >/dev/null 2>&1
+else
+    debug-echo -w "Disable listening on IPv6 because the kernel does not support it"
+    sed -i 's/^\([[:space:]]*\)listen \[::\]/\1# listen [::]/' /etc/nginx/sites-enabled/*.conf /etc/nginx/custom.d/*.conf >/dev/null 2>&1
+fi
+
 # turn on or off ssl_stapling
 if nginx-has-error '"ssl_stapling" ignored'; then
     nginx-conf 'ssl_stapling' 'off';

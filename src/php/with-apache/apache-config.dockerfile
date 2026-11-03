@@ -16,6 +16,13 @@ env-default '# Environment variables for Apache2'
 env-default APACHE_LOG_LEVEL 'error'
 env-default APACHE_ERROR_LOG '$(log-path stderr)'
 env-default APACHE_ACCESS_LOG '$(log-path stdout)'
+env-default APACHE_ALLOW_OVERRIDE 'all'
+env-default APACHE_DEFLATE_LEVEL '5'
+env-default APACHE_DISABLE_MODULES ''
+env-default APACHE_EXPIRES 'access plus 1 month'
+env-default APACHE_KEEPALIVE_TIMEOUT '5'
+env-default APACHE_REFERRER_POLICY 'strict-origin-when-cross-origin'
+env-default APACHE_REQUEST_READ_TIMEOUT 'header=20-40,MinRate=500 body=20,MinRate=500'
 env-default APACHE_MAX_CONNECTIONS_PER_CHILD '0'
 env-default APACHE_MAX_REQUEST_WORKERS '150'
 env-default APACHE_MAX_SPARE_SERVERS '10'
@@ -61,11 +68,11 @@ mkdir -p /etc/apache2 \
     /usr/logs
 
 # configure default modules
-a2dismod ado auth_digest autoindex cgi dav dbd include info mpm_prefork php reqtimeout userdir 2>&1 || true
+a2dismod ado auth_digest autoindex cgi dav dbd include info mpm_prefork php userdir 2>&1 || true
 a2enmod \
     access_compat alias auth_basic authn_core authn_file authz_core authz_host \
     cache cgid deflate dir env expires filter headers http2 log_config mime mime_magic \
-    mpm_event negotiation proxy proxy_fcgi remoteip rewrite setenvif ssl status unixd 2>&1 || true
+    mpm_event negotiation proxy proxy_fcgi remoteip reqtimeout rewrite setenvif ssl status unixd 2>&1 || true
 
 # fix ProxyFCGIBackendType directive for Apache 2.4
 if apache-has-error 'ProxyFCGIBackendType'; then
