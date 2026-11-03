@@ -57,9 +57,10 @@ on:
 ################################################################################
 
 jobs:
-  # Runs build/config.sh once and hands the result to the jobs below. The build
-  # runs once per platform on a runner of the same architecture where possible
-  # (QEMU is only used for 32-bit ARM), then "merge" publishes one multi-platform tag.
+  # Runs build/config.sh once and hands the result to the jobs below.
+  # The build runs once per platform on a runner of the same architecture
+  # where possible (QEMU is only used for 32-bit ARM),
+  # then "merge" publishes one multi-platform tag.
   prepare:
     name: ${{ inputs.php_version }} ${{ inputs.app_name }} ${{ inputs.server }} ${{ inputs.os }} (prepare)
     runs-on: ubuntu-26.04-arm
@@ -104,8 +105,8 @@ jobs:
         name: Plan the platform builds
         run: |
           set -e
-          # amd64 and 386 build on x64, arm64 on arm. 32-bit ARM, ppc64le and s390x
-          # (base-os and base-s6 only) run under QEMU.
+          # amd64 and 386 build on x64, arm64 on arm.
+          # 32-bit ARM, ppc64le and s390x (base-os and base-s6 only) run under QEMU.
           matrix="$(jq -cn --arg platforms "$BUILD_PLATFORM" '
             $platforms | split(",") | map(select(. != "")) | map({
               platform: .,
@@ -235,6 +236,7 @@ jobs:
             BUILD_TAGS=${{ env.BUILD_TAGS }}
             LATEST_PHP=${{ env.LATEST_PHP }}
             LATEST_S6=${{ env.LATEST_S6 }}
+            NGINX_VERSION=${{ env.NGINX_VERSION }}
             OS_BASE=${{ env.OS_BASE }}
             OS_VERSION=${{ env.OS_VERSION }}
             PHP_VARIANT=${{ env.PHP_VARIANT }}

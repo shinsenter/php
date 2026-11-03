@@ -17,7 +17,7 @@ COPY --link --from=frankenphp /etc/frankenphp /etc/frankenphp
 # Install FrankenPHP
 RUN <<'EOF'
 echo 'Install FrankenPHP'
-[ -z "$DEBUG" ] || set -ex && set -e
+[ -z "$DEBUG" ] || set -x; set -e
 
 # install common packages
 APK_PACKAGES='libstdc++ mailcap libcap' \

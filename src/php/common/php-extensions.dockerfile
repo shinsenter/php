@@ -25,12 +25,12 @@ ADD --link ./common/shell-php/ /usr/local/utils/
 ################################################################################
 RUN <<'EOF'
 echo 'Install Composer and PHP extensions'
-[ -z "$DEBUG" ] || set -ex && set -e
+[ -z "$DEBUG" ] || set -x; set -e
 
 # Update PEAR
 if has-cmd pear; then
     pear channel-update pear.php.net
-    pear upgrade --force || true
+    pear list-upgrades 2>&1 | grep -qF 'No upgrades available' || pear upgrade --force || true
 fi
 
 # Set Composer default settings
@@ -278,6 +278,8 @@ exec in-app php-fpm --nodaemonize \
     -c "$(php-envvars php_conf)" \
     -y "$(php-envvars fpm_conf)" \
     -d clear_env=no'
+    # SIGQUIT lets PHP-FPM finish the running requests before it exits
+    s6-service php-fpm down-signal SIGQUIT
 fi
 
 EOF

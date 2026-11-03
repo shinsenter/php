@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Runs before 10-deps, which removes the build tools that provide strip
+if ! has-cmd strip; then exit 0; fi
+
+debug-echo "Strip binaries and libraries."
+
+# ELF files only: scripts and already stripped files are skipped
+find /usr/local -type f ! -name frankenphp ! -name rr \( -perm /0111 -o -name '*.so' -o -name '*.so.*' \) \
+    -exec sh -c 'for f; do head -c 4 "$f" 2>/dev/null | grep -q "ELF" && strip --strip-all "$f" 2>/dev/null; done; :' _ {} + || true

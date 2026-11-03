@@ -15,6 +15,10 @@ if [ "$#" -gt 0 ]; then
     esac
 fi
 
+# http codes that count as ready; WAIT_FOR_CODES is an extended regex that replaces the default
+codes='^[1-4][0-9]{2}$'
+[ -z "$WAIT_FOR_CODES" ] || codes="$WAIT_FOR_CODES"
+
 curl_status() {
     curl -A "${DOCKER_NAME:-shinsenter/php}/health-checker" \
         -sk --max-time 2 \
@@ -27,30 +31,46 @@ if [ -n "$target" ]; then
     timeout="${TIMEOUT:-60}"
     start=$(date +%s)
 
-    # decide checking mode and sleep interval
+    # short polling steps: the server starts as soon as its dependency is ready.
+    # sleep_interval stays an integer for the timeout check, step is what we sleep.
     if [ "${target#http}" != "$target" ]; then
         mode="http"
-        sleep_interval=5
+        sleep_interval=1
+        step="0.5"
     else
         mode="socket"
         sleep_interval=1
+        step="0.1"
     fi
 
+    # fall back to whole seconds when sleep cannot take a fraction
+    sleep 0.01 2>/dev/null || step="$sleep_interval"
+
+    # a socket check costs no process, so count the steps instead of calling date
+    per_second=1
+    [ "$step" = "0.1" ] && per_second=10
+    ticks=$(( timeout * per_second ))
+
     while true; do
-        elapsed=$(( $(date +%s) - start ))
-        remaining=$(( timeout - elapsed ))
+        if [ "$mode" = "http" ]; then
+            elapsed=$(( $(date +%s) - start ))
+            remaining=$(( timeout - elapsed ))
+        else
+            remaining=$(( (ticks + per_second - 1) / per_second ))
+        fi
         if [ "$remaining" -le "$sleep_interval" ]; then
             debug-echo -c "Timeout waiting for $target." >&2
             exit 1
         fi
         if [ "$mode" = "http" ]; then
             # check http
-            curl_status "$target" | grep -qE '^[1-4][0-9]{2}$' && break
+            curl_status "$target" | grep -qE "$codes" && break
         else
             # check socket
             [ -S "$target" ] && break
+            ticks=$(( ticks - 1 ))
         fi
-        sleep "$sleep_interval"
+        sleep "$step"
     done
 
     debug-echo "Target $target is ready." >&2

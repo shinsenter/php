@@ -33,7 +33,7 @@ RUN env-default INITIAL_PROJECT "laravel/laravel"
 ################################################################################
 RUN <<'EOF'
 echo 'Configure Laravel'
-[ -z "$DEBUG" ] || set -ex && set -e
+[ -z "$DEBUG" ] || set -x; set -e
 
 env-default LARAVEL_AUTO_MIGRATION      '1'
 env-default LARAVEL_ENABLE_QUEUE_WORKER '0'

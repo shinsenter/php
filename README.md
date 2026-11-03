@@ -443,7 +443,7 @@ To use PHP's `mail()` function, configure SMTP via these environment variables:
 | `SMTP_USER`          | SMTP username                           | Your smtp username  |
 | `SMTP_PASSWORD`      | SMTP password                           | Your smtp password  |
 | `SMTP_AUTH`          | Enable SMTP authentication (`on`/`off`) | `on`                 |
-| `SMTP_TLS`           | Use TLS for the connection (`on`/`off`) | `on`                 |
+| `SMTP_TLS`           | Use TLS for the connection (`on`/`off`). On by default when `SMTP_USER` or `SMTP_PASSWORD` is set | `on`                 |
 
 > 💡 Tip: If you don't have an SMTP server, try using a local SMTP container like [Mailpit](https://hub.docker.com/r/axllent/mailpit). With Mailpit, set `SMTP_HOST=mailpit` and `SMTP_PORT=1025` in your container.
 
@@ -503,6 +503,14 @@ Additional environment variables for fine-tuning container behavior:
 | `SUPERVISOR_PHP_COMMAND`           | Not set          | Override the PHP command used by supervisor. Quotes group arguments that contain spaces. | `php -S localhost:80 index.php` |
 | `ENABLE_TUNING_FPM`                | Not enabled      | Enable automatic tuning of PHP-FPM settings when set to `1`. Uses the CPU limit of the container, or the host CPU count if there is none. A `PHP_PM*` variable you pass replaces the tuned value. See [Customizing PHP-FPM](#customizing-php-fpm). | `1`     |
 | `ENABLE_TUNING_MPM`                | Not enabled      | Enable automatic tuning of Apache MPM settings when set to `1`. Uses the CPU and memory limits of the container, or the host values if there are none. | `1`     |
+| `APACHE_ALLOW_OVERRIDE`            | `all`            | Value of `AllowOverride` for the document root. `none` skips reading `.htaccess` files on every request, but rules in `.htaccess` stop working. | `none` |
+| `APACHE_DEFLATE_LEVEL`             | `5`              | Compression level of `mod_deflate`, from 1 (fast) to 9 (smallest). | `6` |
+| `APACHE_DISABLE_MODULES`           | Not set          | Apache modules to turn off at start, separated by spaces. | `cache cgid mime_magic negotiation` |
+| `APACHE_EXPIRES`                   | `access plus 1 month`| Cache lifetime that `mod_expires` sets for static file types such as CSS, JS, images and fonts. | `access plus 1 week` |
+| `APACHE_KEEPALIVE_TIMEOUT`         | `5`              | Seconds that Apache keeps an idle connection open. | `2` |
+| `APACHE_MPM_PROFILE`               | `balanced`       | Profile used by `ENABLE_TUNING_MPM`: `low`, `balanced` or `high`. | `high` |
+| `APACHE_REFERRER_POLICY`           | `strict-origin-when-cross-origin` | Value of the `Referrer-Policy` response header. | `no-referrer` |
+| `APACHE_REQUEST_READ_TIMEOUT`      | `header=20-40,MinRate=500 body=20,MinRate=500` | Value of `RequestReadTimeout`. It closes connections that send the request too slowly. | `header=10-20,MinRate=500 body=20,MinRate=500` |
 
 
 ## Supported Platforms

@@ -6,17 +6,28 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
+# nginx-conf [#]<directive> <value>...
+# Sets the value of a directive in every *.conf file.
+# A leading # in the directive comments it out.
+
 conf_dir="/etc/nginx"
+
+if [ "$#" -lt 2 ]; then
+    echo "Usage: nginx-conf [#]<directive> <value>..." >&2
+    exit 1
+fi
 
 if [ ! -d "$conf_dir" ]; then exit 0; fi
 
 first_arg="$1"; shift
 directive="${first_arg/#\#/}"
+# escape the characters that sed treats as special in a replacement
+value="$(printf '%s' "$*" | sed 's/[\\&~]/\\&/g')"
 
 [[ "$first_arg" =~ ^# ]] && prefix="# " || prefix=""
 
 find "$conf_dir" -type f -name "*.conf" -print0 | while IFS= read -r -d '' file; do
     if grep -qE "^\s*#*\s*${directive}\s" "$file"; then
-        sed -i -E "s~^\s*#*\s*${directive}\s+.*\$~${prefix}${directive} $*;~g" "$file"
+        sed -i -E "s~^\s*#*\s*${directive}\s+.*\$~${prefix}${directive} ${value};~g" "$file"
     fi
 done

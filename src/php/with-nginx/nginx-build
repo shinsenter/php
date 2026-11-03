@@ -1,0 +1,49 @@
+#!/bin/sh
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+# Build Nginx $NGINX_VERSION from https://nginx.org with the configure flags of the OS package.
+# It only compiles into /usr/src/nginx and installs nothing.
+# with-nginx/nginx-install.dockerfile runs "make install" when this script succeeds,
+# so a failure leaves the OS package untouched.
+# Mounted into a RUN step from the build context, not part of any image.
+################################################################################
+set -e
+echo "Build Nginx $NGINX_VERSION"
+
+# configure flags of the OS package, without the parts that cannot be rebuilt here:
+# third-party modules (--add-dynamic-module),
+# modules that need extra libraries (geoip, image_filter, perl, xslt) and options removed from Nginx
+eval "set -- $(nginx -V 2>&1 | sed -n 's/^configure arguments: //p')"
+[ "$#" -gt 0 ]
+n=$#
+has_sbin=
+while [ "$n" -gt 0 ]; do
+    arg="$1"; shift; n=$((n - 1))
+    case "$arg" in
+        --add-dynamic-module=*|--with-perl_modules_path=*) continue ;;
+        --with-http_geoip_module*|--with-http_image_filter_module*) continue ;;
+        --with-http_perl_module*|--with-http_xslt_module*|--with-stream_geoip_module*) continue ;;
+        --with-http_v2_hpack_enc|--with-http_spdy_module|--with-ipv6) continue ;;
+        --sbin-path=*) has_sbin=1 ;;
+    esac
+    set -- "$@" "$arg"
+done
+# Debian leaves --sbin-path to its packaging scripts
+[ -n "$has_sbin" ] || set -- "$@" --sbin-path=/usr/sbin/nginx
+
+mkdir -p /usr/src/nginx
+cd /usr/src/nginx
+# the workflow puts the source in /tmp/helper_cache
+cached="/tmp/helper_cache/nginx-$NGINX_VERSION.tar.gz"
+if [ -f "$cached" ]; then
+    tar -xzf "$cached" --strip-components=1
+else
+    curl -fsSL "https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz" | tar -xz --strip-components=1
+fi
+./configure "$@"
+make -j "$(nproc)"

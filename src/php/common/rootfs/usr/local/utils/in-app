@@ -1,3 +1,4 @@
 #!/usr/bin/env sh
 [ "$#" -eq 0 ] && exit 0
-cd "$(app-path)" && exec with-env "$@"
+# same value as app-path, without its process
+cd "${WEBHOME:-${APP_PATH:-/var/www/html}}" && exec with-env "$@"

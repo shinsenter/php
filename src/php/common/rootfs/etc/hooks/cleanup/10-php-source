@@ -15,8 +15,4 @@ fi
 
 if [ -d "$PHP_EXTENSION_DIR" ]; then
     chmod -x "$PHP_EXTENSION_DIR"/*.so || true
-
-    if has-cmd strip; then
-        strip --strip-all --strip-debug "$PHP_EXTENSION_DIR"/*.so || true
-    fi
 fi

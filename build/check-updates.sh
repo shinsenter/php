@@ -9,9 +9,9 @@
 #
 # Prints the PHP versions that need a new build (separated by spaces).
 #
-# For each version it asks build/config.sh (CHECK_ONLY=1) whether the published
-# image still matches the fingerprint of its current inputs. Only manifests and
-# registry APIs are read, nothing is built or pulled.
+# For each version it asks build/config.sh (CHECK_ONLY=1)
+# whether the published image still matches the fingerprint of its current inputs.
+# Only manifests and registry APIs are read, nothing is built or pulled.
 #
 # Usage: ./build/check-updates.sh [version...]   (default: all versions)
 #        Progress is written to stderr, the result to stdout.

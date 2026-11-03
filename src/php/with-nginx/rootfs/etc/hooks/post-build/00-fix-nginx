@@ -18,7 +18,29 @@ if nginx-has-error 'use the "http2" directive'; then
     echo "http2 on;" >/etc/nginx/custom.d/00-ext-http2.conf
 fi
 
+# remove listen parameters that old Nginx versions do not know:
+# "reuseport" needs Nginx 1.9.1 and "http2" needs Nginx 1.9.5
+for param in reuseport http2; do
+    if nginx-has-error "invalid parameter \"$param\""; then
+        echo "Remove the listen parameter $param because it is not supported in this Nginx version"
+        sed -i "s/\(listen .*\) $param/\1/g" /etc/nginx/sites-enabled/*.conf /etc/nginx/custom.d/*.conf >/dev/null 2>&1
+    fi
+done
+
+# disable real_ip when the module is not built in
+if nginx-has-error 'real_ip'; then
+    echo 'Disable real_ip because it is not supported in this Nginx version'
+    nginx-conf '#real_ip_header' 'X-Forwarded-For'
+    nginx-conf '#real_ip_recursive' 'on'
+    sed -i -E 's/^(\s*)set_real_ip_from/\1#set_real_ip_from/' /etc/nginx/nginx.conf
+    # $realip_remote_addr does not exist either, so keep the scheme of the connection
+    printf 'set $client_https $https;\nset $client_scheme $scheme;\n' >/etc/nginx/custom.d/00-proxy-proto.conf
+fi
+
 # customize extensions
 if nginx-has-error 'brotli'; then \rm -f /etc/nginx/custom.d/*brotli.conf; fi
 if nginx-has-error 'gzip';   then \rm -f /etc/nginx/custom.d/*gzip.conf;   fi
-if nginx-has-error 'http3';  then \rm -f /etc/nginx/custom.d/*http3.conf;  fi
+if nginx-has-error 'http3' || nginx-has-error '"quic"'; then \rm -f /etc/nginx/custom.d/*http3.conf; fi
+
+# the server stops at the first error when it starts, so show what is left
+with-env nginx -t || echo 'WARNING: nginx -t still fails after the fixes above' >&2

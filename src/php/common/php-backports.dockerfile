@@ -8,15 +8,16 @@
 # Security backports for end-of-life PHP versions
 #
 # The official PHP images of 7.4, 8.0 and 8.1 do not get security fixes any more.
-# For these versions, PHP is rebuilt in place from the source tarball kept in the
-# official image (/usr/src/php.tar.xz), with the same configure flags and
-# every patch in src/php-backports/php<major.minor>/, in file name order
-# (<YYYYMMDD>-<NN>-<name>.patch). build/config.sh copies that folder to
-# ./php-backports/ in the build context. Other versions are left untouched.
+# For these versions, PHP is rebuilt in place from the source tarball kept in the official image
+# (/usr/src/php.tar.xz),
+# with the same configure flags and every patch in src/php-backports/php<major.minor>/,
+# in file name order (<YYYYMMDD>-<NN>-<name>.patch).
+# build/config.sh copies that folder to ./php-backports/ in the build context.
+# Other versions are left untouched.
 # "*.alpine.patch" and "*.debian.patch" are applied on that OS only.
 #
-# Check the build log: every patch and every patched file is printed, and the
-# build stops when a patch does not apply.
+# Check the build log: every patch and every patched file is printed, and the build stops
+# when a patch does not apply.
 ################################################################################
 # These ARGs are only used by the FROM below (base-php.dockerfile has no copy of them)
 ARG BUILD_FROM_IMAGE="php"
@@ -81,8 +82,8 @@ else
         zlib1g-dev
 fi
 
-# Reuse the configure command of the installed PHP (it already has the flags of
-# this variant: cli, fpm or zts)
+# Reuse the configure command of the installed PHP (it already has the flags of this variant: cli,
+# fpm or zts)
 configure_cmd="$(php -i | sed -n 's/^Configure Command => //p')"
 [ -n "$configure_cmd" ]
 

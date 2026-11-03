@@ -7,15 +7,15 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 config="${1:-/etc/apache2/mods-enabled/mpm_tuning.conf}"
-profile="${2:-balanced}"
-
-cpu_cores=$(container-limits cpu)
-ram_mb=$(container-limits ram)
+profile="${2:-${APACHE_MPM_PROFILE:-balanced}}"
 
 if ! has-cmd apache2; then
     echo "Error: apache2 command not found" >&2
     exit 1
 fi
+
+cpu_cores=$(container-limits cpu)
+ram_mb=$(container-limits ram)
 
 if apache2 -M 2>/dev/null | grep -qF -- mpm_prefork; then
     mpm_module='prefork'
@@ -23,7 +23,7 @@ else
     mpm_module='event'
 fi
 
-# === hệ số điều chỉnh theo profile ===
+# adjustment factors per profile
 case "$profile" in
   low)
     factor_start=1
@@ -35,7 +35,7 @@ case "$profile" in
     factor_spare=4
     factor_clients=2
     ;;
-  balanced|*)
+  *) # balanced, and any unknown profile
     factor_start=2
     factor_spare=2
     factor_clients=1
@@ -47,11 +47,13 @@ if [ "$mpm_module" = "prefork" ]; then
     min_spare_servers=$((cpu_cores * factor_spare))
     max_spare_servers=$((cpu_cores * factor_spare * 2))
     max_clients=$(awk "BEGIN {printf \"%d\", $ram_mb / 10 * $factor_clients}")
+    [ "$max_clients" -ge 1 ] || max_clients=1
     max_requests_per_child=1000
+    server_limit=$max_clients
 
     cat <<EOF > "$config"
 <IfModule mpm_${mpm_module}_module>
-    ServerLimit 20000
+    ServerLimit $server_limit
     StartServers $start_servers
     MinSpareServers $min_spare_servers
     MaxSpareServers $max_spare_servers
@@ -65,11 +67,15 @@ else
     min_spare_threads=$((cpu_cores * factor_spare * 5))
     max_spare_threads=$((cpu_cores * factor_spare * 10))
     threads_per_child=25
-    max_clients=$(awk "BEGIN {printf \"%d\", $ram_mb / 10 * $factor_clients / $threads_per_child * $threads_per_child}")
+    # a multiple of ThreadsPerChild, and at least one child
+    max_clients=$(awk "BEGIN {printf \"%d\", int($ram_mb / 10 * $factor_clients / $threads_per_child) * $threads_per_child}")
+    [ "$max_clients" -ge "$threads_per_child" ] || max_clients=$threads_per_child
+    # one spare child, so a graceful restart can start new ones while old ones finish
+    server_limit=$((max_clients / threads_per_child + 1))
 
     cat <<EOF > "$config"
 <IfModule mpm_${mpm_module}_module>
-    ServerLimit 20000
+    ServerLimit $server_limit
     StartServers $start_servers
     MinSpareThreads $min_spare_threads
     MaxSpareThreads $max_spare_threads

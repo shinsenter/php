@@ -6,8 +6,8 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-# Builds each platform, squashes it to one layer with docker-squash, pushes it
-# to a per-platform tag, then joins those tags into the multi-platform tags.
+# Builds each platform, squashes it to one layer with docker-squash,
+# pushes it to a per-platform tag, then joins those tags into the multi-platform tags.
 # The docker driver cannot push by digest, so the build-<platform> tags stay.
 set -e
 

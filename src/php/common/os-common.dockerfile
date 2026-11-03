@@ -45,7 +45,7 @@ RUN --mount=type=bind,source=./common/patches/distro-patch,target=/tmp/distro-pa
 ################################################################################
 RUN <<'EOF'
 echo 'Configure OS middlewares'
-[ -z "$DEBUG" ] || set -ex && set -e
+[ -z "$DEBUG" ] || set -x; set -e
 
 # Install common packages
 APK_PACKAGES='findutils ncurses ncurses-terminfo run-parts shadow tar tzdata unzip xz' \
@@ -108,7 +108,7 @@ RUN DOCKER_NAME="shinsenter/***" hook onbuild
 ################################################################################
 RUN <<'EOF'
 echo 'Configure base OS'
-[ -z "$DEBUG" ] || set -ex && set -e
+[ -z "$DEBUG" ] || set -x; set -e
 
 # Set aliases for common commands
 env-default '# Aliases for common commands'

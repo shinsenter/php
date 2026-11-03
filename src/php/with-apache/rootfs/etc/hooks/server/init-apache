@@ -19,10 +19,27 @@ Timeout ${PHP_MAX_EXECUTION_TIME}
 " >/etc/apache2/mods-enabled/timeout.conf
 fi
 
+# trust X-Forwarded-For and X-Forwarded-Proto from more proxies (CIDRs separated by comma or space)
+\rm -f /etc/apache2/mods-enabled/trusted-proxies.conf
+if [ -n "$TRUSTED_PROXIES" ]; then
+    for cidr in $(echo "$TRUSTED_PROXIES" | tr ',' ' '); do
+        case "$cidr" in
+            *[!0-9a-fA-F:./]*) debug-echo -w "Skip invalid TRUSTED_PROXIES entry: $cidr" ;;
+            *) echo "RemoteIPTrustedProxy $cidr" >>/etc/apache2/mods-enabled/trusted-proxies.conf ;;
+        esac
+    done
+fi
+
 web-mkdir "$APACHE_LOG_DIR" "$APACHE_LOCK_DIR" "$APACHE_RUN_DIR"
 web-chown fix \
     "$APACHE_LOG_DIR" "$APACHE_LOCK_DIR" "$APACHE_RUN_DIR" \
     /var/lib/apache2 /var/log/apache2 /run/apache2
+
+# modules to turn off at start, for example "cache cgid mime_magic negotiation"
+if [ -n "$APACHE_DISABLE_MODULES" ]; then
+    debug-echo -i "Disable Apache modules: $APACHE_DISABLE_MODULES"
+    a2dismod $APACHE_DISABLE_MODULES
+fi
 
 if is-true "$ENABLE_TUNING_MPM"; then
     debug-echo -i "Tune Apache MPM."
