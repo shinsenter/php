@@ -21,11 +21,17 @@ name: Watch updates
 # Outdated versions are rebuilt when their own official PHP image changes.
 #
 # It also deletes finished runs older than 7 days. Runs started by a release are kept.
+# A manual run can set "keep_days"; 0 deletes all finished runs.
 
 on:
   schedule:
     - cron: "*/30 * * * *"
   workflow_dispatch:
+    inputs:
+      keep_days:
+        description: "Keep finished runs of the last N days. 0 deletes all finished runs. Default 7"
+        type: string
+        default: "7"
 
 permissions:
   contents: read
@@ -91,9 +97,16 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KEEP_DAYS: ${{ inputs.keep_days }}
         run: |
+          # The schedule has no input, so it falls back to 7 days
+          days="${KEEP_DAYS:-7}"
+          case "$days" in
+            ''|*[!0-9]*) echo "keep_days must be a whole number, got: $days"; exit 1 ;;
+          esac
+          echo "Delete finished runs older than $days days"
           gh run list --limit 1000 --json databaseId,event,status,createdAt \
-            --jq '.[] | select(.status == "completed" and .event != "release" and (.createdAt | fromdateiso8601) < (now - 604800)) | .databaseId' |
+            --jq ".[] | select(.status == \"completed\" and .event != \"release\" and (.createdAt | fromdateiso8601) < (now - $days * 86400)) | .databaseId" |
             while read -r id; do
                 gh run delete "$id"
             done
