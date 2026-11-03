@@ -52,13 +52,6 @@ else
     sed -i 's/^\([[:space:]]*\)listen \[::\]/\1# listen [::]/' /etc/nginx/sites-enabled/*.conf /etc/nginx/custom.d/*.conf >/dev/null 2>&1
 fi
 
-# turn on or off ssl_stapling
-if nginx-has-error '"ssl_stapling" ignored'; then
-    nginx-conf 'ssl_stapling' 'off';
-else
-    nginx-conf 'ssl_stapling' 'off';
-fi
-
 # enable debug logs
 if is-debug; then
     nginx-conf 'error_log' "$(log-path stdout) debug"

@@ -68,10 +68,10 @@ mkdir -p /etc/apache2 \
     /usr/logs
 
 # configure default modules
-a2dismod ado auth_digest autoindex cgi dav dbd include info mpm_prefork php userdir 2>&1 || true
+a2dismod ado auth_digest autoindex cache cgi cgid dav dbd include info mime_magic mpm_prefork php userdir 2>&1 || true
 a2enmod \
     access_compat alias auth_basic authn_core authn_file authz_core authz_host \
-    cache cgid deflate dir env expires filter headers http2 log_config mime mime_magic \
+    deflate dir env expires filter headers http2 log_config mime \
     mpm_event negotiation proxy proxy_fcgi remoteip reqtimeout rewrite setenvif ssl status unixd 2>&1 || true
 
 # fix ProxyFCGIBackendType directive for Apache 2.4

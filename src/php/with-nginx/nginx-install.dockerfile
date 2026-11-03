@@ -33,6 +33,7 @@ if [ -n "$NGINX_VERSION" ] && [ "$NGINX_VERSION" != os ]; then
     # the OS package untouched, and the build tools are removed in any case
     if sh /tmp/nginx-build; then
         make -C /usr/src/nginx install
+        strip --strip-all "$(type -P nginx)" || true
         rm -f /etc/nginx/*.default
     else
         echo "WARNING: cannot build Nginx $NGINX_VERSION, keep the version from the OS package" >&2
