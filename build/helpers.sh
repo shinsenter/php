@@ -173,8 +173,8 @@ download_file () {
 }
 
 # Sources of the latest brotli and curl, for src/php/common/patches/middleware-patch.
-# Downloaded once per run into the helper cache, so the image builds do not
-# call the GitHub API (60 requests per hour without a token).
+# Downloaded once per run into the helper cache,
+# so the image builds do not call the GitHub API (60 requests per hour without a token).
 cache_middleware_sources () {
     local dir="/tmp/helper_cache" tag version
     mkdir -p "$dir"
@@ -252,8 +252,8 @@ find_backport_dir() {
     return 0
 }
 
-# Files that config.sh adds to the build context. The build jobs of each
-# platform run this again, because they start from a clean checkout.
+# Files that config.sh adds to the build context.
+# The build jobs of each platform run this again, because they start from a clean checkout.
 # Usage: prepare_build_context <dockerfile> <context> <php-version>
 prepare_build_context() {
     local dockerfile="$1" context="$2" php_version="$3" backports
@@ -264,9 +264,8 @@ prepare_build_context() {
     [ ! -e "$context/meta.dockerfile" ] && \
         cp -pf "$BASE_DIR/src/php/meta.dockerfile" "$context/meta.dockerfile"
 
-    # Security backports for end-of-life PHP versions
-    # (see src/php/common/php-backports.dockerfile). The folder is always there,
-    # it is empty for the versions without backports.
+    # Security backports for end-of-life PHP versions (see src/php/common/php-backports.dockerfile).
+    # The folder is always there, it is empty for the versions without backports.
     if [ "$dockerfile" = "$BASE_DIR/src/php/base-php.dockerfile" ] && [ "$CHECK_ONLY" != "1" ]; then
         backports="$(find_backport_dir "$php_version")"
         rm -rf "$context/php-backports"

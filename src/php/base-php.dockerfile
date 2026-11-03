@@ -17,8 +17,7 @@ INCLUDE ./common/php-backports
 
 ################################################################################
 
-# php-base is the official PHP image
-# rebuilt with the backports when the version has any
+# php-base is the official PHP image rebuilt with the backports when the version has any
 FROM php-base
 ARG  DEBUG
 

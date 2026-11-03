@@ -67,8 +67,9 @@ if [ ! -x /command/s6-env ]; then s6_suffix="-non-s6"; fi
 # run bootstrap hooks to initialize the container
 hook bootstrap ${s6_suffix:+bootstrap$s6_suffix}
 
-# find the composer bin dirs once. Every with-env after this reuses the value
-# instead of starting composer twice, and bootstrap may have created composer.json.
+# find the composer bin dirs once.
+# Every with-env after this reuses the value instead of starting composer twice,
+# and bootstrap may have created composer.json.
 if [ -z "$CACHED_COMPOSER_BIN_DIR" ] && command -v composer &>/dev/null; then
     # || true: a composer error must not stop the container under set -e
     CACHED_COMPOSER_BIN_DIR="$(composer -d "$app_path" config bin-dir --absolute 2>/dev/null || true):$(composer config bin-dir --global --absolute 2>/dev/null || true)"

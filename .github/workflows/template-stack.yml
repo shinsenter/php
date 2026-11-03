@@ -11,9 +11,10 @@ name: Build Template Stack
 ################################################################################
 ################################################################################
 
-# One PHP variant followed by the server images built on top of it. The servers
-# start after the variant is published. GitHub allows four levels of reusable
-# workflows (build-all > stack > php > common), so do not nest any deeper.
+# One PHP variant followed by the server images built on top of it.
+# The servers start after the variant is published.
+# GitHub allows four levels of reusable workflows (build-all > stack > php > common),
+# so do not nest any deeper.
 
 on:
   workflow_call:

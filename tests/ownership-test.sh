@@ -6,16 +6,16 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-# Docker test for issue #442: the UID/GID change at startup must not touch
-# mounted files such as /var/run/docker.sock.
+# Docker test for issue #442:
+# the UID/GID change at startup must not touch mounted files such as /var/run/docker.sock.
 #
 # Usage: tests/ownership-test.sh <image> [app-uid]
 #   tests/ownership-test.sh shinsenter/phpfpm-nginx:local-php8.5-alpine
 #   DOCKER_PLATFORM=linux/amd64 tests/ownership-test.sh shinsenter/php:dev-8.3-fpm
 #
-# It starts the real entrypoint with an APP_GID that another group already
-# uses, so `groupmod` fails as in the issue. Needs Docker and a privileged
-# container (bind mounts). It does not build anything.
+# It starts the real entrypoint with an APP_GID that another group already uses,
+# so `groupmod` fails as in the issue. Needs Docker and a privileged container (bind mounts).
+# It does not build anything.
 
 source "$(dirname "$0")/run.sh"
 
@@ -32,9 +32,9 @@ CONFLICT_GID="$("${RUN[@]}" --entrypoint sh "$IMAGE" -c \
 [ -n "$CONFLICT_GID" ] || { echo "No other group found in $IMAGE" >&2; exit 1; }
 echo "Image $IMAGE: www-data is $WWW_UID:$WWW_GID, APP_UID=$APP_UID, APP_GID=$CONFLICT_GID (already in use)"
 
-# Runs as root before the entrypoint. Files that the container can reach only
-# through their mount point stand for a file on the host. Owned by www-data, so
-# an unsafe migration would match them.
+# Runs as root before the entrypoint.
+# Files that the container can reach only through their mount point stand for a file on the host.
+# Owned by www-data, so an unsafe migration would match them.
 read -r -d '' SETUP <<'EOF'
 set -e
 mkdir -p /host /srv/data /opt

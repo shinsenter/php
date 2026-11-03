@@ -11,10 +11,11 @@ name: Build all
 ################################################################################
 ################################################################################
 
-# There is no scheduled run any more. The "Watch updates" workflow checks the
-# upstream sources and starts this workflow only for the PHP versions that need
-# a new build. Every image also compares its own fingerprint with the published
-# one and skips the build when nothing changed.
+# There is no scheduled run any more.
+# The "Watch updates" workflow checks the upstream sources
+# and starts this workflow only for the PHP versions that need a new build.
+# Every image also compares its own fingerprint with the published one and skips the build
+# when nothing changed.
 
 on:
   workflow_dispatch:
@@ -33,8 +34,8 @@ on:
     types: [released]
   push:
     branches: [main]
-    # Markdown files are not part of the fingerprint. A change there skips the
-    # build and only refreshes the Docker Hub README.
+    # Markdown files are not part of the fingerprint.
+    # A change there skips the build and only refreshes the Docker Hub README.
     paths:
       - 'src/**'
       - 'build/**'

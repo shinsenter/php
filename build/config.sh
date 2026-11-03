@@ -539,8 +539,8 @@ fi
 # Build fingerprint
 ################################################################################
 # The fingerprint covers everything that changes the content of the image.
-# It is stored in the published image (index annotation), so the next run can
-# skip the build when nothing changed, without any Actions cache.
+# It is stored in the published image (index annotation), so the next run can skip the build
+# when nothing changed, without any Actions cache.
 if [ "$SKIP_BUILD" != "1" ]; then
     BUILD_CACHE_KEY="($APP@$BUILD_TAG)${BUILD_CACHE_KEY:+/}$BUILD_CACHE_KEY"
     BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(platform:$BUILD_PLATFORM)"
@@ -592,8 +592,8 @@ if [ "$SKIP_BUILD" != "1" ]; then
         | sort -dbfi | xargs -r shasum 2>/dev/null | shasum | head -c10)"
     BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(buildcontext:$context_hash)"
 
-    # The backports are copied into the context only when building, so they are
-    # hashed from their source (patches and the Dockerfile that applies them)
+    # The backports are copied into the context only when building,
+    # so they are hashed from their source (patches and the Dockerfile that applies them)
     if [ -n "$BACKPORT_DIR" ]; then
         backport_hash="$(path_hash "$BACKPORT_DIR" "$BASE_DIR/src/php/common/php-backports.dockerfile" | shasum | head -c10)"
         BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(backports@$backport_hash)"
