@@ -25,8 +25,9 @@ pkg-add nginx
 
 # replace the binary with the official source
 if [ -n "$NGINX_VERSION" ] && [ "$NGINX_VERSION" != os ]; then
-    # keep the runtime library: autoremove drops it with the build tools otherwise
-    APT_PACKAGES='libpcre2-8-0' pkg-add
+    # keep the runtime library: removing the build tools drops it otherwise
+    # (older Alpine nginx packages link to pcre, not pcre2)
+    APK_PACKAGES='pcre2' APT_PACKAGES='libpcre2-8-0' pkg-add
 
     # build tools, removed right after the build
     export APK_PACKAGES='--virtual .nginx-deps build-base linux-headers openssl-dev pcre2-dev zlib-dev'

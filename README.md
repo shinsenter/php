@@ -1,7 +1,7 @@
 # PHP Docker Images <!-- omit from toc -->
 📦 Lightweight PHP Docker images designed for easy customization and simple extension management.
 
-Our images support PHP versions from 5.6 up to 8.6 (RC), with variants for CLI, ZTS, FPM, FPM/Apache, FPM/Nginx, RoadRunner, and FrankenPHP. Images are available for both Debian and Alpine.
+Lightweight images for PHP 5.6 to 8.6 (RC) on Debian and Alpine.
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/php
 - GitHub Packages: https://code.shin.company/php/pkgs/container/php
@@ -13,24 +13,30 @@ Our images support PHP versions from 5.6 up to 8.6 (RC), with variants for CLI, 
 
 ## Table of Contents <!-- omit from toc -->
 - [Introduction](#introduction)
-- [Docker Image Variants](#docker-image-variants)
-- [Customizing Settings via Environment Variables](#customizing-settings-via-environment-variables)
-- [Pre-installed PHP Extensions](#pre-installed-php-extensions)
-- [Adding PHP Extensions](#adding-php-extensions)
-- [Application Directory](#application-directory)
-- [Customizing Container User and Group in Docker](#customizing-container-user-and-group-in-docker)
-- [Hooks](#hooks)
-- [Autorun Scripts](#autorun-scripts)
-- [Using Cron Jobs](#using-cron-jobs)
-- [Customize Supervisor Command](#customize-supervisor-command)
-- [Sending Emails](#sending-emails)
-- [Debug Mode](#debug-mode)
-- [Other System Settings](#other-system-settings)
-- [Supported Platforms](#supported-platforms)
-- [Stable Image Tags](#stable-image-tags)
-- [How Images Are Updated](#how-images-are-updated)
-- [Contributing](#contributing)
-- [License](#license)
+- [Getting Started](#getting-started)
+  - [Docker image variants](#docker-image-variants)
+- [Configuration](#configuration)
+  - [Environment variables](#environment-variables)
+  - [Customizing PHP-FPM](#customizing-php-fpm)
+  - [Application Directory](#application-directory)
+  - [User and group](#user-and-group)
+- [Extending the Images](#extending-the-images)
+  - [Pre-installed PHP Extensions](#pre-installed-php-extensions)
+  - [Adding PHP Extensions](#adding-php-extensions)
+  - [Hooks](#hooks)
+  - [Autorun Scripts](#autorun-scripts)
+  - [Using Cron Jobs](#using-cron-jobs)
+  - [Supervisor command](#supervisor-command)
+- [Operations](#operations)
+  - [Sending Emails](#sending-emails)
+  - [Debug mode](#debug-mode)
+  - [System settings](#system-settings)
+- [About This Project](#about-this-project)
+  - [Supported Platforms](#supported-platforms)
+  - [Stable Image Tags](#stable-image-tags)
+  - [How Images Are Updated](#how-images-are-updated)
+  - [Contributing](#contributing)
+  - [License](#license)
 
 
 ## Introduction
@@ -41,10 +47,13 @@ These images are based on the [official PHP Docker images](https://hub.docker.co
 
 They include the latest Composer and common web servers - [Apache2](https://httpd.apache.org), [Nginx](https://nginx.org), [RoadRunner](https://roadrunner.dev), and [FrankenPHP](https://frankenphp.dev) - so you don't need to install them separately.
 
-> 🪶 Note: We slim these images down with the [docker-squash](https://code.shin.company/docker-squash) project, so pulls are faster and they use less disk and memory than the official images they're based on.
+> [!NOTE]
+> We slim these images down with the [docker-squash](https://code.shin.company/docker-squash) project, so pulls are faster and they use less disk and memory than the official images they're based on.
 
 
-## Docker Image Variants
+## Getting Started
+
+### Docker image variants
 
 Tags cover PHP versions from 5.6 to 8.6-rc and come in `cli`, `zts`, `fpm`, `fpm-nginx`, `fpm-apache`, `roadrunner`<sup>(1)</sup>, and `frankenphp`<sup>(2)</sup> variants. Both Debian and Alpine builds are available.
 
@@ -63,12 +72,12 @@ Examples:
 See all tags on our [Docker Hub](https://hub.docker.com/r/shinsenter/php/tags).
 
 
-### Examples <!-- omit from toc -->
+#### Examples
 
 Run a container using one of these commands:
 
 
-#### CLI <!-- omit from toc -->
+##### CLI
 
 ```shell
 # non-interactive
@@ -79,14 +88,14 @@ docker run -it -v ./myproject:/var/www/html shinsenter/php:8.5-cli
 ```
 
 
-#### PHP-FPM <!-- omit from toc -->
+##### PHP-FPM
 
 ```shell
 docker run -v ./myproject:/var/www/html -p 9000:9000 shinsenter/php:8.5-fpm
 ```
 
 
-#### PHP-FPM + Nginx (or Apache, RoadRunner, FrankenPHP) <!-- omit from toc -->
+##### PHP-FPM + Nginx (or Apache, RoadRunner, FrankenPHP)
 
 ```shell
 # with Nginx
@@ -103,7 +112,9 @@ docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 shinsenter/php:8.4-f
 ```
 
 
-## Customizing Settings via Environment Variables
+## Configuration
+
+### Environment variables
 
 You can configure PHP and PHP-FPM using environment variables instead of rebuilding images.
 
@@ -116,15 +127,17 @@ Naming rules:
 
 This convention lets you map any environment variable straight back to its ini/fpm directive.
 
-> 👉🏻 Note: By default, `$PHP_*` variables are applied only if set before the container starts. To allow changing PHP settings from an interactive shell inside a running container, start the container with `ALLOW_RUNTIME_PHP_ENVVARS=1`.
+> [!NOTE]
+> By default, `$PHP_*` variables are applied only if set before the container starts. To allow changing PHP settings from an interactive shell inside a running container, start the container with `ALLOW_RUNTIME_PHP_ENVVARS=1`.
 
-> 💡 Tip: Run `php-envvars` inside the container to list the default `$PHP_*` variables.
+> [!TIP]
+> Run `php-envvars` inside the container to list the default `$PHP_*` variables.
 
 
-### Examples <!-- omit from toc -->
+#### Examples
 
 
-#### Command Line <!-- omit from toc -->
+##### Command Line
 
 ```shell
 docker run \
@@ -137,7 +150,7 @@ docker run \
 ```
 
 
-#### With docker-compose.yml <!-- omit from toc -->
+##### With docker-compose.yml
 
 ```yaml
 services:
@@ -151,7 +164,7 @@ services:
 ```
 
 
-#### Explanation <!-- omit from toc -->
+##### Explanation
 
 | Environment Variable          | What it does                                      | Equivalent php.ini / fpm setting |
 |-------------------------------|---------------------------------------------------|----------------------------------|
@@ -160,9 +173,7 @@ services:
 | PHP_UPLOAD_MAX_FILESIZE=100M  | Set max upload file size (default 2M)             | `upload_max_filesize = 100M`     |
 | PHP_SESSION_COOKIE_HTTPONLY=1 | Enable HttpOnly on session cookies                | `session.cookie_httponly = 1`    |
 
-> 💡 Tip: Run `php-envvars` in the container to get a full list of default `$PHP_*` environment variables.
-
-### Customizing PHP-FPM <!-- omit from toc -->
+### Customizing PHP-FPM
 
 The images start PHP-FPM with one generated file, `/usr/local/etc/php-fpm.d/zz-docker-shinsenter-php.conf`. They do not load `php-fpm.conf` or the other files in `/usr/local/etc/php-fpm.d/`, so a mounted `www.conf` has no effect. These sources apply, and the first one wins:
 
@@ -186,7 +197,54 @@ slowlog = /var/log/php-slow.log
 ```
 
 
-## Pre-installed PHP Extensions
+### Application Directory
+
+Default application directory: `/var/www/html`. Change it with `$APP_PATH`:
+
+```shell
+docker run -p 80:80 -p 443:443 -p 443:443/udp \
+    -v "$PWD":/app \
+    -e APP_PATH=/app \
+    shinsenter/php:8.5-fpm-nginx
+```
+
+To change the document root (a path inside `$APP_PATH` that contains `index.php`), set `$DOCUMENT_ROOT`:
+
+```shell
+docker run -p 80:80 -p 443:443 -p 443:443/udp \
+    -v "$PWD":/app \
+    -e APP_PATH=/app \
+    -e DOCUMENT_ROOT=public \
+    shinsenter/php:8.5-fpm-nginx
+```
+
+This example sets the document root to `/app/public`.
+
+
+### User and group
+
+Override the default user and group with environment variables:
+
+| Environment Variable | Description                     | Default        |
+|----------------------|---------------------------------|----------------|
+| `APP_USER`           | Username inside the container   | `www-data`     |
+| `APP_GROUP`          | Group name inside the container | `www-data`     |
+| `APP_UID`            | Numeric UID for the user        | UID in container |
+| `APP_GID`            | Numeric GID for the group       | GID in container |
+
+Example (run as user `myapp` with UID 5000):
+
+```shell
+docker run -p 80:80 -p 443:443 -p 443:443/udp \
+    -e APP_USER=myapp \
+    -e APP_UID=5000 \
+    shinsenter/php:8.5-fpm-nginx
+```
+
+
+## Extending the Images
+
+### Pre-installed PHP Extensions
 
 Common PHP extensions are pre-installed so projects can start quickly.
 
@@ -214,12 +272,14 @@ yaml
 zip
 ```
 
-> 👉🏻 Note: Extensions that are already included in the official PHP images are not listed here.
+> [!NOTE]
+> Extensions that are already included in the official PHP images are not listed here.
 
-> 💡 Tip: Run `docker run --rm shinsenter/php:8.5-cli php -m` (replace `8.5` as needed) to see installed extensions.
+> [!TIP]
+> Run `docker run --rm shinsenter/php:8.5-cli php -m` (replace `8.5` as needed) to see installed extensions.
 
 
-## Adding PHP Extensions
+### Adding PHP Extensions
 
 Use the `phpaddmod` helper to install and configure extensions in one step - no need for `docker-php-ext-install` or manual php.ini edits.
 
@@ -236,69 +296,14 @@ RUN phpaddmod imagick swoole xdebug
 # ADD --chown=$APP_USER:$APP_GROUP ./myproject/ /var/www/html/
 ```
 
-> 👉🏻 Note: `phpaddmod` is a wrapper around the [`mlocati/docker-php-extension-installer`](https://github.com/mlocati/docker-php-extension-installer),
-which handles compiling and enabling extensions.
+> [!NOTE]
+> `phpaddmod` is a wrapper around the [`mlocati/docker-php-extension-installer`](https://github.com/mlocati/docker-php-extension-installer), which handles compiling and enabling extensions.
 
-> 💡 Tip: See the supported extensions in their documentation: https://github.com/mlocati/docker-php-extension-installer/blob/master/README.md#supported-php-extensions
-
-
-## Application Directory
-
-Default application directory: `/var/www/html`. Change it with `$APP_PATH`:
-
-```shell
-docker run -p 80:80 -p 443:443 -p 443:443/udp \
-    -v "$PWD":/app \
-    -e APP_PATH=/app \
-    shinsenter/php:8.5-fpm-nginx
-```
-
-To change the document root (a path inside `$APP_PATH` that contains `index.php`), set `$DOCUMENT_ROOT`:
-
-```shell
-docker run -p 80:80 -p 443:443 -p 443:443/udp \
-    -v "$PWD":/app \
-    -e APP_PATH=/app \
-    -e DOCUMENT_ROOT=public \
-    shinsenter/php:8.5-fpm-nginx
-```
-
-This example sets the document root to `/app/public`.
+> [!TIP]
+> See the supported extensions in their documentation: https://github.com/mlocati/docker-php-extension-installer/blob/master/README.md#supported-php-extensions
 
 
-## Customizing Container User and Group in Docker
-
-Override the default user and group with environment variables:
-
-| Environment Variable | Description                     | Default        |
-|----------------------|---------------------------------|----------------|
-| `APP_USER`           | Username inside the container   | `www-data`     |
-| `APP_GROUP`          | Group name inside the container | `www-data`     |
-| `APP_UID`            | Numeric UID for the user        | UID in container |
-| `APP_GID`            | Numeric GID for the group       | GID in container |
-
-Example (run as user `myapp` with UID 5000):
-
-```shell
-docker run -p 80:80 -p 443:443 -p 443:443/udp \
-    -e APP_USER=myapp \
-    -e APP_UID=5000 \
-    shinsenter/php:8.5-fpm-nginx
-```
-
-docker-compose example:
-
-```yaml
-services:
-  web:
-    image: shinsenter/php:8.5-fpm-nginx
-    environment:
-      APP_USER: "myapp"
-      APP_UID: "5000"
-```
-
-
-## Hooks
+### Hooks
 
 Hooks let you customize runtime behavior. Create a `hooks` folder inside `$APP_PATH` and place executable files named after each hook (or use subfolders).
 
@@ -318,12 +323,13 @@ Example: To install PHP modules on first run, add `hooks/first-run` or `hooks/fi
 Enable `DEBUG=1` to see which hooks run.
 
 
-## Autorun Scripts
+### Autorun Scripts
 
 Place shell scripts in `/startup/` to run automatically when the container starts. Scripts run in alphabetical order by filename.
 
 Example Dockerfile to add an autorun script:
 
+> [!IMPORTANT]
 > Ensure the script is executable.
 
 ```Dockerfile
@@ -337,29 +343,20 @@ RUN chmod +x /startup/00-migration
 # ADD --chown=$APP_USER:$APP_GROUP ./myproject/ /var/www/html/
 ```
 
-> 👉🏻 Note: The startup directory includes `99-greeting`, which prints a welcome message at startup.
+> [!NOTE]
+> The startup directory includes `99-greeting`, which prints a welcome message at startup.
 
 
-#### Disable Autorun Scripts <!-- omit from toc -->
+#### Disable Autorun Scripts
 
 To disable autorun scripts, set `DISABLE_AUTORUN_SCRIPTS=1`:
 
 ```shell
-docker run -e DISABLE_AUTORUN_SCRIPTS=1 shinsenter/ubuntu-s6:latest bash
-```
-
-Or in docker-compose:
-
-```yaml
-services:
-  web:
-    image: shinsenter/ubuntu-s6:latest
-    environment:
-      DISABLE_AUTORUN_SCRIPTS: "1"
+docker run -e DISABLE_AUTORUN_SCRIPTS=1 shinsenter/php:8.5-cli bash
 ```
 
 
-## Using Cron Jobs
+### Using Cron Jobs
 
 This project supports simple cron jobs; build a custom image for advanced cron features.
 
@@ -402,14 +399,12 @@ services:
       CRONTAB_SETTINGS: "* * * * * echo 'This line will run every minute!' | tee /tmp/cron-every-minute.txt"
 ```
 
-For more cron-related environment variables, see [Other System Settings](#other-system-settings).
+For more cron-related variables, see [System settings](#system-settings).
 
 
-## Customize Supervisor Command
+### Supervisor command
 
 Set `SUPERVISOR_PHP_COMMAND` to override the default command used by the supervisor process. This lets you run a different command to serve your app.
-
-Command line example:
 
 ```shell
 docker run \
@@ -417,18 +412,10 @@ docker run \
     shinsenter/php:8.5
 ```
 
-docker-compose example:
 
-```yml
-services:
-  web:
-    image: shinsenter/php:8.5
-    environment:
-      SUPERVISOR_PHP_COMMAND: "php -S localhost:80 index.php"
-```
+## Operations
 
-
-## Sending Emails
+### Sending Emails
 
 We use `msmtp` as a lightweight sendmail replacement, so libraries like [PHPMailer](https://github.com/PHPMailer/PHPMailer) work out of the box.
 
@@ -445,40 +432,41 @@ To use PHP's `mail()` function, configure SMTP via these environment variables:
 | `SMTP_AUTH`          | Enable SMTP authentication (`on`/`off`) | `on`                 |
 | `SMTP_TLS`           | Use TLS for the connection (`on`/`off`). On by default when `SMTP_USER` or `SMTP_PASSWORD` is set | `on`                 |
 
-> 💡 Tip: If you don't have an SMTP server, try using a local SMTP container like [Mailpit](https://hub.docker.com/r/axllent/mailpit). With Mailpit, set `SMTP_HOST=mailpit` and `SMTP_PORT=1025` in your container.
+> [!TIP]
+> If you don't have an SMTP server, try using a local SMTP container like [Mailpit](https://hub.docker.com/r/axllent/mailpit). With Mailpit, set `SMTP_HOST=mailpit` and `SMTP_PORT=1025` in your container.
 
 
-## Debug Mode
+### Debug mode
 
-Enable verbose logging by setting `DEBUG=1` when starting the container.
-
-Command line:
+Set `DEBUG=1` to turn on verbose logging and to see which hooks run:
 
 ```shell
 docker run -e DEBUG=1 shinsenter/php:8.5-fpm-nginx
 ```
 
-docker-compose:
 
-```yml
-services:
-  web:
-    image: shinsenter/php:8.5-fpm-nginx
-    environment:
-      DEBUG: "1"
-```
+### System settings
 
+Environment variables for fine-tuning container behavior.
 
-## Other System Settings
+#### General
 
-Additional environment variables for fine-tuning container behavior:
-
-| Setting Name                       | Default Value    | Description                                                                  | Example |
-|------------------------------------|------------------|------------------------------------------------------------------------------|---------|
+| Setting Name | Default Value | Description | Example |
+|---|---|---|---|
 | `DEFAULT_LOG_PATH`                 | `/proc/1/fd/2`   | Where logs are written. By default, logs are sent to the container's stdout. | `/var/log/container.txt` |
 | `DEBUG` or `DEBUG_MODE`            | Not set          | Enable verbose logging when set to `1`.                                      | `1`     |
 | `TZ`                               | `UTC`            | Set the container's timezone. See the list of timezones.                     | `Asia/Tokyo` |
 | `ALLOW_RUNTIME_PHP_ENVVARS`        | Not set          | Allow `$PHP_*` variables to override PHP configuration at runtime.           | `1`     |
+| `DISABLE_GREETING`                 | Not set          | Suppress the startup greeting with `1`.                                      | `1`     |
+| `ENABLE_SSHD`                      | Not set          | Enable SSH server inside the container when `1`.                             | `1`     |
+| `SSHD_AUTHORIZED_KEYS`             | Not set          | Public SSH keys (one per line). When not empty, they replace the content of `~/.ssh/authorized_keys` at every start. | `ssh-rsa AAAA...` |
+| `SUPERVISOR_PHP_COMMAND`           | Not set          | Override the PHP command used by supervisor. Quotes group arguments that contain spaces. | `php -S localhost:80 index.php` |
+
+
+#### Project startup and autorun
+
+| Setting Name | Default Value | Description | Example |
+|---|---|---|---|
 | `INITIAL_PROJECT`                  | Not set          | Used only when the app directory is empty. A URL starting with `http` and ending in `.zip` or `.tar.gz` is downloaded and extracted. A URL ending in `.git` is cloned. A value like `vendor/package` is created with `composer create-project`. Any other value runs the `create-project` hook. | `https://example.com/project.zip` |
 | `INITIAL_PROJECT_GIT_OPTIONS`      | Not set          | Options passed to `git clone` when `INITIAL_PROJECT` is a `http*.git` URL.   | `-b develop` |
 | `DISABLE_AUTORUN_SCRIPTS`          | Not set          | Set to `1` to disable autorun scripts.                                       | `1`     |
@@ -487,10 +475,13 @@ Additional environment variables for fine-tuning container behavior:
 | `DISABLE_AUTORUN_COMPOSER_INSTALL` | Not set          | Skip running `composer install` during startup when set to `1`. It does not stop `COMPOSER_OPTIMIZE_AUTOLOADER`. | `1`     |
 | `DISABLE_AUTORUN_GENERATING_INDEX` | Not set          | Do not generate `index.php` when set to `1`.                                 | `1`     |
 | `DISABLE_AUTORUN_FIX_OWNER_GROUP`  | Not set          | When `1`, no command changes the owner of files in `APP_PATH` or `DOCUMENT_ROOT`: no ownership fix, no owner on created directories, and no UID/GID migration there. Files and directories the container creates there, such as a missing `DOCUMENT_ROOT` or `index.php`, belong to root, so set the owner of paths that `APP_USER` must write to yourself. | `1`     |
-| `DISABLE_GREETING`                 | Not set          | Suppress the startup greeting with `1`.                                      | `1`     |
 | `COMPOSER_OPTIMIZE_AUTOLOADER`     | Not set          | When `1`, run `composer dumpautoload --optimize --no-cache` at startup if `composer.lock` and the `vendor` directory exist. | `1`     |
-| `ENABLE_SSHD`                      | Not set          | Enable SSH server inside the container when `1`.                             | `1`     |
-| `SSHD_AUTHORIZED_KEYS`             | Not set          | Public SSH keys (one per line). When not empty, they replace the content of `~/.ssh/authorized_keys` at every start. | `ssh-rsa AAAA...` |
+
+
+#### Cron
+
+| Setting Name | Default Value | Description | Example |
+|---|---|---|---|
 | `ENABLE_CRONTAB`                   | Not set          | Enable Crontab service when `1`. Jobs are loaded from `$CRONTAB_DIR`.        | `1`     |
 | `ENABLE_CRONTAB_DEBUG`             | Not set          | Adds a debug cron job that runs every minute when `1`. When set, it takes priority over `DEBUG`, so `0` removes the job even if `DEBUG=1`. | `1`     |
 | `CRONTAB_DIR`                      | `/etc/crontab.d` | Directory for crontab definitions. Jobs run as `$APP_USER`.                  | `/path/for/crontab/schedules` |
@@ -500,7 +491,12 @@ Additional environment variables for fine-tuning container behavior:
 | `CRONTAB_SETTINGS`                 | Not set          | Define cron jobs directly via environment variable.                          | `0 0 * * * echo "..."` |
 | `CRONTAB_SHELL`                    | `/bin/bash`      | Default shell for cron jobs.                                                 | `/bin/bash` |
 | `CRONTAB_TZ`                       | `$TZ`            | Timezone used for cron jobs.                                                 | `Asia/Tokyo` |
-| `SUPERVISOR_PHP_COMMAND`           | Not set          | Override the PHP command used by supervisor. Quotes group arguments that contain spaces. | `php -S localhost:80 index.php` |
+
+
+#### Tuning and Apache
+
+| Setting Name | Default Value | Description | Example |
+|---|---|---|---|
 | `ENABLE_TUNING_FPM`                | Not enabled      | Enable automatic tuning of PHP-FPM settings when set to `1`. Uses the CPU limit of the container, or the host CPU count if there is none. A `PHP_PM*` variable you pass replaces the tuned value. See [Customizing PHP-FPM](#customizing-php-fpm). | `1`     |
 | `ENABLE_TUNING_MPM`                | Not enabled      | Enable automatic tuning of Apache MPM settings when set to `1`. Uses the CPU and memory limits of the container, or the host values if there are none. | `1`     |
 | `APACHE_ALLOW_OVERRIDE`            | `all`            | Value of `AllowOverride` for the document root. `none` skips reading `.htaccess` files on every request, but rules in `.htaccess` stop working. | `none` |
@@ -513,21 +509,25 @@ Additional environment variables for fine-tuning container behavior:
 | `APACHE_REQUEST_READ_TIMEOUT`      | `header=20-40,MinRate=500 body=20,MinRate=500` | Value of `RequestReadTimeout`. It closes connections that send the request too slowly. | `header=10-20,MinRate=500 body=20,MinRate=500` |
 
 
-## Supported Platforms
+## About This Project
 
-See our [Docker Hub](https://hub.docker.com/r/shinsenter/php/tags) for available platforms. Images are built for both Debian and Alpine variants.
+### Supported Platforms
 
-> **Note:** From 2026-10-25, the rarely used platforms `linux/386`, `linux/arm/v7`, `linux/ppc64le` and `linux/s390x` are no longer built. Tags published before that date keep them until they are rebuilt.
+See the [Docker Hub tags](https://hub.docker.com/r/shinsenter/php/tags) for the platforms of each image.
+
+> [!NOTE]
+> From 2026-10-25, the rarely used platforms `linux/386`, `linux/arm/v7`, `linux/ppc64le` and `linux/s390x` are no longer built. Tags published before that date keep them until they are rebuilt.
 
 
-## Stable Image Tags
+### Stable Image Tags
 
 For stable, production-ready images we maintain dated tags in a separate repository.
 
-> 👉🏻 View Stable Tags: https://hub.docker.com/r/shinsenter/php-archives/tags
+> [!NOTE]
+> View stable tags: https://hub.docker.com/r/shinsenter/php-archives/tags
 
 
-## How Images Are Updated
+### How Images Are Updated
 
 Images are no longer rebuilt on a daily schedule. The [Watch updates](https://code.shin.company/php/actions/workflows/watch-updates.yml) workflow runs every 30 minutes and compares each published image with its current inputs:
 
@@ -545,15 +545,15 @@ docker buildx imagetools inspect --raw shinsenter/php:8.5-fpm | jq '.annotations
 
 These images are built from the official `php` image, so they can only be rebuilt after the official image for the new PHP release is published on Docker Hub. To check the PHP version in a container, run `php -v`.
 
-Maintainers can start a build by hand from the [Build all](https://code.shin.company/php/actions/workflows/build-all.yml) workflow. Use `php_versions` (for example `8.5 8.4`) to build selected versions, and `force_build` to build even when an image is up to date.
+Maintainers can start a build by hand from the [Build all](https://code.shin.company/php/actions/workflows/build-all.yml) workflow, with `php_versions` (for example `8.5 8.4`) and `force_build`.
 
 
-## Contributing
+### Contributing
 
 If these images are useful to you, donate via [PayPal](https://www.paypal.me/shinsenter) or open an issue on [GitHub](https://code.shin.company/php/issues/new).
 
 
-## License
+### License
 
 This project is licensed under the [GNU General Public License v3.0](https://code.shin.company/php/blob/main/LICENSE).
 
