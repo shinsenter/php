@@ -31,4 +31,4 @@ Checks that need no build: `sh -n`, `bash -n`, `git apply --check`, `git diff`.
 - The `config` test runs only the paths of `build/config.sh` that end before any network call (Alpine on PHP below 7.1). Do not add cases that reach the registry or GitHub API.
 - Not covered, so still ask the user for a run: `patch -p1 --dry-run` on a source tree, image contents, runtime behavior of hooks and utils (`realpath -m` needs GNU, so `app-root` does not run on macOS). Use `tests/build-test.sh` and `tests/compose-test.sh` for those (see Working rules).
 - `tests/scaling-test.sh <image> [replicas]` is a Docker test: Traefik in front of replicas (`tests/docker-compose.scaling.yml`, app in `tests/scaling/`). The offline part is `tests/run.sh scaling`. See `.claude/docs/scaling.md`.
-- `tests/tools/` holds helpers (`act-dryrun.sh`, `sbom.sh`), not tests. `tests/logs/` is git-ignored output of `build-test.sh`.
+- `tests/tools/` holds helpers (`act-dryrun.sh`, `sbom.sh`), not tests. `tests/logs/` is git-ignored output of the Docker tests. File names are `<YYYYMMDD>-<script>-...`, so `ls` sorts by test day.
