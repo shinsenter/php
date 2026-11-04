@@ -93,7 +93,7 @@ fi
         --build-arg S6_PATH=$S6_PATH \
         --build-arg S6_VERSION=$S6_VERSION
     exit_code=$?
-} 2>&1 | tee "$LOG_DIR/$(slugify "${BUILD_TAG/shinsenter\//}").txt"
+} 2>&1 | tee "$LOG_DIR/$(date +%Y%m%d)-build-$(slugify "${BUILD_TAG/shinsenter\//}").txt"
 
 if [ "$BUILD_CONTEXT" != "$BASE_DIR/src/php" ]; then
     rm -rf "$BUILD_CONTEXT/meta.dockerfile"

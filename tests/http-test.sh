@@ -18,6 +18,8 @@ set -u
 
 BASE_DIR="$(git rev-parse --show-toplevel)"
 LOG_DIR="$BASE_DIR/tests/logs"
+# Date first so ls sorts by test day, then script name
+LOG_PREFIX="$LOG_DIR/$(date +%Y%m%d)-http"
 
 # "--serial" can be anywhere in the arguments
 PARALLEL=1
@@ -61,7 +63,7 @@ done
 
 # Build phase. Each build writes its exit code to $STATUS/<server>.
 build() {
-    "$BASE_DIR/tests/build-test.sh" '' "with-$1" "$PHP_VERSION" >"$LOG_DIR/http-$1-$PHP_VERSION.log" 2>&1
+    "$BASE_DIR/tests/build-test.sh" '' "with-$1" "$PHP_VERSION" >"$LOG_PREFIX-$1-$PHP_VERSION.log" 2>&1
     echo $? >"$STATUS/$1"
 }
 
@@ -71,7 +73,7 @@ if [ "${SKIP_BUILD:-0}" != 1 ]; then
         # The other builds then reuse those images and run in parallel.
         first=1
         for server in $SERVERS; do
-            echo "==> Build $server (log: $LOG_DIR/http-$server-$PHP_VERSION.log)"
+            echo "==> Build $server (log: $LOG_PREFIX-$server-$PHP_VERSION.log)"
             if [ "$first" = 1 ]; then
                 build "$server"
                 first=0
@@ -83,7 +85,7 @@ if [ "${SKIP_BUILD:-0}" != 1 ]; then
         wait
     else
         for server in $SERVERS; do
-            echo "==> Build $server (log: $LOG_DIR/http-$server-$PHP_VERSION.log)"
+            echo "==> Build $server (log: $LOG_PREFIX-$server-$PHP_VERSION.log)"
             build "$server"
         done
     fi
@@ -101,7 +103,7 @@ for server in $SERVERS; do
         *) echo "Unknown server: $server" >&2; exit 2 ;;
     esac
     tag="shinsenter/$image:local-php$PHP_VERSION"
-    log="$LOG_DIR/http-$server-$PHP_VERSION.log"
+    log="$LOG_PREFIX-$server-$PHP_VERSION.log"
 
     echo "==> [$server] $tag"
     if [ "${SKIP_BUILD:-0}" != 1 ] && [ "$(cat "$STATUS/$server" 2>/dev/null)" != 0 ]; then

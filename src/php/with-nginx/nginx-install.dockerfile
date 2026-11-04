@@ -40,7 +40,8 @@ if [ -n "$NGINX_VERSION" ] && [ "$NGINX_VERSION" != os ]; then
     if sh /tmp/nginx-build; then
         make -C /usr/src/nginx install
         strip --strip-all "$(type -P nginx)" || true
-        rm -f /etc/nginx/*.default
+        # make install keeps the binary of the OS package next to the new one
+        rm -f "$(type -P nginx).old" /etc/nginx/*.default
     else
         echo "WARNING: cannot build Nginx $NGINX_VERSION, keep the version from the OS package" >&2
     fi

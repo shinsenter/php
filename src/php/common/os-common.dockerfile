@@ -48,12 +48,13 @@ echo 'Configure OS middlewares'
 [ -z "$DEBUG" ] || set -x; set -e
 
 # Install common packages
-APK_PACKAGES='findutils ncurses ncurses-terminfo run-parts shadow tar tzdata unzip xz' \
-APT_PACKAGES='ncurses-base ncurses-bin xz-utils' \
+APK_PACKAGES='findutils ncurses run-parts shadow tar tzdata unzip xz' \
+APT_PACKAGES='busybox ncurses-base ncurses-bin xz-utils' \
 pkg-add bash ca-certificates coreutils curl htop less openssl procps msmtp upgrade
 
-# Install vim-tiny apart, so a mirror lagging behind vim-common does not break the build
-APT_PACKAGES='vim-tiny' pkg-add || true
+# vi comes from busybox, a smaller editor than vim-tiny
+# Alpine has the applet already, Debian ships only the busybox binary
+has-cmd vi || { [ ! -x /bin/busybox ] || ln -s /bin/busybox /usr/local/bin/vi; }
 
 # Replace sh binary with bash
 BASH_PATH="$(command -v bash)"

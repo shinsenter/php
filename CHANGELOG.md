@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 
 
+## [Unreleased]
+- Make Debian images 81 to 149 MB smaller by removing the packages that the extension build leaves behind: `binutils`, the `gcc` sanitizer libraries, `perl`, `m4`, `patch` and `pkgconf`. The images no longer include `perl`. `phpaddmod` installs the build tools again when it needs them.
+- Make Alpine images 10 to 13 MB smaller by dropping the full `ncurses-terminfo` package. The `ncurses-terminfo-base` package stays, so `htop`, `less` and `vi` keep working in common terminals.
+- Delete the `nginx.old` binary that the Nginx build leaves next to `nginx`.
+- Replace `vim-tiny` with BusyBox `vi` on Debian, as Alpine already does. The `vim` command is no longer available.
+- Add `tests/tools/image-slim-check.sh`, a read-only check that lists removable packages and files in a built image.
+
+
 ## [6.1.0] - 2026-11-03
 - Raise the Go modules `grpc`, `containerd/v2`, `otel`, `otel/sdk` and `klauspost/compress` in the `shinsenter/dockerfile-x` image to clear HIGH CVEs. `moby/buildkit` stays at 0.23.2 because 0.28.1 does not compile with the upstream frontend.
 - Add environment variables for Apache deflate, keep-alive, expires, overrides and the MPM profile.
