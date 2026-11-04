@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Debian only. phpaddmod installs these again through PHPIZE_DEPS when needed.
+has-cmd dpkg-query || exit 0
+
+debug-echo "Remove toolchain leftovers."
+
+# patterns cover the names of every supported Debian release (libasan6 and libasan8, perl 5.32 and 5.40, ...)
+# the status filter skips packages that dpkg only remembers as removed
+leftovers="$(dpkg-query -Wf '${db:Status-Status} ${Package}\n' \
+    'binutils*' libbinutils libctf0 libctf-nobfd0 libsframe1 libgprofng0 libjansson4 \
+    'libasan*' 'libtsan*' libhwasan0 liblsan0 libubsan1 libitm1 libgomp1 libcc1-0 \
+    'libisl*' libmpc3 libmpfr6 libc-dev-bin m4 patch pkgconf rpcsvc-proto \
+    perl 'libperl5*' 'perl-modules-*' libdpkg-perl 2>/dev/null | awk '$1 == "installed" {print $2}' | tr '\n' ' ')"
+
+[ -z "$leftovers" ] || APT_PACKAGES="$leftovers" exec pkg-del
