@@ -6,10 +6,32 @@ debug-echo "Remove toolchain leftovers."
 
 # patterns cover the names of every supported Debian release (libasan6 and libasan8, perl 5.32 and 5.40, ...)
 # the status filter skips packages that dpkg only remembers as removed
-leftovers="$(dpkg-query -Wf '${db:Status-Status} ${Package}\n' \
+installed() {
+    dpkg-query -Wf '${db:Status-Status} ${Package}\n' "$@" 2>/dev/null \
+        | awk '$1 == "installed" {print $2}' | tr '\n' ' '
+}
+
+# A group is removed only when apt takes nothing else with it.
+# For example apache2 depends on perl, so removing perl would remove Apache.
+safe() {
+    local extra
+    extra="$(apt-get -s --purge remove "$@" 2>&1 | awk '/^Purg/ {print $2}' \
+        | grep -vxF -f <(printf '%s\n' "$@") | tr '\n' ' ' || true)"
+    [ -z "$extra" ] && return 0
+    debug-echo -w "Keep: removing it would also remove $extra"
+    return 1
+}
+
+toolchain="$(installed \
     'binutils*' libbinutils libctf0 libctf-nobfd0 libsframe1 libgprofng0 libjansson4 \
     'libasan*' 'libtsan*' libhwasan0 liblsan0 libubsan1 libitm1 libgomp1 libcc1-0 \
-    'libisl*' libmpc3 libmpfr6 libc-dev-bin m4 patch pkgconf rpcsvc-proto \
-    perl 'libperl5*' 'perl-modules-*' libdpkg-perl 2>/dev/null | awk '$1 == "installed" {print $2}' | tr '\n' ' ')"
+    'libisl*' libmpc3 libmpfr6 libc-dev-bin m4 patch pkgconf rpcsvc-proto)"
+perl_group="$(installed perl 'libperl5*' 'perl-modules-*' libdpkg-perl)"
+
+leftovers=""
+for group in "$toolchain" "$perl_group"; do
+    [ -n "$group" ] || continue
+    if safe $group; then leftovers="$leftovers $group"; fi
+done
 
 [ -z "$leftovers" ] || APT_PACKAGES="$leftovers" exec pkg-del
