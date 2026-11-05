@@ -19,6 +19,17 @@ Code that runs as the application user (`www-data` by default), for example thro
 - Cause: by design. `web-do`, `autorun`, `ownership` and the `web-*` utilities need root to switch users and fix owners. `os-common.dockerfile` installs `/sbin/su-exec`, `autorun`, `ownership`, `web-*` and the entrypoint with mode 4755. Whether this `su-exec` build refuses to switch to root is not checked.
 - Fix: not fixed. Needs a design change, for example limiting these helpers to root or to a dedicated group.
 
+## Unreleased
+
+### [#451](https://github.com/shinsenter/php/issues/451) `apache2: not found` in the Debian Apache images
+
+Debian images built after the cleanup change of 2026-11-04 started PHP-FPM but not Apache. The log shows `apache2: command not found` and `exec: apache2: not found`. Images built on `phpfpm-apache`, such as `codeigniter4:php8.5-apache`, had the same problem.
+
+- Cause: the cleanup hook `10-toolchain-leftovers` removed `perl`. The `apache2` package depends on `perl`, so `apt-get purge` removed `apache2` and `apache2-bin` with it.
+- The FrankenPHP Debian images lost `mailcap` and `media-types` in the same way, because both depend on `perl`. `media-types` provides `/etc/mime.types`. This produced no startup error.
+- Fix: the hook removes a package group only when `apt-get -s` shows that apt takes nothing else with it. The Apache and FrankenPHP images keep `perl`, and the build tools are still removed.
+- Tested: HTTP checks (`/`, `/index.php`, blocked `/.env`, security headers, no log errors, no restart) pass for Nginx, Apache, FrankenPHP and RoadRunner on Debian and Alpine with PHP 8.5, 8.4, 8.3 and 8.2 for the servers built so far. Older PHP versions were still being tested when this was merged.
+
 ## 6.0.0
 
 ### [#442](https://github.com/shinsenter/php/issues/442) Startup changed the owner of the host Docker socket

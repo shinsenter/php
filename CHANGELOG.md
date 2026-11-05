@@ -4,10 +4,11 @@ All notable changes to this project will be documented in this file.
 
 
 ## [Unreleased]
-- Make Debian images 81 to 149 MB smaller by removing the packages that the extension build leaves behind: `binutils`, the `gcc` sanitizer libraries, `perl`, `m4`, `patch` and `pkgconf`. The images no longer include `perl`. `phpaddmod` installs the build tools again when it needs them.
+- Make Debian images 81 to 149 MB smaller by removing the packages that the extension build leaves behind: `binutils`, the `gcc` sanitizer libraries, `perl`, `m4`, `patch` and `pkgconf`. The images no longer include `perl`, unless another package needs it, such as `apache2`. `phpaddmod` installs the build tools again when it needs them.
 - Make Alpine images 10 to 13 MB smaller by dropping the full `ncurses-terminfo` package. The `ncurses-terminfo-base` package stays, so `htop`, `less` and `vi` keep working in common terminals.
 - Delete the `nginx.old` binary that the Nginx build leaves next to `nginx`.
 - Replace `vim-tiny` with BusyBox `vi` on Debian, as Alpine already does. The `vim` command is no longer available.
+- Fix the Debian Apache images that started without `apache2` (#451). The same cleanup also removed `mailcap` and `media-types` from the FrankenPHP images. The cleanup hook now removes a package group only when no other package depends on it.
 - Add `tests/tools/image-slim-check.sh`, a read-only check that lists removable packages and files in a built image.
 
 
