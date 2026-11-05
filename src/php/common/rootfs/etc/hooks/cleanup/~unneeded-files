@@ -17,7 +17,10 @@ find /var/log -type f -name "*.log" -exec truncate -s 0 {} \; &>/dev/null || tru
 \rm -rf /usr/local/php/man/* /usr/local/lib/php/doc/* /usr/local/lib/php/test/* &>/dev/null || true
 
 # clean temporary and cache files
-\rm -rf /tmp/* /var/tmp/* /root/.cache &>/dev/null || true
+\rm -rf /tmp/* /root/.cache &>/dev/null || true
+
+# keep /var/tmp/nginx: Nginx on old Alpine keeps its temp files there and does not start without it
+find /var/tmp -mindepth 1 -maxdepth 1 ! -name nginx -exec \rm -rf {} + &>/dev/null || true
 
 # clean service files (not needed in containers)
 \rm -rf /etc/systemd/* /lib/systemd/* /lib/modules/* /lib/firmware/* &>/dev/null || true

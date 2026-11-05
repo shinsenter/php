@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - Delete the `nginx.old` binary that the Nginx build leaves next to `nginx`.
 - Replace `vim-tiny` with BusyBox `vi` on Debian, as Alpine already does. The `vim` command is no longer available.
 - Fix the Debian Apache images that started without `apache2` (#451). The same cleanup also removed `mailcap` and `media-types` from the FrankenPHP images. The cleanup hook now removes a package group only when no other package depends on it.
+- Fix Nginx not starting in the PHP 7.1 Alpine images. The cleanup deleted `/var/tmp/nginx`, which the Nginx of Alpine 3.10 needs for temporary files. The cleanup now keeps that directory.
 - Add `tests/tools/image-slim-check.sh`, a read-only check that lists removable packages and files in a built image.
 
 
