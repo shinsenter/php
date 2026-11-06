@@ -21,6 +21,15 @@ Code that runs as the application user (`www-data` by default), for example thro
 
 ## Unreleased
 
+### [#454](https://github.com/shinsenter/php/issues/454) Alpine: sshd accepts passwords over 256 bytes for `*` accounts
+
+Not reported by a user. Found through https://sshhole.com/. On musl without PAM, `crypt()` returns `*` for a password longer than 256 bytes, and OpenSSH compares it with a `*` field in `/etc/shadow`. A password of 257 bytes or more then logs in to any account locked with `*`. Debian (glibc, PAM) is not affected.
+
+- Cause: with `ENABLE_SSHD=1` and `SSHD_PASSWORD_AUTH=1` but no `SSHD_PASSWORD`, the hook `00-ssh-server` set the field to `*` and still wrote `PasswordAuthentication yes`.
+- Fix: the hook writes `PasswordAuthentication no` when the account has no password, and prints a warning. An account with a real password keeps password login.
+- Still open: with `SSHD_PERMIT_ROOT_LOGIN=1` and password auth on for another user, `root` is `*` on Alpine 3.16 and later, so the same bypass works for `root`. Keep `SSHD_PERMIT_ROOT_LOGIN` off, or upgrade `openssh` to the fixed version once the Alpine repository has it.
+- Tested: `tests/run.sh ssh` runs the hook with stub commands and fails on the old hook. Not tested with a real sshd on Alpine.
+
 ### [#451](https://github.com/shinsenter/php/issues/451) `apache2: not found` in the Debian Apache images
 
 Debian images built after the cleanup change of 2026-11-04 started PHP-FPM but not Apache. The log shows `apache2: command not found` and `exec: apache2: not found`. Images built on `phpfpm-apache`, such as `codeigniter4:php8.5-apache`, had the same problem.

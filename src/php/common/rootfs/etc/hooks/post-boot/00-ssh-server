@@ -73,6 +73,13 @@ elif [ "$(getent shadow "$SSHD_USER" | cut -d: -f2)" = "!" ]; then
     usermod -p '*' "$SSHD_USER"
 fi
 
+# musl crypt() returns '*' for passwords over 256 bytes, which matches a '*' field in shadow
+# so an account without a real password must not accept passwords
+if is-true "$SSHD_PASSWORD_AUTH" && [ "$(getent shadow "$SSHD_USER" | cut -d: -f2)" = "*" ]; then
+    debug-echo -w "\$SSHD_PASSWORD_AUTH is ignored: $SSHD_USER has no password. Set \$SSHD_PASSWORD."
+    SSHD_PASSWORD_AUTH=0
+fi
+
 # authorized_keys
 if [ -n "$SSHD_AUTHORIZED_KEYS" ]; then
     printf "%s\n" "$SSHD_AUTHORIZED_KEYS" > "$SSH_KEYS_CONF"
