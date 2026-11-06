@@ -20,6 +20,7 @@ Which test to run:
 | `build/versions.sh`, `build/helpers.sh` | `run.sh versions` |
 | `src/php-backports/` (patch, README) | `run.sh backports` |
 | `build/config.sh` | `run.sh config` |
+| `00-ssh-server` hook | `run.sh ssh` |
 | Web server config, health checks, shutdown (`with-*`, `s6` defaults) | `run.sh scaling` |
 | Anything else in `build/`, or unsure | `run.sh` |
 

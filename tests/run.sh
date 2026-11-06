@@ -8,7 +8,7 @@
 ################################################################################
 # Offline tests (no Docker, no build). Exit code is non-zero when any fails.
 #   tests/run.sh                 run all
-#   tests/run.sh versions        run one: lint, versions, backports, config, scaling
+#   tests/run.sh versions        run one: lint, versions, backports, config, scaling, ssh
 # Other scripts source this file to reuse the check helpers; the tests run only
 # when it is executed directly.
 #
@@ -326,10 +326,66 @@ test_scaling() {
     finish
 }
 
+# ssh: the sshd hook must never leave password auth on for an account locked with '*'.
+# musl crypt() returns '*' for passwords over 256 bytes, which would match the shadow field.
+# The hook runs with stub commands and a temporary root, so it needs no Docker.
+test_ssh() {
+    cd "$BASE_DIR" || exit 1
+    local hook="$BASE_DIR/src/php/common/rootfs/etc/hooks/post-boot/00-ssh-server"
+    local utils="$BASE_DIR/src/php/common/rootfs/usr/local/utils"
+    local tmp stub conf
+    tmp="$(mktemp -d)"
+    stub="$tmp/bin"
+    mkdir -p "$stub"
+    trap 'rm -rf "$tmp"' RETURN
+
+    # commands the hook calls: the real is-true, a shadow file as state, no-ops for the rest
+    cp "$utils/is-true" "$stub/is-true"
+    for cmd in has-cmd has-s6 s6-service debug-echo pkg-add groupadd useradd ssh-keygen chown; do
+        printf '#!/bin/sh\nexit 0\n' > "$stub/$cmd"
+    done
+    printf '#!/bin/sh\nexit 1\n' > "$stub/is-debug"
+    printf '#!/bin/sh\necho 1000\n' > "$stub/id"
+    printf '#!/bin/sh\nexit 0\n' > "$stub/with-env"
+    printf '#!/bin/sh\nfor a; do :; done; echo "$a"\n' > "$stub/realpath"
+    printf '#!/bin/sh\nif [ "$1" = shadow ]; then echo "$2:$(cat "$SHADOW"):::"; else echo "$2:x:1000:1000::$HOME_STUB:/bin/bash"; fi\n' > "$stub/getent"
+    printf '#!/bin/sh\n[ "$1" = "-p" ] && printf %%s "$2" > "$SHADOW"\nexit 0\n' > "$stub/usermod"
+    printf '#!/bin/sh\nread -r line; printf %%s "\\$6\\$hash" > "$SHADOW"\n' > "$stub/chpasswd"
+    chmod +x "$stub"/*
+
+    # run_hook <initial shadow field> <env assignments...>: prints the generated sshd config
+    run_hook() {
+        local shadow="$1"
+        shift
+        printf %s "$shadow" > "$tmp/shadow"
+        mkdir -p "$tmp/home" "$tmp/run"
+        # /run is not writable on every host, so point the config at the temporary root
+        sed "s#/run#$tmp/run#g; s#/var$tmp/run#$tmp/run#g" "$hook" > "$tmp/hook.sh"
+        env -i PATH="$stub:/usr/bin:/bin" SHADOW="$tmp/shadow" HOME_STUB="$tmp/home" APP_USER=www-data \
+            ENABLE_SSHD=1 "$@" bash "$tmp/hook.sh" >/dev/null 2>&1
+        cat "$tmp/run/sshd_env.conf" 2>/dev/null
+    }
+
+    conf="$(run_hook '!' SSHD_PASSWORD_AUTH=1)"
+    check "ssh: password auth without a password is off" grep -qx 'PasswordAuthentication no' <<< "$conf"
+    conf="$(run_hook '*' SSHD_PASSWORD_AUTH=1)"
+    check "ssh: '*' account with password auth requested is off" grep -qx 'PasswordAuthentication no' <<< "$conf"
+    conf="$(run_hook '!' SSHD_PASSWORD_AUTH=1 SSHD_PASSWORD=)"
+    check "ssh: empty SSHD_PASSWORD is off" grep -qx 'PasswordAuthentication no' <<< "$conf"
+    conf="$(run_hook '!' SSHD_PASSWORD_AUTH=1 SSHD_PASSWORD=secret hash=abc)"
+    check "ssh: password auth stays on with a password" grep -qx 'PasswordAuthentication yes' <<< "$conf"
+    conf="$(run_hook '!')"
+    check "ssh: default is off" grep -qx 'PasswordAuthentication no' <<< "$conf"
+    conf="$(run_hook '$6$salt$realhash' SSHD_PASSWORD_AUTH=1)"
+    check "ssh: account with an existing hash keeps password auth" grep -qx 'PasswordAuthentication yes' <<< "$conf"
+
+    finish
+}
+
 # Each test runs in a subshell: its counters and sourced files stay private.
 if [ "${BASH_SOURCE[0]}" = "$0" ]; then
     status=0
-    for name in ${@:-lint versions backports config scaling}; do
+    for name in ${@:-lint versions backports config scaling ssh}; do
         echo "== $name"
         (NAME="$name"; "test_$name") || status=1
     done
