@@ -106,6 +106,15 @@ jobs:
           else
             php_versions=("${ALL_PHP_VERSIONS[@]}")
           fi
+          # Outdated versions build slower (old toolchains, PHP rebuilt from source for 7.3 to 8.1).
+          # They go first in the matrix so they do not wait for a free runner at the end.
+          ordered=()
+          for version in "${OUTDATED_PHP_VERSIONS[@]}" "${MAINTAINED_PHP_VERSIONS[@]}"; do
+            for item in "${php_versions[@]}"; do
+              if [ "$item" = "$version" ]; then ordered+=("$version"); fi
+            done
+          done
+          php_versions=("${ordered[@]}")
           php_versions_json=$(printf '%s\n' "${php_versions[@]}" | jq -R . | jq -sc .)
 
           # For debugging purposes
