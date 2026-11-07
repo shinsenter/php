@@ -21,6 +21,15 @@ Code that runs as the application user (`www-data` by default), for example thro
 
 ## Unreleased
 
+### [#456](https://github.com/shinsenter/php/issues/456) Client IP behind Cloudflare wrong after 6.1
+
+After updating to 6.1, an app behind Cloudflare saw the wrong client IP.
+
+- Cause: 6.1 trusted `X-Forwarded-For` from the private ranges by default in Nginx and Apache. The load balancer between Cloudflare and the container is in a private range, so the server took the next address in the header, which is a Cloudflare address, as the client. Before 6.1 the server left `REMOTE_ADDR` alone and the app read the header itself.
+- Fix: Nginx and Apache trust no proxy by default again. `TRUSTED_PROXIES` turns the feature on, and Cloudflare ranges can be listed there.
+- Still open: FrankenPHP and RoadRunner still trust the private ranges by default.
+- Tested: `tests/run.sh scaling` checks that the default config trusts no proxy. Not tested with a running image.
+
 ### [#454](https://github.com/shinsenter/php/issues/454) Alpine: sshd accepts passwords over 256 bytes for `*` accounts
 
 Not reported by a user. Found through https://sshhole.com/. On musl without PAM, `crypt()` returns `*` for a password longer than 256 bytes, and OpenSSH compares it with a `*` field in `/etc/shadow`. A password of 257 bytes or more then logs in to any account locked with `*`. Debian (glibc, PAM) is not affected.

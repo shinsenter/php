@@ -124,7 +124,7 @@ The main port (80) carries the traffic, and the health check uses `HEALTH_PORT`.
 
 | Variable | Default | Effect |
 |---|---|---|
-| `TRUSTED_PROXIES` | empty | CIDRs (comma or space separated) that may set `X-Forwarded-For` and `X-Forwarded-Proto`. Added to the private ranges that are always trusted |
+| `TRUSTED_PROXIES` | empty | CIDRs (comma or space separated) that may set `X-Forwarded-For` and `X-Forwarded-Proto`. Nginx and Apache trust no proxy until this is set |
 | `SHUTDOWN_DELAY` | `0` | Seconds to wait after the stop signal before the servers stop, so the load balancer can remove the replica |
 | `S6_SERVICES_GRACETIME`, `S6_KILL_GRACETIME` | `25000` | Milliseconds the servers get to finish running requests. Keep below `terminationGracePeriodSeconds` (30 s by default) |
 | `PHP_PING_PATH` | `/ping` | FPM ping path used by `/readyz` (Nginx and Apache) |
@@ -132,15 +132,16 @@ The main port (80) carries the traffic, and the health check uses `HEALTH_PORT`.
 | `HEALTH_CHECK_URL` | `http://127.0.0.1:${HEALTH_PORT}/healthz` | See the table above (RoadRunner uses `/health?plugin=http`) |
 | `CADDY_GRACE_PERIOD` | `20s` | FrankenPHP: time for running requests on stop |
 
-FrankenPHP and RoadRunner read `TRUSTED_PROXIES` the same way, and trust the private ranges by default too.
-Always trusted: `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `169.254.0.0/16`, `127.0.0.0/8`, `fd00::/8`.
-That covers pod IPs, Traefik in the cluster and AWS or GCP load balancers inside the VPC.
-Add `TRUSTED_PROXIES` for proxies outside these ranges, for example Google front ends `130.211.0.0/22,35.191.0.0/16` or Cloudflare.
+Nginx and Apache trust no proxy by default, so `REMOTE_ADDR` stays the address of the connection and the app reads `X-Forwarded-For` itself, as in 5.x.
+Set `TRUSTED_PROXIES` to let the server replace `REMOTE_ADDR` and honor `X-Forwarded-Proto`, for example `10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` for pod IPs, Traefik and load balancers inside the VPC.
+With Cloudflare in front, list the load balancer and the Cloudflare ranges.
+FrankenPHP and RoadRunner read `TRUSTED_PROXIES` the same way, and also trust the private ranges `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `169.254.0.0/16`, `127.0.0.0/8` and IPv6 private ranges.
 
 ## HTTPS behind a proxy
 
 `X-Forwarded-Proto: https` sets `$_SERVER['HTTPS']` to `on` and `REQUEST_SCHEME` to `https`.
 The header is used only when the proxy that sent it is trusted, which is the same rule as for the client address.
+On Nginx and Apache that needs `TRUSTED_PROXIES`.
 A client that connects directly cannot fake it.
 
 ## Stopping a replica
