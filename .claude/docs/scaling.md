@@ -135,7 +135,7 @@ The main port (80) carries the traffic, and the health check uses `HEALTH_PORT`.
 Nginx and Apache trust no proxy by default, so `REMOTE_ADDR` stays the address of the connection and the app reads `X-Forwarded-For` itself, as in 5.x.
 Set `TRUSTED_PROXIES` to let the server replace `REMOTE_ADDR` and honor `X-Forwarded-Proto`, for example `10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` for pod IPs, Traefik and load balancers inside the VPC.
 With Cloudflare in front, list the load balancer and the Cloudflare ranges.
-FrankenPHP and RoadRunner read `TRUSTED_PROXIES` the same way, and also trust the private ranges `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `169.254.0.0/16`, `127.0.0.0/8` and IPv6 private ranges.
+FrankenPHP and RoadRunner read `TRUSTED_PROXIES` the same way and trust no proxy by default.
 
 ## HTTPS behind a proxy
 

@@ -430,7 +430,7 @@ To use PHP's `mail()` function, configure SMTP via these environment variables:
 | `SMTP_USER`          | SMTP username                           | Your smtp username  |
 | `SMTP_PASSWORD`      | SMTP password                           | Your smtp password  |
 | `SMTP_AUTH`          | Enable SMTP authentication (`on`/`off`) | `on`                 |
-| `SMTP_TLS`           | Use TLS for the connection (`on`/`off`). On by default when `SMTP_USER` or `SMTP_PASSWORD` is set | `on`                 |
+| `SMTP_TLS`           | Use TLS for the connection (`on`/`off`). Not set by default, so msmtp decides | (empty)              |
 
 > [!TIP]
 > If you don't have an SMTP server, try using a local SMTP container like [Mailpit](https://hub.docker.com/r/axllent/mailpit). With Mailpit, set `SMTP_HOST=mailpit` and `SMTP_PORT=1025` in your container.
@@ -506,7 +506,7 @@ Environment variables for fine-tuning container behavior.
 | `APACHE_KEEPALIVE_TIMEOUT`         | `5`              | Seconds that Apache keeps an idle connection open. | `2` |
 | `APACHE_MPM_PROFILE`               | `balanced`       | Profile used by `ENABLE_TUNING_MPM`: `low`, `balanced` or `high`. | `high` |
 | `APACHE_REFERRER_POLICY`           | `strict-origin-when-cross-origin` | Value of the `Referrer-Policy` response header. | `no-referrer` |
-| `APACHE_REQUEST_READ_TIMEOUT`      | `header=20-40,MinRate=500 body=20,MinRate=500` | Value of `RequestReadTimeout`. It closes connections that send the request too slowly. | `header=10-20,MinRate=500 body=20,MinRate=500` |
+| `APACHE_REQUEST_READ_TIMEOUT`      | `header=0 body=0` (no limit) | Value of `RequestReadTimeout`. Set a limit to close connections that send the request too slowly. | `header=10-20,MinRate=500 body=20,MinRate=500` |
 
 
 ## About This Project

@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 
 ## [Unreleased]
+- Make FrankenPHP and RoadRunner trust no proxy by default, as Nginx and Apache now do. `TRUSTED_PROXIES` adds the ranges.
+- Turn Apache `reqtimeout` off by default again (`APACHE_REQUEST_READ_TIMEOUT=header=0 body=0`). Set a limit to turn it on.
+- Remove the Nginx `open_file_cache` settings, so deploys that swap a symlink show new files at once.
+- Enable the Apache `cache` module again.
+- Fix mail failing after 6.1 for relays without TLS. `SMTP_TLS` is no longer turned on when `SMTP_USER` or `SMTP_PASSWORD` is set. Set `SMTP_TLS=on` to require TLS.
+- Fix apps that set their own session ID failing after 6.1. `PHP_SESSION_USE_STRICT_MODE` is no longer set to `1` by default. Set it to `1` to turn strict mode on.
 - Fix Nginx and Apache replacing the client address with an `X-Forwarded-For` entry by default (#456). Behind Cloudflare, apps saw the Cloudflare address. The two servers trust no proxy again, as before 6.1, and `TRUSTED_PROXIES` turns the feature on.
 - Make Debian images 81 to 149 MB smaller by removing the packages that the extension build leaves behind: `binutils`, the `gcc` sanitizer libraries, `perl`, `m4`, `patch` and `pkgconf`. The images no longer include `perl`, unless another package needs it, such as `apache2`. `phpaddmod` installs the build tools again when it needs them.
 - Make Alpine images 10 to 13 MB smaller by dropping the full `ncurses-terminfo` package. The `ncurses-terminfo-base` package stays, so `htop`, `less` and `vi` keep working in common terminals.
