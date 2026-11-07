@@ -284,7 +284,8 @@ test_scaling() {
 
     check "frankenphp: health site on its own port" grep -q 'http://:{$HEALTH_PORT:2020}' src/php/with-f8p/rootfs/etc/caddy/Caddyfile
     check "frankenphp: HEALTH_CHECK_URL" grep -q 'HEALTH_CHECK_URL .*HEALTH_PORT}/healthz' src/php/with-f8p/f8p-config.dockerfile
-    check "frankenphp: trusted proxies" grep -q 'trusted_proxies static private_ranges' src/php/with-f8p/rootfs/etc/caddy/Caddyfile
+    check "frankenphp: trusted proxies come from TRUSTED_PROXIES only" grep -q 'trusted_proxies static {$CADDY_TRUSTED_PROXIES}' src/php/with-f8p/rootfs/etc/caddy/Caddyfile
+    check_not "roadrunner: private ranges are not trusted by default" grep -q '10.0.0.0/8' src/php/with-roadrunner/rootfs/etc/hooks/server/init-roadrunner
     check "frankenphp: TRUSTED_PROXIES" grep -q 'CADDY_TRUSTED_PROXIES' src/php/with-f8p/rootfs/etc/hooks/server/init-f8p
     check "frankenphp: grace period" grep -q 'grace_period' src/php/with-f8p/rootfs/etc/caddy/Caddyfile
     check "roadrunner: status plugin" grep -q 'status.address=0.0.0.0:${HEALTH_PORT:-2020}' src/php/with-roadrunner/roadrunner-config.dockerfile
@@ -385,10 +386,25 @@ test_ssh() {
     finish
 }
 
+# defaults: 6.1 values that broke working setups stay opt-in (#456).
+test_defaults() {
+    cd "$BASE_DIR" || exit 1
+    local wrapper=src/php/common/rootfs/usr/local/utils/msmtp-wrapper
+
+    check_not "smtp: TLS is not forced when only a user or password is set" grep -q -- '--tls=on' "$wrapper"
+    check "smtp: SMTP_TLS is passed to msmtp" grep -q -- '--tls=$SMTP_TLS' "$wrapper"
+    check_not "nginx: no open_file_cache" grep -q 'open_file_cache' src/php/with-nginx/rootfs/etc/nginx/nginx.conf
+    check "apache: cache module is enabled" grep -qE '^ +cache deflate' src/php/with-apache/apache-config.dockerfile
+    check "apache: request read timeout is off by default" grep -q "APACHE_REQUEST_READ_TIMEOUT 'header=0 body=0'" src/php/with-apache/apache-config.dockerfile
+    check_not "php: session strict mode is not forced" grep -q 'PHP_SESSION_USE_STRICT_MODE' src/php/common/php-ini-directives.dockerfile
+
+    finish
+}
+
 # Each test runs in a subshell: its counters and sourced files stay private.
 if [ "${BASH_SOURCE[0]}" = "$0" ]; then
     status=0
-    for name in ${@:-lint versions backports config scaling ssh}; do
+    for name in ${@:-lint versions backports config scaling ssh defaults}; do
         echo "== $name"
         (NAME="$name"; "test_$name") || status=1
     done

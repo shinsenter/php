@@ -12,10 +12,11 @@ set -e
 roadrunner-conf 'server.user'  "$APP_USER"
 roadrunner-conf 'server.group' "$APP_GROUP"
 
-# trust X-Forwarded-For and X-Forwarded-Proto from private networks and from TRUSTED_PROXIES
-# the list is written in full because RoadRunner replaces its default list when one is set
+# trust X-Forwarded-For and X-Forwarded-Proto only from TRUSTED_PROXIES
+# the list is written in full because RoadRunner replaces its default list (the private ranges) when one is set
+# an empty list may fall back to that default, so loopback alone stands for "no proxy"
 if has-cmd yq; then
-    subnets='"10.0.0.0/8","172.16.0.0/12","192.168.0.0/16","169.254.0.0/16","127.0.0.0/8","::1/128","fc00::/7"'
+    subnets='"127.0.0.1/32"'
     for cidr in $(echo "$TRUSTED_PROXIES" | tr ',' ' '); do
         case "$cidr" in
             *[!0-9a-fA-F:./]*) debug-echo -w "Skip invalid TRUSTED_PROXIES entry: $cidr" ;;

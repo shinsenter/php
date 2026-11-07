@@ -6,9 +6,9 @@
 	# Let running requests finish on stop, within the s6 stop timeout
 	grace_period {$CADDY_GRACE_PERIOD:20s}
 
-	# Trust X-Forwarded-For and X-Forwarded-Proto from private networks and from TRUSTED_PROXIES
+	# Trust X-Forwarded-For and X-Forwarded-Proto only from TRUSTED_PROXIES
 	servers {
-		trusted_proxies static private_ranges {$CADDY_TRUSTED_PROXIES}
+		trusted_proxies static {$CADDY_TRUSTED_PROXIES}
 		# Close connections that send their request headers too slowly
 		timeouts {
 			read_header {$CADDY_READ_HEADER_TIMEOUT:10s}
