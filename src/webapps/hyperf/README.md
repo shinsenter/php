@@ -1,97 +1,85 @@
 # shinsenter/hyperf
 
-🔋 (PHP / Hyperf) Production-ready Docker images with automatic Hyperf installer.
+⚡ (PHP) Hyperf coroutine framework ready in one command
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/hyperf
 - GitHub Packages: https://code.shin.company/php/pkgs/container/hyperf
-- You can also find and use [other pre-built Docker images for some popular PHP applications and frameworks here](https://hub.docker.com/u/shinsenter).
-- Main documentation: [shinsenter/php](https://code.shin.company/php)
+- Main documentation (all environment variables, PHP extensions, hooks, cron): [shinsenter/php](https://hub.docker.com/r/shinsenter/php)
+- Other pre-built images for popular PHP apps and frameworks: https://hub.docker.com/u/shinsenter
 
-The Docker images are available for both Debian and Alpine versions.
-
-
-## Introduction
-
-Our PHP Docker images, available on [Docker Hub](https://hub.docker.com/r/shinsenter/php),
-let you configure PHP and PHP-FPM settings through environment variables, with no image rebuild required.
-
-These images also include the latest version of [Composer](https://getcomposer.org).
+Built on [shinsenter/phpfpm-nginx](https://hub.docker.com/r/shinsenter/phpfpm-nginx) (Nginx, PHP-FPM, Composer). For settings shared by all images, see [shinsenter/php](https://hub.docker.com/r/shinsenter/php).
 
 
-## Usage
+## Quick start
 
-[![shinsenter/php](https://repository-images.githubusercontent.com/458053748/58e1c323-ab0b-46d2-94d2-f5472908e7f5)](https://docker.shin.company/php)
-
-Check out [our documentation](https://hub.docker.com/r/shinsenter/php) to learn how to customize these Docker images for your projects.
-
-
-## Creating a New Project
-
-When you mount an empty directory into the container, it will automatically download the entire source code for the framework, allowing you to bootstrap a new project quickly.
-
-### Steps to Create a New Project
-
-1. Create an empty directory on your host machine for your project code. For example:
+New project: mount an empty folder. On first start the container downloads Hyperf into it (`composer create-project hyperf/hyperf-skeleton`). Watch progress with `docker logs -f <container>`.
 
 ```shell
 mkdir hyperf
-```
-
-2. Run the container and mount the empty directory as a volume. For example:
-
-```shell
 docker run -p 80:80 -p 443:443 -p 443:443/udp \
     -v ./hyperf:/var/www/html \
     shinsenter/hyperf:latest
 ```
 
-The container will detect the empty directory mounted to `/var/www/html` and clone the framework source code into it.
+Existing project: mount your code the same way. Changes on the host show up in the container at once.
 
+Compose:
 
-## Using an Existing Project
-
-You can mount your application code from your host machine to the `/var/www/html` directory inside the container.
-
-Because the source code is mounted as a volume, any changes made on the host machine are reflected inside the container.
-
-
-## Using HTTPS
-
-The Docker images come with pre-generated SSL certificate files for testing HTTPS locally:
-
-- /etc/ssl/site/server.crt
-- /etc/ssl/site/server.key
-
-To use valid HTTPS certificates in production, replace these files with your own certificate and key.
-Copy or mount your certificates from the host machine into the container, overwriting the default files.
-
-#### Using Dockerfile
-
-```Dockerfile
-FROM shinsenter/hyperf:latest
-
-# Copy your own certs into the container
-COPY my_domain.crt /etc/ssl/site/server.crt
-COPY my_domain.key /etc/ssl/site/server.key
-
-# Add your instructions here
-# For example:
-# ADD --chown=$APP_USER:$APP_GROUP ./hyperf/ /var/www/html/
+```yaml
+services:
+  web:
+    image: shinsenter/hyperf:latest
+    ports: ["80:80", "443:443", "443:443/udp"]
+    volumes:
+      - ./hyperf:/var/www/html
 ```
 
-#### Using docker run
+The image has no database. Run one as a separate service and pass its address to the app through the app's own settings.
 
-```shell
-docker run -p 80:80 -p 443:443 -p 443:443/udp \
-    -v ./hyperf:/var/www/html \
-    -v ./my_domain.crt:/etc/ssl/site/server.crt \
-    -v ./my_domain.key:/etc/ssl/site/server.key \
-    shinsenter/hyperf:latest
-```
 
-#### Using docker-compose
+## What is inside
 
-```yml
+| Item | Value |
+|---|---|
+| Base image | [shinsenter/phpfpm-nginx](https://hub.docker.com/r/shinsenter/phpfpm-nginx) |
+| Web server | Nginx |
+| Document root | project root |
+| New project source | `composer create-project hyperf/hyperf-skeleton` |
+
+Defaults this image sets (you can override each with `-e`):
+
+| Variable | Default |
+|---|---|
+| `APP_INDEX` | `bin/hyperf.php` |
+| `HTTP_SERVER_PORT` | `9501` |
+| `PHP_SWOOLE_USE_SHORTNAME` | `off` |
+
+
+## Common settings
+
+| Variable | What it does | Default |
+|---|---|---|
+| `APP_PATH` | Application directory inside the container. | `/var/www/html` |
+| `DOCUMENT_ROOT` | Folder inside `APP_PATH` that the web server serves. | project root |
+| `APP_USER`, `APP_GROUP`, `APP_UID`, `APP_GID` | Run as another user and group. | `www-data` |
+| `TZ` | Container timezone, for example `Asia/Tokyo`. | `UTC` |
+| `DEBUG` | `1` prints verbose logs, including which hooks run. | not set |
+| `ENABLE_CRONTAB`, `CRONTAB_SETTINGS` | Turn on cron and define jobs, for example `* * * * * php -f /var/www/html/cron.php`. | not set |
+| `PHP_*` | Any php.ini setting, for example `PHP_MEMORY_LIMIT=512M`, `PHP_UPLOAD_MAX_FILESIZE=100M`. Run `php-envvars` in the container to list them. | image defaults |
+
+The full list is in the [shinsenter/php](https://hub.docker.com/r/shinsenter/php) documentation.
+
+
+## HTTPS
+
+The image ships a self-signed certificate for local tests:
+
+- `/etc/ssl/site/server.crt`
+- `/etc/ssl/site/server.key`
+
+For production, replace both files with your own, by mounting them:
+
+```yaml
 services:
   web:
     image: shinsenter/hyperf:latest
@@ -101,19 +89,32 @@ services:
       - ./my_domain.key:/etc/ssl/site/server.key
 ```
 
+or by copying them in your own Dockerfile:
 
-## Stable Image Tags
+```Dockerfile
+FROM shinsenter/hyperf:latest
+COPY my_domain.crt /etc/ssl/site/server.crt
+COPY my_domain.key /etc/ssl/site/server.key
+```
 
-The release versions on [this GitHub repository](https://code.shin.company/php) don't guarantee
-that Docker images built from the same source code will always be identical.
 
-We rebuild the Docker images when upstream sources (PHP, base OS, Composer, etc.)
-publish an update, so they stay up-to-date.
-The images in this repo are regularly updated under the same tag names.
+## Extend the image
 
-But you can pull the image from `shinsenter/hyperf:latest`,
-and tag it with a name that indicates its stability,
-such as `your-repo/hyperf:stable` using the below commands:
+```Dockerfile
+FROM shinsenter/hyperf:latest
+
+# Your own steps, for example:
+ADD --chown=$APP_USER:$APP_GROUP ./hyperf/ /var/www/html/
+```
+
+Adding PHP extensions, hooks, autorun scripts and cron jobs are covered in [shinsenter/php](https://hub.docker.com/r/shinsenter/php).
+
+
+## Image tags and platforms
+
+- All tags and platforms: [Docker Hub](https://hub.docker.com/r/shinsenter/hyperf/tags). Debian and Alpine variants are available.
+- Since 2026-10-25, `linux/386`, `linux/arm/v7`, `linux/ppc64le` and `linux/s390x` are no longer built. Older tags keep them until they are rebuilt.
+- Images are rebuilt when PHP, the base OS or Composer publish an update, so a tag can change over time. For production, pin your own copy:
 
 ```shell
 docker pull shinsenter/hyperf:latest
@@ -121,26 +122,21 @@ docker tag  shinsenter/hyperf:latest your-repo/hyperf:stable
 docker push your-repo/hyperf:stable
 ```
 
-Then use the image `your-repo/hyperf:stable` as a base image to build containers for production.
+
+## Support the project
+
+Keeping these images rebuilt for every PHP release takes ongoing work. If they save you time, you can help keep them going:
+
+- ☕ [Donate via PayPal](https://www.paypal.me/shinsenter)
+- 💖 [Sponsor on GitHub](https://github.com/sponsors/shinsenter)
+
+Reporting a bug, sharing the project or giving it a star on [GitHub](https://code.shin.company/php) also helps.
 
 
-## Supported Platforms
+## Issues and license
 
-Check our [Docker Hub](https://hub.docker.com/r/shinsenter/hyperf/tags) for all available platforms. The Docker images are available for both Debian and Alpine versions.
-
-> **Note:** From 2026-10-25, the rarely used platforms `linux/386`, `linux/arm/v7`, `linux/ppc64le` and `linux/s390x` are no longer built. Tags published before that date keep them until they are rebuilt.
-
-
-## Contributing
-
-If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://code.shin.company/php/issues/new).
-
-
-## License
-
-This project is licensed under the terms of the [GNU General Public License v3.0](https://code.shin.company/php/blob/main/LICENSE).
-
-Please respect the work that went into these images. If you reuse ideas from this project, credit is appreciated.
+- Questions and bugs: [GitHub issues](https://code.shin.company/php/issues/new).
+- Licensed under the [GNU General Public License v3.0](https://code.shin.company/php/blob/main/LICENSE). If you reuse ideas from this project, please give credit.
 
 ---
 

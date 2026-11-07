@@ -1,44 +1,76 @@
-# Responsible Disclosure Policy
+<!--
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+-->
+
+# Security Policy
+
+## Report a vulnerability
+
+Email [shin@shin.company](mailto:shin@shin.company). Please do not open a public issue or pull request for a vulnerability.
+
+Include:
+
+- the image and tag (for example `shinsenter/php:8.5-fpm-nginx`), and the OS (Debian or Alpine)
+- what is affected and the impact
+- steps to reproduce, or a proof of concept
+- the output of `docker buildx imagetools inspect --raw <image> | jq '.annotations'`, if you can
+
+We acknowledge the report, check it, and tell you when a fix is published. Please give us time to fix it before you disclose it, and test only what you need to show the problem.
 
 
-## Reporting Security Vulnerabilities
+## What is in scope
 
-We take security seriously in our open-source project. If you discover a security vulnerability, please help us by responsibly disclosing it. We appreciate your efforts in keeping our project safe for everyone.
+In scope: the files in this repository and the images built from them. That includes Dockerfiles, hooks and utilities in `src/php/common/rootfs/`, default settings (proxy trust, SSH, sessions, permissions), build scripts and GitHub workflows.
 
+Out of scope, so please report it upstream:
 
-## How to Report a Vulnerability
+- bugs in PHP, Nginx, Apache, FrankenPHP, RoadRunner, Composer, s6-overlay or the OS packages
+- bugs in the web applications that the `src/webapps/` images install
+- findings that need access you already have, such as root in the container
 
-To report a security vulnerability:
-
-1. **Contact us privately**: Please email us at [shin@shin.company](mailto:shin@shin.company) with details about the vulnerability. Please refrain from disclosing the issue publicly until we've had a chance to address it.
-
-2. **Provide details**: Include as much information as possible about the vulnerability, including steps to reproduce it and its potential impact.
-
-3. **Be responsible**: Please avoid exploiting the vulnerability beyond what is necessary to demonstrate the issue.
+If you are not sure, send it to us. We will tell you where it belongs.
 
 
-## What to Expect
+## Supported versions
 
-Once we receive your report, we'll acknowledge it promptly. We'll work to assess the reported vulnerability's validity and severity and develop a fix as quickly as possible. We'll keep you updated on our progress throughout the process.
+| PHP versions | Status |
+|---|---|
+| 8.6-rc, 8.5, 8.4, 8.3, 8.2 | Maintained. Rebuilt when the official `php` image or another input changes. |
+| 8.1, 8.0, 7.4, 7.3 | Outdated. PHP security fixes are backported (see `src/php-backports/`). |
+| 7.2, 7.1, 7.0, 5.6 | Outdated. No backports. Not recommended for production. |
+
+The list comes from `build/versions.sh`. Only the latest image of each tag gets fixes.
 
 
-## Security Updates for PHP and Dependencies
+## Get security updates
 
-When PHP publishes a security release, the images are rebuilt automatically after the official `php` image for that version is published on Docker Hub. The [Watch updates](https://code.shin.company/php/actions/workflows/watch-updates.yml) workflow checks for a new official image every 30 minutes and builds only the affected PHP versions. See [How Images Are Updated](README.md#how-images-are-updated).
+When PHP publishes a security release, the images are rebuilt after the official `php` image for that version appears on Docker Hub. The [Watch updates](https://code.shin.company/php/actions/workflows/watch-updates.yml) workflow checks every 30 minutes and builds only the affected versions. See [How Images Are Updated](README.md#how-images-are-updated).
 
 To apply a fix as soon as it is available:
 
 1. Pull the image again, for example `docker pull shinsenter/php:8.5-fpm`.
-2. Recreate your containers, since a running container keeps the old image.
+2. Recreate your containers. A running container keeps the old image.
 3. Check the version with `php -v`.
 
-Before the rebuilt image is available, follow the mitigation in the PHP security advisory for your version. You can set most `php.ini` options with `PHP_*` environment variables (see the README), but check that the option really mitigates the issue in the advisory.
+Before the rebuilt image is available, follow the mitigation in the PHP advisory for your version. You can set most `php.ini` options with `PHP_*` environment variables, but check that the option really mitigates the issue.
 
-If a rebuild looks late, open an issue with the PHP version and the image tag. Include the link to the PHP release notes.
+If a rebuild looks late, open a public issue with the PHP version, the image tag and a link to the PHP release notes. This is only for late rebuilds, not for new vulnerabilities.
 
 
-## Legal Safe Harbor
+## Safe harbor
 
-We won't take legal action against you for responsibly disclosing security vulnerabilities in our project. We appreciate your contributions to making our project more secure.
+We will not take legal action against you for reporting a vulnerability in good faith and within the limits above.
 
-Thank you for your help in keeping our project safe.
+
+## Support the project
+
+If these images help you, you can help keep them maintained:
+
+- ☕ [Donate via PayPal](https://www.paypal.me/shinsenter)
+- 💖 [Sponsor on GitHub](https://github.com/sponsors/shinsenter)

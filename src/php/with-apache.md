@@ -1,22 +1,14 @@
 # shinsenter/phpfpm-apache
 
-🌏 (PHP) PHP-FPM + Apache2 Docker images for both production and development.
+🪶 (PHP) PHP-FPM + Apache, production-ready with HTTPS out of the box
 
 - Docker Hub: https://hub.docker.com/r/shinsenter/phpfpm-apache
 - GitHub Packages: https://code.shin.company/php/pkgs/container/phpfpm-apache
-- You can also find and use [other pre-built Docker images for some popular PHP applications and frameworks here](https://hub.docker.com/u/shinsenter).
-- Main documentation: [shinsenter/php](https://code.shin.company/php)
+- Main documentation (all environment variables, PHP extensions, hooks, cron): [shinsenter/php](https://hub.docker.com/r/shinsenter/php)
+- Other pre-built images for popular PHP apps and frameworks: https://hub.docker.com/u/shinsenter
 
 
-## Introduction
-
-Our PHP Docker images, available on [Docker Hub](https://hub.docker.com/r/shinsenter/php),
-are designed for easy configuration of PHP and PHP-FPM settings via environment variables, with no image rebuild required.
-
-These images also come with the latest version of [Composer](https://getcomposer.org).
-
-
-## Usage
+## Quick start
 
 ```shell
 docker run -p 80:80 -p 443:443 -p 443:443/udp \
@@ -24,43 +16,42 @@ docker run -p 80:80 -p 443:443 -p 443:443/udp \
     shinsenter/phpfpm-apache:latest
 ```
 
-[![shinsenter/php](https://repository-images.githubusercontent.com/458053748/58e1c323-ab0b-46d2-94d2-f5472908e7f5)](https://docker.shin.company/php)
+Open http://localhost (or https://localhost with the test certificate). Your code lives in `/var/www/html`. If you mount an empty folder, the container can create a project for you: set `INITIAL_PROJECT`, for example `-e INITIAL_PROJECT=laravel/laravel`.
 
-Refer to [our documentation](https://hub.docker.com/r/shinsenter/php) to learn how to customize these Docker images for your projects.
+The images include the latest [Composer](https://getcomposer.org). PHP settings change through `PHP_*` environment variables, so you do not need to rebuild the image.
+
+Need a specific PHP version? See the tags on [Docker Hub](https://hub.docker.com/r/shinsenter/phpfpm-apache/tags). For a plain PHP image without Apache, see [shinsenter/php](https://hub.docker.com/r/shinsenter/php).
 
 
-## Using HTTPS
+## Common settings
 
-The Docker images come with pre-generated SSL certificate files for testing HTTPS locally:
+Pass them with `-e NAME=value` or in `environment:` of your compose file.
 
-- /etc/ssl/site/server.crt
-- /etc/ssl/site/server.key
+| Variable | What it does | Default |
+|---|---|---|
+| `APP_PATH` | Application directory inside the container. | `/var/www/html` |
+| `DOCUMENT_ROOT` | Folder inside `APP_PATH` that the web server serves. | project root |
+| `APP_USER`, `APP_GROUP`, `APP_UID`, `APP_GID` | Run as another user and group. | `www-data` |
+| `TZ` | Container timezone, for example `Asia/Tokyo`. | `UTC` |
+| `DEBUG` | `1` prints verbose logs, including which hooks run. | not set |
+| `ENABLE_CRONTAB`, `CRONTAB_SETTINGS` | Turn on cron and define jobs, for example `* * * * * php -f /var/www/html/cron.php`. | not set |
+| `PHP_*` | Any php.ini setting, for example `PHP_MEMORY_LIMIT=512M`, `PHP_UPLOAD_MAX_FILESIZE=100M`. Run `php-envvars` in the container to list them. | image defaults |
+| `ENABLE_TUNING_FPM` | `1` sets PHP-FPM `pm.*` values from the CPU limit of the container. | not set |
+| `ENABLE_TUNING_MPM` | `1` sets Apache MPM values from the CPU and memory limits. | not set |
 
-To use valid HTTPS certificates in production, replace these files with your own certificate and key, either by copying or mounting them from the host into the container.
+The full list (cron, SSH, autorun switches) is in the [shinsenter/php](https://hub.docker.com/r/shinsenter/php) documentation.
 
-#### Using Dockerfile
 
-```Dockerfile
-FROM shinsenter/phpfpm-apache:latest
+## HTTPS
 
-# Copy your own certificates into the container
-COPY my_domain.crt /etc/ssl/site/server.crt
-COPY my_domain.key /etc/ssl/site/server.key
-```
+The image ships a self-signed certificate for local tests:
 
-#### Using docker run
+- `/etc/ssl/site/server.crt`
+- `/etc/ssl/site/server.key`
 
-```shell
-docker run -p 80:80 -p 443:443 -p 443:443/udp \
-    -v ./myproject:/var/www/html \
-    -v ./my_domain.crt:/etc/ssl/site/server.crt \
-    -v ./my_domain.key:/etc/ssl/site/server.key \
-    shinsenter/phpfpm-apache:latest
-```
+For production, replace both files with your own, by mounting them:
 
-#### Using docker-compose
-
-```yml
+```yaml
 services:
   web:
     image: shinsenter/phpfpm-apache:latest
@@ -70,34 +61,46 @@ services:
       - ./my_domain.key:/etc/ssl/site/server.key
 ```
 
+or by copying them in your own Dockerfile:
+
+```Dockerfile
+FROM shinsenter/phpfpm-apache:latest
+COPY my_domain.crt /etc/ssl/site/server.crt
+COPY my_domain.key /etc/ssl/site/server.key
+```
+
 
 ## Customize Apache
 
-You can add your Apache configurations by mounting or copying your `*.conf` files into the `/etc/apache2/custom.d/` directory of the container.
-The config files here will be loaded into the Apache's default virtual host.
+Mount or copy your `*.conf` files into `/etc/apache2/custom.d/`. They are loaded into Apache's default virtual host.
 
-> ⚠️ Note: Since there are already some common configs in this directory, please avoid mounting or replacing an entire different directory into `/etc/apache2/custom.d/`.
+```shell
+docker run -p 80:80 -p 443:443 -p 443:443/udp \
+    -v ./myproject:/var/www/html \
+    -v ./my-site.conf:/etc/apache2/custom.d/my-site.conf:ro \
+    shinsenter/phpfpm-apache:latest
+```
+
+> ⚠️ This folder already holds common config files. Mount single files into it. Do not replace the whole folder.
 
 
-## Supported Platforms
+## Extend the image
 
-Check our [Docker Hub](https://hub.docker.com/r/shinsenter/phpfpm-apache/tags) for all available platforms. The Docker images are available for both Debian and Alpine versions.
+```Dockerfile
+FROM shinsenter/phpfpm-apache:latest
 
-> **Note:** From 2026-10-25, the rarely used platforms `linux/386`, `linux/arm/v7`, `linux/ppc64le` and `linux/s390x` are no longer built. Tags published before that date keep them until they are rebuilt.
+# Your own steps, for example:
+ADD --chown=$APP_USER:$APP_GROUP ./myproject/ /var/www/html/
+```
+
+Adding PHP extensions, hooks, autorun scripts and cron jobs are covered in [shinsenter/php](https://hub.docker.com/r/shinsenter/php).
 
 
-## Stable Image Tags
+## Image tags and platforms
 
-The release versions on [this GitHub repository](https://code.shin.company/php) don't guarantee
-that Docker images built from the same source code will always be identical.
-
-We rebuild the Docker images when upstream sources (PHP, base OS, Composer, etc.)
-publish an update, so they stay up-to-date.
-The images in this repo are regularly updated under the same tag names.
-
-But you can pull the image from `shinsenter/phpfpm-apache:latest`,
-and tag it with a name that indicates its stability,
-such as `your-repo/phpfpm-apache:stable` using the below commands:
+- All tags and platforms: [Docker Hub](https://hub.docker.com/r/shinsenter/phpfpm-apache/tags). Debian and Alpine variants are available.
+- Since 2026-10-25, `linux/386`, `linux/arm/v7`, `linux/ppc64le` and `linux/s390x` are no longer built. Older tags keep them until they are rebuilt.
+- Images are rebuilt when PHP, the base OS or Composer publish an update, so a tag can change over time. For production, pin your own copy:
 
 ```shell
 docker pull shinsenter/phpfpm-apache:latest
@@ -105,19 +108,21 @@ docker tag  shinsenter/phpfpm-apache:latest your-repo/phpfpm-apache:stable
 docker push your-repo/phpfpm-apache:stable
 ```
 
-Then use the image `your-repo/phpfpm-apache:stable` as a base image to build containers for production.
+
+## Support the project
+
+Keeping these images rebuilt for every PHP release takes ongoing work. If they save you time, you can help keep them going:
+
+- ☕ [Donate via PayPal](https://www.paypal.me/shinsenter)
+- 💖 [Sponsor on GitHub](https://github.com/sponsors/shinsenter)
+
+Reporting a bug, sharing the project or giving it a star on [GitHub](https://code.shin.company/php) also helps.
 
 
-## Contributing
+## Issues and license
 
-If you find these images useful, consider donating via [PayPal](https://www.paypal.me/shinsenter) or opening an issue on [GitHub](https://code.shin.company/php/issues/new).
-
-
-## License
-
-This project is licensed under the terms of the [GNU General Public License v3.0](https://code.shin.company/php/blob/main/LICENSE).
-
-Please respect the work that went into these images. If you reuse ideas from this project, credit is appreciated.
+- Questions and bugs: [GitHub issues](https://code.shin.company/php/issues/new).
+- Licensed under the [GNU General Public License v3.0](https://code.shin.company/php/blob/main/LICENSE). If you reuse ideas from this project, please give credit.
 
 ---
 
