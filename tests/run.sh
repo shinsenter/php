@@ -386,7 +386,7 @@ test_ssh() {
     finish
 }
 
-# defaults: 6.1 values that broke working setups stay opt-in (#456).
+# defaults: settings that stay opt-in so existing setups keep working (#456).
 test_defaults() {
     cd "$BASE_DIR" || exit 1
     local wrapper=src/php/common/rootfs/usr/local/utils/msmtp-wrapper

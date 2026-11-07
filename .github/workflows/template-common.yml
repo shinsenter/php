@@ -219,7 +219,8 @@ jobs:
           context: ${{ env.BUILD_CONTEXT }}
           tags: ${{ env.SKIP_SQUASH != '1' && env.BUILD_TMP_NAME || '' }}
           outputs: ${{ env.SKIP_SQUASH == '1' && format('type=image,name={0},push-by-digest=true,name-canonical=true,push={1}', steps.stage.outputs.name, env.SKIP_PUSH != '1') || '' }}
-          sbom: true
+          # the temporary image of squash mode is discarded, only the final image needs an SBOM
+          sbom: ${{ env.SKIP_SQUASH == '1' }}
           build-args: |
             DEBUG=${{ env.DEBUG }}
             BUILD_CACHE_KEY=${{ env.BUILD_CACHE_KEY }}
