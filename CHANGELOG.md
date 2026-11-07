@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 
 ## [Unreleased]
+- Fix Nginx and Apache replacing the client address with an `X-Forwarded-For` entry by default (#456). Behind Cloudflare, apps saw the Cloudflare address. The two servers trust no proxy again, as before 6.1, and `TRUSTED_PROXIES` turns the feature on.
 - Make Debian images 81 to 149 MB smaller by removing the packages that the extension build leaves behind: `binutils`, the `gcc` sanitizer libraries, `perl`, `m4`, `patch` and `pkgconf`. The images no longer include `perl`, unless another package needs it, such as `apache2`. `phpaddmod` installs the build tools again when it needs them.
 - Make Alpine images 10 to 13 MB smaller by dropping the full `ncurses-terminfo` package. The `ncurses-terminfo-base` package stays, so `htop`, `less` and `vi` keep working in common terminals.
 - Delete the `nginx.old` binary that the Nginx build leaves next to `nginx`.
