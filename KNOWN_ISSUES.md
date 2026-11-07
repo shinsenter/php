@@ -19,15 +19,16 @@ Code that runs as the application user (`www-data` by default), for example thro
 - Cause: by design. `web-do`, `autorun`, `ownership` and the `web-*` utilities need root to switch users and fix owners. `os-common.dockerfile` installs `/sbin/su-exec`, `autorun`, `ownership`, `web-*` and the entrypoint with mode 4755. Whether this `su-exec` build refuses to switch to root is not checked.
 - Fix: not fixed. Needs a design change, for example limiting these helpers to root or to a dedicated group.
 
-## Unreleased
+## 6.1.0
 
-### [#456](https://github.com/shinsenter/php/issues/456) Client IP behind Cloudflare wrong after 6.1
+### [#456](https://github.com/shinsenter/php/issues/456) Client IP behind Cloudflare wrong in the first 6.1.0 build
 
-After updating to 6.1, an app behind Cloudflare saw the wrong client IP.
+Images built from the first `6.1.0` tag (2026-11-03) trusted `X-Forwarded-For` from the private ranges. An app behind Cloudflare then saw a Cloudflare address as the client IP. The tag was moved on 2026-11-08, so images built from it do not have this problem. Images that were pulled earlier keep it until they are pulled again.
 
-- Cause: 6.1 trusted `X-Forwarded-For` from the private ranges by default in Nginx and Apache. The load balancer between Cloudflare and the container is in a private range, so the server took the next address in the header, which is a Cloudflare address, as the client. Before 6.1 the server left `REMOTE_ADDR` alone and the app read the header itself.
-- Fix: Nginx and Apache trust no proxy by default again. FrankenPHP and RoadRunner follow in the same release. `TRUSTED_PROXIES` turns the feature on, and Cloudflare ranges can be listed there.
-- Tested: `tests/run.sh scaling` checks that the default config trusts no proxy. Not tested with a running image.
+- Cause: Nginx and Apache trusted the private ranges by default. The load balancer between Cloudflare and the container is in a private range, so the server skipped it and took the next address in the header, a Cloudflare address, as the client. Before that the server left `REMOTE_ADDR` alone and the app read the header itself.
+- Fix: Nginx, Apache, FrankenPHP and RoadRunner trust no proxy by default. `TRUSTED_PROXIES` turns the feature on, and Cloudflare ranges can be listed there.
+- Same first build, not reported on GitHub: `SMTP_TLS` was on whenever `SMTP_USER` or `SMTP_PASSWORD` was set, and `PHP_SESSION_USE_STRICT_MODE` was `1`. Both are back to opt-in. The Apache `reqtimeout` and the Nginx `open_file_cache` defaults of that build were also removed.
+- Tested: `tests/run.sh scaling` and `tests/run.sh defaults` check the default configs. The PHP 8.4 Debian images of Apache, FrankenPHP and RoadRunner started and answered HTTP checks. Not tested with a real proxy in front.
 
 ### [#454](https://github.com/shinsenter/php/issues/454) Alpine: sshd accepts passwords over 256 bytes for `*` accounts
 

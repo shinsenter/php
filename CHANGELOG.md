@@ -3,36 +3,23 @@
 All notable changes to this project will be documented in this file.
 
 
-## [Unreleased]
-- Make FrankenPHP and RoadRunner trust no proxy by default, as Nginx and Apache now do. `TRUSTED_PROXIES` adds the ranges.
-- Turn Apache `reqtimeout` off by default again (`APACHE_REQUEST_READ_TIMEOUT=header=0 body=0`). Set a limit to turn it on.
-- Remove the Nginx `open_file_cache` settings, so deploys that swap a symlink show new files at once.
-- Enable the Apache `cache` module again.
-- Fix mail failing after 6.1 for relays without TLS. `SMTP_TLS` is no longer turned on when `SMTP_USER` or `SMTP_PASSWORD` is set. Set `SMTP_TLS=on` to require TLS.
-- Fix apps that set their own session ID failing after 6.1. `PHP_SESSION_USE_STRICT_MODE` is no longer set to `1` by default. Set it to `1` to turn strict mode on.
-- Fix Nginx and Apache replacing the client address with an `X-Forwarded-For` entry by default (#456). Behind Cloudflare, apps saw the Cloudflare address. The two servers trust no proxy again, as before 6.1, and `TRUSTED_PROXIES` turns the feature on.
+## [6.1.0] - 2026-11-08
+- Raise the Go modules `grpc`, `containerd/v2`, `otel`, `otel/sdk` and `klauspost/compress` in the `shinsenter/dockerfile-x` image to clear HIGH CVEs. `moby/buildkit` stays at 0.23.2 because 0.28.1 does not compile with the upstream frontend.
+- Add environment variables for Apache deflate, keep-alive, expires, overrides, the MPM profile and `reqtimeout` (`APACHE_REQUEST_READ_TIMEOUT`, no limit by default).
+- Change `Referrer-Policy` to `strict-origin-when-cross-origin` in Nginx and Apache (`APACHE_REFERRER_POLICY` sets it in Apache) and add `X-Content-Type-Options` to Apache. Remove `X-XSS-Protection` and `Permissions-Policy` from Nginx.
+- Hide function arguments in exception traces (`PHP_ZEND_EXCEPTION_IGNORE_ARGS=1`).
+- Add Nginx fallbacks for old `listen` parameters, `real_ip`, `dhparam` and IPv6.
+- Add `TRUSTED_PROXIES` (CIDRs separated by comma or space) for Nginx, Apache, FrankenPHP and RoadRunner. The server replaces the client address with the `X-Forwarded-For` entry and honors `X-Forwarded-Proto` only for the listed proxies. No proxy is trusted by default (#456).
+- Delete workflow runs older than 7 days in `Watch updates`, except release builds.
+- Fix the Docker Hub README refresh after a merge that changes only markdown files.
+- Faster responses: larger Opcache (`PHP_OPCACHE_MEMORY_CONSUMPTION=256`, `PHP_OPCACHE_INTERNED_STRINGS_BUFFER=32`), and a bigger realpath cache (`PHP_REALPATH_CACHE_SIZE=4M`).
+- Nginx keeps connections to PHP-FPM open (`keepalive`, `fastcgi_keep_conn`).
 - Make Debian images 81 to 149 MB smaller by removing the packages that the extension build leaves behind: `binutils`, the `gcc` sanitizer libraries, `perl`, `m4`, `patch` and `pkgconf`. The images no longer include `perl`, unless another package needs it, such as `apache2`. `phpaddmod` installs the build tools again when it needs them.
 - Make Alpine images 10 to 13 MB smaller by dropping the full `ncurses-terminfo` package. The `ncurses-terminfo-base` package stays, so `htop`, `less` and `vi` keep working in common terminals.
 - Delete the `nginx.old` binary that the Nginx build leaves next to `nginx`.
 - Replace `vim-tiny` with BusyBox `vi` on Debian, as Alpine already does. The `vim` command is no longer available.
-- Fix the Debian Apache images that started without `apache2` (#451). The same cleanup also removed `mailcap` and `media-types` from the FrankenPHP images. The cleanup hook now removes a package group only when no other package depends on it.
-- Fix Nginx not starting in the PHP 7.1 Alpine images. The cleanup deleted `/var/tmp/nginx`, which the Nginx of Alpine 3.10 needs for temporary files. The cleanup now keeps that directory.
 - Fix sshd in the Alpine images accepting any password over 256 bytes for an account without a password (#454). Password login now stays off unless `SSHD_PASSWORD` is set.
 - Add `tests/tools/image-slim-check.sh`, a read-only check that lists removable packages and files in a built image.
-
-
-## [6.1.0] - 2026-11-03
-- Raise the Go modules `grpc`, `containerd/v2`, `otel`, `otel/sdk` and `klauspost/compress` in the `shinsenter/dockerfile-x` image to clear HIGH CVEs. `moby/buildkit` stays at 0.23.2 because 0.28.1 does not compile with the upstream frontend.
-- Add environment variables for Apache deflate, keep-alive, expires, overrides and the MPM profile.
-- Harden the default PHP session settings, Nginx and Apache security headers, Apache `reqtimeout` and SMTP TLS.
-- Add Nginx fallbacks for old `listen` parameters, `real_ip`, `dhparam` and IPv6.
-- Trust `X-Forwarded-For` in Apache `remoteip` and Nginx `real_ip` only from private network ranges (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `169.254.0.0/16`, `127.0.0.0/8`, `fd00::/8`), so a direct client cannot fake its IP.
-- Delete workflow runs older than 7 days in `Watch updates`, except release builds.
-- Fix the Docker Hub README refresh after a merge that changes only markdown files.
-- Faster responses: larger Opcache (`PHP_OPCACHE_MEMORY_CONSUMPTION=256`, `PHP_OPCACHE_INTERNED_STRINGS_BUFFER=32`), and a bigger realpath cache (`PHP_REALPATH_CACHE_SIZE=4M`).
-- Nginx keeps connections to PHP-FPM open (`keepalive`, `fastcgi_keep_conn`) and caches file metadata (`open_file_cache`).
-- Make images smaller.
-- Fix the cleanup of backup and package config files.
 
 
 ## [6.0.0] - 2026-10-27
