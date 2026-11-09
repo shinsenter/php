@@ -156,7 +156,8 @@ get_dockerhub_tag_digest () {
     fi
     local json
     json="$(fetch_with_cache "https://registry.hub.docker.com/v2/repositories/$name/tags/$tag" "$options")" || return 1
-    parse_json "$json" 1 '.digest // empty'
+    # Old tags that are no longer updated have a null digest, the push time is stable for them
+    parse_json "$json" 1 '.digest // .tag_last_pushed // empty'
 }
 
 # Same as above, but a failed lookup returns a value that changes on every run,
