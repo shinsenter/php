@@ -17,7 +17,8 @@ echo "Build Nginx $NGINX_VERSION"
 
 # configure flags of the OS package, without the parts that cannot be rebuilt here:
 # third-party modules (--add-dynamic-module),
-# modules that need extra libraries (geoip, image_filter, perl, xslt) and options removed from Nginx
+# modules that need extra libraries (geoip, image_filter, perl, xslt), options removed from Nginx,
+# and --without-pcre2: old Alpine packages use PCRE, but only the PCRE2 headers are installed here
 eval "set -- $(nginx -V 2>&1 | sed -n 's/^configure arguments: //p')"
 [ "$#" -gt 0 ]
 n=$#
@@ -28,7 +29,7 @@ while [ "$n" -gt 0 ]; do
         --add-dynamic-module=*|--with-perl_modules_path=*) continue ;;
         --with-http_geoip_module*|--with-http_image_filter_module*) continue ;;
         --with-http_perl_module*|--with-http_xslt_module*|--with-stream_geoip_module*) continue ;;
-        --with-http_v2_hpack_enc|--with-http_spdy_module|--with-ipv6) continue ;;
+        --with-http_v2_hpack_enc|--with-http_spdy_module|--with-ipv6|--without-pcre2) continue ;;
         --sbin-path=*) has_sbin=1 ;;
     esac
     set -- "$@" "$arg"
@@ -42,14 +43,54 @@ case " $* " in
     *) set -- "$@" --with-debug ;;
 esac
 
+# fetch_source <url> <name>: extract a source tarball into the current directory
+# the workflow puts the sources in /tmp/helper_cache
+fetch_source() {
+    if [ -f "/tmp/helper_cache/$2" ]; then
+        tar -xzf "/tmp/helper_cache/$2" --strip-components=1
+    else
+        curl -fsSL "$1" | tar -xz --strip-components=1
+    fi
+}
+
+# The brotli module is built in when the OS has the brotli headers.
+# ngx_brotli has no release, so the latest commit of its default branch is used.
+add_brotli() {
+    [ -f /usr/include/brotli/encode.h ] || return 1
+    mkdir -p /usr/src/nginx/ngx_brotli
+    (cd /usr/src/nginx/ngx_brotli && fetch_source "https://github.com/google/ngx_brotli/archive/HEAD.tar.gz" "ngx_brotli.tar.gz") || return 1
+    # the module only looks for the library in its own deps folder,
+    # so point that folder to the headers of the OS and let the linker find the OS library
+    mkdir -p /usr/src/nginx/ngx_brotli/deps/brotli/c
+    ln -s /usr/include /usr/src/nginx/ngx_brotli/deps/brotli/c/include
+    # middleware-patch replaces the brotli library on old Alpine,
+    # which leaves the links of brotli-dev pointing to the removed version
+    for lib in /usr/lib/libbrotli*.so; do
+        [ -e "$lib" ] || [ ! -L "$lib" ] || ln -sf "${lib##*/}.1" "$lib"
+    done
+}
+
+build() {
+    ./configure "$@" && make -j "$(nproc)"
+}
+
 mkdir -p /usr/src/nginx
 cd /usr/src/nginx
-# the workflow puts the source in /tmp/helper_cache
-cached="/tmp/helper_cache/nginx-$NGINX_VERSION.tar.gz"
-if [ -f "$cached" ]; then
-    tar -xzf "$cached" --strip-components=1
-else
-    curl -fsSL "https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz" | tar -xz --strip-components=1
+fetch_source "https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz" "nginx-$NGINX_VERSION.tar.gz"
+
+# modules that the OS package may not have
+extras=""
+
+# HTTP/3: old OS packages do not enable it, and configure refuses it when OpenSSL is too old
+case " $* " in
+    *" --with-http_v3_module "*) ;;
+    *) if ./configure "$@" --with-http_v3_module >/dev/null 2>&1; then extras="--with-http_v3_module"; fi ;;
+esac
+
+if add_brotli; then extras="$extras --add-module=/usr/src/nginx/ngx_brotli"; fi
+
+if [ -n "$extras" ]; then
+    if build "$@" $extras; then exit 0; fi
+    echo "WARNING: cannot build Nginx $NGINX_VERSION with $extras, build without" >&2
 fi
-./configure "$@"
-make -j "$(nproc)"
+build "$@"

@@ -198,7 +198,7 @@ cache_middleware_sources () {
 HELPER_CACHE_DIR="${HELPER_CACHE_DIR:-/tmp/helper_cache}"
 WPCLI_URL="${WPCLI_URL:-https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar}"
 
-# Nginx source for src/php/with-nginx/nginx-build
+# Nginx and ngx_brotli sources for src/php/with-nginx/nginx-build
 cache_nginx_source () {
     local version
     version="$(resolve_nginx_version "${NGINX_VERSION:-mainline}")"
@@ -207,6 +207,10 @@ cache_nginx_source () {
     download_file "https://nginx.org/download/nginx-$version.tar.gz" \
         "$HELPER_CACHE_DIR/nginx-$version.tar.gz" \
         || echo "Cannot cache Nginx $version" >&2
+    # ngx_brotli has no release: the latest commit is used, and it is not part of the fingerprint
+    download_file "https://github.com/google/ngx_brotli/archive/HEAD.tar.gz" \
+        "$HELPER_CACHE_DIR/ngx_brotli.tar.gz" \
+        || echo "Cannot cache ngx_brotli" >&2
 }
 
 # s6-overlay archives for src/php/common/os-s6-overlay.dockerfile.

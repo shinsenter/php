@@ -160,6 +160,7 @@ test_versions() {
 
     cache_nginx_source 2>/dev/null
     check "cache: nginx source" [ -f "$cache_dir/nginx-1.31.8.tar.gz" ]
+    check "cache: ngx_brotli source" [ -f "$cache_dir/ngx_brotli.tar.gz" ]
     cache_s6_sources 2>/dev/null
     check "cache: s6 noarch" [ -f "$cache_dir/s6-v3.2.1.0-s6-overlay-noarch.tar.xz" ]
     check "cache: s6 syslogd" [ -f "$cache_dir/s6-v3.2.1.0-syslogd-overlay-noarch.tar.xz" ]
@@ -172,9 +173,9 @@ test_versions() {
     cache_wpcli_source 2>/dev/null
     check "cache: wp-cli with a matching checksum is kept" [ -f "$cache_dir/wp-cli.phar" ]
     NGINX_VERSION=os; resolve_nginx_version() { echo os; }
-    rm -f "$cache_dir"/nginx-*
+    rm -f "$cache_dir"/nginx-* "$cache_dir"/ngx_brotli*
     cache_nginx_source 2>/dev/null
-    check_eq "cache: nginx os is not downloaded" "" "$(ls "$cache_dir" | grep '^nginx-' || true)"
+    check_eq "cache: nginx os is not downloaded" "" "$(ls "$cache_dir" | grep '^nginx-\|^ngx_brotli' || true)"
     rm -rf "$cache_dir"
     unset -f fetch_with_cache download_file get_github_latest_tag resolve_nginx_version
     source "$BASE_DIR/build/helpers.sh"
@@ -272,6 +273,13 @@ test_scaling() {
     check "nginx: graceful stop signal" grep -q 'down-signal SIGQUIT' "$nginx/nginx-config.dockerfile"
     check "nginx: HEALTH_CHECK_URL" grep -q "HEALTH_CHECK_URL 'http://127.0.0.1:\${HEALTH_PORT}/healthz'" "$nginx/nginx-config.dockerfile"
     check "nginx: real_ip fallback keeps the proxy file valid" grep -q '00-proxy-proto.conf' "$nginx/rootfs/etc/hooks/post-build/00-fix-nginx"
+    check "nginx: the brotli library is kept by its owner package" grep -q 'APK_PACKAGES="$brotli_lib" APT_PACKAGES=.libbrotli1. pkg-add' "$nginx/nginx-install.dockerfile"
+    check "nginx: broken brotli-dev links are repaired" grep -q 'ln -sf "${lib##\*/}.1" "$lib"' "$nginx/nginx-build"
+    check "nginx: PCRE2 is used on every OS" grep -q -- '|--without-pcre2) continue' "$nginx/nginx-build"
+    check "nginx: HTTP/3 is added when the OS package lacks it" grep -q 'extras="--with-http_v3_module"' "$nginx/nginx-build"
+    check "nginx: brotli module is built in" grep -q -- '--add-module=/usr/src/nginx/ngx_brotli' "$nginx/nginx-build"
+    check "nginx: brotli headers are removed after the build" grep -q "APK_PACKAGES='.nginx-brotli' APT_PACKAGES='libbrotli-dev' pkg-del" "$nginx/nginx-install.dockerfile"
+    check "nginx: brotli config is dropped when the module is missing" grep -q "nginx-has-error 'brotli'" "$nginx/rootfs/etc/hooks/post-build/00-fix-nginx"
 
     check "apache: health vhost on HEALTH_PORT" grep -q 'VirtualHost \*:${HEALTH_PORT}' "$apache/rootfs/etc/apache2/sites-enabled/01-health.conf"
     check "apache: /healthz" grep -q 'healthz' "$apache/rootfs/etc/apache2/sites-enabled/01-health.conf"

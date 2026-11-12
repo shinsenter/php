@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [Unreleased]
+- Build Nginx with the brotli module (`google/ngx_brotli`), so `brotli` and `brotli_static` work in the `fpm-nginx` images.
+- Fix the Nginx build on the Alpine images of PHP 7.4, 8.0 and 8.1, which kept the old Nginx of the OS package. Nginx now uses PCRE2 on every OS.
+- Build Nginx with HTTP/3 on the older OS releases whose Nginx package does not enable it, when their OpenSSL supports QUIC.
+
+
 ## [6.1.0] - 2026-11-08
 - Raise the Go modules `grpc`, `containerd/v2`, `otel`, `otel/sdk` and `klauspost/compress` in the `shinsenter/dockerfile-x` image to clear HIGH CVEs. `moby/buildkit` stays at 0.23.2 because 0.28.1 does not compile with the upstream frontend.
 - Add environment variables for Apache deflate, keep-alive, expires, overrides, the MPM profile and `reqtimeout` (`APACHE_REQUEST_READ_TIMEOUT`, no limit by default).

@@ -34,6 +34,15 @@ if [ -n "$NGINX_VERSION" ] && [ "$NGINX_VERSION" != os ]; then
     export APT_PACKAGES='build-essential libssl-dev libpcre2-dev zlib1g-dev'
     pkg-add
 
+    # brotli headers for the brotli module,
+    # installed apart so an OS without them still builds Nginx
+    APK_PACKAGES='--virtual .nginx-brotli brotli-dev' APT_PACKAGES='libbrotli-dev' pkg-add
+
+    # keep the brotli library when the headers are removed:
+    # Alpine has it in brotli-libs, or in brotli on old releases, so ask which package owns it
+    brotli_lib="$(apk info -W /usr/lib/libbrotlienc.so.1 2>/dev/null | sed -n 's/.* is owned by \(.*\)-[^-]*-r[0-9]*$/\1/p')"
+    APK_PACKAGES="$brotli_lib" APT_PACKAGES='libbrotli1' pkg-add
+
     # the build runs in its own shell:
     # a failure before "make install" leaves the OS package untouched,
     # and the build tools are removed in any case
@@ -47,6 +56,7 @@ if [ -n "$NGINX_VERSION" ] && [ "$NGINX_VERSION" != os ]; then
     fi
 
     rm -rf /usr/src/nginx
+    APK_PACKAGES='.nginx-brotli' APT_PACKAGES='libbrotli-dev' pkg-del
     APK_PACKAGES='.nginx-deps' pkg-del
     unset APK_PACKAGES APT_PACKAGES
 fi
