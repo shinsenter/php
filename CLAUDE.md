@@ -75,6 +75,18 @@ Utilities inside the image: `pkg-add` and `pkg-del` (install and remove packages
 - Do not touch `.env`, secrets, `.secrets` or `build/.secrets.example`.
 - Fixing a bug reported in a GitHub issue: also record it in `KNOWN_ISSUES.md` in the same change. Read the issue first, do not guess a cause. Format: `.claude/docs/known-issues.md`.
 
+## Ship flow ("ship 6.x")
+
+When the user says "ship 6.x" (or asks for the usual flow), do all steps without asking again. Start only after the tests for the change have passed.
+
+1. Commit on `6.x` in groups by topic (`feat`, `fix`, `docs`, `test`, `chore` apart). One-line messages, no body, no co-author line. Leave untracked scratch files and `_OUTPUTS/` out.
+2. Push `6.x` and open a PR to `main`. Title `[6.x] <summary>`. Body in plain English with Goal, Scope, Implementation, Risks, Tests. No AI or tool attribution.
+3. Squash merge with a one-line Conventional Commits subject and an empty body. Do not delete the `6.x` branch.
+4. Update `main` (`git pull --ff-only`), then `git reset --hard main` on `6.x` and force push `6.x` (`--force-with-lease`).
+5. No release and no tag, unless the user asks for one.
+
+Stop and report when a step fails (push rejected, checks failing, merge conflict). Do not work around it.
+
 ## Read before changing
 
 | Area | Read | Hard rule |
