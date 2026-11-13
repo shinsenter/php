@@ -50,6 +50,13 @@ concurrency:
   group: build-all-${{ github.ref }}
   cancel-in-progress: false
 
+# The reusable workflows cannot get more than this.
+# id-token is for the keyless signature (cosign), packages is for GHCR.
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
 ################################################################################
 ################################################################################
 

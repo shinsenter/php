@@ -218,9 +218,10 @@ jobs:
           file: ${{ env.BUILD_DOCKERFILE }}
           context: ${{ env.BUILD_CONTEXT }}
           tags: ${{ env.SKIP_SQUASH != '1' && env.BUILD_TMP_NAME || '' }}
-          outputs: ${{ env.SKIP_SQUASH == '1' && format('type=image,name={0},push-by-digest=true,name-canonical=true,push={1}', steps.stage.outputs.name, env.SKIP_PUSH != '1') || '' }}
+          outputs: ${{ env.SKIP_SQUASH == '1' && format('type=image,name={0},push-by-digest=true,name-canonical=true,compression=zstd,force-compression=true,oci-mediatypes=true,push={1}', steps.stage.outputs.name, env.SKIP_PUSH != '1') || '' }}
           # the temporary image of squash mode is discarded, only the final image needs an SBOM
           sbom: ${{ env.SKIP_SQUASH == '1' }}
+          provenance: ${{ env.SKIP_SQUASH == '1' && 'mode=max' || 'false' }}
           build-args: |
             DEBUG=${{ env.DEBUG }}
             BUILD_CACHE_KEY=${{ env.BUILD_CACHE_KEY }}
@@ -256,7 +257,7 @@ jobs:
           docker images
           df -h
 
-      -
+      - # Only the pushed image uses zstd layers (smaller, faster pull), the temporary image above stays gzip
         if: ${{ env.SKIP_SQUASH != '1' }}
         id: push_squash
         name: Squash and push ${{ env.BUILD_TAG }} for ${{ matrix.platform }}
@@ -267,8 +268,9 @@ jobs:
           platforms: ${{ matrix.platform }}
           file: ${{ env.BUILD_DOCKERFILE_SQUASHED }}
           context: ${{ env.BUILD_CONTEXT }}
-          outputs: type=image,name=${{ steps.stage.outputs.name }},push-by-digest=true,name-canonical=true,push=${{ env.SKIP_PUSH != '1' }}
+          outputs: type=image,name=${{ steps.stage.outputs.name }},push-by-digest=true,name-canonical=true,compression=zstd,force-compression=true,oci-mediatypes=true,push=${{ env.SKIP_PUSH != '1' }}
           sbom: true
+          provenance: mode=max
           build-args: |
             DEBUG=${{ env.DEBUG }}
 
@@ -302,6 +304,7 @@ jobs:
     permissions:
       packages: write
       contents: read
+      id-token: write
     env:
       PUBLISH_TO_GHCR: "1"
     steps:
@@ -332,6 +335,13 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - # Size before the new image replaces the tag, empty for a first release
+        if: ${{ env.SKIP_PUSH != '1' }}
+        name: Read the size of the current ${{ env.BUILD_TAG }}
+        run: |
+          . ./build/helpers.sh
+          echo "PREV_SIZE=$(get_image_size "ghcr.io/$BUILD_TAG")" >> "$GITHUB_ENV"
 
       -
         if: ${{ env.SKIP_PUSH != '1' }}
@@ -371,6 +381,55 @@ jobs:
             echo "::error::The published image does not carry the expected fingerprint"
             exit 1
           fi
+
+      - # A warning only: a bigger image can be right (new PHP version, new extension)
+        if: ${{ success() && env.SKIP_PUSH != '1' }}
+        name: Compare the size of ${{ env.BUILD_TAG }}
+        continue-on-error: true
+        run: |
+          . ./build/helpers.sh
+          now="$(get_image_size "ghcr.io/$BUILD_TAG")"
+          [ -n "$now" ] || exit 0
+          line="$(awk -v n="$now" -v p="${PREV_SIZE:-0}" 'BEGIN {
+              printf "%.1f MB", n / 1048576
+              if (p > 0) printf " (was %.1f MB, %+.1f%%)", p / 1048576, (n - p) * 100 / p
+          }')"
+          echo "$BUILD_TAG linux/amd64 compressed size: $line"
+          echo "- \`$BUILD_TAG\` linux/amd64 compressed size: $line" >> "$GITHUB_STEP_SUMMARY"
+          if awk -v n="$now" -v p="${PREV_SIZE:-0}" 'BEGIN { exit !(p > 0 && n > p * 1.03) }'; then
+              echo "::warning::$BUILD_TAG grew more than 3%: $line"
+          fi
+
+      - # Keyless signature by digest, so the tags keep pointing at the same index
+        if: ${{ success() && env.SKIP_PUSH != '1' }}
+        uses: sigstore/cosign-installer@v4
+
+      - # The signature is a separate artifact next to the image, a failure here does not block the release
+        if: ${{ success() && env.SKIP_PUSH != '1' }}
+        name: Sign ${{ env.BUILD_TAG }}
+        continue-on-error: true
+        run: |
+          set -e
+          digest="$(docker buildx imagetools inspect "$BUILD_TAG" --format '{{.Manifest.Digest}}')"
+          [ -n "$digest" ] || { echo "::error::No digest for $BUILD_TAG"; exit 1; }
+          for repo in "$BUILD_NAME" "ghcr.io/$BUILD_NAME"; do
+              cosign sign --yes "$repo@$digest"
+          done
+
+      - # Report only: PHP and OS packages carry CVEs that the image cannot fix on its own
+        if: ${{ success() && env.SKIP_PUSH != '1' }}
+        name: Scan ${{ env.BUILD_TAG }}
+        continue-on-error: true
+        run: |
+          docker run --rm ghcr.io/aquasecurity/trivy:latest image \
+              --quiet --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed \
+              --timeout 10m --format table "ghcr.io/$BUILD_TAG" | head -c 200000 >/tmp/scan.txt
+          {
+              echo "### Vulnerabilities in $BUILD_TAG (HIGH and CRITICAL, fixed upstream)"
+              echo '```'
+              cat /tmp/scan.txt
+              echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
   ##############################################################################
 

@@ -52,6 +52,8 @@ They include the latest Composer and common web servers - [Apache2](https://http
 
 > [!NOTE]
 > We slim these images down with the [docker-squash](https://code.shin.company/docker-squash) project, so pulls are faster and they use less disk and memory than the official images they're based on.
+>
+> New builds use zstd layer compression, which makes images smaller to pull. Pulling them needs Docker Engine 23.0 or later, or containerd 1.5 or later (Kubernetes included). On an older runtime the pull fails. A tag that has not been rebuilt yet keeps its gzip layers.
 
 
 ## Quick start
