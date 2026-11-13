@@ -24,11 +24,9 @@ if [ -z "$DISABLE_AUTORUN_FIX_OWNER_GROUP" ] || ! is-true "$DISABLE_AUTORUN_FIX_
     fi
 
     if [ "$need_fixed" -eq 1 ]; then
-        start_time=$(date +%s)
+        SECONDS=0
         web-chown fix
-        end_time=$(date +%s)
-        elapsed=$(( end_time - start_time ))
-        if [ "$elapsed" -gt 10 ]; then
+        if [ "$SECONDS" -gt 10 ]; then
             debug-echo -w "The ownership-fix process ensures the user '$APP_USER' can read and write files in $APP_PATH. "
             debug-echo -w "If this takes too long and delays container startup, set the environment variable 'DISABLE_AUTORUN_FIX_OWNER_GROUP=1' to disable it."
             debug-echo -w "You'll then need to manually fix ownership yourself and rebuild the Docker image."
