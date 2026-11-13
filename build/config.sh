@@ -585,11 +585,7 @@ if [ "$SKIP_BUILD" != "1" ]; then
     fi
 
     BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(buildfile:$(path_hash "$BUILD_DOCKERFILE" | head -c10))"
-    # Other Dockerfiles in the same folder are not part of this image
-    context_hash="$(find "$BUILD_CONTEXT" -type f ! -name '.*' ! -name '*.md' \
-        ! -path '*/php-backports/*' \
-        \( ! -name '*.dockerfile' -o -name 'meta.dockerfile' \) \
-        | sort -dbfi | xargs -r shasum 2>/dev/null | shasum | head -c10)"
+    context_hash="$(get_context_hash "$BUILD_CONTEXT" "$BUILD_DOCKERFILE")"
     BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(buildcontext:$context_hash)"
 
     # The backports are copied into the context only when building,
