@@ -44,6 +44,9 @@ codeigniter4:min=8.2 server=apache
 # https://coolify.io/docs/installation
 coolify:min=8.2 base=laravel
 
+# https://craftcms.com/docs/5.x/requirements
+craftcms:min=8.2 server=nginx
+
 # https://www.drupal.org/docs/getting-started/system-requirements/php-requirements
 drupal:min=8.3 server=apache
 

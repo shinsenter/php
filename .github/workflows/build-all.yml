@@ -370,6 +370,7 @@ jobs:
           - app-bagisto
           - app-bedrock
           - app-coolify
+          - app-craftcms
           - app-invoiceshelf
           - app-joomla
           - app-nextcloud

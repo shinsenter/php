@@ -8,7 +8,7 @@ All notable changes to this project are documented in this file.
 - Sign the published images with cosign (keyless) and attach max provenance.
 - Report HIGH and CRITICAL vulnerabilities and the image size change in the job summary of each publish. Neither fails the build.
 - Fix the build fingerprint. A changed Dockerfile fragment now rebuilds the image, and a change for one server no longer rebuilds the base images and the other servers.
-- Add images for Shopware, Tempest, Joomla, PrestaShop and Nextcloud.
+- Add images for Craft CMS, Shopware, Tempest, Joomla, PrestaShop and Nextcloud.
 - Add a Performance section to the README and update the GitHub Actions weekly with Dependabot.
 - Fix the WordPress image downloading nothing when the project folder belongs to root, which left the site answering 404.
 - Build Nginx with the brotli module (`google/ngx_brotli`), so `brotli` and `brotli_static` work in the `fpm-nginx` images.

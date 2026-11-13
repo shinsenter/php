@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+# Test only, mounted by tests/docker-compose.yml: install Craft with a first user, so that / answers 200.
+# The image does not run this by itself, because it has no database of its own.
+# The project is still owned by root here, and the console runs as the web user
+web-chown fix "$APP_PATH"
+cd "$APP_PATH" || exit 1
+web-do php craft install/check || web-do php craft install --interactive=0 \
+    --email=admin@example.com --username=admin --password=test-password \
+    --site-name=Test --site-url=http://localhost --language=en-US

@@ -15,7 +15,7 @@
 #   -t SECONDS     wait for init per container (default 120)
 #   -s             strict: follow redirects and pass only on HTTP 2xx (default: any HTTP answer)
 #   keyword        run only services whose name contains a keyword, "with-" is ignored
-#                  (default: all except cli and fpm)
+#                  (default: all except cli, fpm and mysql, the shared test database)
 # IMAGE_TAG overrides the tag built from -v and -o: dev-php<version>[-alpine].
 # Results go to tests/logs/<date>-compose-<tag>.csv.
 # The csv has the columns service, status, result and header (all response header lines
@@ -74,7 +74,7 @@ parse_args() {
 # Fill SERVICES with the compose services that match the keywords
 select_services() {
     SERVICES=""
-    for name in $(compose config --services | grep -vx -e cli -e fpm); do
+    for name in $(compose config --services | grep -vx -e cli -e fpm -e mysql); do
         keep=0
         [ -z "$KEYWORDS" ] && keep=1
         for key in $KEYWORDS; do
@@ -159,11 +159,12 @@ run_batch() {
     echo "==> Batch:$BATCH"
     # A pull failure is not fatal: the missing image shows up as FAIL below
     compose pull --ignore-pull-failures $BATCH >"$LOG_PREFIX-$IMAGE_TAG-pull.log" 2>&1
-    compose up -d --force-recreate --no-deps $BATCH >"$LOG_PREFIX-$IMAGE_TAG-up.log" 2>&1
+    # No --no-deps: a service with depends_on (for example mysql) starts its database first
+    compose up -d --force-recreate $BATCH >"$LOG_PREFIX-$IMAGE_TAG-up.log" 2>&1
     for svc in $BATCH; do
         check_service "$svc"
     done
-    compose rm -sf -v $BATCH >/dev/null 2>&1
+    compose rm -sf -v $BATCH mysql >/dev/null 2>&1
 }
 
 parse_args "$@"

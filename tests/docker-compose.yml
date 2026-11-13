@@ -41,6 +41,23 @@ services:
 
   ##########################################################
 
+  # Shared by the webapps that need a database (see depends_on). MariaDB speaks the MySQL protocol and is smaller.
+  # It keeps its data in memory, so every batch of compose-test.sh starts with an empty database.
+  mysql:
+    image: mariadb:11
+    environment:
+      MARIADB_ROOT_PASSWORD: test
+      MARIADB_DATABASE: test
+    tmpfs:
+      - /var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+
+  ##########################################################
+
   bagisto:       { <<: *app, image: "ghcr.io/shinsenter/bagisto:${IMAGE_TAG}",       ports: ["8105:80", "8205:443"] }
   bedrock:       { <<: *app, image: "ghcr.io/shinsenter/bedrock:${IMAGE_TAG}",       ports: ["8106:80", "8206:443"] }
   cakephp5:      { <<: *app, image: "ghcr.io/shinsenter/cakephp5:${IMAGE_TAG}",      ports: ["8107:80", "8207:443"] }
@@ -61,10 +78,37 @@ services:
   phpmyadmin:    { <<: *app, image: "ghcr.io/shinsenter/phpmyadmin:${IMAGE_TAG}",    ports: ["8122:80", "8222:443"] }
   spiral:        { <<: *app, image: "ghcr.io/shinsenter/spiral:${IMAGE_TAG}",        ports: ["8123:80", "8223:443"] }
   statamic:      { <<: *app, image: "ghcr.io/shinsenter/statamic:${IMAGE_TAG}",      ports: ["8124:80", "8224:443"] }
-  sulu:          { <<: *app, image: "ghcr.io/shinsenter/sulu:${IMAGE_TAG}",          ports: ["8125:80", "8225:443"] }
+  # Sulu needs its tables before / answers, and the image does not create them, so a test hook runs sulu:build.
+  sulu:
+    <<: *app
+    image: "ghcr.io/shinsenter/sulu:${IMAGE_TAG}"
+    ports: ["8125:80", "8225:443"]
+    environment:
+      - DATABASE_URL=mysql://root:test@mysql:3306/test?serverVersion=mariadb-11.4.0&charset=utf8mb4
+    volumes:
+      - ./compose-hooks/90-sulu-build:/etc/hooks/post-create-project/90-sulu-build:ro
+    depends_on:
+      mysql: { condition: service_healthy }
   symfony:       { <<: *app, image: "ghcr.io/shinsenter/symfony:${IMAGE_TAG}",       ports: ["8126:80", "8226:443"] }
   wordpress:     { <<: *app, image: "ghcr.io/shinsenter/wordpress:${IMAGE_TAG}",     ports: ["8127:80", "8227:443"] }
   yii:           { <<: *app, image: "ghcr.io/shinsenter/yii:${IMAGE_TAG}",           ports: ["8128:80", "8228:443"] }
+  # Craft needs its tables and a first user before / answers, so a test hook runs the install.
+  craftcms:
+    <<: *app
+    image: "ghcr.io/shinsenter/craftcms:${IMAGE_TAG}"
+    ports: ["8129:80", "8229:443"]
+    environment:
+      - CRAFT_DB_DRIVER=mysql
+      - CRAFT_DB_SERVER=mysql
+      - CRAFT_DB_PORT=3306
+      - CRAFT_DB_DATABASE=test
+      - CRAFT_DB_USER=root
+      - CRAFT_DB_PASSWORD=test
+      - CRAFT_DB_TABLE_PREFIX=craft_
+    volumes:
+      - ./compose-hooks/90-craft-install:/etc/hooks/post-create-project/90-craft-install:ro
+    depends_on:
+      mysql: { condition: service_healthy }
   joomla:        { <<: *app, image: "ghcr.io/shinsenter/joomla:${IMAGE_TAG}",        ports: ["8130:80", "8230:443"] }
   nextcloud:     { <<: *app, image: "ghcr.io/shinsenter/nextcloud:${IMAGE_TAG}",     ports: ["8131:80", "8231:443"] }
   prestashop:    { <<: *app, image: "ghcr.io/shinsenter/prestashop:${IMAGE_TAG}",    ports: ["8132:80", "8232:443"] }

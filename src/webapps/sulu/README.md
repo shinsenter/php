@@ -36,6 +36,44 @@ services:
 
 The image has no database. Run one as a separate service and pass its address to the app through the app's own settings.
 
+Sulu needs a database before the first page works. Compose with MariaDB (MySQL compatible):
+
+```yaml
+services:
+  web:
+    image: shinsenter/sulu:latest
+    ports: ["80:80", "443:443", "443:443/udp"]
+    volumes:
+      - ./sulu:/var/www/html
+    environment:
+      - DATABASE_URL=mysql://sulu:secret@db:3306/sulu?serverVersion=mariadb-11.4.0&charset=utf8mb4
+    depends_on:
+      db: { condition: service_healthy }
+  db:
+    image: mariadb:11
+    environment:
+      MARIADB_ROOT_PASSWORD: secret
+      MARIADB_DATABASE: sulu
+      MARIADB_USER: sulu
+      MARIADB_PASSWORD: secret
+    volumes:
+      - db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      retries: 30
+volumes:
+  db:
+```
+
+The first start also downloads the project, so wait for it to finish. Then create the tables once:
+
+```shell
+docker compose exec web web-do php bin/console sulu:build dev --no-interaction
+```
+
+Without this step the site answers `500` with `Table 'sulu.ro_routes' doesn't exist`.
+
 
 ## What is inside
 
