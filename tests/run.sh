@@ -491,6 +491,13 @@ test_helpers() {
     HELPER_CACHE_DIR="$tmp/hc" cache_file "http://x/y" y.txt
     check_eq "cache_file puts the file in the cache" "http://x/y" "$(cat "$tmp/hc/y.txt")"
 
+    # plan_matrix: runner and QEMU choice per platform
+    check_eq "plan_matrix amd64 on x64" "ubuntu-26.04||linux-amd64" "$(plan_matrix linux/amd64 | jq -r '.[0] | "\(.runner)|\(.qemu)|\(.slug)"')"
+    check_eq "plan_matrix arm64 on arm" "ubuntu-26.04-arm|" "$(plan_matrix linux/amd64,linux/arm64/v8 | jq -r '.[1] | "\(.runner)|\(.qemu)"')"
+    check_eq "plan_matrix arm/v7 under QEMU" "arm" "$(plan_matrix linux/arm/v7 | jq -r '.[0].qemu')"
+    check_eq "plan_matrix ppc64le under QEMU" "ppc64le" "$(plan_matrix linux/ppc64le | jq -r '.[0].qemu')"
+    check_eq "plan_matrix empty list" "[]" "$(plan_matrix '')"
+
     rm -rf "$tmp"
     finish
 }

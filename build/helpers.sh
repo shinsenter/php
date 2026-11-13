@@ -263,6 +263,24 @@ get_image_size() {
 }
 
 ################################################################################
+# Build plan
+################################################################################
+
+# JSON matrix of the platform builds, one entry per platform of a comma list.
+# amd64 and 386 build on x64, arm64 on arm.
+# 32-bit ARM, ppc64le and s390x (base-os and base-s6 only) run under QEMU.
+# Usage: plan_matrix <platforms>
+plan_matrix() {
+    jq -cn --arg platforms "$1" '
+        $platforms | split(",") | map(select(. != "")) | map({
+          platform: .,
+          slug: gsub("/"; "-"),
+          runner: (if . == "linux/amd64" or . == "linux/386" then "ubuntu-26.04" else "ubuntu-26.04-arm" end),
+          qemu: (if test("^linux/arm/") then "arm" elif test("ppc64le|s390x") then ltrimstr("linux/") else "" end)
+        })'
+}
+
+################################################################################
 # Build context
 ################################################################################
 
