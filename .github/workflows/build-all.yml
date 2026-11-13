@@ -50,12 +50,10 @@ concurrency:
   group: build-all-${{ github.ref }}
   cancel-in-progress: false
 
-# The reusable workflows cannot get more than this.
-# id-token is for the keyless signature (cosign), packages is for GHCR.
+# A reusable workflow cannot get more than its caller grants.
+# The jobs that call one grant packages (GHCR) and id-token (keyless signature with cosign) themselves.
 permissions:
   contents: read
-  packages: write
-  id-token: write
 
 ################################################################################
 ################################################################################
@@ -86,8 +84,8 @@ jobs:
           . ./build/versions.sh
 
           # Prepare variables
-          ref_type=${{ github.ref_type }}
-          ref=${{ github.ref }}
+          ref_type=$GITHUB_REF_TYPE
+          ref=$GITHUB_REF
           tag_prefix=$(if [[ $ref_type != 'tag' ]] && [[ $ref != 'refs/heads/main' ]]; then echo 'dev-'; fi)
           force_build=$(if [ "$FORCE_BUILD" = "true" ]; then echo 'true'; else echo 'false'; fi)
 
@@ -183,6 +181,10 @@ jobs:
   s6-overlay:
     if: ${{ needs.prepare.outputs.build_base == 'true' }}
     uses: ./.github/workflows/template-common.yml
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     secrets: inherit
     needs: [prepare]
     with:
@@ -195,6 +197,10 @@ jobs:
     name: ${{ matrix.os == '' && 'debian' || matrix.os }}-s6
     if: ${{ needs.prepare.outputs.build_base == 'true' }}
     uses: ./.github/workflows/template-common.yml
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     secrets: inherit
     needs: [prepare]
     strategy:
@@ -215,6 +221,10 @@ jobs:
   # A PHP variant, then the servers built on top of it
   fpm:
     uses: ./.github/workflows/template-stack.yml
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     secrets: inherit
     needs: [prepare]
     with:
@@ -226,6 +236,10 @@ jobs:
 
   cli:
     uses: ./.github/workflows/template-stack.yml
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     secrets: inherit
     needs: [prepare]
     with:
@@ -237,6 +251,10 @@ jobs:
 
   zts:
     uses: ./.github/workflows/template-stack.yml
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     secrets: inherit
     needs: [prepare]
     with:
@@ -265,11 +283,13 @@ jobs:
           DOCKERHUB_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
+          PREPARED_TAG_PREFIX: ${{ needs.prepare.outputs.tag_prefix }}
+          PREPARED_PHP_VERSIONS: ${{ needs.prepare.outputs.php_versions }}
         run: |
           set -e
           . ./build/helpers.sh
-          tag_prefix="${{ needs.prepare.outputs.tag_prefix }}"
-          php_versions=($(echo '${{ needs.prepare.outputs.php_versions }}' | jq -r '.[]'))
+          tag_prefix="$PREPARED_TAG_PREFIX"
+          php_versions=($(echo "$PREPARED_PHP_VERSIONS" | jq -r '.[]'))
           distros=(debian alpine)
           # laravel is not listed: it is built after this job, its digest is fetched later
           base_images=(phpfpm-nginx phpfpm-apache roadrunner)
@@ -305,6 +325,10 @@ jobs:
   popular-apps:
     name: ${{ matrix.app }}
     uses: ./.github/workflows/template-php.yml
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     secrets: inherit
     needs: [prepare, server-cache]
     strategy:
@@ -345,6 +369,10 @@ jobs:
   other-apps:
     name: ${{ matrix.app }}
     uses: ./.github/workflows/template-php.yml
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     secrets: inherit
     needs: [prepare, server-cache]
     strategy:
@@ -361,6 +389,10 @@ jobs:
   extended-apps:
     name: ${{ matrix.app }}
     uses: ./.github/workflows/template-php.yml
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     secrets: inherit
     needs: [prepare, popular-apps]
     strategy:

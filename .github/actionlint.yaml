@@ -1,4 +1,3 @@
-#!/bin/sh -e
 ################################################################################
 #     These setups are part of the project: https://code.shin.company/php
 #     Please respect the intellectual effort that went into creating them.
@@ -6,11 +5,16 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
+# Settings for tests/tools/workflow-check.sh
 
-BASE_DIR="$(git rev-parse --show-toplevel)"
+self-hosted-runner:
+  # A GitHub-hosted runner that the bundled label list does not know yet
+  labels:
+    - ubuntu-26.04-arm
 
-act workflow_dispatch --dryrun \
-    --network host \
-    --container-architecture linux/amd64 \
-    --workflows "$BASE_DIR/.github/workflows/build-all.yml" \
-    "$@"
+paths:
+  .github/workflows/**/*.yml:
+    ignore:
+      # Style notes on shell that works as written:
+      # SC1007 is the empty "DEBUG= command" assignment, SC2012 and SC2207 are an ls and a command split, SC2129 is separate redirects
+      - 'shellcheck reported issue in this script: SC(1007|2012|2129|2207):.+'

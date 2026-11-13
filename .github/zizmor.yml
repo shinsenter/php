@@ -1,0 +1,21 @@
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+# Settings for tests/tools/workflow-check.sh
+
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        # Actions follow a version tag, and Dependabot updates the tags. They are not pinned to a hash.
+        "*": ref-pin
+  secrets-inherit:
+    # The templates call each other and pass the registry secrets down, so every level inherits them
+    disable: true
+  dependabot-cooldown:
+    # Updates are taken as soon as they are published
+    disable: true

@@ -48,6 +48,10 @@ jobs:
   base:
     name: ${{ inputs.base }}
     uses: ./.github/workflows/template-php.yml
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     secrets: inherit
     with:
       app_name: ${{ inputs.base }}
@@ -60,6 +64,10 @@ jobs:
     if: ${{ inputs.servers != '[]' }}
     needs: base
     uses: ./.github/workflows/template-php.yml
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     secrets: inherit
     strategy:
       fail-fast: false

@@ -96,9 +96,13 @@ jobs:
           BUILD_TAG_PREFIX: ${{ inputs.tag_prefix }}
           FORCE_BUILD: ${{ inputs.force_build && '1' || '0' }}
           BUILD_ENV_FILE: /tmp/build.env
+          INPUT_OS: ${{ inputs.os }}
+          INPUT_APP_NAME: ${{ inputs.app_name }}
+          INPUT_PHP_VERSION: ${{ inputs.php_version }}
+          INPUT_SERVER: ${{ inputs.server }}
         run: |
           set -e
-          ./build/config.sh "${{ inputs.os }}" "${{ inputs.app_name }}" "${{ inputs.php_version }}" "${{ inputs.server }}"
+          ./build/config.sh "$INPUT_OS" "$INPUT_APP_NAME" "$INPUT_PHP_VERSION" "$INPUT_SERVER"
 
       -
         id: plan
@@ -250,10 +254,12 @@ jobs:
         if: ${{ env.SKIP_SQUASH != '1' }}
         name: Make squashed Dockerfile for ${{ env.BUILD_TAG }}
         continue-on-error: ${{ inputs.continue-on-error }}
+        env:
+          MATRIX_PLATFORM: ${{ matrix.platform }}
         run: |
-          docker pull --platform "${{ matrix.platform }}" "${{ env.BUILD_TMP_NAME }}"
-          DEBUG= ${{ env.SQUASH_CMD }} "${{ env.BUILD_TMP_NAME }}" -p >"${{ env.BUILD_DOCKERFILE_SQUASHED }}"
-          cat "${{ env.BUILD_DOCKERFILE_SQUASHED }}"
+          docker pull --platform "$MATRIX_PLATFORM" "$BUILD_TMP_NAME"
+          DEBUG= $SQUASH_CMD "$BUILD_TMP_NAME" -p >"$BUILD_DOCKERFILE_SQUASHED"
+          cat "$BUILD_DOCKERFILE_SQUASHED"
           docker images
           df -h
 
@@ -374,10 +380,10 @@ jobs:
         run: |
           set -e
           . ./build/helpers.sh
-          published="$(get_image_fingerprint "ghcr.io/${{ env.BUILD_TAG }}")"
-          echo "expected  = ${{ env.BUILD_FINGERPRINT }}"
+          published="$(get_image_fingerprint "ghcr.io/$BUILD_TAG")"
+          echo "expected  = $BUILD_FINGERPRINT"
           echo "published = $published"
-          if [ "$published" != "${{ env.BUILD_FINGERPRINT }}" ]; then
+          if [ "$published" != "$BUILD_FINGERPRINT" ]; then
             echo "::error::The published image does not carry the expected fingerprint"
             exit 1
           fi
@@ -402,7 +408,7 @@ jobs:
 
       - # Keyless signature by digest, so the tags keep pointing at the same index
         if: ${{ success() && env.SKIP_PUSH != '1' }}
-        uses: sigstore/cosign-installer@v4
+        uses: sigstore/cosign-installer@v4.1.3
 
       - # The signature is a separate artifact next to the image, a failure here does not block the release
         if: ${{ success() && env.SKIP_PUSH != '1' }}
