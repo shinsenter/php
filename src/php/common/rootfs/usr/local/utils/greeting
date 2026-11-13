@@ -12,6 +12,11 @@ case "$arch" in
     i?86) arch=386 ;;
 esac
 
+web_server=""
+if has-cmd nginx; then web_server="$(nginx -v 2>&1 | sed 's#^nginx version: ##')"
+elif has-cmd apache2; then web_server="$(apache2 -v | sed -n 's#^Server version: ##p')"
+fi
+
 echo "
 $([ -f "$welcome_txt" ] && cat "$welcome_txt" | sed "s#%PATH%#$welcome_txt#g")
 ---------------
@@ -22,11 +27,19 @@ Container     : ${DOCKER_NAME:-shinsenter/php} (built: ${DOCKER_DATE:-$(date +'%
 Distro        : $(source /etc/os-release && echo ${PRETTY_NAME:-Unknown}) (arch: linux/$arch)
 Timezone      : $(date +'%Z') (GMT$(date +'%z'))
 UID / GID     : $user:$group ($(id -u $user):$(id -g $user))
+Limits        : $(container-limits cpu) CPU, $(container-limits ram) MB RAM
+Web Server    : ${web_server:--}
+Debug         : $(is-debug && echo on || echo off)
 App Root      : $APP_PATH
 Document Root : $APP_ROOT
 ---------------
 "
 if [ -n "$S6_VERSION" ]; then echo "With s6-overlay $S6_VERSION"; fi
 if has-cmd php-fpm;  then php-fpm -v; elif has-cmd php; then php -v; fi
-if has-cmd composer; then composer -V 2>&1 | head -n1; fi
+if has-cmd composer; then
+    # read the version from the phar, as `composer -V` boots PHP and is about 3x slower
+    composer_bin="$(PATH="$(env-path)" command -v composer)"
+    composer_ver="$(grep -a -m1 -o "const VERSION = '[0-9][0-9.]*" "$composer_bin" | head -n1 | cut -d"'" -f2)"
+    [ -n "$composer_ver" ] && echo "Composer version $composer_ver"
+fi
 echo ""
