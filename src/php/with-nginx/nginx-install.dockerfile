@@ -52,7 +52,8 @@ if [ -n "$NGINX_VERSION" ] && [ "$NGINX_VERSION" != os ]; then
         # make install keeps the binary of the OS package next to the new one
         rm -f "$(type -P nginx).old" /etc/nginx/*.default
     else
-        echo "WARNING: cannot build Nginx $NGINX_VERSION, keep the version from the OS package" >&2
+        echo "WARNING: cannot build Nginx $NGINX_VERSION, keep the version from the OS package, which may lack security fixes" >&2
+        NGINX_VERSION=os
     fi
 
     rm -rf /usr/src/nginx
@@ -63,6 +64,12 @@ fi
 
 # test nginx command
 nginx -V || exit 1
+
+# a build that succeeded must give the requested version (a failed one fell back to NGINX_VERSION=os above)
+if [ -n "$NGINX_VERSION" ] && [ "$NGINX_VERSION" != os ]; then
+    nginx_now="$(nginx -v 2>&1 | sed -n 's|^nginx version: nginx/\([0-9.]*\).*|\1|p')"
+    [ "$nginx_now" = "$NGINX_VERSION" ] || { echo "ERROR: Nginx is $nginx_now, not $NGINX_VERSION" >&2; exit 1; }
+fi
 
 # clean up
 \rm -rf /var/www/localhost \

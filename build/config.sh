@@ -214,6 +214,7 @@ LATEST_S6=
 PHP_VARIANT="${PHP_VARIANT:-}"
 S6_VERSION="${S6_VERSION:-latest}"
 NGINX_VERSION="${NGINX_VERSION:-mainline}"
+APACHE_VERSION="${APACHE_VERSION:-stable}"
 S6_PATH="${S6_PATH:-}"
 OS_BASE="${OS_BASE:-debian}"
 OS_VERSION="${OS_VERSION:-latest}"
@@ -390,6 +391,11 @@ if [ "$SKIP_BUILD" != "1" ]; then
     if [ "$APP" = "with-nginx" ]; then
         NGINX_VERSION="$(resolve_nginx_version "$NGINX_VERSION")"
     fi
+
+    # Apache, built from source in with-apache (see src/php/with-apache/apache-build)
+    if [ "$APP" = "with-apache" ]; then
+        APACHE_VERSION="$(resolve_apache_version "$APACHE_VERSION")"
+    fi
 fi
 
 ################################################################################
@@ -565,6 +571,7 @@ if [ "$SKIP_BUILD" != "1" ]; then
 
     [ -n "$S6_VERSION" ] && BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(s6@$S6_VERSION)"
     [ "$APP" = "with-nginx" ] && BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(nginx@$NGINX_VERSION)"
+    [ "$APP" = "with-apache" ] && BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(apache@$APACHE_VERSION)"
 
     if [ -z "$PHP_VERSION" ] && [ -n "$OS_BASE" ]; then
         # base-os and base-s6 are built FROM the OS image
@@ -685,6 +692,7 @@ github_env BUILD_TAGS "$BUILD_TAGS"
 github_env BUILD_TMP_NAME "$BUILD_TMP_NAME"
 github_env LATEST_PHP "$LATEST_PHP"
 github_env LATEST_S6 "$LATEST_S6"
+github_env APACHE_VERSION "$APACHE_VERSION"
 github_env NGINX_VERSION "$NGINX_VERSION"
 github_env OS_BASE "$OS_BASE"
 github_env OS_VERSION "$OS_VERSION"

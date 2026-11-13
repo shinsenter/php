@@ -17,6 +17,7 @@ env-default APACHE_LOG_LEVEL 'error'
 env-default APACHE_ERROR_LOG '$(log-path stderr)'
 env-default APACHE_ACCESS_LOG '$(log-path stdout)'
 env-default APACHE_ALLOW_OVERRIDE 'all'
+env-default APACHE_BROTLI_QUALITY '5'
 env-default APACHE_DEFLATE_LEVEL '5'
 env-default APACHE_DISABLE_MODULES ''
 env-default APACHE_EXPIRES 'access plus 1 month'
@@ -74,7 +75,7 @@ mkdir -p /etc/apache2 \
 # configure default modules
 a2dismod ado auth_digest autoindex cgi cgid dav dbd include info mime_magic mpm_prefork php userdir 2>&1 || true
 a2enmod \
-    access_compat alias auth_basic authn_core authn_file authz_core authz_host \
+    access_compat alias auth_basic authn_core authn_file authz_core authz_host brotli \
     cache deflate dir env expires filter headers http2 log_config mime \
     mpm_event negotiation proxy proxy_fcgi remoteip reqtimeout rewrite setenvif ssl status unixd 2>&1 || true
 

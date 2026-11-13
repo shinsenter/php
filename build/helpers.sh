@@ -155,6 +155,21 @@ resolve_nginx_version() {
         | head -n 1 | sed 's/^nginx-//; s/\.tar\.gz$//'
 }
 
+# Apache version number from https://httpd.apache.org.
+# "stable" is the latest release of the download page, "os", empty and numbers pass through.
+# Usage: resolve_apache_version <stable|os|number>
+resolve_apache_version() {
+    local want="$1" page
+    case "$want" in
+        stable) ;;
+        *)      echo "$want"; return 0 ;;
+    esac
+    page="$(fetch_with_cache "https://httpd.apache.org/download.cgi")" || return 1
+    echo "$page" \
+        | grep -oE 'httpd-[0-9]+(\.[0-9]+)+\.tar\.gz' \
+        | head -n 1 | sed 's/^httpd-//; s/\.tar\.gz$//'
+}
+
 ################################################################################
 # Downloads for the build steps
 ################################################################################
@@ -202,6 +217,17 @@ cache_nginx_source() {
     # ngx_brotli has no release: the latest commit is used, and it is not part of the fingerprint
     cache_file "https://github.com/google/ngx_brotli/archive/HEAD.tar.gz" "ngx_brotli.tar.gz" \
         || echo "Cannot cache ngx_brotli" >&2
+}
+
+# Apache source for src/php/with-apache/apache-build
+cache_apache_source() {
+    local version
+    version="$(resolve_apache_version "${APACHE_VERSION:-stable}")"
+    case "$version" in ""|os) return 0 ;; esac
+    # only the latest release stays on the mirror, older ones move to the archive
+    cache_file "https://dlcdn.apache.org/httpd/httpd-$version.tar.gz" "httpd-$version.tar.gz" \
+        || cache_file "https://archive.apache.org/dist/httpd/httpd-$version.tar.gz" "httpd-$version.tar.gz" \
+        || echo "Cannot cache Apache $version" >&2
 }
 
 # s6-overlay archives for src/php/common/os-s6-overlay.dockerfile.

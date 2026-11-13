@@ -147,6 +147,14 @@ test_versions() {
     check_eq "nginx number" "1.29.0" "$(resolve_nginx_version 1.29.0)"
     check_eq "nginx os" "os" "$(resolve_nginx_version os)"
     check_eq "nginx empty" "" "$(resolve_nginx_version '')"
+    # Apache keyword, with a stub of the download page (no network)
+    fetch_with_cache() {
+        echo '<h1>Apache HTTP Server 2.4.71</h1><a href="https://dlcdn.apache.org/httpd/httpd-2.4.71.tar.gz">httpd-2.4.71.tar.gz</a><a href="x/httpd-2.4.71.tar.bz2">'
+    }
+    check_eq "apache stable" "2.4.71" "$(resolve_apache_version stable)"
+    check_eq "apache number" "2.4.60" "$(resolve_apache_version 2.4.60)"
+    check_eq "apache os" "os" "$(resolve_apache_version os)"
+    check_eq "apache empty" "" "$(resolve_apache_version '')"
     unset -f fetch_with_cache
 
     # Helper cache downloads, with stubs (no network)
@@ -154,6 +162,7 @@ test_versions() {
     cache_dir="$(mktemp -d)"
     HELPER_CACHE_DIR="$cache_dir"
     resolve_nginx_version() { echo 1.31.8; }
+    resolve_apache_version() { echo 2.4.71; }
     get_github_latest_tag() { echo v3.2.1.0; }
     download_file() { echo "$1" >"$2"; }
     fetch_with_cache() { echo "bad  wp-cli.phar"; }
@@ -161,6 +170,8 @@ test_versions() {
     cache_nginx_source 2>/dev/null
     check "cache: nginx source" [ -f "$cache_dir/nginx-1.31.8.tar.gz" ]
     check "cache: ngx_brotli source" [ -f "$cache_dir/ngx_brotli.tar.gz" ]
+    cache_apache_source 2>/dev/null
+    check "cache: apache source" [ -f "$cache_dir/httpd-2.4.71.tar.gz" ]
     cache_s6_sources 2>/dev/null
     check "cache: s6 noarch" [ -f "$cache_dir/s6-v3.2.1.0-s6-overlay-noarch.tar.xz" ]
     check "cache: s6 syslogd" [ -f "$cache_dir/s6-v3.2.1.0-syslogd-overlay-noarch.tar.xz" ]
@@ -403,6 +414,9 @@ test_defaults() {
     check "smtp: SMTP_TLS is passed to msmtp" grep -q -- '--tls=$SMTP_TLS' "$wrapper"
     check_not "nginx: no open_file_cache" grep -q 'open_file_cache' src/php/with-nginx/rootfs/etc/nginx/nginx.conf
     check "apache: cache module is enabled" grep -qE '^ +cache deflate' src/php/with-apache/apache-config.dockerfile
+    check "apache: the built version is checked" grep -q 'Apache is \$apache_now, not' src/php/with-apache/apache-install.dockerfile
+    check "nginx: the built version is checked" grep -q 'Nginx is \$nginx_now, not' src/php/with-nginx/nginx-install.dockerfile
+    check "apache: build keeps the paths of the OS binary" grep -q 'ap_config_auto.h' src/php/with-apache/apache-build
     check "apache: request read timeout is off by default" grep -q "APACHE_REQUEST_READ_TIMEOUT 'header=0 body=0'" src/php/with-apache/apache-config.dockerfile
     check_not "php: session strict mode is not forced" grep -q 'PHP_SESSION_USE_STRICT_MODE' src/php/common/php-ini-directives.dockerfile
 

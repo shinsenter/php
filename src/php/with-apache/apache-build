@@ -1,0 +1,101 @@
+#!/bin/sh
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+# Build Apache $APACHE_VERSION from https://httpd.apache.org with HTTP/2 and brotli.
+# It compiles into /usr/src/httpd and stages the result in /usr/src/httpd-stage.
+# with-apache/apache-install.dockerfile copies the staged binary and modules over the OS ones
+# when this script succeeds, so a failure leaves the OS package untouched.
+# Mounted into a RUN step from the build context, not part of any image.
+################################################################################
+set -e
+echo "Build Apache $APACHE_VERSION"
+
+bin="$(command -v apache2 || command -v httpd)"
+[ -n "$bin" ]
+
+# modules go to the folder of the OS modules
+module_dir="$(dirname "$(find /usr/lib -type f -name mod_mpm_event.so | head -n 1)")"
+[ -d "$module_dir" ]
+
+# Build options of the OS package, so the new binary behaves like the old one.
+# 1. Paths and limits built into the OS binary. The service starts without "-f",
+#    so Apache finds its config, pid file and scoreboard through them.
+#    "-V" exits with an error when the config variables are not set, so ignore its status.
+info="$("$bin" -V 2>/dev/null || true)"
+macro() { echo "$info" | sed -n "s/^ *-D $1=\"\(.*\)\"\$/\1/p"; }
+[ -n "$(macro HTTPD_ROOT)" ] && [ -n "$(macro SERVER_CONFIG_FILE)" ]
+
+# configure defines these three itself (include/ap_config_auto.h) and that beats -D,
+# so they are rewritten after configure. The others take -D.
+cppflags=""
+for name in DEFAULT_PIDLOG DEFAULT_SCOREBOARD DEFAULT_ERRORLOG SUEXEC_BIN; do
+    value="$(macro $name)"
+    [ -z "$value" ] || cppflags="$cppflags -D$name=\\\"$value\\\""
+done
+limit="$(echo "$info" | sed -n 's/^ *-D DYNAMIC_MODULE_LIMIT=\([0-9]*\)$/\1/p')"
+[ -z "$limit" ] || cppflags="$cppflags -DDYNAMIC_MODULE_LIMIT=$limit"
+
+# 2. The modules and MPMs of the OS package.
+# Modules that need libraries which are not installed here stay as the OS built them.
+mpms=""
+mods=""
+# extras are the modules that this build is for. They are dropped when the build fails with them,
+# so that a source build with fewer features still beats the OS package
+extras="http2"
+# middleware-patch replaces the brotli library on old Alpine,
+# which leaves the links of brotli-dev pointing to the removed version
+for lib in /usr/lib/libbrotli*.so; do
+    [ -e "$lib" ] || [ ! -L "$lib" ] || ln -sf "${lib##*/}.1" "$lib"
+done
+# mod_brotli needs the brotli headers, which an old OS may not have
+[ -f /usr/include/brotli/encode.h ] && extras="$extras brotli"
+for file in "$module_dir"/mod_*.so; do
+    name="${file##*/mod_}"; name="${name%.so}"
+    case "$name" in
+        mpm_*) mpms="$mpms ${name#mpm_}" ;;
+        authnz_ldap|ldap|lua|md|proxy_html|xml2enc|socache_dc|apreq*) ;;
+        http2|brotli) ;;
+        *) mods="$mods $name" ;;
+    esac
+done
+[ -n "$mpms" ]
+
+# the workflow puts the source in /tmp/helper_cache
+mkdir -p /usr/src/httpd
+cd /usr/src/httpd
+file="httpd-$APACHE_VERSION.tar.gz"
+if [ -f "/tmp/helper_cache/$file" ]; then
+    tar -xzf "/tmp/helper_cache/$file" --strip-components=1
+else
+    # only the latest release stays on the mirror, older ones move to the archive
+    { curl -fsSL "https://dlcdn.apache.org/httpd/$file" \
+        || curl -fsSL "https://archive.apache.org/dist/httpd/$file"; } | tar -xz --strip-components=1
+fi
+
+# build <modules>: configure, compile and stage Apache with the given shared modules.
+# eval keeps the quotes that CPPFLAGS has.
+build() {
+    eval "CPPFLAGS='$cppflags' ./configure" \
+        --prefix=/usr --bindir=/usr/bin --sbindir=/usr/sbin --sysconfdir=/etc/apache2 \
+        --libexecdir="$module_dir" \
+        --with-program-name="${bin##*/}" \
+        --with-mpm=event --enable-mpms-shared="'$mpms'" \
+        --enable-so --enable-mods-shared="'$*'" \
+    && for name in HTTPD_ROOT SERVER_CONFIG_FILE AP_TYPES_CONFIG_FILE; do
+        value="$(macro $name)"
+        [ -z "$value" ] || sed -i "s|^#define $name .*|#define $name \"$value\"|" include/ap_config_auto.h
+    done \
+    && make -j "$(nproc)" \
+    && make install DESTDIR=/usr/src/httpd-stage
+}
+
+if build $mods $extras; then exit 0; fi
+echo "WARNING: cannot build Apache $APACHE_VERSION with $extras, build without" >&2
+rm -rf /usr/src/httpd-stage
+make distclean >/dev/null 2>&1 || true
+build $mods
