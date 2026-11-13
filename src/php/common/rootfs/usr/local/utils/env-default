@@ -19,11 +19,19 @@ APP_PATH="$(app-path)"
 APP_ROOT="$(app-root)"
 if command -v composer &>/dev/null; then
     if [ -z "$CACHED_COMPOSER_BIN_DIR" ]; then
-        export CACHED_COMPOSER_BIN_DIR="$(
-            user_bin="$(composer -d "$APP_PATH" config bin-dir --absolute 2>/dev/null)"
-            global_bin="$(composer config bin-dir --global --absolute 2>/dev/null)"
-            printf '%s:%s' "$user_bin" "$global_bin"
-        )"
+        # reuse the value of an earlier shell, unless composer.json is newer than it
+        if [ -r /run/composer-bin-dir ] && [ ! "$APP_PATH/composer.json" -nt /run/composer-bin-dir ]; then
+            read -r CACHED_COMPOSER_BIN_DIR </run/composer-bin-dir
+            export CACHED_COMPOSER_BIN_DIR
+        else
+            export CACHED_COMPOSER_BIN_DIR="$(
+                user_bin=""
+                [ -f "$APP_PATH/composer.json" ] && user_bin="$(composer -d "$APP_PATH" config bin-dir --absolute 2>/dev/null)"
+                global_bin="$(composer config bin-dir --global --absolute 2>/dev/null)"
+                printf '%s:%s' "$user_bin" "$global_bin"
+            )"
+            { printf '%s\n' "$CACHED_COMPOSER_BIN_DIR" >/run/composer-bin-dir; } 2>/dev/null
+        fi
     fi
     PATH="$(env-path "$CACHED_COMPOSER_BIN_DIR")"
 fi
