@@ -57,7 +57,7 @@ Utilities inside the image: `pkg-add` and `pkg-del` (install and remove packages
 - Do not report test results without a run or a log.
 - Work on a `feature/*` branch or the current branch. Never commit or push to `main`.
 - Use Conventional Commits: `feat:` `fix:` `refactor:` `docs:` `test:` `chore:`.
-- After each change, suggest a one-line English commit message. The type follows semver: `feat:` is a minor bump, `fix:` a patch bump, and `!` (for example `feat!:`) a major bump. `refactor:` `docs:` `test:` `chore:` do not bump the version. Commit only when the user asks.
+- After each change, suggest a one-line English commit message, short: about 60 characters or fewer, one idea, no detail that the diff already shows. The type follows semver: `feat:` is a minor bump, `fix:` a patch bump, and `!` (for example `feat!:`) a major bump. `refactor:` `docs:` `test:` `chore:` do not bump the version. Commit only when the user asks.
 - Edit the code directly in the working tree of the current branch. Do not write changes to `_OUTPUTS/` first. This overrides the global rule that sends all output there.
 - `_OUTPUTS/` is a local scratch folder that git ignores. Do not commit it.
 - Match the surrounding file. Indent 4 spaces (Dockerfile, shell) or 2 spaces (YAML). No tabs. Dockerfile: one command per `RUN` line, chained with `&&`.
