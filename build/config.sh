@@ -65,6 +65,9 @@ hyperf:min=8.2 server=nginx
 # https://docs.invoiceshelf.com/install/manual.html
 invoiceshelf:min=8.2 base=laravel
 
+# https://manual.joomla.org/docs/next/get-started/technical-requirements
+joomla:min=8.3 server=apache
+
 # https://getkirby.com/docs/cookbook/setup/composer
 kirby:min=8.3 server=apache
 
@@ -80,8 +83,17 @@ matomo:min=8.1 server=apache
 # https://docs.mautic.org/en/5.x/getting_started/how_to_install_mautic.html#installing-with-composer
 mautic:min=8.2 server=apache
 
+# https://docs.nextcloud.com/server/latest/admin_manual/installation/system_requirements.html
+nextcloud:min=8.2 server=apache
+
 # https://docs.phpmyadmin.net/en/latest/setup.html
 phpmyadmin:min=7.2 server=nginx
+
+# https://devdocs.prestashop-project.org/9/basics/installation/system-requirements/
+prestashop:min=8.2 server=apache
+
+# https://developer.shopware.com/docs/guides/hosting/
+shopware:min=8.2 server=nginx
 
 # https://spiral.dev/docs/start-installation/current/en
 spiral:min=8.1 server=roadrunner variant=cli platform=linux/amd64,linux/arm64
@@ -94,6 +106,9 @@ symfony:min=8.4 server=apache
 
 # https://github.com/sulu/skeleton
 sulu:base=symfony
+
+# https://tempestphp.com/docs/
+tempest:min=8.5 server=nginx
 
 # https://wordpress.org/documentation/category/installation
 wordpress:allow_rc=1 server=apache

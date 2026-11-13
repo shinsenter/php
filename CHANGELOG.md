@@ -8,6 +8,7 @@ All notable changes to this project are documented in this file.
 - Sign the published images with cosign (keyless) and attach max provenance.
 - Report HIGH and CRITICAL vulnerabilities and the image size change in the job summary of each publish. Neither fails the build.
 - Fix the build fingerprint. A changed Dockerfile fragment now rebuilds the image, and a change for one server no longer rebuilds the base images and the other servers.
+- Add images for Shopware, Tempest, Joomla, PrestaShop and Nextcloud.
 - Add a Performance section to the README and update the GitHub Actions weekly with Dependabot.
 - Build Nginx with the brotli module (`google/ngx_brotli`), so `brotli` and `brotli_static` work in the `fpm-nginx` images.
 - Fix the Nginx build on the Alpine images of PHP 7.4, 8.0 and 8.1, which kept the old Nginx of the OS package. Nginx uses PCRE2 on every OS.

@@ -371,8 +371,13 @@ jobs:
           - app-bedrock
           - app-coolify
           - app-invoiceshelf
+          - app-joomla
+          - app-nextcloud
+          - app-prestashop
+          - app-shopware
           - app-statamic
           - app-sulu
+          - app-tempest
     with:
       app_name: ${{ matrix.app }}
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}

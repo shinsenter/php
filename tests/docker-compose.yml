@@ -65,3 +65,8 @@ services:
   symfony:       { <<: *app, image: "ghcr.io/shinsenter/symfony:${IMAGE_TAG}",       ports: ["8126:80", "8226:443"] }
   wordpress:     { <<: *app, image: "ghcr.io/shinsenter/wordpress:${IMAGE_TAG}",     ports: ["8127:80", "8227:443"] }
   yii:           { <<: *app, image: "ghcr.io/shinsenter/yii:${IMAGE_TAG}",           ports: ["8128:80", "8228:443"] }
+  joomla:        { <<: *app, image: "ghcr.io/shinsenter/joomla:${IMAGE_TAG}",        ports: ["8130:80", "8230:443"] }
+  nextcloud:     { <<: *app, image: "ghcr.io/shinsenter/nextcloud:${IMAGE_TAG}",     ports: ["8131:80", "8231:443"] }
+  prestashop:    { <<: *app, image: "ghcr.io/shinsenter/prestashop:${IMAGE_TAG}",    ports: ["8132:80", "8232:443"] }
+  shopware:      { <<: *app, image: "ghcr.io/shinsenter/shopware:${IMAGE_TAG}",      ports: ["8133:80", "8233:443"] }
+  tempest:       { <<: *app, image: "ghcr.io/shinsenter/tempest:${IMAGE_TAG}",       ports: ["8134:80", "8234:443"] }
