@@ -8,8 +8,11 @@ indent_style = space
 indent_size = 4
 trim_trailing_whitespace = true
 
-[*.yml]
+[*.{yml,yaml}]
 indent_size = 2
+
+[*.patch]
+trim_trailing_whitespace = false
 
 [Caddyfile]
 indent_style = tab
