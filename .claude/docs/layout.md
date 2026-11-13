@@ -10,7 +10,7 @@
 
 # Layout and build notes
 
-Paths and build behavior beyond the core table in `CLAUDE.md`.
+Paths and build behavior beyond the core table in `AGENTS.md`.
 
 ## Paths
 

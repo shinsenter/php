@@ -10,7 +10,7 @@
 
 # Tests (details)
 
-Extra notes for `tests/`. The run commands are in `CLAUDE.md`.
+Extra notes for `tests/`. The run commands are in `AGENTS.md`.
 
 | Changed | Run |
 |---|---|

@@ -10,7 +10,7 @@
 
 # KNOWN_ISSUES.md workflow (details)
 
-Short form: `CLAUDE.md`, section "Working rules".
+Short form: `AGENTS.md`, section "Working rules".
 
 When the user asks to fix a bug that a user reported in a GitHub issue, record it in `KNOWN_ISSUES.md` in the same change.
 
