@@ -103,7 +103,7 @@ Name the file `<YYYYMMDD>-<NN>-<name>.patch` and do not rename or reorder existi
 
 The READMEs in `src/` are published on Docker Hub. Line 3 of each file is the short description, so keep it as `<emoji> (PHP) <caption>` under 90 characters (no `(PHP)` for the base OS images). Every web application and web server README links back to [shinsenter/php](https://hub.docker.com/r/shinsenter/php).
 
-See also [ACCESSIBILITY.md](ACCESSIBILITY.md).
+See also [accessibility](docs/accessibility.md).
 
 
 ## License and credit

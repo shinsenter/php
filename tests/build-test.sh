@@ -78,6 +78,7 @@ fi
         --provenance=true --sbom=true \
         --platform  "linux/${PLATFORM:-$(uname -m)}" \
         --build-arg DEBUG=$BUILD_DEBUG \
+        --build-arg APACHE_VERSION=$APACHE_VERSION \
         --build-arg BUILD_DATE=$BUILD_DATE \
         --build-arg BUILD_FROM_IMAGE=$BUILD_FROM_IMAGE \
         --build-arg BUILD_TAG=$BUILD_TAG \

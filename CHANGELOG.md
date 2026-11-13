@@ -14,6 +14,9 @@ All notable changes to this project are documented in this file.
 - Build Nginx with the brotli module (`google/ngx_brotli`), so `brotli` and `brotli_static` work in the `fpm-nginx` images.
 - Fix the Nginx build on the Alpine images of PHP 7.4, 8.0 and 8.1, which kept the old Nginx of the OS package. Nginx uses PCRE2 on every OS.
 - Build Nginx with HTTP/3 on older OS releases whose Nginx package lacks it, when their OpenSSL supports QUIC.
+- Build Apache from the latest 2.4 release of https://httpd.apache.org (`APACHE_VERSION`, `stable` by default) with HTTP/2 and `mod_brotli`. Every variant runs the same version. It keeps the OS package when the build fails, for example on an OS that is too old. Brotli is on by default, with `APACHE_BROTLI_QUALITY` (5). Apache has no HTTP/3.
+- Check the version after the Apache and Nginx source builds, so a build that succeeds with the wrong version fails the image. When the build fails, Apache and Nginx are first built again without HTTP/2, brotli and HTTP/3, so that a source version with fewer features is kept. Only when that fails too, the image falls back to the OS package (as with `APACHE_VERSION=os` or `NGINX_VERSION=os`) and the log has a warning.
+- Fix the Alpine Apache images loading no HTTP/2 module. They now install `apache2-http2` and `apache2-brotli`.
 
 
 ## [6.1.0] - 2026-11-08

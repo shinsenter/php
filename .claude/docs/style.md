@@ -10,7 +10,7 @@
 
 # Formatting and comments (details)
 
-Short form: `CLAUDE.md`, section "Working rules".
+Short form: `AGENTS.md`, section "Working rules".
 
 - Format every file you create or edit, and match the surrounding file.
 - Dockerfiles: one command per `RUN` line chained with `&&`. Continuation lines indent 4 spaces, deeper arguments 4 more.

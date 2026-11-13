@@ -28,7 +28,7 @@ It builds from the `upstream/` submodule instead of `devthefuture/dockerfile-x`,
 ## Verify
 
 - Without a build: `sh -n .dockerfile-x/patches/bump-go-deps.sh`, `bash -n .dockerfile-x/build.sh`, `git submodule status`.
-- With a build (ask first, see Working rules in `CLAUDE.md`): run `.dockerfile-x/build.sh`, then `docker scout cves shinsenter/dockerfile-x:latest --only-severity critical,high`. The goal is no CRITICAL and fewer HIGH than before. Report numbers from the real output only.
+- With a build (ask first, see Working rules in `AGENTS.md`): run `.dockerfile-x/build.sh`, then `docker scout cves shinsenter/dockerfile-x:latest --only-severity critical,high`. The goal is no CRITICAL and fewer HIGH than before. Report numbers from the real output only.
 
 ## Known residual risk
 

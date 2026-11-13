@@ -13,7 +13,7 @@
 <!--
 Copied verbatim from https://github.com/multica-ai/andrej-karpathy-skills/blob/main/CLAUDE.md
 Only the H1 title is dropped and the section headings are one level lower.
-Where a guideline conflicts with the rules in `CLAUDE.md`, `CLAUDE.md` wins
+Where a guideline conflicts with the rules in `AGENTS.md`, `AGENTS.md` wins
 (for example "Working rules" on builds, branches and commits).
 -->
 
