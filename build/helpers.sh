@@ -7,25 +7,20 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
-################################################################################
-# TTY helper methods
-################################################################################
-
-echo_error()    { echo $@ >&2; }
-echo_warning()  { echo $@ >&2; }
-echo_info()     { echo $@; }
-echo_debug()    { echo $@; }
+# Where the build steps find the files that were downloaded once per run
+HELPER_CACHE_DIR="${HELPER_CACHE_DIR:-/tmp/helper_cache}"
+WPCLI_URL="${WPCLI_URL:-https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar}"
 
 ################################################################################
-# Helper methods
+# Versions
 ################################################################################
 
-# Function to compare if $1 is less than or equal to $2
+# True when $1 is less than or equal to $2
 verlte() {
     printf '%s\n' "$1" "$2" | sort -C -V
 }
 
-# Function to compare if $1 is less than $2
+# True when $1 is less than $2
 verlt() {
     ! verlte "$2" "$1"
 }
@@ -34,12 +29,12 @@ is_active_version() {
     verlt "8.2" "$1"
 }
 
-# Function to get current timestamp
-timestamp() {
-    date +%s
-}
+################################################################################
+# Remote content
+################################################################################
 
-# Function to fetch and cache remote content
+# Fetch a URL and keep the answer for the rest of the day.
+# TOKEN, when set, goes in as a bearer token. Other arguments go to curl.
 fetch_with_cache() {
     local url="$1"
 
@@ -80,27 +75,24 @@ fetch_with_cache() {
     fi
 }
 
-# Function to get metadata from GitHub
-get_github_json () {
-    local name="$1"
-    local query="$2"
-    local limit="${3:-5}"
-    TOKEN="$GITHUB_TOKEN" fetch_with_cache "https://api.github.com/repos/$name/tags?per_page=$limit&$query"
+# GitHub API of a repository, with the token when there is one.
+# Usage: github_api <owner/repo>/<path>
+github_api() {
+    TOKEN="$GITHUB_TOKEN" fetch_with_cache "https://api.github.com/repos/$1"
 }
 
-# Function to get metadata from Docker Hub
-get_dockerhub_json () {
-    local name="$1"
-    local query="$2"
-    local limit="${3:-5}"
-    local options=
+# Docker Hub API of a repository, with the credentials when there are some.
+# Usage: dockerhub_api <namespace/repo>/<path>
+dockerhub_api() {
+    local auth=
     if [ -n "$DOCKERHUB_USERNAME" ] && [ -n "$DOCKERHUB_PASSWORD" ]; then
-        options="-u $DOCKERHUB_USERNAME:$DOCKERHUB_PASSWORD"
+        auth="-u $DOCKERHUB_USERNAME:$DOCKERHUB_PASSWORD"
     fi
-    fetch_with_cache "https://registry.hub.docker.com/v2/repositories/$name/tags?&page_size=$limit&status=active&sort=last_updated&$query" "$options"
+    fetch_with_cache "https://registry.hub.docker.com/v2/repositories/$1" "$auth"
 }
 
-# Function to parse JSON and return
+# Run a jq query on JSON and print the first lines. Fails when there is no result.
+# Usage: parse_json <json> [lines, default 1] [jq query, default .]
 parse_json() {
     local json="$1"
     local limit="${2:-1}"
@@ -114,18 +106,42 @@ parse_json() {
     echo "$result"
 }
 
-# For GitHub
-get_github_latest_tag () { parse_json "$(get_github_json "$1")" "${2:-1}" '.[] | if type == "object" then (.name // empty) else empty end'; }
+# Newest tag names of a GitHub repository
+# Usage: get_github_latest_tag <owner/repo> [lines, default 1]
+get_github_latest_tag() {
+    parse_json "$(github_api "$1/tags?per_page=5&")" "${2:-1}" \
+        '.[] | if type == "object" then (.name // empty) else empty end'
+}
+
 # Tag of the latest stable release (pre-releases are not included)
-get_github_latest_release () {
+get_github_latest_release() {
     local json
-    json="$(TOKEN="$GITHUB_TOKEN" fetch_with_cache "https://api.github.com/repos/$1/releases/latest")" || return 1
+    json="$(github_api "$1/releases/latest")" || return 1
     parse_json "$json" 1 '.tag_name // empty'
 }
+
+# Digest of one exact tag on Docker Hub (e.g. library/php 8.5-fpm).
+# Do not use the "name=" search of the tags API for this: it matches substrings
+# and returns whichever tag was updated last (8.5-fpm-alpine3.23, 8.5-fpm-bookworm...).
+get_dockerhub_tag_digest() {
+    local json
+    json="$(dockerhub_api "$1/tags/$2")" || return 1
+    # Old tags that are no longer updated have a null digest, the push time is stable for them
+    parse_json "$json" 1 '.digest // .tag_last_pushed // empty'
+}
+
+# Same as above, but a failed lookup returns a value that changes on every run,
+# so the image is rebuilt instead of being wrongly treated as up to date.
+get_dockerhub_tag_digest_or_now() {
+    local digest
+    digest="$(get_dockerhub_tag_digest "$@")" || true
+    echo "${digest:-unknown-$(date +%s)}"
+}
+
 # Nginx version number from https://nginx.org.
 # "mainline" and "stable" are looked up on the download page, "os", empty and numbers pass through.
 # Usage: resolve_nginx_version <mainline|stable|os|number>
-resolve_nginx_version () {
+resolve_nginx_version() {
     local want="$1" label page
     case "$want" in
         mainline) label=Mainline ;;
@@ -138,104 +154,75 @@ resolve_nginx_version () {
         | grep -oE 'nginx-[0-9]+(\.[0-9]+)+\.tar\.gz' \
         | head -n 1 | sed 's/^nginx-//; s/\.tar\.gz$//'
 }
-get_github_latest_sha () { parse_json "$(get_github_json "$1")" "${2:-1}" '.[] | if type == "object" then (.commit.sha // .node_id // empty) else empty end'; }
 
-# For Docker Hub
-get_dockerhub_latest_tag () { parse_json "$(get_dockerhub_json "$1" "name=${3:-latest}")" "${2:-1}" '.results[] | if type == "object" then (.name // empty) else empty end'; }
-get_dockerhub_latest_sha () { parse_json "$(get_dockerhub_json "$1" "name=${3:-latest}")" "${2:-1}" '.results[] | if type == "object" then (.digest // .tag_last_pushed // .id // empty) else . end'; }
-
-# Digest of one exact tag on Docker Hub (e.g. library/php 8.5-fpm).
-# Do not use the "name=" search of the tags API for this: it matches substrings
-# and returns whichever tag was updated last (8.5-fpm-alpine3.23, 8.5-fpm-bookworm...).
-get_dockerhub_tag_digest () {
-    local name="$1"
-    local tag="$2"
-    local options=
-    if [ -n "$DOCKERHUB_USERNAME" ] && [ -n "$DOCKERHUB_PASSWORD" ]; then
-        options="-u $DOCKERHUB_USERNAME:$DOCKERHUB_PASSWORD"
-    fi
-    local json
-    json="$(fetch_with_cache "https://registry.hub.docker.com/v2/repositories/$name/tags/$tag" "$options")" || return 1
-    # Old tags that are no longer updated have a null digest, the push time is stable for them
-    parse_json "$json" 1 '.digest // .tag_last_pushed // empty'
-}
-
-# Same as above, but a failed lookup returns a value that changes on every run,
-# so the image is rebuilt instead of being wrongly treated as up to date.
-get_dockerhub_tag_digest_or_now () {
-    local digest
-    digest="$(get_dockerhub_tag_digest "$@")" || true
-    echo "${digest:-unknown-$(date +%s)}"
-}
+################################################################################
+# Downloads for the build steps
+################################################################################
+# Each cache_* function puts its files in HELPER_CACHE_DIR once per run,
+# so the image builds do not download them again (and do not call the GitHub API,
+# which allows 60 requests per hour without a token).
+# A failed download is not fatal, except for cache_middleware_sources:
+# the build step downloads the file itself.
 
 # Download a file, fail on HTTP errors
-download_file () {
+# Usage: download_file <url> <path>
+download_file() {
     curl --retry 3 --retry-delay 5 -fsSLo "$2" "$1"
 }
 
-# Sources of the latest brotli and curl, for src/php/common/patches/middleware-patch.
-# Downloaded once per run into the helper cache,
-# so the image builds do not call the GitHub API (60 requests per hour without a token).
-cache_middleware_sources () {
-    local dir="/tmp/helper_cache" tag version
-    mkdir -p "$dir"
+# Download a file into the helper cache
+# Usage: cache_file <url> <file name>
+cache_file() {
+    mkdir -p "$HELPER_CACHE_DIR"
+    download_file "$1" "$HELPER_CACHE_DIR/$2"
+}
+
+# Sources of the latest brotli and curl, for src/php/common/patches/middleware-patch
+cache_middleware_sources() {
+    local tag version
 
     tag="$(get_github_latest_release "google/brotli")" || return 1
     version="${tag#v}"
-    download_file "https://github.com/google/brotli/archive/refs/tags/v$version.tar.gz" \
-        "$dir/brotli-$version.tar.gz" || return 1
+    cache_file "https://github.com/google/brotli/archive/refs/tags/v$version.tar.gz" \
+        "brotli-$version.tar.gz" || return 1
 
     tag="$(get_github_latest_release "curl/curl")" || return 1
     version="$(echo "${tag#curl-}" | tr _ .)"
-    download_file "https://curl.se/download/curl-$version.tar.xz" \
-        "$dir/curl-$version.tar.xz" || return 1
+    cache_file "https://curl.se/download/curl-$version.tar.xz" \
+        "curl-$version.tar.xz" || return 1
 }
 
-# Downloads for the build steps that fetch a binary or a source tarball.
-# Each function puts its files in the helper cache once per run,
-# so the image builds do not download them again.
-# A failed download is not fatal: the build step downloads the file itself.
-HELPER_CACHE_DIR="${HELPER_CACHE_DIR:-/tmp/helper_cache}"
-WPCLI_URL="${WPCLI_URL:-https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar}"
-
 # Nginx and ngx_brotli sources for src/php/with-nginx/nginx-build
-cache_nginx_source () {
+cache_nginx_source() {
     local version
     version="$(resolve_nginx_version "${NGINX_VERSION:-mainline}")"
     case "$version" in ""|os) return 0 ;; esac
-    mkdir -p "$HELPER_CACHE_DIR"
-    download_file "https://nginx.org/download/nginx-$version.tar.gz" \
-        "$HELPER_CACHE_DIR/nginx-$version.tar.gz" \
+    cache_file "https://nginx.org/download/nginx-$version.tar.gz" "nginx-$version.tar.gz" \
         || echo "Cannot cache Nginx $version" >&2
     # ngx_brotli has no release: the latest commit is used, and it is not part of the fingerprint
-    download_file "https://github.com/google/ngx_brotli/archive/HEAD.tar.gz" \
-        "$HELPER_CACHE_DIR/ngx_brotli.tar.gz" \
+    cache_file "https://github.com/google/ngx_brotli/archive/HEAD.tar.gz" "ngx_brotli.tar.gz" \
         || echo "Cannot cache ngx_brotli" >&2
 }
 
 # s6-overlay archives for src/php/common/os-s6-overlay.dockerfile.
 # The file name is s6-<version>-<name on GitHub>.
-cache_s6_sources () {
-    local version="${S6_VERSION:-}" name arch
+cache_s6_sources() {
+    local version="${S6_VERSION:-}" name
     case "$version" in ""|latest) version="$(get_github_latest_tag "just-containers/s6-overlay" 1)" ;; esac
     [ -n "$version" ] || return 0
-    mkdir -p "$HELPER_CACHE_DIR"
     for name in s6-overlay-noarch syslogd-overlay-noarch \
         s6-overlay-x86_64 s6-overlay-aarch64 s6-overlay-arm s6-overlay-i686 s6-overlay-s390x; do
-        download_file \
-            "https://github.com/just-containers/s6-overlay/releases/download/$version/$name.tar.xz" \
-            "$HELPER_CACHE_DIR/s6-$version-$name.tar.xz" \
-            || echo "Cannot cache $name $version" >&2
+        cache_file "https://github.com/just-containers/s6-overlay/releases/download/$version/$name.tar.xz" \
+            "s6-$version-$name.tar.xz" || echo "Cannot cache $name $version" >&2
     done
 }
 
 # WP-CLI for src/webapps/wordpress/wordpress.dockerfile.
 # The file is checked against the checksum that WP-CLI publishes.
-cache_wpcli_source () {
+cache_wpcli_source() {
     local file="$HELPER_CACHE_DIR/wp-cli.phar" expected actual
-    mkdir -p "$HELPER_CACHE_DIR"
     expected="$(fetch_with_cache "$WPCLI_URL.sha512" | awk '{print $1}')"
-    if download_file "$WPCLI_URL" "$file" && [ -n "$expected" ]; then
+    if cache_file "$WPCLI_URL" wp-cli.phar && [ -n "$expected" ]; then
         actual="$(shasum -a 512 "$file" | awk '{print $1}')"
         [ "$actual" = "$expected" ] && return 0
         echo "Checksum mismatch for wp-cli.phar, not cached" >&2
@@ -244,12 +231,58 @@ cache_wpcli_source () {
     echo "Cannot cache wp-cli.phar" >&2
 }
 
-# Fingerprint stored in the index manifest of a published image (empty if none).
-# Reads the manifest only, no layer is pulled.
-get_image_fingerprint () {
-    docker buildx imagetools inspect --raw "$1" 2>/dev/null \
+################################################################################
+# Published images
+################################################################################
+
+# Manifest of a published image as JSON (empty if there is none).
+# It reads the manifest only, no layer is pulled.
+image_manifest() {
+    docker buildx imagetools inspect --raw "$1" 2>/dev/null
+}
+
+# Fingerprint stored in the index manifest of a published image (empty if none)
+get_image_fingerprint() {
+    image_manifest "$1" \
         | jq -r '.annotations["org.shinsenter.build.fingerprint"] // empty' 2>/dev/null
 }
+
+# Compressed size in bytes of an image manifest: config plus layers (reads JSON on stdin)
+manifest_size() {
+    jq -r '[.config.size // 0] + [.layers[]?.size] | add // empty' 2>/dev/null
+}
+
+# Compressed size of one platform of a published image (empty if it is not published)
+# Usage: get_image_size <image:tag> [arch, default amd64]
+get_image_size() {
+    local image="$1" arch="${2:-amd64}" digest
+    digest="$(image_manifest "$image" \
+        | jq -r --arg arch "$arch" '[.manifests[]? | select(.platform.os == "linux" and .platform.architecture == $arch)][0].digest // empty' 2>/dev/null)"
+    [ -n "$digest" ] || return 0
+    image_manifest "${image%:*}@$digest" | manifest_size
+}
+
+################################################################################
+# Build plan
+################################################################################
+
+# JSON matrix of the platform builds, one entry per platform of a comma list.
+# amd64 and 386 build on x64, arm64 on arm.
+# 32-bit ARM, ppc64le and s390x (base-os and base-s6 only) run under QEMU.
+# Usage: plan_matrix <platforms>
+plan_matrix() {
+    jq -cn --arg platforms "$1" '
+        $platforms | split(",") | map(select(. != "")) | map({
+          platform: .,
+          slug: gsub("/"; "-"),
+          runner: (if . == "linux/amd64" or . == "linux/386" then "ubuntu-26.04" else "ubuntu-26.04-arm" end),
+          qemu: (if test("^linux/arm/") then "arm" elif test("ppc64le|s390x") then ltrimstr("linux/") else "" end)
+        })'
+}
+
+################################################################################
+# Build context
+################################################################################
 
 # Folder with the security backports of a PHP version (empty when there is none)
 find_backport_dir() {
@@ -280,25 +313,48 @@ prepare_build_context() {
     return 0
 }
 
-# Function to set environment variables
+# Print a variable for the shell, or add it to the GitHub Actions environment.
+# In a workflow it also goes to BUILD_ENV_FILE, for the jobs that run after this one (see template-common.yml).
+# Usage: github_env <name> <value...>
 github_env() {
     local name="$1"; shift
     if [ -t 1 ] || [ -z "$GITHUB_ENV" ]; then
-        echo "$name='$@'"
-    else
-        echo "$name=$@"
-        echo "$name=$@" >> $GITHUB_ENV
-        # Copy for the jobs that run after this one (see template-common.yml)
-        if [ -n "$BUILD_ENV_FILE" ]; then
-            echo "$name=$@" >> "$BUILD_ENV_FILE"
-        fi
+        echo "$name='$*'"
+        return 0
     fi
+    echo "$name=$*"
+    echo "$name=$*" >> "$GITHUB_ENV"
+    [ -z "$BUILD_ENV_FILE" ] || echo "$name=$*" >> "$BUILD_ENV_FILE"
+    return 0
 }
 
 ################################################################################
-# Hashing functions
+# Hashing
 ################################################################################
 
+# Hash each file listed on stdin, in a stable order
+hash_files() {
+    sort -dbfi | xargs -r shasum 2>/dev/null
+}
+
+# Hash of the files that go into one image (first 10 characters).
+# - The Dockerfile fragments in sub folders count: INCLUDE pulls them into the build.
+# - The top level Dockerfiles do not: the image hashes its own Dockerfile apart, the others are other images.
+# - The folder of another server (with-*) does not count, only the folder named like the Dockerfile.
+# - Markdown, hidden files and the backports (hashed apart) do not count.
+# Usage: get_context_hash <context-folder> <dockerfile>
+get_context_hash() {
+    local context="$1" own
+    own="$(basename "${2%.dockerfile}")"
+    find "$context" -type f ! -name '.*' ! -name '*.md' \
+        ! -path '*/php-backports/*' \
+        ! \( -path "$context/*.dockerfile" ! -path "$context/*/*" ! -name 'meta.dockerfile' \) \
+        ! \( -path "$context/with-*/*" ! -path "$context/$own/*" \) \
+        | hash_files | shasum | head -c10
+}
+
+# One hash line per file of each folder or file given (hidden files and Markdown are left out)
+# Usage: path_hash [path...]
 path_hash() {
     if [ "$#" -eq 0 ]; then
         echo -n "" | shasum
@@ -308,8 +364,7 @@ path_hash() {
     for target; do
         if [ -n "$target" ]; then
             if [ -d "$target" ]; then
-                find "$target" -type f ! -name '.*' ! -name '*.md' \
-                | sort -dbfi | xargs -r shasum 2>/dev/null
+                find "$target" -type f ! -name '.*' ! -name '*.md' | hash_files
             elif [ -f "$target" ]; then
                 shasum "$target" 2>/dev/null
             else
@@ -319,17 +374,8 @@ path_hash() {
     done
 }
 
-################################################################################
-# Testing and debug
-################################################################################
-
-# get_github_latest_tag    "just-containers/s6-overlay"
-# get_github_latest_sha    "just-containers/s6-overlay"
-# get_github_latest_tag    "roadrunner-server/roadrunner"
-# get_github_latest_sha    "roadrunner-server/roadrunner"
-# get_dockerhub_latest_tag "library/php"
-# get_dockerhub_latest_tag "dunglas/frankenphp" 1 "1-php8.4-alpine"
-# get_dockerhub_latest_sha "library/alpine"
-# get_dockerhub_latest_sha "library/ubuntu"
-# get_dockerhub_latest_sha "library/debian"
+# Examples
+# get_github_latest_tag     "just-containers/s6-overlay"
+# get_github_latest_release "google/brotli"
+# get_dockerhub_tag_digest  "library/php" "8.5-fpm"
 # path_hash ./.github/workflows/template-*

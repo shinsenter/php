@@ -77,6 +77,14 @@ for f in $(command -v php) $(command -v php-fpm) $n "$ext_dir"/*.so; do
     ! grep -q "\.symtab" "$f" 2>/dev/null || warn "not stripped: $f"
 done
 
+# Info only: the size of each extension file, without the system libraries it links to
+# (those show in the list of top packages and files)
+echo "== Extensions by file size (KB)"
+for f in "$ext_dir"/*.so; do
+    [ -f "$f" ] || continue
+    echo "$(du -k "$f" | cut -f1) $(basename "$f" .so)"
+done | sort -rn | head -15
+
 # Info only, never a finding: read it to spot what grows between releases
 echo "== Top 15 files over 1 MB (MB)"
 find / -xdev -type f -size +1024k -exec ls -s {} + 2>/dev/null | sort -rn | head -15 | while read -r kb path; do echo "$(mb "$kb") $path"; done

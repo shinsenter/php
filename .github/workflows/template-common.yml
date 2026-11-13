@@ -60,7 +60,7 @@ jobs:
   # Runs build/config.sh once and hands the result to the jobs below.
   # The build runs once per platform on a runner of the same architecture
   # where possible (QEMU is only used for 32-bit ARM),
-  # then "merge" publishes one multi-platform tag.
+  # the last platform to finish publishes one multi-platform tag.
   prepare:
     name: ${{ inputs.php_version }} ${{ inputs.app_name }} ${{ inputs.server }} ${{ inputs.os }} (prepare)
     runs-on: ubuntu-26.04-arm
@@ -96,24 +96,21 @@ jobs:
           BUILD_TAG_PREFIX: ${{ inputs.tag_prefix }}
           FORCE_BUILD: ${{ inputs.force_build && '1' || '0' }}
           BUILD_ENV_FILE: /tmp/build.env
+          INPUT_OS: ${{ inputs.os }}
+          INPUT_APP_NAME: ${{ inputs.app_name }}
+          INPUT_PHP_VERSION: ${{ inputs.php_version }}
+          INPUT_SERVER: ${{ inputs.server }}
         run: |
           set -e
-          ./build/config.sh "${{ inputs.os }}" "${{ inputs.app_name }}" "${{ inputs.php_version }}" "${{ inputs.server }}"
+          ./build/config.sh "$INPUT_OS" "$INPUT_APP_NAME" "$INPUT_PHP_VERSION" "$INPUT_SERVER"
 
       -
         id: plan
         name: Plan the platform builds
         run: |
           set -e
-          # amd64 and 386 build on x64, arm64 on arm.
-          # 32-bit ARM, ppc64le and s390x (base-os and base-s6 only) run under QEMU.
-          matrix="$(jq -cn --arg platforms "$BUILD_PLATFORM" '
-            $platforms | split(",") | map(select(. != "")) | map({
-              platform: .,
-              slug: gsub("/"; "-"),
-              runner: (if . == "linux/amd64" or . == "linux/386" then "ubuntu-26.04" else "ubuntu-26.04-arm" end),
-              qemu: (if test("^linux/arm/") then "arm" elif test("ppc64le|s390x") then ltrimstr("linux/") else "" end)
-            })')"
+          . ./build/helpers.sh
+          matrix="$(plan_matrix "$BUILD_PLATFORM")"
           skip="${SKIP_BUILD:-0}"
           if [ "$matrix" = "[]" ]; then
             skip=1
@@ -143,6 +140,7 @@ jobs:
     permissions:
       packages: write
       contents: read
+      id-token: write
     services:
       registry:
         image: registry:2
@@ -196,7 +194,7 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - # Each platform is pushed by digest, "merge" puts the digests under the tags
+      - # Each platform is pushed by digest, the last platform puts the digests under the tags
         id: stage
         name: Set the staging repository
         run: |
@@ -218,9 +216,10 @@ jobs:
           file: ${{ env.BUILD_DOCKERFILE }}
           context: ${{ env.BUILD_CONTEXT }}
           tags: ${{ env.SKIP_SQUASH != '1' && env.BUILD_TMP_NAME || '' }}
-          outputs: ${{ env.SKIP_SQUASH == '1' && format('type=image,name={0},push-by-digest=true,name-canonical=true,push={1}', steps.stage.outputs.name, env.SKIP_PUSH != '1') || '' }}
+          outputs: ${{ env.SKIP_SQUASH == '1' && format('type=image,name={0},push-by-digest=true,name-canonical=true,compression=zstd,force-compression=true,oci-mediatypes=true,push={1}', steps.stage.outputs.name, env.SKIP_PUSH != '1') || '' }}
           # the temporary image of squash mode is discarded, only the final image needs an SBOM
           sbom: ${{ env.SKIP_SQUASH == '1' }}
+          provenance: ${{ env.SKIP_SQUASH == '1' && 'mode=max' || 'false' }}
           build-args: |
             DEBUG=${{ env.DEBUG }}
             BUILD_CACHE_KEY=${{ env.BUILD_CACHE_KEY }}
@@ -249,14 +248,16 @@ jobs:
         if: ${{ env.SKIP_SQUASH != '1' }}
         name: Make squashed Dockerfile for ${{ env.BUILD_TAG }}
         continue-on-error: ${{ inputs.continue-on-error }}
+        env:
+          MATRIX_PLATFORM: ${{ matrix.platform }}
         run: |
-          docker pull --platform "${{ matrix.platform }}" "${{ env.BUILD_TMP_NAME }}"
-          DEBUG= ${{ env.SQUASH_CMD }} "${{ env.BUILD_TMP_NAME }}" -p >"${{ env.BUILD_DOCKERFILE_SQUASHED }}"
-          cat "${{ env.BUILD_DOCKERFILE_SQUASHED }}"
+          docker pull --platform "$MATRIX_PLATFORM" "$BUILD_TMP_NAME"
+          DEBUG= $SQUASH_CMD "$BUILD_TMP_NAME" -p >"$BUILD_DOCKERFILE_SQUASHED"
+          cat "$BUILD_DOCKERFILE_SQUASHED"
           docker images
           df -h
 
-      -
+      - # Only the pushed image uses zstd layers (smaller, faster pull), the temporary image above stays gzip
         if: ${{ env.SKIP_SQUASH != '1' }}
         id: push_squash
         name: Squash and push ${{ env.BUILD_TAG }} for ${{ matrix.platform }}
@@ -267,8 +268,9 @@ jobs:
           platforms: ${{ matrix.platform }}
           file: ${{ env.BUILD_DOCKERFILE_SQUASHED }}
           context: ${{ env.BUILD_CONTEXT }}
-          outputs: type=image,name=${{ steps.stage.outputs.name }},push-by-digest=true,name-canonical=true,push=${{ env.SKIP_PUSH != '1' }}
+          outputs: type=image,name=${{ steps.stage.outputs.name }},push-by-digest=true,name-canonical=true,compression=zstd,force-compression=true,oci-mediatypes=true,push=${{ env.SKIP_PUSH != '1' }}
           sbom: true
+          provenance: mode=max
           build-args: |
             DEBUG=${{ env.DEBUG }}
 
@@ -292,31 +294,7 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  ##############################################################################
-
-  merge:
-    name: ${{ inputs.php_version }} ${{ inputs.app_name }} ${{ inputs.server }} ${{ inputs.os }} (publish)
-    needs: [prepare, build]
-    if: ${{ needs.prepare.outputs.skip != '1' }}
-    runs-on: ubuntu-26.04-arm
-    permissions:
-      packages: write
-      contents: read
-    env:
-      PUBLISH_TO_GHCR: "1"
-    steps:
-      -
-        uses: actions/checkout@v7
-        with:
-          submodules: 'true'
-
-      -
-        name: Load build config
-        env:
-          BUILD_ENV: ${{ needs.prepare.outputs.env }}
-        run: printf '%s\n' "$BUILD_ENV" >> "$GITHUB_ENV"
-
-      -
+      - # The platform that finishes last sees every digest and publishes the tags itself, so no job waits for a runner again
         if: ${{ env.SKIP_PUSH != '1' }}
         uses: actions/download-artifact@v8
         with:
@@ -325,60 +303,29 @@ jobs:
           merge-multiple: true
 
       -
-        uses: docker/setup-buildx-action@v4
-
-      -
-        uses: ./.github/actions/registry-login
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-
-      -
+        id: gather
         if: ${{ env.SKIP_PUSH != '1' }}
-        name: Publish ${{ env.BUILD_TAG }}
-        continue-on-error: ${{ inputs.continue-on-error }}
-        working-directory: /tmp/digests
+        name: Check whether every platform is done
+        env:
+          EXPECTED: ${{ strategy.job-total }}
         run: |
-          set -e
-          stage="$BUILD_NAME"
-          [ "$PUBLISH_TO_GHCR" = "1" ] && stage="ghcr.io/$BUILD_NAME"
+          count="$(find /tmp/digests -type f | wc -l)"
+          echo "digests = $count of $EXPECTED"
+          if [ "$count" -ge "$EXPECTED" ]; then echo "ready=1" >> "$GITHUB_OUTPUT"; fi
 
-          tags=()
-          for tag in ${BUILD_TAGS//,/ }; do
-              tags+=(-t "$tag")
-          done
-
-          sources=()
-          for digest in *; do
-              sources+=("$stage@sha256:$digest")
-          done
-
-          docker buildx imagetools create "${tags[@]}" \
-              --annotation "index:org.shinsenter.build.fingerprint=$BUILD_FINGERPRINT" \
-              "${sources[@]}"
-          docker buildx imagetools inspect "$BUILD_TAG"
-
-      - # Without the fingerprint the next run would build this image again
-        if: ${{ success() && env.SKIP_PUSH != '1' }}
-        name: Verify the fingerprint of ${{ env.BUILD_TAG }}
-        run: |
-          set -e
-          . ./build/helpers.sh
-          published="$(get_image_fingerprint "ghcr.io/${{ env.BUILD_TAG }}")"
-          echo "expected  = ${{ env.BUILD_FINGERPRINT }}"
-          echo "published = $published"
-          if [ "$published" != "${{ env.BUILD_FINGERPRINT }}" ]; then
-            echo "::error::The published image does not carry the expected fingerprint"
-            exit 1
-          fi
+      -
+        if: ${{ steps.gather.outputs.ready == '1' }}
+        uses: ./.github/actions/publish
+        with:
+          continue-on-error: ${{ inputs.continue-on-error }}
 
   ##############################################################################
 
   readme:
     name: ${{ inputs.php_version }} ${{ inputs.app_name }} ${{ inputs.server }} ${{ inputs.os }} (readme)
-    needs: [prepare, build, merge]
-    # Runs even when build and merge are skipped (SKIP_BUILD), but not after a failure
-    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.build.result != 'failure' && needs.merge.result != 'failure' }}
+    needs: [prepare, build]
+    # Runs even when build is skipped (SKIP_BUILD), but not after a failure
+    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.build.result != 'failure' }}
     runs-on: ubuntu-26.04-arm
     steps:
       -

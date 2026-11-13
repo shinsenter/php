@@ -8,18 +8,21 @@
 ################################################################################
 # Start the images in tests/docker-compose.yml in batches, wait until each
 # container answers on port 80, record the HTTP status of / and stop the batch.
-# Usage: tests/compose-test.sh [-n N] [-v PHP_VERSION] [-o alpine|debian] [-t SECONDS] [keyword...]
+# Usage: tests/compose-test.sh [-n N] [-v PHP_VERSION] [-o alpine|debian] [-t SECONDS] [-s] [keyword...]
 #   -n N           containers per batch (default 4)
 #   -v PHP_VERSION default latest
 #   -o OS          alpine (default) or debian
 #   -t SECONDS     wait for init per container (default 120)
+#   -s             strict: follow redirects and pass only on HTTP 2xx (default: any HTTP answer)
 #   keyword        run only services whose name contains a keyword, "with-" is ignored
-#                  (default: all except cli and fpm)
+#                  (default: all except cli, fpm and mysql, the shared test database)
 # IMAGE_TAG overrides the tag built from -v and -o: dev-php<version>[-alpine].
 # Results go to tests/logs/<date>-compose-<tag>.csv.
 # The csv has the columns service, status, result and header (all response header lines
 # on one line, or ERROR when the container never answered).
-# A container passes when it answers HTTP. For status 400 and above the response
+# A container passes when it answers HTTP, or with -s when the final answer is 2xx.
+# With -s the check keeps polling until 2xx or the wait ends, so a slow installer can still pass.
+# For status 400 and above the response
 # header and body go to tests/logs/<date>-compose-<tag>-<service>.http.
 set -u
 
@@ -31,11 +34,12 @@ N=4
 PHP_VERSION=latest
 OS=alpine
 WAIT=120
+STRICT=0
 FAIL=0
 
 usage() {
-    # Print the header comment above (lines 9-21) as help text
-    sed -n '9,21p' "$0" | cut -c3-
+    # Print the header comment above (lines 9-22) as help text
+    sed -n '9,22p' "$0" | cut -c3-
     exit 2
 }
 
@@ -45,12 +49,13 @@ compose() {
 }
 
 parse_args() {
-    while getopts n:v:o:t: opt; do
+    while getopts n:v:o:t:s opt; do
         case "$opt" in
             n) N="$OPTARG" ;;
             v) PHP_VERSION="$OPTARG" ;;
             o) OS="$OPTARG" ;;
             t) WAIT="$OPTARG" ;;
+            s) STRICT=1 ;;
             *) usage ;;
         esac
     done
@@ -69,7 +74,7 @@ parse_args() {
 # Fill SERVICES with the compose services that match the keywords
 select_services() {
     SERVICES=""
-    for name in $(compose config --services | grep -vx -e cli -e fpm); do
+    for name in $(compose config --services | grep -vx -e cli -e fpm -e mysql); do
         keep=0
         [ -z "$KEYWORDS" ] && keep=1
         for key in $KEYWORDS; do
@@ -88,10 +93,16 @@ wait_http() {
     CODE=000
     port=$(compose port "$svc" 80 2>/dev/null | sed 's/.*://')
     [ -n "$port" ] || return 0
+    # Strict mode judges the page after the redirects, such as an installer page
+    FOLLOW=; [ "$STRICT" = 1 ] && FOLLOW=-L
     waited=0
     while [ "$waited" -lt "$WAIT" ]; do
-        CODE=$(curl -s -D "$out.h" -o "$out.b" -m 5 -w '%{http_code}' "http://127.0.0.1:$port/")
-        [ "$CODE" != 000 ] && return 0
+        CODE=$(curl -s $FOLLOW -D "$out.h" -o "$out.b" -m 5 -w '%{http_code}' "http://127.0.0.1:$port/")
+        if [ "$STRICT" = 1 ]; then
+            case "$CODE" in 2??) return 0 ;; esac
+        else
+            [ "$CODE" != 000 ] && return 0
+        fi
         sleep 2
         waited=$((waited + 2))
     done
@@ -129,6 +140,8 @@ check_service() {
         compose logs --tail 20 "$svc" >"$prefix.log" 2>&1
     else
         res=PASS
+        # Strict mode fails an answer that is not 2xx, and keeps the response for review
+        case "$STRICT$CODE" in 1[!2]*) res=FAIL; FAIL=1 ;; esac
         header=$(csv_header "$prefix.h")
         # An error page still counts as an answer, keep it for review
         if [ "$CODE" -ge 400 ]; then
@@ -146,11 +159,12 @@ run_batch() {
     echo "==> Batch:$BATCH"
     # A pull failure is not fatal: the missing image shows up as FAIL below
     compose pull --ignore-pull-failures $BATCH >"$LOG_PREFIX-$IMAGE_TAG-pull.log" 2>&1
-    compose up -d --force-recreate --no-deps $BATCH >"$LOG_PREFIX-$IMAGE_TAG-up.log" 2>&1
+    # No --no-deps: a service with depends_on (for example mysql) starts its database first
+    compose up -d --force-recreate $BATCH >"$LOG_PREFIX-$IMAGE_TAG-up.log" 2>&1
     for svc in $BATCH; do
         check_service "$svc"
     done
-    compose rm -sf -v $BATCH >/dev/null 2>&1
+    compose rm -sf -v $BATCH mysql >/dev/null 2>&1
 }
 
 parse_args "$@"

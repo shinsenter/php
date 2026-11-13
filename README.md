@@ -32,6 +32,7 @@
   - [Behind a proxy or load balancer](#behind-a-proxy-or-load-balancer)
   - [Health checks](#health-checks)
   - [Stopping and scaling](#stopping-and-scaling)
+  - [Performance](#performance)
 - [Operations](#operations)
   - [Sending Emails](#sending-emails)
   - [Debug mode](#debug-mode)
@@ -52,6 +53,8 @@ They include the latest Composer and common web servers - [Apache2](https://http
 
 > [!NOTE]
 > We slim these images down with the [docker-squash](https://code.shin.company/docker-squash) project, so pulls are faster and they use less disk and memory than the official images they're based on.
+>
+> New builds use zstd layer compression, which makes images smaller to pull. Pulling them needs Docker Engine 23.0 or later, or containerd 1.5 or later (Kubernetes included). On an older runtime the pull fails. A tag that has not been rebuilt yet keeps its gzip layers.
 
 
 ## Quick start
@@ -384,6 +387,30 @@ To scale out:
 
 - Keep sessions, uploads and cache outside the container (Redis, a database, object storage or a shared volume), so every replica can answer any request.
 - Put the source and `vendor/` in the image at build time, and set `DISABLE_AUTORUN_CREATING_PROJECT=1` and `DISABLE_AUTORUN_COMPOSER_INSTALL=1`. Replicas then start fast and with the same package versions.
+
+
+### Performance
+
+The defaults suit development as well as production, so a code change shows up right away. For production, set these variables:
+
+| Variable | Value | Effect |
+|---|---|---|
+| `PHP_OPCACHE_VALIDATE_TIMESTAMPS` | `0` | PHP stops checking files for changes. Restart the container after a deploy, because a changed file is not picked up |
+| `ENABLE_TUNING_FPM` | `1` | Sets the `pm.*` values of PHP-FPM from the CPU limit of the container (see [Customizing PHP-FPM](#customizing-php-fpm)) |
+| `COMPOSER_OPTIMIZE_AUTOLOADER` | `1` | Builds an optimized class map at startup. With `vendor/` in the image, run `composer dump-autoload --optimize` at build time instead |
+
+```shell
+docker run -p 80:80 \
+    -e PHP_OPCACHE_VALIDATE_TIMESTAMPS=0 \
+    -e ENABLE_TUNING_FPM=1 \
+    shinsenter/php:8.5-fpm-nginx
+```
+
+Other settings that matter:
+
+- `PHP_OPCACHE_MEMORY_CONSUMPTION` (default `256`, in MB) and `PHP_OPCACHE_MAX_ACCELERATED_FILES` (default `130987`) are enough for most projects. Raise them when `opcache_get_status()` shows a full cache.
+- `PHP_OPCACHE_JIT` and `PHP_OPCACHE_JIT_BUFFER_SIZE` turn on the JIT. It helps CPU-bound code and does little for a typical web request, so measure before you keep it.
+- Nginx and FrankenPHP compress responses (brotli and gzip). Do not compress again in your app.
 
 
 ## Operations

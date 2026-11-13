@@ -2,7 +2,8 @@
 source=https://raw.githubusercontent.com/docker-library/wordpress/master/wp-config-docker.php
 
 debug-echo -i "Install Wordpress to $APP_PATH."
-web-chown fix "$WP_CLI_DIR" "$WP_CLI_CACHE_DIR" "$WP_CLI_PACKAGES_DIR"
+# wp runs as the web user, and an existing project folder can still belong to root
+web-chown fix "$APP_PATH" "$WP_CLI_DIR" "$WP_CLI_CACHE_DIR" "$WP_CLI_PACKAGES_DIR"
 
 cd "$APP_PATH"
 wp core download \

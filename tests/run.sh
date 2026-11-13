@@ -409,10 +409,103 @@ test_defaults() {
     finish
 }
 
+# size: the size helpers of build/helpers.sh, on a fixed manifest (offline).
+test_size() {
+    source "$BASE_DIR/build/helpers.sh"
+
+    check_eq "manifest size is config plus layers" "600" \
+        "$(echo '{"config":{"size":100},"layers":[{"size":200},{"size":300}]}' | manifest_size)"
+    check_eq "manifest without layers is the config size" "100" \
+        "$(echo '{"config":{"size":100}}' | manifest_size)"
+    check_eq "invalid JSON gives no size" "" "$(echo 'not json' | manifest_size)"
+
+    finish
+}
+
+# fingerprint: which files change the context hash of an image (offline, on a temporary copy).
+test_fingerprint() {
+    source "$BASE_DIR/build/helpers.sh"
+    local tmp ctx base nginx before after
+    tmp="$(mktemp -d)"
+    cp -R "$BASE_DIR/src/php" "$tmp/php"
+    ctx="$tmp/php"
+    base="$ctx/base-php.dockerfile"
+    nginx="$ctx/with-nginx.dockerfile"
+
+    # hash of both images, after one change
+    change() { echo "# changed" >> "$ctx/$1"; }
+    hashes() { echo "$(get_context_hash "$ctx" "$base") $(get_context_hash "$ctx" "$nginx")"; }
+
+    before="$(hashes)"; change common/php-extensions.dockerfile; after="$(hashes)"
+    check_eq "a changed fragment changes the base image" "different" \
+        "$([ "${before% *}" != "${after% *}" ] && echo different || echo same)"
+    check_eq "a changed common fragment changes the server image" "different" \
+        "$([ "${before#* }" != "${after#* }" ] && echo different || echo same)"
+
+    before="$(hashes)"; change with-nginx/rootfs/etc/nginx/nginx.conf; after="$(hashes)"
+    check_eq "nginx files do not change the base image" "${before% *}" "${after% *}"
+    check_eq "nginx files change the nginx image" "different" \
+        "$([ "${before#* }" != "${after#* }" ] && echo different || echo same)"
+
+    before="$(hashes)"; change with-nginx/nginx-config.dockerfile; after="$(hashes)"
+    check_eq "an nginx fragment does not change the base image" "${before% *}" "${after% *}"
+    check_eq "an nginx fragment changes the nginx image" "different" \
+        "$([ "${before#* }" != "${after#* }" ] && echo different || echo same)"
+
+    before="$(hashes)"; change with-apache/rootfs/etc/apache2/apache2.conf; after="$(hashes)"
+    check_eq "apache files do not change the nginx image" "${before#* }" "${after#* }"
+
+    before="$(hashes)"; change with-nginx.dockerfile; after="$(hashes)"
+    check_eq "a top level Dockerfile is hashed apart" "$before" "$after"
+
+    before="$(hashes)"; echo x >> "$ctx/common/NOTES.md"; after="$(hashes)"
+    check_eq "markdown does not change the hash" "$before" "$after"
+
+    rm -rf "$tmp"
+    finish
+}
+
+# helpers: the pure functions of build/helpers.sh (offline, no network).
+test_helpers() {
+    source "$BASE_DIR/build/helpers.sh"
+    local tmp
+    tmp="$(mktemp -d)"
+
+    # parse_json: first lines of a jq query, fails without a result
+    check_eq "parse_json first value" "a" "$(parse_json '[{"n":"a"},{"n":"b"}]' 1 '.[].n')"
+    check_eq "parse_json two values" "a b" "$(parse_json '[{"n":"a"},{"n":"b"}]' 2 '.[].n' | tr '\n' ' ' | sed 's/ $//')"
+    check_not "parse_json fails without a result" parse_json '[]' 1 '.[].n'
+
+    # github_env: shell form outside Actions, the file and BUILD_ENV_FILE inside
+    check_eq "github_env outside Actions" "FOO='a b'" "$(GITHUB_ENV= github_env FOO a b)"
+    GITHUB_ENV="$tmp/env" BUILD_ENV_FILE="$tmp/build" github_env FOO a b >/dev/null
+    check_eq "github_env writes GITHUB_ENV" "FOO=a b" "$(cat "$tmp/env")"
+    check_eq "github_env writes BUILD_ENV_FILE" "FOO=a b" "$(cat "$tmp/build")"
+
+    # path_hash: hidden files and Markdown do not count
+    mkdir "$tmp/d"; echo 1 > "$tmp/d/a"; echo 2 > "$tmp/d/.hidden"; echo 3 > "$tmp/d/n.md"
+    check_eq "path_hash lists one file" "1" "$(path_hash "$tmp/d" | wc -l | tr -d ' ')"
+
+    # cache_file: the file lands in HELPER_CACHE_DIR
+    download_file() { echo "$1" > "$2"; }
+    HELPER_CACHE_DIR="$tmp/hc" cache_file "http://x/y" y.txt
+    check_eq "cache_file puts the file in the cache" "http://x/y" "$(cat "$tmp/hc/y.txt")"
+
+    # plan_matrix: runner and QEMU choice per platform
+    check_eq "plan_matrix amd64 on x64" "ubuntu-26.04||linux-amd64" "$(plan_matrix linux/amd64 | jq -r '.[0] | "\(.runner)|\(.qemu)|\(.slug)"')"
+    check_eq "plan_matrix arm64 on arm" "ubuntu-26.04-arm|" "$(plan_matrix linux/amd64,linux/arm64/v8 | jq -r '.[1] | "\(.runner)|\(.qemu)"')"
+    check_eq "plan_matrix arm/v7 under QEMU" "arm" "$(plan_matrix linux/arm/v7 | jq -r '.[0].qemu')"
+    check_eq "plan_matrix ppc64le under QEMU" "ppc64le" "$(plan_matrix linux/ppc64le | jq -r '.[0].qemu')"
+    check_eq "plan_matrix empty list" "[]" "$(plan_matrix '')"
+
+    rm -rf "$tmp"
+    finish
+}
+
 # Each test runs in a subshell: its counters and sourced files stay private.
 if [ "${BASH_SOURCE[0]}" = "$0" ]; then
     status=0
-    for name in ${@:-lint versions backports config scaling ssh defaults}; do
+    for name in ${@:-lint versions backports config scaling ssh defaults size fingerprint helpers}; do
         echo "== $name"
         (NAME="$name"; "test_$name") || status=1
     done

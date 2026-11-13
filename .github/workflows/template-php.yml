@@ -41,6 +41,10 @@ jobs:
   build:
     name: ${{ matrix.php_version }} ${{ matrix.os == '' && 'debian' || matrix.os }}
     uses: ./.github/workflows/template-common.yml
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     secrets: inherit
     strategy:
       fail-fast: false

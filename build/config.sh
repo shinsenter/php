@@ -44,6 +44,9 @@ codeigniter4:min=8.2 server=apache
 # https://coolify.io/docs/installation
 coolify:min=8.2 base=laravel
 
+# https://craftcms.com/docs/5.x/requirements
+craftcms:min=8.2 server=nginx
+
 # https://www.drupal.org/docs/getting-started/system-requirements/php-requirements
 drupal:min=8.3 server=apache
 
@@ -65,6 +68,9 @@ hyperf:min=8.2 server=nginx
 # https://docs.invoiceshelf.com/install/manual.html
 invoiceshelf:min=8.2 base=laravel
 
+# https://manual.joomla.org/docs/next/get-started/technical-requirements
+joomla:min=8.3 server=apache
+
 # https://getkirby.com/docs/cookbook/setup/composer
 kirby:min=8.3 server=apache
 
@@ -80,8 +86,17 @@ matomo:min=8.1 server=apache
 # https://docs.mautic.org/en/5.x/getting_started/how_to_install_mautic.html#installing-with-composer
 mautic:min=8.2 server=apache
 
+# https://docs.nextcloud.com/server/latest/admin_manual/installation/system_requirements.html
+nextcloud:min=8.2 server=apache
+
 # https://docs.phpmyadmin.net/en/latest/setup.html
 phpmyadmin:min=7.2 server=nginx
+
+# https://devdocs.prestashop-project.org/9/basics/installation/system-requirements/
+prestashop:min=8.2 server=apache
+
+# https://developer.shopware.com/docs/guides/hosting/
+shopware:min=8.2 server=nginx
 
 # https://spiral.dev/docs/start-installation/current/en
 spiral:min=8.1 server=roadrunner variant=cli platform=linux/amd64,linux/arm64
@@ -94,6 +109,9 @@ symfony:min=8.4 server=apache
 
 # https://github.com/sulu/skeleton
 sulu:base=symfony
+
+# https://tempestphp.com/docs/
+tempest:min=8.5 server=nginx
 
 # https://wordpress.org/documentation/category/installation
 wordpress:allow_rc=1 server=apache
@@ -585,11 +603,7 @@ if [ "$SKIP_BUILD" != "1" ]; then
     fi
 
     BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(buildfile:$(path_hash "$BUILD_DOCKERFILE" | head -c10))"
-    # Other Dockerfiles in the same folder are not part of this image
-    context_hash="$(find "$BUILD_CONTEXT" -type f ! -name '.*' ! -name '*.md' \
-        ! -path '*/php-backports/*' \
-        \( ! -name '*.dockerfile' -o -name 'meta.dockerfile' \) \
-        | sort -dbfi | xargs -r shasum 2>/dev/null | shasum | head -c10)"
+    context_hash="$(get_context_hash "$BUILD_CONTEXT" "$BUILD_DOCKERFILE")"
     BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(buildcontext:$context_hash)"
 
     # The backports are copied into the context only when building,

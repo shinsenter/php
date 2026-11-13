@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+# The PrestaShop download holds prestashop.zip with the shop inside.
+# The zip also holds a large index.php, so unpack apart and copy over it.
+cd "$APP_PATH" || exit 0
+[ -f prestashop.zip ] || exit 0
+
+debug-echo -i "Unpack prestashop.zip in $APP_PATH."
+tmp="$(mktemp -d)"
+unzip -q prestashop.zip -d "$tmp"
+cp -rpf "$tmp"/. "$APP_PATH"/
+rm -rf "$tmp" prestashop.zip Install_PrestaShop.html
+debug-echo -s "PrestaShop is unpacked in $APP_PATH."

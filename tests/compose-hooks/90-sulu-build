@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+# Test only, mounted by tests/docker-compose.yml: create the Sulu tables and a user, so that / answers 200.
+# The image does not run this by itself, because it has no database of its own.
+# The project is still owned by root here, and the console runs as the web user
+web-chown fix "$APP_PATH"
+cd "$APP_PATH" && web-do php bin/console sulu:build dev --no-interaction

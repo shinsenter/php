@@ -10,11 +10,11 @@
 
 # KNOWN_ISSUES.md workflow (details)
 
-The short form is in `CLAUDE.md`, section "Working rules".
+Short form: `CLAUDE.md`, section "Working rules".
 
-When the user asks to fix a bug reported by a user (a GitHub issue), also record it in `KNOWN_ISSUES.md` in the same change.
+When the user asks to fix a bug that a user reported in a GitHub issue, record it in `KNOWN_ISSUES.md` in the same change.
 
-- Add the entry under the release that will ship the fix, or under `Open` until the fix is merged.
-- Each entry has the issue link, the symptom, the cause (or "not recorded"), and the fix.
-- Do not write commit hashes, because a squash merge changes them.
-- Read the issue and its comments first, and do not guess a cause.
+- Put the entry under the release that ships the fix, or under `Open` until the fix is merged.
+- Each entry has the issue link, the symptom, the cause (or "not recorded") and the fix.
+- Do not write commit hashes. A squash merge changes them.
+- Read the issue and its comments first. Do not guess a cause.
