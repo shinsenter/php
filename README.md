@@ -10,6 +10,9 @@
 [![Watch updates](https://code.shin.company/php/actions/workflows/watch-updates.yml/badge.svg)](https://code.shin.company/php/actions/workflows/watch-updates.yml)
 
 
+> [!IMPORTANT]
+> **Sponsors open in 2027.** The project plans to open a sponsors program in 2027. Details will be announced here before it starts. Until then you can already [support the project](#support-the-project) with a donation or a GitHub sponsorship.
+
 ## Table of Contents <!-- omit from toc -->
 - [Introduction](#introduction)
 - [Quick start](#quick-start)
@@ -531,6 +534,11 @@ Environment variables for fine-tuning container behavior.
 | `APACHE_REQUEST_READ_TIMEOUT`      | `header=0 body=0` (no limit) | Value of `RequestReadTimeout`. Set a limit to close connections that send the request too slowly. |
 
 
+## Deploy to your own server
+
+[muken](https://github.com/shinsenter/muken) is a command-line tool, in its own repository, that puts these images on a VPS: it installs Docker and a proxy, deploys with no downtime, rolls back on a failed health check, and can create the server and the DNS records for you (DigitalOcean, Hetzner, Cloudflare). Start with `muken init`. A short page is in [docs/muken.md](https://code.shin.company/php/blob/main/docs/muken.md), and the guide is in the muken repository.
+
+
 ## About This Project
 
 The platforms, stable tags, update process and security updates are in [docs/project.md](https://code.shin.company/php/blob/main/docs/project.md).
@@ -542,6 +550,8 @@ Keeping these images rebuilt for every PHP release takes ongoing work. If they s
 
 - ☕ [Donate via PayPal](https://www.paypal.me/shinsenter)
 - 💖 [Sponsor on GitHub](https://github.com/sponsors/shinsenter)
+
+**Plan for 2027:** the project plans to open a sponsors program in 2027. Details will be announced in this README before it starts.
 
 Bug reports, fixes and docs are welcome too. See [CONTRIBUTING.md](https://code.shin.company/php/blob/main/CONTRIBUTING.md) or open an [issue](https://code.shin.company/php/issues/new).
 
