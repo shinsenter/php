@@ -143,4 +143,4 @@ services:
       CRONTAB_SETTINGS: "* * * * * echo 'This line will run every minute!' | tee /tmp/cron-every-minute.txt"
 ```
 
-For more cron-related variables, see [System settings](https://code.shin.company/php#system-settings).
+For more cron-related variables, see [System settings](settings.md).

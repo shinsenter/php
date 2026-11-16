@@ -8,9 +8,10 @@ All notable changes to this project are documented in this file.
 - Set `traefik.enable=false` in the `phpmyadmin` and `coolify` images.
 - Remove `vim-tiny` and `vim-common` from the Debian images. They carry an open HIGH CVE with no fix, and `vi` comes from busybox.
 - Add `private` to `TRUSTED_PROXIES` (the private network ranges). One utility now reads the list for all four servers.
-- Compress image layers with zstd. Pulling needs Docker Engine 23.0 or later, or containerd 1.5 or later.
+- Add a guide for Traefik.
 - Point to [muken](https://github.com/shinsenter/muken), the separate tool that deploys these images.
 - Note in the README that sponsors open in 2027.
+- Compress image layers with zstd. Pulling needs Docker Engine 23.0 or later, or containerd 1.5 or later.
 - Sign the published images with cosign (keyless) and attach max provenance.
 - Report HIGH and CRITICAL vulnerabilities and the image size change in the job summary of each publish. Neither fails the build.
 - Fix the build fingerprint. A changed Dockerfile fragment now rebuilds the image, and a change for one server no longer rebuilds the base images and the other servers.
