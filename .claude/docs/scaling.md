@@ -101,7 +101,7 @@ RoadRunner uses the same port with other paths: liveness `/health?plugin=http`, 
 
 The main port (80) carries the traffic. The health check uses `HEALTH_PORT`.
 
-- Traefik: the images carry `traefik.enable=true`. Set `traefik.http.services.<name>.loadbalancer.server.port=80` and a router rule. For health checks add `traefik.http.services.<name>.loadbalancer.healthcheck.port=2020` and `traefik.http.services.<name>.loadbalancer.healthcheck.path=/readyz`.
+- Traefik: the web images carry `traefik.enable=true`. The `phpmyadmin` and `coolify` images carry `traefik.enable=false`, so a tool with admin rights is routed only after you opt in. Set `traefik.http.services.<name>.loadbalancer.server.port=80` and a router rule. The images expose several ports (22, 80, 443, 443/udp, and 2019 or 6001 on FrankenPHP and RoadRunner), and the Traefik documentation asks for the port label then. For health checks add `traefik.http.services.<name>.loadbalancer.healthcheck.port=2020` and `traefik.http.services.<name>.loadbalancer.healthcheck.path=/readyz`. On RoadRunner use `/health?plugin=http`, not `/ready?plugin=http`: readiness answers 503 while every worker is busy, and Traefik would then drop the replica under load. The full guide with a Compose file is `docs/traefik.md`.
 - AWS ALB: target group health check port override `2020`, path `/readyz`, protocol HTTP. Set the deregistration delay equal to or longer than `SHUTDOWN_DELAY`. A target that is still starting stays out of rotation.
 - AWS ECS: define `healthCheck` in the task definition (`CMD-SHELL`, `startPeriod`). Set the ALB check port in the target group as above.
 - GCP: BackendConfig health check `requestPath: /readyz`, `port: 2020`. Use container-native load balancing (NEG) so the check hits the pod directly.
@@ -110,7 +110,8 @@ The main port (80) carries the traffic. The health check uses `HEALTH_PORT`.
 
 | Variable | Default | Effect |
 |---|---|---|
-| `TRUSTED_PROXIES` | empty | CIDRs (comma or space separated) that may set `X-Forwarded-For` and `X-Forwarded-Proto`. No proxy is trusted until this is set |
+| `TRUSTED_PROXIES` | empty | CIDRs (comma or space separated) that may set `X-Forwarded-For` and `X-Forwarded-Proto`. No proxy is trusted until this is set. `private` stands for `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16` and `fd00::/8`. One utility, `trusted-proxies`, expands the list for all four servers |
+| `NGINX_KEEPALIVE_TIMEOUT`, `APACHE_KEEPALIVE_TIMEOUT` | `120` | Seconds an idle client connection stays open. It must exceed the idle time of the proxy in front (Traefik keeps its idle backend connections 90 s), see "Keep-alive" below |
 | `SHUTDOWN_DELAY` | `0` | Seconds to wait after the stop signal, so the load balancer can remove the replica |
 | `S6_SERVICES_GRACETIME`, `S6_KILL_GRACETIME` | `25000` | Milliseconds the servers get to finish running requests. Keep below `terminationGracePeriodSeconds` (30 s by default) |
 | `PHP_PING_PATH` | `/ping` | FPM ping path that `/readyz` uses (Nginx and Apache) |
@@ -127,6 +128,21 @@ With Cloudflare in front, list the load balancer and the Cloudflare ranges.
 `X-Forwarded-Proto: https` sets `$_SERVER['HTTPS']` to `on` and `REQUEST_SCHEME` to `https`.
 The server uses the header only when the proxy that sent it is trusted, the same rule as for the client address.
 A client that connects directly cannot fake it.
+
+## Keep-alive
+
+A proxy reuses a connection to the backend until the backend closes it. When the backend closes it first, a request that the proxy sends in that instant fails with 502 (the proxy cannot know the connection died).
+So the backend must keep an idle connection open longer than the proxy does.
+
+| Server | Idle time of the connection | Why |
+|---|---|---|
+| Nginx | `NGINX_KEEPALIVE_TIMEOUT`, default 120 s | Nginx alone defaults to 75 s |
+| Apache | `APACHE_KEEPALIVE_TIMEOUT`, default 120 s | It was 5 s. The event MPM keeps an idle connection without holding a worker |
+| FrankenPHP | Caddy default, 5 min | Not changed |
+| RoadRunner | Go `net/http` default, no idle limit | Not changed |
+
+Traefik closes idle backend connections after 90 s (`serversTransport.forwardingTimeouts.idleConnTimeout`, taken from the Traefik documentation, not tested here). A proxy with a longer idle time needs a larger value here. With Traefik you can also lower `idleConnTimeout` below the backend value.
+Not verified: the FrankenPHP and RoadRunner values come from the upstream defaults, not from a test of these images.
 
 ## Stopping a replica
 

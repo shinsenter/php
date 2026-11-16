@@ -49,11 +49,8 @@ HEALTHCONF
 # this works only when real_ip is built in, because the same directive decides who is trusted
 \rm -f /etc/nginx/proxies.d/trusted.conf
 if [ -n "$TRUSTED_PROXIES" ] && grep -q '^[[:space:]]*real_ip_header' /etc/nginx/nginx.conf; then
-    for cidr in $(echo "$TRUSTED_PROXIES" | tr ',' ' '); do
-        case "$cidr" in
-            *[!0-9a-fA-F:./]*) debug-echo -w "Skip invalid TRUSTED_PROXIES entry: $cidr" ;;
-            *) echo "set_real_ip_from $cidr;" >>/etc/nginx/proxies.d/trusted.conf ;;
-        esac
+    for cidr in $(trusted-proxies); do
+        echo "set_real_ip_from $cidr;" >>/etc/nginx/proxies.d/trusted.conf
     done
 fi
 

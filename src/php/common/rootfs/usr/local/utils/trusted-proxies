@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+# Print the proxy ranges from $TRUSTED_PROXIES, one per line.
+# The list separates items by comma or space.
+# "private" stands for the private ranges: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 and fd00::/8.
+# Anything else must be an address or a CIDR. A bad item is skipped with a warning on stderr.
+for item in $(echo "$TRUSTED_PROXIES" | tr ',' ' '); do
+    case "$item" in
+        private) printf '%s\n' 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 fd00::/8 ;;
+        *[!0-9a-fA-F:./]*) debug-echo -w "Skip invalid TRUSTED_PROXIES entry: $item" >&2 ;;
+        *) printf '%s\n' "$item" ;;
+    esac
+done

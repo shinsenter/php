@@ -10,6 +10,9 @@
 [![Watch updates](https://code.shin.company/php/actions/workflows/watch-updates.yml/badge.svg)](https://code.shin.company/php/actions/workflows/watch-updates.yml)
 
 
+> [!IMPORTANT]
+> **Sponsors open in 2027.** The project plans to open a sponsors program in 2027. Details will be announced here before it starts. Until then you can already [support the project](#support-the-project) with a donation or a GitHub sponsorship.
+
 ## Table of Contents <!-- omit from toc -->
 - [Introduction](#introduction)
 - [Quick start](#quick-start)
@@ -319,14 +322,16 @@ If a proxy or load balancer ends TLS for you, see the next section.
 
 By default no proxy is trusted. `REMOTE_ADDR` stays the address of the connection, and your app reads `X-Forwarded-For` itself.
 
-Set `TRUSTED_PROXIES` (CIDRs, separated by comma or space) to let the server use the client address from `X-Forwarded-For` and honor `X-Forwarded-Proto` (it then sets `$_SERVER['HTTPS']`). It works on Nginx, Apache, FrankenPHP and RoadRunner:
+Set `TRUSTED_PROXIES` (CIDRs, separated by comma or space) to let the server use the client address from `X-Forwarded-For` and honor `X-Forwarded-Proto` (it then sets `$_SERVER['HTTPS']`). It works on Nginx, Apache, FrankenPHP and RoadRunner. The word `private` stands for the private ranges `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16` and `fd00::/8`, where Docker networks, Kubernetes pods and most proxies live:
 
 ```shell
-docker run -e TRUSTED_PROXIES='10.0.0.0/8,172.16.0.0/12,192.168.0.0/16' \
+docker run -e TRUSTED_PROXIES=private \
     -p 80:80 shinsenter/php:8.5-fpm-nginx
 ```
 
-Only listed proxies can set these headers, so a client that connects directly cannot fake them. With Cloudflare in front, list your load balancer and the Cloudflare ranges.
+You can mix both forms, for example `private,203.0.113.0/24`. Only listed proxies can set these headers, so a client that connects directly cannot fake them. Use `private` only when nothing outside your private network can reach the container directly. With Cloudflare in front, list your load balancer and the Cloudflare ranges.
+
+Traefik: see [docs/traefik.md](https://code.shin.company/php/blob/main/docs/traefik.md) for a working Compose file and the settings that avoid 502 errors during deploys.
 
 
 ### Health checks
@@ -456,76 +461,26 @@ docker run -p 2222:22 -e ENABLE_SSHD=1 \
 ssh -p 2222 www-data@localhost
 ```
 
-| Variable | Default | Effect |
-|---|---|---|
-| `SSHD_AUTHORIZED_KEYS` | not set | Public keys, one per line. When not empty, they replace `~/.ssh/authorized_keys` at every start |
-| `SSHD_USER` | `$APP_USER` | User to log in as |
-| `SSHD_PORT` | `22` | Port that sshd listens on |
-| `SSHD_PASSWORD_AUTH`, `SSHD_PASSWORD` | `0`, not set | Password login stays off unless both are set |
-| `SSHD_PERMIT_ROOT_LOGIN` | `0` | Allow root login |
-| `SSHD_SFTP_ONLY` | `0` | Allow SFTP only, no shell |
+Main variables: `SSHD_AUTHORIZED_KEYS` (public keys, one per line), `SSHD_USER` (default `$APP_USER`), `SSHD_PORT` (default `22`). Password login stays off unless `SSHD_PASSWORD_AUTH` and `SSHD_PASSWORD` are set. The full list is in [docs/settings.md](https://code.shin.company/php/blob/main/docs/settings.md#ssh-access).
 
 
 ### System settings
 
-Environment variables for fine-tuning container behavior.
+The most used variables are below. Every other setting, with its default, is in [docs/settings.md](https://code.shin.company/php/blob/main/docs/settings.md).
 
-#### General
-
-| Setting Name | Default Value | Description |
-|---|---|---|
-| `DEFAULT_LOG_PATH`                 | `/proc/1/fd/2`   | Where logs are written. By default, logs are sent to the container's stdout. |
-| `DEBUG` or `DEBUG_MODE`            | Not set          | Enable verbose logging when set to `1`. |
-| `TZ`                               | `UTC`            | Set the container's timezone. See the list of timezones. |
-| `ALLOW_RUNTIME_PHP_ENVVARS`        | Not set          | Allow `$PHP_*` variables to override PHP configuration at runtime. |
-| `DISABLE_GREETING`                 | Not set          | Suppress the startup greeting with `1`. |
-| `SUPERVISOR_PHP_COMMAND`           | Not set          | Override the PHP command used by supervisor. Quotes group arguments that contain spaces. |
+| Variable | Effect |
+|---|---|
+| `TZ` | Timezone of the container (default `UTC`) |
+| `DEBUG` | `1` turns on verbose logging |
+| `INITIAL_PROJECT` | Creates a project in an empty app directory: a `.zip`, `.tar.gz` or `.git` URL, or `vendor/package` for Composer |
+| `ENABLE_CRONTAB` | `1` runs the jobs in `$CRONTAB_DIR` |
+| `ENABLE_TUNING_FPM` | `1` sets the `pm.*` values from the CPU limit |
+| `DISABLE_AUTORUN_SCRIPTS` | `1` skips the autorun scripts |
 
 
-#### Project startup and autorun
+## Deploy to your own server
 
-| Setting Name | Default Value | Description |
-|---|---|---|
-| `INITIAL_PROJECT`                  | Not set          | Used only when the app directory is empty. A URL starting with `http` and ending in `.zip` or `.tar.gz` is downloaded and extracted. A URL ending in `.git` is cloned. A value like `vendor/package` is created with `composer create-project`. Any other value runs the `create-project` hook. |
-| `INITIAL_PROJECT_GIT_OPTIONS`      | Not set          | Options passed to `git clone` when `INITIAL_PROJECT` is a `http*.git` URL. |
-| `DISABLE_AUTORUN_SCRIPTS`          | Not set          | Set to `1` to disable autorun scripts. |
-| `DISABLE_AUTORUN_CREATING_PROJECT` | Not set          | Do not create a project from `INITIAL_PROJECT` when `1`. It does not stop copying `/source/`. |
-| `DISABLE_AUTORUN_COPYING_SOURCE`   | Not set          | Do not copy the files of `/source/` into the app directory when `1`. The copy runs only when the app directory is empty. |
-| `DISABLE_AUTORUN_COMPOSER_INSTALL` | Not set          | Skip running `composer install` during startup when set to `1`. It does not stop `COMPOSER_OPTIMIZE_AUTOLOADER`. |
-| `DISABLE_AUTORUN_GENERATING_INDEX` | Not set          | Do not generate `index.php` when set to `1`. |
-| `DISABLE_AUTORUN_FIX_OWNER_GROUP`  | Not set          | When `1`, no command changes the owner of files in `APP_PATH` or `DOCUMENT_ROOT`: no ownership fix, no owner on created directories, and no UID/GID migration there. Files and directories the container creates there, such as a missing `DOCUMENT_ROOT` or `index.php`, belong to root, so set the owner of paths that `APP_USER` must write to yourself. |
-| `COMPOSER_OPTIMIZE_AUTOLOADER`     | Not set          | When `1`, run `composer dumpautoload --optimize --no-cache` at startup if `composer.lock` and the `vendor` directory exist. |
-
-
-#### Cron
-
-| Setting Name | Default Value | Description |
-|---|---|---|
-| `ENABLE_CRONTAB`                   | Not set          | Enable Crontab service when `1`. Jobs are loaded from `$CRONTAB_DIR`. |
-| `ENABLE_CRONTAB_DEBUG`             | Not set          | Adds a debug cron job that runs every minute when `1`. When set, it takes priority over `DEBUG`, so `0` removes the job even if `DEBUG=1`. |
-| `CRONTAB_DIR`                      | `/etc/crontab.d` | Directory for crontab definitions. Jobs run as `$APP_USER`. |
-| `CRONTAB_HOME`                     | `$APP_PATH`      | Home directory for cron jobs. |
-| `CRONTAB_MAILTO`                   | Not set          | Email address to receive cron output. |
-| `CRONTAB_PATH`                     | `$PATH`          | Executable search path used by cron jobs. |
-| `CRONTAB_SETTINGS`                 | Not set          | Define cron jobs directly via environment variable. |
-| `CRONTAB_SHELL`                    | `/bin/bash`      | Default shell for cron jobs. |
-| `CRONTAB_TZ`                       | `$TZ`            | Timezone used for cron jobs. |
-
-
-#### Tuning and Apache
-
-| Setting Name | Default Value | Description |
-|---|---|---|
-| `ENABLE_TUNING_FPM`                | Not enabled      | Enable automatic tuning of PHP-FPM settings when set to `1`. Uses the CPU limit of the container, or the host CPU count if there is none. A `PHP_PM*` variable you pass replaces the tuned value. See [Customizing PHP-FPM](#customizing-php-fpm). |
-| `ENABLE_TUNING_MPM`                | Not enabled      | Enable automatic tuning of Apache MPM settings when set to `1`. Uses the CPU and memory limits of the container, or the host values if there are none. |
-| `APACHE_ALLOW_OVERRIDE`            | `all`            | Value of `AllowOverride` for the document root. `none` skips reading `.htaccess` files on every request, but rules in `.htaccess` stop working. |
-| `APACHE_DEFLATE_LEVEL`             | `5`              | Compression level of `mod_deflate`, from 1 (fast) to 9 (smallest). |
-| `APACHE_DISABLE_MODULES`           | Not set          | Apache modules to turn off at start, separated by spaces. |
-| `APACHE_EXPIRES`                   | `access plus 1 month`| Cache lifetime that `mod_expires` sets for static file types such as CSS, JS, images and fonts. |
-| `APACHE_KEEPALIVE_TIMEOUT`         | `5`              | Seconds that Apache keeps an idle connection open. |
-| `APACHE_MPM_PROFILE`               | `balanced`       | Profile used by `ENABLE_TUNING_MPM`: `low`, `balanced` or `high`. |
-| `APACHE_REFERRER_POLICY`           | `strict-origin-when-cross-origin` | Value of the `Referrer-Policy` response header. |
-| `APACHE_REQUEST_READ_TIMEOUT`      | `header=0 body=0` (no limit) | Value of `RequestReadTimeout`. Set a limit to close connections that send the request too slowly. |
+[muken](https://github.com/shinsenter/muken) is a command-line tool, in its own repository, that puts these images on a VPS: it installs Docker and a proxy, deploys with no downtime, rolls back on a failed health check, and can create the server and the DNS records for you (DigitalOcean, Hetzner, Cloudflare). Start with `muken init`. A short page is in [docs/muken.md](https://code.shin.company/php/blob/main/docs/muken.md), and the guide is in the muken repository.
 
 
 ## About This Project
@@ -539,6 +494,8 @@ Keeping these images rebuilt for every PHP release takes ongoing work. If they s
 
 - ☕ [Donate via PayPal](https://www.paypal.me/shinsenter)
 - 💖 [Sponsor on GitHub](https://github.com/sponsors/shinsenter)
+
+**Plan for 2027:** the project plans to open a sponsors program in 2027. Details will be announced in this README before it starts.
 
 Bug reports, fixes and docs are welcome too. See [CONTRIBUTING.md](https://code.shin.company/php/blob/main/CONTRIBUTING.md) or open an [issue](https://code.shin.company/php/issues/new).
 
