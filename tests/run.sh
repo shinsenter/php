@@ -346,6 +346,40 @@ test_scaling() {
     check "compose: scaling file" test -f tests/docker-compose.scaling.yml
     check "scaling-test.sh is executable" test -x tests/scaling-test.sh
 
+    # Traefik: keep-alive stays above the 90 s that Traefik keeps its idle backend connections
+    local nk ak
+    nk="$(sed -n "s/^env-default NGINX_KEEPALIVE_TIMEOUT '\([0-9]*\)'.*/\1/p" "$nginx/nginx-config.dockerfile")"
+    ak="$(sed -n "s/^env-default APACHE_KEEPALIVE_TIMEOUT '\([0-9]*\)'.*/\1/p" "$apache/apache-config.dockerfile")"
+    check "nginx: keep-alive default is above 90 s" test "${nk:-0}" -gt 90
+    check "apache: keep-alive default is above 90 s" test "${ak:-0}" -gt 90
+    check "nginx: the hook writes keepalive_timeout" grep -q 'keepalive_timeout \${NGINX_KEEPALIVE_TIMEOUT}s;' "$nginx/rootfs/etc/hooks/server/init-nginx"
+    check "nginx: a bad NGINX_KEEPALIVE_TIMEOUT is skipped" grep -q 'Skip invalid NGINX_KEEPALIVE_TIMEOUT' "$nginx/rootfs/etc/hooks/server/init-nginx"
+
+    # Traefik labels: web servers opt in, the admin tools opt out
+    check "label: nginx traefik.enable=true" grep -q '^LABEL traefik.enable=true' src/php/with-nginx.dockerfile
+    check "label: apache traefik.enable=true" grep -q '^LABEL traefik.enable=true' src/php/with-apache.dockerfile
+    check "label: phpmyadmin traefik.enable=false" grep -q '^LABEL traefik.enable=false' src/webapps/phpmyadmin/phpmyadmin.dockerfile
+    check "label: coolify traefik.enable=false" grep -q '^LABEL traefik.enable=false' src/webapps/coolify/coolify.dockerfile
+
+    # trusted-proxies: one expansion shared by the four servers, so "private" works everywhere
+    local tp="$common/rootfs/usr/local/utils/trusted-proxies" stub hook
+    stub="$(mktemp -d)"
+    printf '#!/bin/sh\necho "$@" >&2\n' >"$stub/debug-echo"
+    chmod +x "$stub/debug-echo"
+    tp_run() { PATH="$stub:$PATH" TRUSTED_PROXIES="$1" sh "$tp" 2>/dev/null | tr '\n' ' ' | sed 's/ $//'; }
+    check_eq "trusted-proxies: private" "10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 fd00::/8" "$(tp_run private)"
+    check_eq "trusted-proxies: a mixed list" "203.0.113.0/24 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 fd00::/8 2001:db8::/32" "$(tp_run '203.0.113.0/24,private 2001:db8::/32')"
+    check_eq "trusted-proxies: a bad item is skipped" "10.1.2.3" "$(tp_run '10.1.2.3,bad!,a;b')"
+    check_eq "trusted-proxies: empty list" "" "$(tp_run '')"
+    check "trusted-proxies: a bad item gives a warning on stderr" test -n "$(PATH="$stub:$PATH" TRUSTED_PROXIES='bad!' sh "$tp" 2>&1 >/dev/null)"
+    rm -rf "$stub"
+    for hook in "$nginx/rootfs/etc/hooks/server/init-nginx" "$apache/rootfs/etc/hooks/server/init-apache" \
+        src/php/with-f8p/rootfs/etc/hooks/server/init-f8p src/php/with-roadrunner/rootfs/etc/hooks/server/init-roadrunner; do
+        check "trusted-proxies: $(basename "$hook") uses the utility" grep -q '\$(trusted-proxies)' "$hook"
+        check_not "trusted-proxies: $(basename "$hook") does not parse the list itself" grep -q 'echo "\$TRUSTED_PROXIES"' "$hook"
+    done
+    check "docs: traefik.md" test -f docs/traefik.md
+
     finish
 }
 
