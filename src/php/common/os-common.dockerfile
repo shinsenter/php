@@ -53,6 +53,8 @@ APT_PACKAGES='busybox ncurses-base ncurses-bin xz-utils' \
 pkg-add bash ca-certificates coreutils curl htop less openssl procps msmtp upgrade
 
 # vi comes from busybox, a smaller editor than vim-tiny
+# Remove vim-tiny, the Debian base ships it and it carries open CVEs
+pkg-del vim-tiny vim-common
 # Alpine has the applet already, Debian ships only the busybox binary
 has-cmd vi || { [ ! -x /bin/busybox ] || ln -s /bin/busybox /usr/local/bin/vi; }
 
