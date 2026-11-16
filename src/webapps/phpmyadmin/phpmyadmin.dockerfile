@@ -34,3 +34,8 @@ INCLUDE ./meta
 ONBUILD RUN hook onbuild
 
 ################################################################################
+# A database admin tool is not routed by accident.
+# Traefik serves it only after you set traefik.enable=true.
+LABEL traefik.enable=false
+
+################################################################################

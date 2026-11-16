@@ -5,6 +5,7 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 - Keep idle connections open for 120 s in Nginx (`NGINX_KEEPALIVE_TIMEOUT`, new) and Apache (`APACHE_KEEPALIVE_TIMEOUT`, was 5 s), so Traefik does not reuse a connection that just closed.
+- Set `traefik.enable=false` in the `phpmyadmin` and `coolify` images.
 - Compress image layers with zstd. Pulling needs Docker Engine 23.0 or later, or containerd 1.5 or later.
 - Sign the published images with cosign (keyless) and attach max provenance.
 - Report HIGH and CRITICAL vulnerabilities and the image size change in the job summary of each publish. Neither fails the build.
