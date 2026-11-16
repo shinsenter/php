@@ -57,6 +57,15 @@ if [ -n "$TRUSTED_PROXIES" ] && grep -q '^[[:space:]]*real_ip_header' /etc/nginx
     done
 fi
 
+# keep idle connections open longer than a proxy in front does, or the proxy may reuse a connection that just closed (502)
+\rm -f /etc/nginx/custom.d/00-keepalive_timeout.conf
+if [ -n "$NGINX_KEEPALIVE_TIMEOUT" ]; then
+    case "$NGINX_KEEPALIVE_TIMEOUT" in
+        *[!0-9]*) debug-echo -w "Skip invalid NGINX_KEEPALIVE_TIMEOUT: $NGINX_KEEPALIVE_TIMEOUT" ;;
+        *) echo "keepalive_timeout ${NGINX_KEEPALIVE_TIMEOUT}s;" >/etc/nginx/custom.d/00-keepalive_timeout.conf ;;
+    esac
+fi
+
 # adjust max upload size
 if [ -n "$PHP_POST_MAX_SIZE" ]; then
     echo "client_max_body_size ${PHP_POST_MAX_SIZE};" >/etc/nginx/custom.d/00-client_max_body_size.conf

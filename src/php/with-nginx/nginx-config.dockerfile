@@ -21,6 +21,9 @@ usermod -G $SUPP_GROUPS,nginx $APP_USER &>/dev/null || true
 env-default HEALTH_PORT '2020'
 env-default HEALTH_CHECK_URL 'http://127.0.0.1:${HEALTH_PORT}/healthz'
 
+# seconds to keep an idle connection open, longer than the 90 s that Traefik keeps its own idle connections
+env-default NGINX_KEEPALIVE_TIMEOUT '120'
+
 # disable PHP-FPM logging to stdout
 env-default PHP_LISTEN '/run/php-fpm.sock'
 env-default PHP_ACCESS_LOG '/var/log/php-fpm.log'
