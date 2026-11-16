@@ -17,11 +17,8 @@ roadrunner-conf 'server.group' "$APP_GROUP"
 # an empty list may fall back to that default, so loopback alone stands for "no proxy"
 if has-cmd yq; then
     subnets='"127.0.0.1/32"'
-    for cidr in $(echo "$TRUSTED_PROXIES" | tr ',' ' '); do
-        case "$cidr" in
-            *[!0-9a-fA-F:./]*) debug-echo -w "Skip invalid TRUSTED_PROXIES entry: $cidr" ;;
-            *) subnets="$subnets,\"$cidr\"" ;;
-        esac
+    for cidr in $(trusted-proxies); do
+        subnets="$subnets,\"$cidr\""
     done
     yq -i ".http.trusted_subnets = [$subnets]" "$APP_PATH/.rr.yaml"
 fi
