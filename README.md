@@ -319,14 +319,16 @@ If a proxy or load balancer ends TLS for you, see the next section.
 
 By default no proxy is trusted. `REMOTE_ADDR` stays the address of the connection, and your app reads `X-Forwarded-For` itself.
 
-Set `TRUSTED_PROXIES` (CIDRs, separated by comma or space) to let the server use the client address from `X-Forwarded-For` and honor `X-Forwarded-Proto` (it then sets `$_SERVER['HTTPS']`). It works on Nginx, Apache, FrankenPHP and RoadRunner:
+Set `TRUSTED_PROXIES` (CIDRs, separated by comma or space) to let the server use the client address from `X-Forwarded-For` and honor `X-Forwarded-Proto` (it then sets `$_SERVER['HTTPS']`). It works on Nginx, Apache, FrankenPHP and RoadRunner. The word `private` stands for the private ranges `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16` and `fd00::/8`, where Docker networks, Kubernetes pods and most proxies live:
 
 ```shell
-docker run -e TRUSTED_PROXIES='10.0.0.0/8,172.16.0.0/12,192.168.0.0/16' \
+docker run -e TRUSTED_PROXIES=private \
     -p 80:80 shinsenter/php:8.5-fpm-nginx
 ```
 
-Only listed proxies can set these headers, so a client that connects directly cannot fake them. With Cloudflare in front, list your load balancer and the Cloudflare ranges.
+You can mix both forms, for example `private,203.0.113.0/24`. Only listed proxies can set these headers, so a client that connects directly cannot fake them. Use `private` only when nothing outside your private network can reach the container directly. With Cloudflare in front, list your load balancer and the Cloudflare ranges.
+
+Traefik: see [docs/traefik.md](https://code.shin.company/php/blob/main/docs/traefik.md) for a working Compose file and the settings that avoid 502 errors during deploys.
 
 
 ### Health checks
@@ -522,7 +524,8 @@ Environment variables for fine-tuning container behavior.
 | `APACHE_DEFLATE_LEVEL`             | `5`              | Compression level of `mod_deflate`, from 1 (fast) to 9 (smallest). |
 | `APACHE_DISABLE_MODULES`           | Not set          | Apache modules to turn off at start, separated by spaces. |
 | `APACHE_EXPIRES`                   | `access plus 1 month`| Cache lifetime that `mod_expires` sets for static file types such as CSS, JS, images and fonts. |
-| `APACHE_KEEPALIVE_TIMEOUT`         | `5`              | Seconds that Apache keeps an idle connection open. |
+| `APACHE_KEEPALIVE_TIMEOUT`         | `120`            | Seconds that Apache keeps an idle connection open. Keep it longer than the idle time of the proxy in front (Traefik: 90 s), or the proxy can reuse a connection that just closed and answer 502. |
+| `NGINX_KEEPALIVE_TIMEOUT`          | `120`            | The same for Nginx (`keepalive_timeout`). `0` turns keep-alive off. |
 | `APACHE_MPM_PROFILE`               | `balanced`       | Profile used by `ENABLE_TUNING_MPM`: `low`, `balanced` or `high`. |
 | `APACHE_REFERRER_POLICY`           | `strict-origin-when-cross-origin` | Value of the `Referrer-Policy` response header. |
 | `APACHE_REQUEST_READ_TIMEOUT`      | `header=0 body=0` (no limit) | Value of `RequestReadTimeout`. Set a limit to close connections that send the request too slowly. |
