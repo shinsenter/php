@@ -4,7 +4,7 @@ Project context for coding agents and human contributors. Update it when a decis
 
 ## Project
 
-Docker images for PHP (shinsenter/php), built on the official `php` image. PHP 5.6 to 8.6-rc, Debian and Alpine. Variants: `cli`, `zts`, `fpm`, `fpm-apache`, `fpm-nginx`, `roadrunner`, `frankenphp`, plus the webapp images in `src/webapps/`.
+Docker images for PHP (shinsenter/php), built on the official `php` image. PHP 5.6 to 8.6, Debian and Alpine. Variants: `cli`, `zts`, `fpm`, `fpm-apache`, `fpm-nginx`, `roadrunner`, `frankenphp`, plus the webapp images in `src/webapps/`.
 
 Environment variables change PHP and FPM settings, so a change needs no rebuild. `build/docker-squash` slims the images.
 
@@ -50,7 +50,7 @@ Format and OpenSpec change flow (`openspec/changes/<id>/`): spec `conventions`. 
 | `src/php-backports/php<X.Y>/` | Security patches for end-of-life PHP (spec `backports`) |
 | `src/webapps/` | Images for PHP frameworks and applications |
 | `build/config.sh` | Produces the build variables: tag, platforms, context, fingerprint |
-| `build/versions.sh` | Version lists: maintained 8.6-rc to 8.2, outdated 8.1 to 5.6 |
+| `build/versions.sh` | Version lists: maintained 8.6 to 8.2, outdated 8.1 to 5.6 |
 | `build/helpers.sh` | Shared functions: version compare, logging, registry lookups, hashing |
 | Other paths (patches, `nginx-build`, `.dockerfile-x/`, `tests/`, `.github/`) | spec `build-fingerprint` |
 
@@ -85,7 +85,7 @@ When the user says "ship 6.x" or asks for the usual flow, do every step without 
 2. Push `6.x` and open a PR to `main`. Title: `[6.x] <summary>`. Body: plain English with Goal, Scope, Implementation, Risks, Tests, and no AI or tool attribution.
 3. Squash merge with a one-line Conventional Commits subject and an empty body. Keep the `6.x` branch.
 4. Update `main` (`git pull --ff-only`), then `git reset --hard main` on `6.x` and force push it (`--force-with-lease`).
-5. Make no release and no tag unless the user asks.
+5. Make no release and no tag unless the user asks. When asked, follow the release notes rules in spec `conventions`.
 
 When a step fails (push rejected, failing checks, merge conflict), stop and report. Do not work around it.
 

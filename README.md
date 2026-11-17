@@ -64,12 +64,12 @@ They include the latest Composer and common web servers - [Apache2](https://http
 
 ```shell
 # Check the PHP version
-docker run --rm shinsenter/php:8.5-cli php -v
+docker run --rm shinsenter/php:8.6-cli php -v
 
 # Serve a project with PHP-FPM and Nginx, then open http://localhost
 docker run -p 80:80 -p 443:443 -p 443:443/udp \
     -v ./myproject:/var/www/html \
-    shinsenter/php:8.5-fpm-nginx
+    shinsenter/php:8.6-fpm-nginx
 ```
 
 - Your code goes in `/var/www/html`.
@@ -82,16 +82,16 @@ docker run -p 80:80 -p 443:443 -p 443:443/udp \
 
 ### Docker image variants
 
-Tags cover PHP versions from 5.6 to 8.6-rc and come in `cli`, `zts`, `fpm`, `fpm-nginx`, `fpm-apache`, `roadrunner`<sup>(1)</sup>, and `frankenphp`<sup>(2)</sup> variants. Both Debian and Alpine builds are available.
+Tags cover PHP versions from 5.6 to 8.6 and come in `cli`, `zts`, `fpm`, `fpm-nginx`, `fpm-apache`, `roadrunner`<sup>(1)</sup>, and `frankenphp`<sup>(2)</sup> variants. Both Debian and Alpine builds are available.
 
 Examples:
-- `shinsenter/php:8.3-cli`
-- `shinsenter/php:8.4-zts`
-- `shinsenter/php:8.5-fpm`
-- `shinsenter/php:8.1-fpm-apache`
-- `shinsenter/php:8.2-fpm-nginx`
-- `shinsenter/php:8.3-roadrunner` <sup>(1)</sup>
-- `shinsenter/php:8.4-frankenphp` <sup>(2)</sup>
+- `shinsenter/php:8.6-cli`
+- `shinsenter/php:8.6-zts`
+- `shinsenter/php:8.6-fpm`
+- `shinsenter/php:8.6-fpm-apache`
+- `shinsenter/php:8.6-fpm-nginx`
+- `shinsenter/php:8.6-roadrunner` <sup>(1)</sup>
+- `shinsenter/php:8.5-frankenphp` <sup>(2)</sup>
 
 > <sup>(1)</sup> RoadRunner variant - requires PHP >= 8.0.<br>
 > <sup>(2)</sup> FrankenPHP variant is BETA - requires PHP >= 8.2.<br>
@@ -152,7 +152,7 @@ docker run \
     -e PHP_POST_MAX_SIZE='100M' \
     -e PHP_UPLOAD_MAX_FILESIZE='100M' \
     -e PHP_SESSION_COOKIE_HTTPONLY='1' \
-    shinsenter/php:8.5 php -i
+    shinsenter/php:8.6 php -i
 ```
 
 
@@ -161,7 +161,7 @@ docker run \
 ```yaml
 services:
   web:
-    image: shinsenter/php:8.5-fpm-nginx
+    image: shinsenter/php:8.6-fpm-nginx
     environment:
       PHP_DISPLAY_ERRORS: "1"
       PHP_POST_MAX_SIZE: "100M"
@@ -211,7 +211,7 @@ Default application directory: `/var/www/html`. Change it with `$APP_PATH`:
 docker run -p 80:80 -p 443:443 -p 443:443/udp \
     -v "$PWD":/app \
     -e APP_PATH=/app \
-    shinsenter/php:8.5-fpm-nginx
+    shinsenter/php:8.6-fpm-nginx
 ```
 
 To change the document root (a path inside `$APP_PATH` that contains `index.php`), set `$DOCUMENT_ROOT`:
@@ -221,7 +221,7 @@ docker run -p 80:80 -p 443:443 -p 443:443/udp \
     -v "$PWD":/app \
     -e APP_PATH=/app \
     -e DOCUMENT_ROOT=public \
-    shinsenter/php:8.5-fpm-nginx
+    shinsenter/php:8.6-fpm-nginx
 ```
 
 This example sets the document root to `/app/public`.
@@ -244,7 +244,7 @@ Example (run as user `myapp` with UID 5000):
 docker run -p 80:80 -p 443:443 -p 443:443/udp \
     -e APP_USER=myapp \
     -e APP_UID=5000 \
-    shinsenter/php:8.5-fpm-nginx
+    shinsenter/php:8.6-fpm-nginx
 ```
 
 
@@ -261,7 +261,7 @@ Use the `phpaddmod` helper to install and configure extensions in one step - no 
 Example Dockerfile:
 
 ```Dockerfile
-FROM shinsenter/php:8.5-fpm-nginx
+FROM shinsenter/php:8.6-fpm-nginx
 
 # Install imagick, swoole and xdebug
 RUN phpaddmod imagick swoole xdebug
@@ -290,7 +290,7 @@ Set `SUPERVISOR_PHP_COMMAND` to override the default command used by the supervi
 ```shell
 docker run \
     -e SUPERVISOR_PHP_COMMAND='php -S localhost:80 index.php' \
-    shinsenter/php:8.5
+    shinsenter/php:8.6
 ```
 
 
@@ -312,7 +312,7 @@ docker run -p 80:80 -p 443:443 -p 443:443/udp \
     -v ./myproject:/var/www/html \
     -v ./my_domain.crt:/etc/ssl/site/server.crt \
     -v ./my_domain.key:/etc/ssl/site/server.key \
-    shinsenter/php:8.5-fpm-nginx
+    shinsenter/php:8.6-fpm-nginx
 ```
 
 If a proxy or load balancer ends TLS for you, see the next section.
@@ -326,7 +326,7 @@ Set `TRUSTED_PROXIES` (CIDRs, separated by comma or space) to let the server use
 
 ```shell
 docker run -e TRUSTED_PROXIES=private \
-    -p 80:80 shinsenter/php:8.5-fpm-nginx
+    -p 80:80 shinsenter/php:8.6-fpm-nginx
 ```
 
 You can mix both forms, for example `private,203.0.113.0/24`. Only listed proxies can set these headers, so a client that connects directly cannot fake them. Use `private` only when nothing outside your private network can reach the container directly. With Cloudflare in front, list your load balancer and the Cloudflare ranges.
@@ -351,7 +351,7 @@ Docker Compose:
 ```yaml
 services:
   web:
-    image: shinsenter/php:8.5-fpm-nginx
+    image: shinsenter/php:8.6-fpm-nginx
     healthcheck:
       test: ["CMD-SHELL", "with-env sh -c 'curl -sf \"$$HEALTH_CHECK_URL\" >/dev/null'"]
       interval: 15s
@@ -408,7 +408,7 @@ The defaults suit development as well as production, so a code change shows up r
 docker run -p 80:80 \
     -e PHP_OPCACHE_VALIDATE_TIMESTAMPS=0 \
     -e ENABLE_TUNING_FPM=1 \
-    shinsenter/php:8.5-fpm-nginx
+    shinsenter/php:8.6-fpm-nginx
 ```
 
 Other settings that matter:
@@ -446,7 +446,7 @@ To use PHP's `mail()` function, configure SMTP via these environment variables:
 Set `DEBUG=1` to turn on verbose logging and to see which hooks run:
 
 ```shell
-docker run -e DEBUG=1 shinsenter/php:8.5-fpm-nginx
+docker run -e DEBUG=1 shinsenter/php:8.6-fpm-nginx
 ```
 
 
@@ -457,7 +457,7 @@ Set `ENABLE_SSHD=1` and publish port 22 to log in over SSH or SFTP. Key login is
 ```shell
 docker run -p 2222:22 -e ENABLE_SSHD=1 \
     -e SSHD_AUTHORIZED_KEYS="$(cat ~/.ssh/id_ed25519.pub)" \
-    shinsenter/php:8.5-fpm-nginx
+    shinsenter/php:8.6-fpm-nginx
 ssh -p 2222 www-data@localhost
 ```
 

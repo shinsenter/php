@@ -50,3 +50,15 @@ The repo SHALL follow these rules for: spec workflow (openspec).
 - Specs in `openspec/specs/<capability>/spec.md` are the source of truth for behavior. Use `SHALL`/`MUST` for rules, `Scenario` for testable cases, `Why:` for one-line reasons. Keep each spec short; unverified facts say "Unverified".
 - A change to behavior or contract (env var, endpoint, fingerprint, backport rule) SHALL start as `openspec/changes/<id>/` with `proposal.md` (why, scope), `tasks.md` (checklist, each with its check) and delta files `specs/<capability>/spec.md` using `## ADDED|MODIFIED|REMOVED Requirements`. After merge, fold the deltas into `openspec/specs/` and move the folder to `openspec/changes/archive/`.
 - Typo, docs, chore and bug fixes that keep behavior skip the change folder but SHALL update the spec if it states the old behavior.
+
+### Requirement: Release notes
+
+A release SHALL have a short `CHANGELOG.md` entry and a GitHub release body in the same shape.
+
+#### Scenario: Write the notes for a release
+- **WHEN** a version is prepared (for example 6.2.0)
+- **THEN** the changelog lists only what differs from the previous version, taken from the commits since its tag, one short line per change, about seven lines
+- **AND** names, variables and issue numbers stay only when a user needs them
+- **AND** the release body is `## What's Changed` (one line per merged PR: `* <title> by @<author> in <PR url>`, read from git history between the two tags, not from the generate-notes API), then `## Highlights` (the changelog lines), then `**Full Changelog:** https://github.com/shinsenter/php/compare/<previous>...<new>`
+- **AND** the release is created as a draft with the target `main`, and published only after the PR is merged and the images are built
+- **AND** an older release body changes only when the user asks, and the old body is kept in `_OUTPUTS/` first

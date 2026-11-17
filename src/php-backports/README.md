@@ -27,7 +27,7 @@ The CVE patches are the php-src commits without the hunks that only update tests
 
 ## About CVE-2026-109618 and CVE-2026-109619
 
-Two critical remote code execution bugs, published 2026-10-21. Upstream fixed them in 8.2.35, 8.3.36, 8.4.27 and 8.5.12. For 8.1 and older, php-src only has a "minimal mitigation for EOL version" (the patches here). The advisories say updating to a fixed release is the only complete mitigation.
+Two critical remote code execution bugs, published 2026-10-21. Upstream fixed them in 8.2.35, 8.3.36, 8.4.27 and 8.6.12. For 8.1 and older, php-src only has a "minimal mitigation for EOL version" (the patches here). The advisories say updating to a fixed release is the only complete mitigation.
 
 - [CVE-2026-109618](https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w) (GHSA-w8hw-w9fx-j79w), RCE via OOM corruption. PHP leaves the request state invalid when an out-of-memory error exits early with `longjmp()`, and request shutdown then reads it. Multipart requests can reach OOM within the normal limits (many headers in one part, empty file fields, no content length).
 - [CVE-2026-109619](https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp) (GHSA-6wmf-4rv5-p3rp), RCE via stale global state. A worker keeps global pointers (error, session, object, extension state) to memory of a finished request. The next request can use them before initialization (use after free).

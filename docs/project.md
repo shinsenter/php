@@ -41,12 +41,12 @@ When an input changes, only the affected PHP versions are built again. Images th
 Each published image carries the fingerprint of its inputs in the `org.shinsenter.build.fingerprint` annotation of the image index:
 
 ```sh
-docker buildx imagetools inspect --raw shinsenter/php:8.5-fpm | jq '.annotations'
+docker buildx imagetools inspect --raw shinsenter/php:8.6-fpm | jq '.annotations'
 ```
 
 These images are built from the official `php` image, so they can only be rebuilt after the official image for the new PHP release is published on Docker Hub. To check the PHP version in a container, run `php -v`.
 
-Maintainers can start a build by hand from the [Build all](https://code.shin.company/php/actions/workflows/build-all.yml) workflow, with `php_versions` (for example `8.5 8.4`) and `force_build`.
+Maintainers can start a build by hand from the [Build all](https://code.shin.company/php/actions/workflows/build-all.yml) workflow, with `php_versions` (for example `8.6 8.5`) and `force_build`.
 
 
 ## Security updates

@@ -33,7 +33,7 @@ APP_RULES="
 bagisto:min=8.3 latest=8.4 base=laravel
 
 # https://roots.io/bedrock/docs/installation
-bedrock:min=8.3 base=wordpress
+bedrock:min=8.3 latest=8.5 base=wordpress
 
 # https://book.cakephp.org/5/en/installation.html
 cakephp5:min=8.1 server=apache
@@ -48,10 +48,10 @@ coolify:min=8.2 base=laravel
 craftcms:min=8.2 server=nginx
 
 # https://www.drupal.org/docs/getting-started/system-requirements/php-requirements
-drupal:min=8.3 server=apache
+drupal:min=8.3 latest=8.5 server=apache
 
 # https://docs.espocrm.com/administration/installation
-espocrm:min=8.2 server=apache
+espocrm:min=8.2 latest=8.5 server=apache
 
 # https://docs.flarum.org/install
 flarum:min=8.3 server=nginx
@@ -69,10 +69,10 @@ hyperf:min=8.2 server=nginx
 invoiceshelf:min=8.2 base=laravel
 
 # https://manual.joomla.org/docs/next/get-started/technical-requirements
-joomla:min=8.3 server=apache
+joomla:min=8.3 latest=8.5 server=apache
 
 # https://getkirby.com/docs/cookbook/setup/composer
-kirby:min=8.3 server=apache
+kirby:min=8.3 latest=8.5 server=apache
 
 # https://laravel.com/docs/master/installation
 laravel:min=8.3 server=nginx
@@ -87,16 +87,16 @@ matomo:min=8.1 server=apache
 mautic:min=8.2 server=apache
 
 # https://docs.nextcloud.com/server/latest/admin_manual/installation/system_requirements.html
-nextcloud:min=8.2 server=apache
+nextcloud:min=8.2 latest=8.5 server=apache
 
 # https://docs.phpmyadmin.net/en/latest/setup.html
 phpmyadmin:min=7.2 server=nginx
 
 # https://devdocs.prestashop-project.org/9/basics/installation/system-requirements/
-prestashop:min=8.2 server=apache
+prestashop:min=8.2 latest=8.5 server=apache
 
 # https://developer.shopware.com/docs/guides/hosting/
-shopware:min=8.2 server=nginx
+shopware:min=8.2 latest=8.5 server=nginx
 
 # https://spiral.dev/docs/start-installation/current/en
 spiral:min=8.1 server=roadrunner variant=cli platform=linux/amd64,linux/arm64
@@ -114,7 +114,7 @@ sulu:base=symfony
 tempest:min=8.5 server=nginx
 
 # https://wordpress.org/documentation/category/installation
-wordpress:allow_rc=1 server=apache
+wordpress:latest=8.5 server=apache
 
 # https://www.yiiframework.com/doc/guide/2.0/en/start-installation
 yii:server=apache
@@ -208,7 +208,7 @@ OS="$1"; APP="$2"; PHP_VERSION="$3"; PREFER_SERVER="$4"
 ################################################################################
 # Build environment variables
 ################################################################################
-LATEST_PHP="8.5"
+LATEST_PHP="8.6"
 LATEST_S6=
 
 PHP_VARIANT="${PHP_VARIANT:-}"
@@ -307,6 +307,8 @@ case "$APP" in
         ;;
     with-f8p)
         verlt "$PHP_VERSION" "8.2" && SKIP_BUILD=1
+        # dunglas/frankenphp has no PHP 8.6 image yet, so cap the build at 8.5
+        LATEST_PHP="8.5"
         PREFIX="frankenphp"
         BUILD_NAME="$DEFAULT_REPO/frankenphp"
         BUILD_SOURCE_IMAGE="dunglas/frankenphp:1-php$PHP_VERSION$SUFFIX"
@@ -463,9 +465,9 @@ if [ -n "$PHP_VERSION" ]; then
             expand_tags ":php7.4" ":php7"
             expand_tags ":7.4" ":7"
             ;;
-        8.5)
-            expand_tags ":php8.5" ":php8"
-            expand_tags ":8.5" ":8"
+        8.6)
+            expand_tags ":php8.6" ":php8"
+            expand_tags ":8.6" ":8"
             ;;
         "$LATEST_PHP")
             major=${PHP_VERSION%%.*}

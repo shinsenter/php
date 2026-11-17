@@ -21,7 +21,7 @@
 ################################################################################
 # These ARGs are only used by the FROM below (base-php.dockerfile has no copy of them)
 ARG BUILD_FROM_IMAGE="php"
-ARG PHP_VERSION="8.5"
+ARG PHP_VERSION="8.6"
 ARG PHP_VARIANT="fpm-alpine"
 
 FROM ${BUILD_FROM_IMAGE}:${PHP_VERSION}-${PHP_VARIANT} AS php-base
