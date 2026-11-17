@@ -1,0 +1,15 @@
+# These setups are part of the project: https://code.shin.company/php
+# Author: Mai Nhut Tan <shin@shin.company>
+# License: https://code.shin.company/php/blob/main/LICENSE
+schema: spec-driven
+
+context: |
+  Docker images for PHP (shinsenter/php). Debian and Alpine, PHP 5.6 to 8.6-rc.
+  Rules that always apply are in AGENTS.md. Specs are in openspec/specs/<capability>/spec.md.
+  Offline tests: tests/run.sh. No docker build without asking.
+
+rules:
+  specs:
+    - Short requirements with SHALL or MUST. One-line Why. Say "Unverified" when not tested.
+  proposal:
+    - State scope and the check for each task. No speculative features.
