@@ -125,7 +125,7 @@ test_versions() {
     check "alpine 7.1" has_alpine_php 7.1
     check "alpine 7.4" has_alpine_php 7.4
     check "alpine 8.5" has_alpine_php 8.5
-    check "alpine 8.6-rc" has_alpine_php 8.6-rc
+    check "alpine 8.6" has_alpine_php 8.6
 
     # Version compare
     check "verlte 7.4 8.0" verlte 7.4 8.0
@@ -133,7 +133,7 @@ test_versions() {
     check_not "verlte 8.1 8.0" verlte 8.1 8.0
     check "verlt 7.9 7.10" verlt 7.9 7.10
     check_not "verlt 8.0 8.0" verlt 8.0 8.0
-    check "verlt 8.5 8.6-rc" verlt 8.5 8.6-rc
+    check "verlt 8.5 8.6" verlt 8.5 8.6
     check "active 8.3" is_active_version 8.3
     check_not "active 8.2" is_active_version 8.2
     check_not "active 7.4" is_active_version 7.4
@@ -194,7 +194,7 @@ test_versions() {
     finish
 }
 
-# backports: rules for src/php-backports/ (see .claude/docs/backports.md).
+# backports: rules for src/php-backports/ (see openspec/specs/backports/spec.md).
 # It does not apply the patches: that needs the source tree of that PHP version.
 test_backports() {
     source "$BASE_DIR/build/versions.sh"
@@ -342,7 +342,7 @@ test_scaling() {
         check "$name is between 10000 and 29000 (got '$value')" test "${value:-0}" -ge 10000 -a "${value:-0}" -le 29000
     done
 
-    check "docs: scaling.md" test -f .claude/docs/scaling.md
+    check "spec: scaling" test -f openspec/specs/scaling/spec.md
     check "compose: scaling file" test -f tests/docker-compose.scaling.yml
     check "scaling-test.sh is executable" test -x tests/scaling-test.sh
 

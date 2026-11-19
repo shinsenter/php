@@ -16,7 +16,7 @@ Email [shin@shin.company](mailto:shin@shin.company). Please do not open a public
 
 Include:
 
-- the image and tag (for example `shinsenter/php:8.5-fpm-nginx`), and the OS (Debian or Alpine)
+- the image and tag (for example `shinsenter/php:8.6-fpm-nginx`), and the OS (Debian or Alpine)
 - what is affected and the impact
 - steps to reproduce, or a proof of concept
 - the output of `docker buildx imagetools inspect --raw <image> | jq '.annotations'`, if you can
@@ -41,7 +41,7 @@ If you are not sure, send it to us. We will tell you where it belongs.
 
 | PHP versions | Status |
 |---|---|
-| 8.6-rc, 8.5, 8.4, 8.3, 8.2 | Maintained. Rebuilt when the official `php` image or another input changes. |
+| 8.6, 8.5, 8.4, 8.3, 8.2 | Maintained. Rebuilt when the official `php` image or another input changes. |
 | 8.1, 8.0, 7.4, 7.3 | Outdated. PHP security fixes are backported (see `src/php-backports/`). |
 | 7.2, 7.1, 7.0, 5.6 | Outdated. No backports. Not recommended for production. |
 
@@ -54,7 +54,7 @@ When PHP publishes a security release, the images are rebuilt after the official
 
 To apply a fix as soon as it is available:
 
-1. Pull the image again, for example `docker pull shinsenter/php:8.5-fpm`.
+1. Pull the image again, for example `docker pull shinsenter/php:8.6-fpm`.
 2. Recreate your containers. A running container keeps the old image.
 3. Check the version with `php -v`.
 

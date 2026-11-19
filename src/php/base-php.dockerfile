@@ -21,7 +21,7 @@ FROM php-base
 ARG  DEBUG
 
 # set PHP variables
-ARG PHP_VERSION="8.5"
+ARG PHP_VERSION="8.6"
 ENV PHP_VERSION=${PHP_VERSION//-rc/}
 
 ################################################################################

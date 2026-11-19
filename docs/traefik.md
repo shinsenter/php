@@ -42,7 +42,7 @@ services:
       - acme:/acme
 
   app:
-    image: shinsenter/php:8.5-fpm-nginx
+    image: shinsenter/php:8.6-fpm-nginx
     environment:
       TRUSTED_PROXIES: private
       SHUTDOWN_DELAY: "5"

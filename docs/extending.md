@@ -44,7 +44,7 @@ zip
 > Extensions that are already included in the official PHP images are not listed here.
 
 > [!TIP]
-> Run `docker run --rm shinsenter/php:8.5-cli php -m` (replace `8.5` as needed) to see installed extensions.
+> Run `docker run --rm shinsenter/php:8.6-cli php -m` (replace `8.6` as needed) to see installed extensions.
 
 
 ## Hooks
@@ -77,7 +77,7 @@ Example Dockerfile to add an autorun script:
 > Ensure the script is executable.
 
 ```Dockerfile
-FROM shinsenter/php:8.5-cli
+FROM shinsenter/php:8.6-cli
 
 ADD ./autorun/00-migration /startup/00-migration
 RUN chmod +x /startup/00-migration
@@ -96,7 +96,7 @@ RUN chmod +x /startup/00-migration
 To disable autorun scripts, set `DISABLE_AUTORUN_SCRIPTS=1`:
 
 ```shell
-docker run -e DISABLE_AUTORUN_SCRIPTS=1 shinsenter/php:8.5-cli bash
+docker run -e DISABLE_AUTORUN_SCRIPTS=1 shinsenter/php:8.6-cli bash
 ```
 
 
@@ -137,7 +137,7 @@ You can set cron jobs directly via the `CRONTAB_SETTINGS` environment variable i
 ```yml
 services:
   web:
-    image: shinsenter/php:8.5-fpm-nginx
+    image: shinsenter/php:8.6-fpm-nginx
     environment:
       ENABLE_CRONTAB: "1"
       CRONTAB_SETTINGS: "* * * * * echo 'This line will run every minute!' | tee /tmp/cron-every-minute.txt"

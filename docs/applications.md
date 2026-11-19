@@ -28,17 +28,17 @@ Run a container using one of these commands:
 
 ```shell
 # non-interactive
-docker run --rm shinsenter/php:8.5-cli php -m
+docker run --rm shinsenter/php:8.6-cli php -m
 
 # interactive
-docker run -it -v ./myproject:/var/www/html shinsenter/php:8.5-cli
+docker run -it -v ./myproject:/var/www/html shinsenter/php:8.6-cli
 ```
 
 
 ### PHP-FPM
 
 ```shell
-docker run -v ./myproject:/var/www/html -p 9000:9000 shinsenter/php:8.5-fpm
+docker run -v ./myproject:/var/www/html -p 9000:9000 shinsenter/php:8.6-fpm
 ```
 
 
@@ -46,10 +46,10 @@ docker run -v ./myproject:/var/www/html -p 9000:9000 shinsenter/php:8.5-fpm
 
 ```shell
 # with Nginx
-docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 -p 443:443/udp shinsenter/php:8.5-fpm-nginx
+docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 -p 443:443/udp shinsenter/php:8.6-fpm-nginx
 
 # with Apache
-docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 -p 443:443/udp shinsenter/php:8.5-fpm-apache
+docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 -p 443:443/udp shinsenter/php:8.6-fpm-apache
 
 # with RoadRunner
 docker run -v ./myproject:/var/www/html -p 80:80 -p 443:443 -p 443:443/udp shinsenter/php:8.4-roadrunner

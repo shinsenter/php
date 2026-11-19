@@ -4,55 +4,35 @@ All notable changes to this project are documented in this file.
 
 
 ## [Unreleased]
-- Keep idle connections open for 120 s in Nginx (`NGINX_KEEPALIVE_TIMEOUT`, new) and Apache (`APACHE_KEEPALIVE_TIMEOUT`, was 5 s), so Traefik does not reuse a connection that just closed.
-- Set `traefik.enable=false` in the `phpmyadmin` and `coolify` images.
-- Remove `vim-tiny` and `vim-common` from the Debian images. They carry an open HIGH CVE with no fix, and `vi` comes from busybox.
-- Add `private` to `TRUSTED_PROXIES` (the private network ranges). One utility now reads the list for all four servers.
-- Add a guide for Traefik.
-- Point to [muken](https://github.com/shinsenter/muken), the separate tool that deploys these images.
-- Note in the README that sponsors open in 2027.
-- Compress image layers with zstd. Pulling needs Docker Engine 23.0 or later, or containerd 1.5 or later.
-- Sign the published images with cosign (keyless) and attach max provenance.
-- Report HIGH and CRITICAL vulnerabilities and the image size change in the job summary of each publish. Neither fails the build.
-- Fix the build fingerprint. A changed Dockerfile fragment now rebuilds the image, and a change for one server no longer rebuilds the base images and the other servers.
-- Add images for Craft CMS, Shopware, Tempest, Joomla, PrestaShop and Nextcloud.
-- Add a Performance section to the README and update the GitHub Actions weekly with Dependabot.
-- Fix the WordPress image downloading nothing when the project folder belongs to root, which left the site answering 404.
-- Build Nginx with the brotli module (`google/ngx_brotli`), so `brotli` and `brotli_static` work in the `fpm-nginx` images.
-- Fix the Nginx build on the Alpine images of PHP 7.4, 8.0 and 8.1, which kept the old Nginx of the OS package. Nginx uses PCRE2 on every OS.
-- Build Nginx with HTTP/3 on older OS releases whose Nginx package lacks it, when their OpenSSL supports QUIC.
-- Build Apache from the latest 2.4 release of https://httpd.apache.org (`APACHE_VERSION`, `stable` by default) with HTTP/2 and `mod_brotli`. Every variant runs the same version. It keeps the OS package when the build fails, for example on an OS that is too old. Brotli is on by default, with `APACHE_BROTLI_QUALITY` (5). Apache has no HTTP/3.
-- Check the version after the Apache and Nginx source builds, so a build that succeeds with the wrong version fails the image. When the build fails, Apache and Nginx are first built again without HTTP/2, brotli and HTTP/3, so that a source version with fewer features is kept. Only when that fails too, the image falls back to the OS package (as with `APACHE_VERSION=os` or `NGINX_VERSION=os`) and the log has a warning.
-- Fix the Alpine Apache images loading no HTTP/2 module. They now install `apache2-http2` and `apache2-brotli`.
+
+
+## [6.2.0] - 2026-11-19
+- Add PHP 8.6 and make it `latest`. Drupal, PrestaShop, Nextcloud, EspoCRM, Joomla, Kirby, WordPress, Bedrock, Shopware and FrankenPHP stay at 8.5. Magento and Bagisto stay at 8.4.
+- Build Apache and Nginx from source, with HTTP/2 and brotli (and HTTP/3 for Nginx on older OS).
+- Raise the keep-alive of Nginx and Apache to 120 s (`NGINX_KEEPALIVE_TIMEOUT`, `APACHE_KEEPALIVE_TIMEOUT`).
+- Add `TRUSTED_PROXIES=private` and a Traefik guide.
+- Compress layers with zstd, sign images with cosign, report CVEs and size per publish.
+- Add Craft CMS, Shopware, Tempest, Joomla, PrestaShop and Nextcloud images.
+- Remove `vim-tiny` from Debian. Fix the build fingerprint, the Alpine Apache HTTP/2 modules and the WordPress download.
 
 
 ## [6.1.0] - 2026-11-08
-- Raise the Go modules `grpc`, `containerd/v2`, `otel`, `otel/sdk` and `klauspost/compress` in the `shinsenter/dockerfile-x` image to clear HIGH CVEs. `moby/buildkit` stays at 0.23.2, because 0.28.1 does not compile with the upstream frontend.
-- Add Apache variables for deflate, keep-alive, expires, overrides, the MPM profile and `reqtimeout` (`APACHE_REQUEST_READ_TIMEOUT`, no limit by default).
-- Set `Referrer-Policy` to `strict-origin-when-cross-origin` in Nginx and Apache (`APACHE_REFERRER_POLICY` sets it in Apache). Add `X-Content-Type-Options` to Apache. Remove `X-XSS-Protection` and `Permissions-Policy` from Nginx.
-- Hide function arguments in exception traces (`PHP_ZEND_EXCEPTION_IGNORE_ARGS=1`).
-- Add Nginx fallbacks for old `listen` parameters, `real_ip`, `dhparam` and IPv6.
-- Add `TRUSTED_PROXIES` (CIDRs separated by comma or space) for Nginx, Apache, FrankenPHP and RoadRunner. The server takes the client address from `X-Forwarded-For` and honors `X-Forwarded-Proto` only for the listed proxies. No proxy is trusted by default (#456).
-- Delete workflow runs older than 7 days in `Watch updates`, except release builds.
-- Fix the Docker Hub README refresh after a merge that changes only markdown files.
-- Faster responses: larger Opcache (`PHP_OPCACHE_MEMORY_CONSUMPTION=256`, `PHP_OPCACHE_INTERNED_STRINGS_BUFFER=32`) and realpath cache (`PHP_REALPATH_CACHE_SIZE=4M`). Nginx keeps connections to PHP-FPM open (`keepalive`, `fastcgi_keep_conn`).
-- Make Debian images 81 to 149 MB smaller by removing what the extension build leaves behind: `binutils`, the `gcc` sanitizer libraries, `perl`, `m4`, `patch` and `pkgconf`. The images no longer include `perl` unless another package needs it, such as `apache2`. `phpaddmod` installs the build tools again when it needs them.
-- Make Alpine images 10 to 13 MB smaller by dropping the full `ncurses-terminfo` package. `ncurses-terminfo-base` stays, so `htop`, `less` and `vi` keep working in common terminals.
-- Delete the `nginx.old` binary that the Nginx build leaves next to `nginx`.
-- Replace `vim-tiny` with BusyBox `vi` on Debian, as Alpine already does. The `vim` command is gone.
-- Fix the cleanup of backup and package config files.
+- Add `TRUSTED_PROXIES` for Nginx, Apache, FrankenPHP and RoadRunner. No proxy is trusted by default (#456).
 - Fix sshd in the Alpine images accepting any password over 256 bytes for an account without a password (#454). Password login stays off unless `SSHD_PASSWORD` is set.
-- Add `tests/tools/image-slim-check.sh`, a read-only check that lists removable packages and files in a built image.
+- Add Apache variables for deflate, keep-alive, expires, overrides, the MPM profile and `reqtimeout`. Add Nginx fallbacks for old `listen`, `real_ip`, `dhparam` and IPv6.
+- Change the security headers: `Referrer-Policy` is `strict-origin-when-cross-origin` (`APACHE_REFERRER_POLICY` in Apache), Apache adds `X-Content-Type-Options`, Nginx drops `X-XSS-Protection` and `Permissions-Policy`. Hide function arguments in exception traces (`PHP_ZEND_EXCEPTION_IGNORE_ARGS=1`).
+- Faster responses: larger Opcache and realpath cache, and Nginx keeps connections to PHP-FPM open.
+- Make Debian images 81 to 149 MB smaller and Alpine images 10 to 13 MB smaller. Debian has no `perl` unless a package needs it, and `vim-tiny` gives way to BusyBox `vi` (no `vim` command).
+- Raise the Go modules of `shinsenter/dockerfile-x` to clear HIGH CVEs. `moby/buildkit` stays at 0.23.2.
+- Fix the cleanup of backup and package config files and the Docker Hub README refresh. Add `tests/tools/image-slim-check.sh`.
 
 
 ## [6.0.0] - 2026-10-27
+- Breaking: remove `APACHE_DOCUMENT_ROOT` and `NGINX_DOCUMENT_ROOT` (use `DOCUMENT_ROOT`) and `ENABLE_SSH` (use `ENABLE_SSHD`).
 - Remove the sources of the unmaintained images `zz-cakephp4`, `zz-crater`, `zz-fuelphp`, `zz-hypervel`, `zz-laminas`, `zz-phpixie` and `zz-slim`. Published tags stay on Docker Hub and are not updated.
-- Remove the `update-readme` workflow, which only served those images.
-- Breaking: remove the legacy variables `APACHE_DOCUMENT_ROOT` and `NGINX_DOCUMENT_ROOT` (use `DOCUMENT_ROOT`), and `ENABLE_SSH` (use `ENABLE_SSHD`).
-- Decide Alpine support for a PHP version in one place, `has_alpine_php` in `build/versions.sh`.
 - Fix the startup ownership migration changing the owner of mounted files such as `/var/run/docker.sock` when `APP_GID` matches an existing group (#442).
-- Add `KNOWN_ISSUES.md` with the user-reported bugs fixed in 5.x and 6.x.
-- Fix variables that did not match the docs: `DISABLE_AUTORUN_FIX_OWNER_GROUP`, `ENABLE_TUNING_FPM`, `ENABLE_TUNING_MPM`, `ENABLE_CRONTAB_DEBUG`, `COMPOSER_OPTIMIZE_AUTOLOADER`, `SUPERVISOR_PHP_COMMAND`, `SMTP_FROM`, `ENABLE_SSHD`, `DEFAULT_USER` and `DEFAULT_GROUP`. Load `custom-*.conf` files from `/usr/local/etc/php-fpm.d/` after the generated PHP-FPM settings, and let `PHP_PM*` variables win over `ENABLE_TUNING_FPM`. Update the docs of `INITIAL_PROJECT`, `DISABLE_AUTORUN_COPYING_SOURCE`, `CRONTAB_SHELL` and `SSHD_AUTHORIZED_KEYS`.
+- Fix variables that did not match the docs, such as `ENABLE_TUNING_FPM`, `ENABLE_SSHD`, `DEFAULT_USER` and `SMTP_FROM`. Load `custom-*.conf` from `/usr/local/etc/php-fpm.d/` after the generated settings, and let `PHP_PM*` win over `ENABLE_TUNING_FPM`.
+- Add `KNOWN_ISSUES.md`.
 
 
 ## [5.9.0] - 2026-10-25
