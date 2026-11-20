@@ -4,6 +4,7 @@ All notable changes to this project are documented in this file.
 
 
 ## [Unreleased]
+- Point `latest` back to PHP 8.5, because the PHP 8.6 images still lack some modules (`apcu`, `igbinary`, `msgpack`, `redis`, `sodium`, `yaml`). The `8.6` tags stay available.
 
 
 ## [6.3.0] - 2026-11-21
