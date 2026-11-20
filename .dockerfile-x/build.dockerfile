@@ -8,7 +8,7 @@
 ################################################################################
 # dockerfile-x from the ./upstream submodule, with patched Go modules.
 # build.sh squashes the result into one layer. Context: this folder.
-ARG ORAS_VERSION=1.3.6
+ARG ORAS_VERSION=1.4.0
 
 ################################################################################
 # Frontend and oras, cross-compiled on the build platform
