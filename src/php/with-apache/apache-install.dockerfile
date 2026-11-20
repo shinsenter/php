@@ -60,7 +60,7 @@ if [ -n "$APACHE_VERSION" ] && [ "$APACHE_VERSION" != os ]; then
         cp -f "/usr/src/httpd-stage/usr/sbin/${apache_bin##*/}" "$apache_bin"
         strip --strip-all "$apache_bin" || true
 
-        # the package record still names the OS version, and scanners report it for the new binary
+        # the package records still name the OS version, and scanners report it for the new binary
         if [ -f /var/lib/dpkg/status ]; then
             awk -v p=apache2 -v n="$APACHE_VERSION" 'function swap(s, o, r,   out, i) {
                 while ((i = index(s, o)) > 0) { out = out substr(s, 1, i - 1) r; s = substr(s, i + length(o)) }
@@ -72,6 +72,18 @@ if [ -n "$APACHE_VERSION" ] && [ "$APACHE_VERSION" != os ]; then
             }
             { print }' /var/lib/dpkg/status > /tmp/dpkg-status && cat /tmp/dpkg-status > /var/lib/dpkg/status
             rm -f /tmp/dpkg-status
+        fi
+        if [ -f /lib/apk/db/installed ]; then
+            awk -v p=apache2 -v n="$APACHE_VERSION-r0" 'function swap(s, o, r,   out, i) {
+                while ((i = index(s, o)) > 0) { out = out substr(s, 1, i - 1) r; s = substr(s, i + length(o)) }
+                return out s
+            }
+            BEGIN { RS = ORS = "\n\n" }
+            $0 ~ "(^|\n)P:" p "(-[^\n]*)?\n" && match($0, /\nV:[^\n]*/) {
+                o = substr($0, RSTART + 3, RLENGTH - 3); $0 = swap($0, o, n)
+            }
+            { print }' /lib/apk/db/installed > /tmp/apk-installed && cat /tmp/apk-installed > /lib/apk/db/installed
+            rm -f /tmp/apk-installed
         fi
     else
         echo "WARNING: cannot build Apache $APACHE_VERSION, keep the version from the OS package, which may lack security fixes" >&2
