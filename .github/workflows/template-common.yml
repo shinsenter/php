@@ -56,11 +56,16 @@ on:
 ################################################################################
 ################################################################################
 
+# How it works
+#  - prepare: runs build/config.sh once, and plans one build job per platform.
+#  - build:   runs once per platform, on a runner of the same architecture where possible.
+#             QEMU is only used for the platforms that the runner cannot run itself (32-bit ARM),
+#             and only when a probe shows that it is needed.
+#             Each platform pushes its image by digest. The last one to finish publishes one multi-platform tag.
+#  - readme:  updates the Docker Hub description.
+
 jobs:
-  # Runs build/config.sh once and hands the result to the jobs below.
-  # The build runs once per platform on a runner of the same architecture
-  # where possible (QEMU is only used for 32-bit ARM),
-  # the last platform to finish publishes one multi-platform tag.
+  # Runs build/config.sh once and hands the result to the jobs below
   prepare:
     name: ${{ inputs.php_version }} ${{ inputs.app_name }} ${{ inputs.server }} ${{ inputs.os }} (prepare)
     runs-on: ubuntu-26.04-arm
@@ -110,21 +115,13 @@ jobs:
         run: |
           set -e
           . ./build/helpers.sh
-          matrix="$(plan_matrix "$BUILD_PLATFORM")"
-          skip="${SKIP_BUILD:-0}"
-          if [ "$matrix" = "[]" ]; then
-            skip=1
-            matrix='[{"platform":"none","slug":"none","runner":"ubuntu-26.04","qemu":""}]'
-          fi
           {
-            echo "skip=$skip"
-            echo "matrix=$matrix"
+            build_plan "$BUILD_PLATFORM" "${SKIP_BUILD:-0}"
             echo "fingerprint=$BUILD_FINGERPRINT"
             echo "env<<EOF_BUILD_ENV"
             cat /tmp/build.env 2>/dev/null || true
             echo "EOF_BUILD_ENV"
-          } >> "$GITHUB_OUTPUT"
-          echo "skip=$skip matrix=$matrix"
+          } | tee -a "$GITHUB_OUTPUT" | grep -E '^(skip|matrix)='
 
   ##############################################################################
 
@@ -177,8 +174,22 @@ jobs:
           name: helper_cache
           path: ${{ env.BUILD_CONTEXT }}/helper_cache/
 
-      -
+      - # Some runners can run 32-bit ARM containers natively (CPU with AArch32 and a kernel with compat mode), which is much faster than QEMU
+        id: native
         if: ${{ matrix.qemu != '' }}
+        name: Check whether this runner runs ${{ matrix.platform }} without QEMU
+        env:
+          MATRIX_PLATFORM: ${{ matrix.platform }}
+        run: |
+          if arch="$(docker run --rm --platform "$MATRIX_PLATFORM" public.ecr.aws/docker/library/busybox:stable uname -m 2>/dev/null)"; then
+            echo "$MATRIX_PLATFORM runs natively ($arch), QEMU is not needed"
+            echo "native=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "$MATRIX_PLATFORM does not run natively, QEMU is needed"
+          fi
+
+      -
+        if: ${{ matrix.qemu != '' && steps.native.outputs.native != '1' }}
         uses: docker/setup-qemu-action@v4
         with:
           platforms: ${{ matrix.qemu }}
@@ -217,11 +228,11 @@ jobs:
           context: ${{ env.BUILD_CONTEXT }}
           tags: ${{ env.SKIP_SQUASH != '1' && env.BUILD_TMP_NAME || '' }}
           outputs: ${{ env.SKIP_SQUASH == '1' && format('type=image,name={0},push-by-digest=true,name-canonical=true,compression=zstd,force-compression=true,oci-mediatypes=true,push={1}', steps.stage.outputs.name, env.SKIP_PUSH != '1') || '' }}
-          # the temporary image of squash mode is discarded, only the final image needs an SBOM
+          # The temporary image of squash mode is discarded, only the final image needs an SBOM
           sbom: ${{ env.SKIP_SQUASH == '1' }}
           provenance: ${{ env.SKIP_SQUASH == '1' && 'mode=max' || 'false' }}
           build-args: |
-            DEBUG=${{ env.DEBUG }}
+            APACHE_VERSION=${{ env.APACHE_VERSION }}
             BUILD_CACHE_KEY=${{ env.BUILD_CACHE_KEY }}
             BUILD_CONTEXT=${{ env.BUILD_CONTEXT }}
             BUILD_DATE=${{ env.BUILD_DATE }}
@@ -231,15 +242,16 @@ jobs:
             BUILD_PLATFORM=${{ env.BUILD_PLATFORM }}
             BUILD_REVISION=${{ env.BUILD_REVISION }}
             BUILD_SOURCE_IMAGE=${{ env.BUILD_SOURCE_IMAGE }}
-            BUILD_TAG_PREFIX=${{ env.BUILD_TAG_PREFIX }}
             BUILD_TAG=${{ env.BUILD_TAG }}
             BUILD_TAGS=${{ env.BUILD_TAGS }}
+            BUILD_TAG_PREFIX=${{ env.BUILD_TAG_PREFIX }}
+            DEBUG=${{ env.DEBUG }}
             LATEST_PHP=${{ env.LATEST_PHP }}
             LATEST_S6=${{ env.LATEST_S6 }}
-            APACHE_VERSION=${{ env.APACHE_VERSION }}
             NGINX_VERSION=${{ env.NGINX_VERSION }}
             OS_BASE=${{ env.OS_BASE }}
             OS_VERSION=${{ env.OS_VERSION }}
+            PHP_SKIP_MODULES=${{ env.PHP_SKIP_MODULES }}
             PHP_VARIANT=${{ env.PHP_VARIANT }}
             PHP_VERSION=${{ env.PHP_VERSION }}
             S6_PATH=${{ env.S6_PATH }}
@@ -297,11 +309,9 @@ jobs:
 
       - # The platform that finishes last sees every digest and publishes the tags itself, so no job waits for a runner again
         if: ${{ env.SKIP_PUSH != '1' }}
-        uses: actions/download-artifact@v8
+        uses: ./.github/actions/download-digests
         with:
-          path: /tmp/digests
           pattern: digest-${{ needs.prepare.outputs.fingerprint }}-*
-          merge-multiple: true
 
       -
         id: gather

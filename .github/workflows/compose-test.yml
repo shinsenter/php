@@ -1,0 +1,99 @@
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+name: Compose test
+
+################################################################################
+################################################################################
+
+# Manual run, after the build of a release has finished.
+# It pulls the published images of the servers and the webapps and starts each one with tests/compose-test.sh.
+# Each service and OS is a job of its own, so one failure does not hide the others.
+# It never builds or pushes an image, and no other workflow depends on it.
+# A failed check does not fail the run: the result is only written to the job summary.
+
+on:
+  workflow_dispatch:
+    inputs:
+      php_version:
+        description: "PHP version to test, or latest (the images tagged latest)"
+        required: false
+        type: string
+        default: "latest"
+      tag_prefix:
+        description: "Tag prefix of the images: empty for a release, dev- for the images built from a branch"
+        required: false
+        type: string
+        default: ""
+      services:
+        description: "Services to test (names in tests/docker-compose.yml), separated by spaces (empty = all)"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+################################################################################
+################################################################################
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.select.outputs.services }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # An empty list means all the services, except the ones that only support the others
+      - name: Select the services
+        id: select
+        env:
+          REQUESTED: ${{ inputs.services }}
+        run: |
+          all="$(IMAGE_TAG=x docker compose -f tests/docker-compose.yml config --services 2>/dev/null | grep -vx -e cli -e fpm -e mysql | tr '\n' ' ')"
+          read -ra service_list <<<"${REQUESTED:-$all}"
+          services_json="$(printf '%s\n' "${service_list[@]}" | jq -R . | jq -sc .)"
+          echo "services=$services_json" | tee -a "$GITHUB_OUTPUT"
+
+  compose-test:
+    name: ${{ matrix.service }} ${{ matrix.os }}
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [debian, alpine]
+        service: ${{ fromJSON(needs.prepare.outputs.services) }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # The test never fails the job, it only reports
+      - name: Test the published image
+        continue-on-error: true
+        env:
+          OS: ${{ matrix.os }}
+          PHP_VERSION: ${{ inputs.php_version }}
+          SERVICE: ${{ matrix.service }}
+          TAG_PREFIX: ${{ inputs.tag_prefix }}
+        run: tests/compose-test.sh -n 1 -o "$OS" -v "$PHP_VERSION" "$SERVICE"
+
+      # Write the result lines to the job summary
+      - name: Write the summary
+        if: always()
+        env:
+          OS: ${{ matrix.os }}
+          SERVICE: ${{ matrix.service }}
+          PHP_VERSION: ${{ inputs.php_version }}
+        run: |
+          {
+              echo "### $SERVICE, PHP $PHP_VERSION, $OS"
+              echo '```'
+              cat tests/logs/*-compose-*.csv 2>/dev/null || echo "No result"
+              echo '```'
+          } >>"$GITHUB_STEP_SUMMARY"
