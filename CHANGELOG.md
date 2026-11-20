@@ -6,6 +6,10 @@ All notable changes to this project are documented in this file.
 ## [Unreleased]
 
 
+## [6.2.1] - 2026-11-20
+- Debian: the package records of Nginx and Apache now show the version built from source, so scanners no longer report CVEs of the older OS version.
+
+
 ## [6.2.0] - 2026-11-19
 - Add PHP 8.6 and make it `latest`. Drupal, PrestaShop, Nextcloud, EspoCRM, Joomla, Kirby, WordPress, Bedrock, Shopware and FrankenPHP stay at 8.5. Magento and Bagisto stay at 8.4.
 - Build Apache and Nginx from source, with HTTP/2 and brotli (and HTTP/3 for Nginx on older OS).
