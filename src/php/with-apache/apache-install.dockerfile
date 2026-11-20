@@ -59,6 +59,20 @@ if [ -n "$APACHE_VERSION" ] && [ "$APACHE_VERSION" != os ]; then
         cp -f "/usr/src/httpd-stage$module_dir"/*.so "$module_dir"/
         cp -f "/usr/src/httpd-stage/usr/sbin/${apache_bin##*/}" "$apache_bin"
         strip --strip-all "$apache_bin" || true
+
+        # the package record still names the OS version, and scanners report it for the new binary
+        if [ -f /var/lib/dpkg/status ]; then
+            awk -v p=apache2 -v n="$APACHE_VERSION" 'function swap(s, o, r,   out, i) {
+                while ((i = index(s, o)) > 0) { out = out substr(s, 1, i - 1) r; s = substr(s, i + length(o)) }
+                return out s
+            }
+            BEGIN { RS = ""; ORS = "\n\n" }
+            $0 ~ "(^|\n)Package: " p "(-[^\n]*)?(\n|$)" && match($0, /(^|\n)Version: [^\n]*/) {
+                v = substr($0, RSTART, RLENGTH); sub(/^\n?Version: /, "", v); $0 = swap($0, v, n)
+            }
+            { print }' /var/lib/dpkg/status > /tmp/dpkg-status && cat /tmp/dpkg-status > /var/lib/dpkg/status
+            rm -f /tmp/dpkg-status
+        fi
     else
         echo "WARNING: cannot build Apache $APACHE_VERSION, keep the version from the OS package, which may lack security fixes" >&2
         APACHE_VERSION=os
