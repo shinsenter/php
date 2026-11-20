@@ -574,6 +574,44 @@ echo "${modules[*]}"' _ "$1" "$2" 2>/dev/null | tail -1
     finish
 }
 
+# scan: build/scan-images.sh with a stub of docker (no Trivy, no network)
+test_scan() {
+    local tmp stub
+    tmp="$(mktemp -d)"
+    stub="$tmp/bin"
+    mkdir -p "$stub"
+    trap 'rm -rf "$tmp"' RETURN
+
+    # docker stub: logs the call, "bad" images have CVEs (exit 10), "broken" images fail (exit 1)
+    cat > "$stub/docker" <<'EOF'
+#!/bin/sh
+echo "$*" >> "$DOCKER_LOG"
+case "$*" in
+    *--download-db-only*) exit 0 ;;
+    *bad*)    echo "TABLE of $*"; exit 10 ;;
+    *broken*) echo "boom" >&2; exit 1 ;;
+esac
+exit 0
+EOF
+    chmod +x "$stub/docker"
+
+    printf '%s\n' ghcr.io/x/good:1 ghcr.io/x/bad:1 ghcr.io/x/broken:1 ghcr.io/x/good:1 > "$tmp/list"
+    : > "$tmp/log"
+    PATH="$stub:$PATH" DOCKER_LOG="$tmp/log" GITHUB_STEP_SUMMARY="$tmp/summary" \
+        "$BASE_DIR/build/scan-images.sh" "$tmp/list" 2 >/dev/null 2>&1
+    check_eq "scan: the database is downloaded once" "1" "$(grep -c -e '--download-db-only' "$tmp/log")"
+    check_eq "scan: a duplicate image is scanned once" "1" "$(grep -c 'good:1' "$tmp/log")"
+    check_eq "scan: every unique image is scanned with the shared database" "3" "$(grep -c -e '--skip-db-update' "$tmp/log")"
+    has "scan: an image with CVEs is listed" "$tmp/summary" "Vulnerabilities in ghcr.io/x/bad:1"
+    lacks "scan: a clean image is not listed" "$tmp/summary" "Vulnerabilities in ghcr.io/x/good:1"
+    has "scan: a failed scan is reported" "$tmp/summary" "scan failed: ghcr.io/x/broken:1"
+    has "scan: the totals count unique images" "$tmp/summary" "1 of 3 images"
+
+    : > "$tmp/empty"
+    check "scan: an empty list is not an error" env PATH="$stub:$PATH" DOCKER_LOG="$tmp/log" "$BASE_DIR/build/scan-images.sh" "$tmp/empty"
+    finish
+}
+
 # updates: the start and cleanup commands of build/check-updates.sh, with a stub of the GitHub CLI (offline)
 test_updates() {
     local tmp stub
@@ -623,7 +661,7 @@ EOF
 # Each test runs in a subshell: its counters and sourced files stay private
 if [ "${BASH_SOURCE[0]}" = "$0" ]; then
     status=0
-    for name in ${@:-lint versions backports config scaling ssh defaults size fingerprint helpers updates}; do
+    for name in ${@:-lint versions backports config scaling ssh defaults size fingerprint helpers updates scan}; do
         echo "== $name"
         (NAME="$name"; "test_$name") || status=1
     done

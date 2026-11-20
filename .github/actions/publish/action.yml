@@ -97,23 +97,16 @@ runs:
             cosign sign --yes "$repo@$digest"
         done
 
-    - # Report only: PHP and OS packages carry CVEs that the image cannot fix on its own
-      # The runner may be any architecture, so the scan names the platform the size check also uses
-      name: Scan ${{ env.BUILD_TAG }}
-      continue-on-error: true
+    - # The scan runs once for all images at the end of the run (build/scan-images.sh), not here:
+      # one job per image would download Trivy and its database every time
+      name: Record ${{ env.BUILD_TAG }} for the scan
       shell: bash
       run: |
-        # Exit code 10 means CVEs were found, so the summary is written only then
-        rc=0
-        docker run --rm ghcr.io/aquasecurity/trivy:latest image --platform linux/amd64 \
-            --quiet --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed \
-            --timeout 10m --exit-code 10 --format table "ghcr.io/$BUILD_TAG" >/tmp/scan.full || rc=$?
-        head -c 200000 /tmp/scan.full >/tmp/scan.txt
-        if [ "$rc" = 10 ]; then
-            {
-                echo "### Vulnerabilities in $BUILD_TAG (HIGH and CRITICAL, fixed upstream)"
-                echo '```'
-                cat /tmp/scan.txt
-                echo '```'
-            } >> "$GITHUB_STEP_SUMMARY"
-        fi
+        mkdir -p /tmp/scan
+        echo "ghcr.io/$BUILD_TAG" > /tmp/scan/image
+
+    - uses: actions/upload-artifact@v7
+      with:
+        name: scan-${{ env.BUILD_FINGERPRINT }}
+        path: /tmp/scan/image
+        retention-days: 1

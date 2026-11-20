@@ -13,7 +13,7 @@
 
 ## Purpose
 
-Behavior of `build/config.sh`, `build/helpers.sh` and the workflows. Checks: `tests/run.sh config|fingerprint|helpers|size|updates`.
+Behavior of `build/config.sh`, `build/helpers.sh` and the workflows. Checks: `tests/run.sh config|fingerprint|helpers|size|updates|scan`.
 
 ## Paths
 | Path | Purpose |
@@ -24,6 +24,7 @@ Behavior of `build/config.sh`, `build/helpers.sh` and the workflows. Checks: `te
 | `src/php/with-apache/apache-config.dockerfile` | Writes `/etc/apache2/modules.conf` from the module files and enables the default modules. Modules compiled into the binary (`apache2 -l`) are left out, because Apache stops on "is built-in and can't be loaded" (#475). It ends with a config test: the build fails on a syntax error |
 | `src/php/with-nginx/nginx-build` | Compiles Nginx from `NGINX_VERSION` with OS package configure flags; adds HTTP/3 when missing and brotli from latest `google/ngx_brotli` (not in the fingerprint), linked to OS brotli; builds without them on failure. `nginx-install.dockerfile` installs only on success. Mounted like `distro-patch` |
 | `build/helpers.sh` | Shared functions in sections: versions, remote content, downloads, IPE modules, published images, build plan, context and hashes. One file, because every build step sources it |
+| `build/scan-images.sh` | Trivy scan of a list of images: the database is downloaded once, the scans run in parallel and read it, one summary lists the images with fixable HIGH or CRITICAL CVEs. Report only. Run by the `scan` job at the end of `build-all` |
 | `build/check-updates.sh` | `check` prints the PHP versions to rebuild, `start` runs `build-all` unless one is running or failed in the last 3 hours, `cleanup` deletes old runs. The `watch-updates` workflow only calls it |
 | `tests/` | Offline: `run.sh`. Docker: `build-test.sh`, `compose-test.sh`, `ownership-test.sh`. Helpers: `tools/`. Logs: `tests/logs/` |
 | `.github/workflows/` | `build-all`, `watch-updates`, `compose-test` (manual test of the published images, see spec `testing`), templates (`template-stack` > `template-php` > `template-common`, the four-level limit). A new server image is one entry in the `servers` list of `build-all` |
@@ -50,6 +51,6 @@ The repo SHALL follow these rules for: build and fingerprint rules.
 - A build SHALL be skipped, not failed, when Docker Hub answers 404 for the official image it starts from: `php:<version>-<variant>` or `dunglas/frankenphp:1-php<version>` (`upstream_digest` in `build/config.sh`). A new PHP version can lack a variant, so one missing image must not fail the run and skip the servers and apps of other versions (#469). Any other answer, such as an outage or a rate limit, SHALL NOT skip a build. The 404 is read from the same cached lookup as the digest, so it sends no request of its own. Temporary: `zts` of PHP 8.6 builds on `php:8.6-rc-zts` until `8.6-zts` exists, and `frankenphp` of PHP 8.6 is skipped.
 - `php-extensions.dockerfile` SHALL skip the modules that `data/supported-extensions` of docker-php-extension-installer does not list for the PHP version (`get_php_skip_modules`, build arg `PHP_SKIP_MODULES`), because one failed module fails the whole install. A module PHP already has is never skipped. A lookup that fails or finds no column skips nothing. The data file is cached for 2 hours. The list is part of the cache key, limited to the modules of the image. The required-modules check at the end of the install stays: it is the only guard after `|| true`.
 - Pushed layers SHALL use zstd. The temporary squash image stays gzip.
-- The publish job SHALL sign each index with cosign (keyless), scan with Trivy (report only) and report the size change against the previous tag in the job summary.
+- The publish job SHALL sign each index with cosign (keyless), record its image for the one Trivy scan at the end of the run (report only, `build/scan-images.sh`) and report the size change against the previous tag in the job summary.
 - Workflows SHALL use few resources: no job without work (the `readme` job runs only when `UPDATE_README=1`), no checkout of the submodule `.dockerfile-x/upstream` (58 MB), only `build/docker-squash` in the job that squashes, and a `timeout-minutes` on every job (a hung job must not hold a runner for six hours). Prefer the cached lookup to a new request.
 - After a workflow change, `tests/tools/workflow-check.sh` MUST exit 0.

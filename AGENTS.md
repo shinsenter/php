@@ -54,6 +54,7 @@ Format and OpenSpec change flow (`openspec/changes/<id>/`): spec `conventions`. 
 | `build/config.sh` | Produces the build variables: tag, platforms, context, fingerprint |
 | `build/versions.sh` | Version lists: maintained 8.6 to 8.2, outdated 8.1 to 5.6 |
 | `build/helpers.sh` | Shared functions, one section per purpose: versions, remote content, downloads, IPE modules, published images, build plan, context and hashes |
+| `build/scan-images.sh` | One Trivy scan for the images of a run, with one shared database (job `scan` of `build-all`) |
 | `build/check-updates.sh` | Scripts of the Watch updates workflow: `check` (default), `start`, `cleanup` |
 | Other paths (patches, `nginx-build`, `.dockerfile-x/`, `tests/`, `.github/`) | spec `build-fingerprint` |
 
@@ -64,7 +65,7 @@ Utilities inside the image: `pkg-add` and `pkg-del` (install and remove packages
 ## Build and test
 
 - Trial build: `tests/build-test.sh <os> <app> <php-version> [server]`, for example `tests/build-test.sh '' with-nginx 8.4`. An empty `<os>` is Debian. It also builds the images it depends on. Variables: `SKIP_SQUASH=1`, `BUILD_TAG_PREFIX`.
-- Offline tests need no Docker, so run them after a change and report the real output: `tests/run.sh`, or `tests/run.sh lint|versions|backports|config|scaling|ssh|defaults|size|fingerprint|helpers|updates`.
+- Offline tests need no Docker, so run them after a change and report the real output: `tests/run.sh`, or `tests/run.sh lint|versions|backports|config|scaling|ssh|defaults|size|fingerprint|helpers|updates|scan`.
 - All images at once: `tests/compose-test.sh` starts the servers and webapps in batches. The manual `Compose test` workflow runs it on the published images, one job per service and OS.
 - A failing check is a finding. Fix the cause or tell the user. Do not edit a test to make it pass.
 

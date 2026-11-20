@@ -360,3 +360,33 @@ jobs:
 
 ################################################################################
 ################################################################################
+
+  ##########################################################
+
+  # One Trivy scan for every image published in this run (the publish action records them).
+  # It downloads Trivy and its database once. It only reports, so a failure here never fails the run.
+  scan:
+    name: Trivy scan
+    needs: [s6-overlay, linux-s6, fpm, cli, zts, popular-apps, other-apps, extended-apps]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Get the list of published images
+        id: list
+        continue-on-error: true
+        uses: actions/download-artifact@v8
+        with:
+          pattern: scan-*
+          path: /tmp/scan
+          merge-multiple: false
+
+      - name: Scan the images
+        continue-on-error: true
+        run: |
+          cat /tmp/scan/*/image 2>/dev/null | sort -u > /tmp/scan-list
+          ./build/scan-images.sh /tmp/scan-list
