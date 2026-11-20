@@ -137,10 +137,14 @@ get_dockerhub_tag_digest() {
 # Same as above, but a failed lookup returns a value that changes on every run,
 # so the image is rebuilt instead of being wrongly treated as up to date.
 # True only when Docker Hub answers 404 for the tag.
-# Any other answer (an outage, a rate limit, no network) is not "missing", so a build is never skipped by mistake.
+# It reads the same cached answer as get_dockerhub_tag_digest, so it sends no request of its own.
+# Any other answer (an outage, a rate limit, no answer) is not "missing", so a build is never skipped by mistake.
 # Usage: dockerhub_tag_missing <namespace/repo> <tag>
 dockerhub_tag_missing() {
-    [ "$(curl -ksL -m 10 -o /dev/null -w '%{http_code}' "https://registry.hub.docker.com/v2/repositories/$1/tags/$2" 2>/dev/null)" = 404 ]
+    local json
+    json="$(dockerhub_api "$1/tags/$2" 2>/dev/null)" || return 1
+    case "$json" in *"httperror 404"*) return 0 ;; esac
+    return 1
 }
 
 get_dockerhub_tag_digest_or_now() {
@@ -293,6 +297,8 @@ cache_run_inputs() {
     cache_nginx_source
     cache_s6_sources
     cache_wpcli_source
+    # The list of modules that IPE does not support, read by build/config.sh in every job
+    get_ipe_unsupported "${1:-8.5}" >/dev/null || true
 
     for distro in debian alpine; do
         cache_dockerhub_digest "library/$distro" latest
@@ -300,6 +306,8 @@ cache_run_inputs() {
         for version; do
             for variant in cli fpm zts; do
                 cache_dockerhub_digest "library/php" "${version}-${variant}${distro:+-$distro}"
+                # Temporary, with the rule in build/config.sh: zts of PHP 8.6 builds on the rc image
+                [ "$variant$version" = "zts8.6" ] && cache_dockerhub_digest "library/php" "${version}-rc-${variant}${distro:+-$distro}"
                 if [ "$variant" = "zts" ] && verlte "8.2" "$version"; then
                     cache_dockerhub_digest "dunglas/frankenphp" "1-php${version}${distro:+-$distro}"
                 fi

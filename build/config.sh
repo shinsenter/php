@@ -199,6 +199,22 @@ apply_app_rules() {
     esac
 }
 
+# Digest of an official upstream image tag, stored in the variable named by $1 (unknown-<time> when the lookup fails).
+# A tag that Docker Hub reports as missing skips the build, because there is nothing to build from.
+# The 404 check runs only when the lookup fails, so a normal run makes no extra request.
+# Usage: upstream_digest <variable> <namespace/repo> <tag>
+upstream_digest() {
+    local digest
+    if ! digest="$(get_dockerhub_tag_digest "$2" "$3")"; then
+        if dockerhub_tag_missing "$2" "$3"; then
+            echo "WARN: no upstream image $2:$3, skip the build" >&2
+            SKIP_BUILD=1
+        fi
+        digest="unknown-$(date +%s)"
+    fi
+    printf -v "$1" '%s' "$digest"
+}
+
 # Build tags: expand_tags adds a tag for each tag that matches, add_tag appends tags
 expand_tags() {
     local find="$1" add="$2" exclude="${3:-dummy}" out=""
@@ -328,13 +344,12 @@ case "$APP" in
         ;;
     with-f8p)
         verlt "$PHP_VERSION" "8.2" && SKIP_BUILD=1
-        # dunglas/frankenphp has no PHP 8.6 image yet, so cap the build at 8.5
-        LATEST_PHP="8.5"
         PREFIX="frankenphp"
         BUILD_NAME="$DEFAULT_REPO/frankenphp"
         BUILD_SOURCE_IMAGE="dunglas/frankenphp:1-php$PHP_VERSION$SUFFIX"
         BUILD_DOCKERFILE="$BASE_DIR/src/php/with-f8p.dockerfile"
-        BUILD_CACHE_KEY="(frankenphp@$(get_dockerhub_tag_digest_or_now "dunglas/frankenphp" "1-php$PHP_VERSION$SUFFIX"))"
+        upstream_digest F8P_SHA "dunglas/frankenphp" "1-php$PHP_VERSION$SUFFIX"
+        BUILD_CACHE_KEY="(frankenphp@$F8P_SHA)"
         PHP_VARIANT="zts$SUFFIX"
         ;;
     with-roadrunner)
@@ -361,6 +376,8 @@ case "$APP" in
         BUILD_DOCKERFILE="$BASE_DIR/src/php/base-php.dockerfile"
         PHP_VARIANT="$APP$SUFFIX"
         ALLOW_RC=1
+        # Temporary: the official image has no 8.6-zts yet, only 8.6-rc-zts. Remove this line when it has
+        [ "$APP" = "zts" ] && [ "$PHP_VERSION" = "8.6" ] && PHP_VERSION="8.6-rc"
         ;;
 esac
 
@@ -422,7 +439,7 @@ if [ "$SKIP_BUILD" != "1" ]; then
 
     # Modules that IPE does not support on this PHP version, skipped in src/php/common/php-extensions.dockerfile
     if [ "$BUILD_DOCKERFILE" = "$BASE_DIR/src/php/base-php.dockerfile" ]; then
-        PHP_SKIP_MODULES="$(get_php_skip_modules "$PHP_VERSION" | tr '\n' ' ' | sed 's/ $//')"
+        PHP_SKIP_MODULES="$(get_php_skip_modules "${PHP_VERSION%-rc}" | tr '\n' ' ' | sed 's/ $//')"
     fi
 fi
 
@@ -591,12 +608,8 @@ if [ "$SKIP_BUILD" != "1" ]; then
     fi
 
     if [ -n "$PHP_VERSION" ]; then
-        # A new PHP version can lack a variant for a while (for example 8.6-zts), so there is nothing to build from
-        if dockerhub_tag_missing "library/php" "$PHP_VERSION-${PHP_VARIANT#-}"; then
-            echo "WARN: no official image php:$PHP_VERSION-${PHP_VARIANT#-}, skip the build" >&2
-            SKIP_BUILD=1
-        fi
-        PHP_SHA="$(get_dockerhub_tag_digest_or_now "library/php" "$PHP_VERSION-${PHP_VARIANT#-}")"
+        # A new PHP version can lack a variant for a while (for example 8.6-zts)
+        upstream_digest PHP_SHA "library/php" "$PHP_VERSION-${PHP_VARIANT#-}"
         BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(php:$PHP_VERSION-${PHP_VARIANT#-}@$PHP_SHA)"
 
         # Outdated versions are only rebuilt when their official PHP image changes
