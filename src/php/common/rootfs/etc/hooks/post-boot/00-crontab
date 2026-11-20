@@ -14,7 +14,7 @@ APP_USER="${APP_USER:-root}"
 CRONTAB="/var/spool/cron/crontabs/$APP_USER"
 CRONTAB_DIR="${CRONTAB_DIR:-/etc/crontab.d}"
 
-# service settings
+# Service settings
 
 if ! is-true "$ENABLE_CRONTAB"; then
     \rm -f "$CRONTAB"
@@ -32,6 +32,7 @@ else
         echo '*  *  *  *  *  echo -e "$(date) DEBUG: Crontab is running as $(whoami).\\nTotal passed environment variables: $(env | wc -l)" | tee /tmp/cron-debug.txt' >$CRONTAB_DIR/.debug
     fi
 
+    # Write the crontab header
     cat <<CRONTAB >$CRONTAB
 CRON_TZ=${CRONTAB_TZ:-${TZ:-UTC}}
 HOME=${CRONTAB_HOME:-$APP_PATH}
@@ -49,6 +50,7 @@ $(if [ -n "$CRONTAB_MAILTO" ]; then echo "MAILTO=${CRONTAB_MAILTO}"; fi)
 # *  *  *  *  *  command to be executed
 CRONTAB
 
+    # Append CRONTAB_SETTINGS, then every script in CRONTAB_DIR
     if [ -n "$CRONTAB_SETTINGS" ]; then
         echo -e "\n# from \$CRONTAB_SETTINGS" >>$CRONTAB
         echo "$CRONTAB_SETTINGS" >>$CRONTAB

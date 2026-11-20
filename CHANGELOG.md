@@ -8,6 +8,11 @@ All notable changes to this project are documented in this file.
 
 ## [6.3.0] - 2026-11-20
 - The package records of Nginx and Apache (Debian and Alpine) now show the version built from source, so scanners no longer report CVEs of the older OS version.
+- Add `linux/arm/v7` (32-bit ARM) images. RoadRunner stays on `linux/amd64` and `linux/arm64`.
+- Skip PHP extensions that docker-php-extension-installer does not support for the PHP version, so one unsupported module no longer fails the build. Add `mbstring`.
+- Run `pecl upgrade-all` before installing extensions. The old call used a command that does not exist.
+- Point `latest` to PHP 8.5 until the extensions of PHP 8.6 are supported.
+- Build each platform in its own job, on a native ARM runner when one is available.
 
 
 ## [6.2.0] - 2026-11-19

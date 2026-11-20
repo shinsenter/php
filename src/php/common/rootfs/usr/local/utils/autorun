@@ -16,7 +16,7 @@ run_cmd() {
     fi
 }
 
-# one chmod for the *.sh files of a directory, none when the glob matches nothing
+# One chmod for the *.sh files of a directory, none when the glob matches nothing
 make_executable() {
     [ ! -e "$1" ] || chmod +x "$@" >/dev/null 2>&1
 }
@@ -29,6 +29,7 @@ if [ -n "$AUTORUN_ARGS" ]; then
     )
 fi
 
+# Run a directory with run-parts or find, a file directly
 for path; do
     if [ -n "$path" ] && [ -e "$path" ]; then
         # realpath only matters for relative paths and for . .. or // inside the path

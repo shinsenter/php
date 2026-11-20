@@ -7,43 +7,43 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 SYSTEM_ENV="/etc/environment"
-# what `ENV= env-path @` prints, without the process
+# What `ENV= env-path @` prints, without the process
 DEFAULT_ENV="/usr/local/etc/.env"
 
 print_env() {
-    # print environment variables sorted, excluding the special _= variable
+    # Print environment variables sorted, excluding the special _= variable
     env -0 | sort -dbfiz | tr '\0' '\n' | grep -v '^_='
 }
 
 safe_source() {
     file="$1"
-    # only source if the file exists and is not this script itself
+    # Only source if the file exists and is not this script itself
     [ -f "$file" ] && [ "$file" != "$0" ] && . "$file" >/dev/null 2>&1
 }
 
-# load system environment variables
+# Load system environment variables
 if [ -f "$SYSTEM_ENV" ]; then
     set -a
     . "$SYSTEM_ENV" >/dev/null 2>&1
     set +a
 fi
 
-# load default env and user env if different
+# Load default env and user env if different
 safe_source "$DEFAULT_ENV"
 [ -n "$ENV" ] && [ "$ENV" != "$DEFAULT_ENV" ] && safe_source "$ENV"
 
 if [ "$#" -eq 0 ]; then
-    # no arguments, print environment variables
+    # No arguments, print environment variables
     print_env | debug-echo -l
 else
-    # if first argument is "@", save environment for other processes
+    # If first argument is "@", save environment for other processes
     if [ "$1" = "@" ]; then
         mkdir -pm 0755 /etc/default
         print_env > /etc/default/locale
         shift
     fi
 
-    # execute the given command
+    # Execute the given command
     if [ "$#" -gt 0 ]; then
         export APP_PATH="${WEBHOME:-${APP_PATH:-/var/www/html}}"
         export APP_ROOT="$(app-root)"

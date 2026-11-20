@@ -8,7 +8,7 @@
 ################################################################################
 if ! has-cmd php; then exit 0; fi
 
-# show usage if no arguments are passed
+# Show usage if no arguments are passed
 if [ "$#" -eq 0 ]; then
     debug-echo -i "Disable PHP modules."
     debug-echo -i "  Usage: ${0##*/} <module> [module] [...]" >&2
@@ -16,11 +16,11 @@ if [ "$#" -eq 0 ]; then
     exit 1
 fi
 
-# ensure PHP_INI_DIR is defined and valid
+# Ensure PHP_INI_DIR is defined and valid
 if [ -n "$PHP_INI_DIR" ] && [ -d "$PHP_INI_DIR/conf.d" ]; then
     for module in "$@"; do
         debug-echo -w "Disable PHP module $module."
-        # modify matching extension lines by commenting them
+        # Modify matching extension lines by commenting them
         sed -i "/^extension *= *$module/s/^/;/g" "$PHP_INI_DIR"/conf.d/*.ini 2>/dev/null
     done
 fi

@@ -6,7 +6,7 @@
 # SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_AUTH, SMTP_FROM, SMTP_LOG, SMTP_TLS
 ##
 
-# if msmtp calls this wrapper with --passwordeval, return password
+# If msmtp calls this wrapper with --passwordeval, return password
 if [ -n "$SMTP_PASSWORD" ]; then
     parent_command="$(ps -o comm= "$PPID" 2>/dev/null)"
     case "$parent_command" in
@@ -17,10 +17,10 @@ if [ -n "$SMTP_PASSWORD" ]; then
     esac
 fi
 
-# start building msmtp options
+# Start building msmtp options
 options=""
 
-# look for -t and -f among the options only, not in addresses
+# Look for -t and -f among the options only, not in addresses
 has_t=0
 has_f=0
 for arg; do
@@ -30,7 +30,7 @@ for arg; do
     esac
 done
 
-# add -t if not already present
+# Add -t if not already present
 [ "$has_t" -eq 1 ] || options="$options -t"
 
 # set envelope from
@@ -63,7 +63,7 @@ elif [ -f /var/log/mail.log ]; then
     options="$options --logfile=/var/log/mail.log"
 fi
 
-# optional settings
+# Optional settings
 [ -n "$SMTP_PORT" ] && options="$options --port=$SMTP_PORT"
 [ -n "$SMTP_USER" ] && options="$options --user=$SMTP_USER"
 
@@ -73,14 +73,14 @@ if [ -n "$SMTP_PASSWORD" ]; then
     options="$options --passwordeval=$script_path"
 fi
 
-# auth toggle
+# Auth toggle
 if [ -n "$SMTP_AUTH" ]; then
     options="$options --auth=$SMTP_AUTH"
 elif [ -n "$SMTP_USER" ] || [ -n "$SMTP_PASSWORD" ]; then
     options="$options --auth=on"
 fi
 
-# credentials must not travel in clear text, so TLS is on by default when they are set
+# Credentials must not travel in clear text, so TLS is on by default when they are set
 [ -n "$SMTP_TLS" ] && options="$options --tls=$SMTP_TLS"
 
 # finally, invoke msmtp with built options

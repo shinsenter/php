@@ -8,6 +8,7 @@
 ################################################################################
 set -e
 
+# The first argument is the target when it is empty, a URL or a path
 if [ "$#" -gt 0 ]; then
     case "$1" in
     ""|http*|/*) target="$1"; shift ;;
@@ -31,7 +32,7 @@ if [ -n "$target" ]; then
     timeout="${TIMEOUT:-60}"
     start=$(date +%s)
 
-    # short polling steps: the server starts as soon as its dependency is ready.
+    # Short polling steps: the server starts as soon as its dependency is ready.
     # sleep_interval stays an integer for the timeout check, step is what we sleep.
     if [ "${target#http}" != "$target" ]; then
         mode="http"
@@ -43,10 +44,10 @@ if [ -n "$target" ]; then
         step="0.1"
     fi
 
-    # fall back to whole seconds when sleep cannot take a fraction
+    # Fall back to whole seconds when sleep cannot take a fraction
     sleep 0.01 2>/dev/null || step="$sleep_interval"
 
-    # a socket check costs no process, so count the steps instead of calling date
+    # A socket check costs no process, so count the steps instead of calling date
     per_second=1
     [ "$step" = "0.1" ] && per_second=10
     ticks=$(( timeout * per_second ))
@@ -63,10 +64,10 @@ if [ -n "$target" ]; then
             exit 1
         fi
         if [ "$mode" = "http" ]; then
-            # check http
+            # Check http
             curl_status "$target" | grep -qE "$codes" && break
         else
-            # check socket
+            # Check socket
             [ -S "$target" ] && break
             ticks=$(( ticks - 1 ))
         fi

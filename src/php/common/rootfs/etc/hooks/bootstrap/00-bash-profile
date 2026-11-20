@@ -9,7 +9,7 @@
 user_dir="$(realpath -mqs "$(getent passwd "${APP_USER:-www-data}" | cut -d: -f6)")"
 if [ -n "$user_dir" ]; then web-mkdir "$user_dir"; fi
 
-# load the $ENV in ~/.bashrc and ~/.profile
+# Load the $ENV in ~/.bashrc and ~/.profile
 env_check='[ -f "$ENV" ] && [ -z "$ENV_LOADED" ] && source "$ENV" &>/dev/null && ENV_LOADED=1'
 for profile in {"$user_dir",/root}/{.bashrc,.profile}; do
     if [ -z "$profile" ]; then continue; fi

@@ -6,13 +6,13 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-# service dirs
+# Service dirs
 # s6-overlay 3.2.3.2 moved user bundle definitions outside s6-rc.d
 # see: https://github.com/just-containers/s6-overlay/blob/master/CHANGELOG.md#version-3232
 s6="${S6_RUNTIME_BUNDLEDIR:-/etc/s6-overlay/user-bundles.d}"
 disabled_s6="${s6}.disabled"
 
-# show help if no args or help flag
+# Show help if no args or help flag
 case "$1" in
 ""|-h|--help|help)
     debug-echo -i "Simple wrapper for adding s6-overlay services."
@@ -33,7 +33,7 @@ $1
 EOF
 }
 
-# create file with optional content
+# Create file with optional content
 create() {
     path=$1; dir="${path%/*}"; shift
     mkdir -p "$dir" && chmod 0755 "$dir"
@@ -46,7 +46,7 @@ create() {
 ############################################################
 # set defaults
 if [ -n "$1" ]; then
-    # a name that is already a slug needs no tr and sed
+    # A name that is already a slug needs no tr and sed
     case "$1" in
         *[!a-z0-9.~-]*|-*|*-) name=$(slugify "$1") ;;
         *) name="$1" ;;
@@ -57,16 +57,16 @@ else
 fi
 [ -n "$1" ] && type=$1 && shift || type="oneshot"
 
-# remove '~' from name for hook
+# Remove '~' from name for hook
 hook_name="s6-exit-$(printf '%s' "$name" | tr -d '~')"
 svc_path="${s6}/${name}"
 deps_path="${s6}/${name}/dependencies.d"
 flag_path="${s6}/user/contents.d/${name}"
 
-# load file content if param is a file
+# Load file content if param is a file
 [ -n "$1" ] && [ -f "$1" ] && set -- "$(cat "$1")"
 
-# handle simple commands
+# Handle simple commands
 case "$type" in
 enable)
     if [ -d "${disabled_s6}/${name}" ]; then
@@ -109,7 +109,7 @@ unset|delete)
 esac
 
 ############################################################
-# service generation
+# Service generation
 debug-echo -i "Creating s6 service: ${name} (${type})."
 
 if [ "$type" = "oneshot" ]; then
@@ -122,6 +122,7 @@ if [ "$type" = "longrun" ]; then
 exec hook ${hook_name}"
 fi
 
+# Service script: from the arguments, else from stdin
 if [ -n "$@" ]; then
     content="$@"
 else
@@ -136,7 +137,7 @@ else
     fi
 fi
 
-# common files
+# Common files
 create "${svc_path}/type" "$type"
 create "${svc_path}/run"  "$content"
 create "${deps_path}/base"

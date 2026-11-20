@@ -94,6 +94,7 @@ export CFLAGS="$PHP_CFLAGS" CPPFLAGS="$PHP_CPPFLAGS" LDFLAGS="$PHP_LDFLAGS" \
 docker-php-source extract
 cd /usr/src/php
 
+# Apply the patches in file name order, skip the ones for the other OS
 for patchfile in "$dir"/*.patch; do
     [ -e "$patchfile" ] || continue
     case "$patchfile" in
@@ -104,6 +105,7 @@ for patchfile in "$dir"/*.patch; do
     patch -p1 < "$patchfile"
 done
 
+# Build and install over the PHP of the official image
 eval "$configure_cmd"
 make -j "$(nproc)"
 find -type f -name '*.a' -delete
@@ -126,7 +128,7 @@ fi
 
 rm -rf /tmp/pear ~/.pearrc
 
-# smoke test
+# Smoke test
 php --version
 EOF
 

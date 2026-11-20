@@ -15,6 +15,7 @@ has_composer="$(has-cmd composer && echo 1 || echo 0)"
 just_created=0
 
 ################################################################################
+# Install tools that composer.json needs, then npm packages
 install_deps() {
     [ -f "$CONF_PATH" ] || return 0
 
@@ -35,6 +36,7 @@ composer_exec() {
     [ "$has_composer" -eq 1 ] && composer --no-interaction "$@"
 }
 
+# Run a composer script if composer.json defines it, then the shell hook
 composer_hook() {
     [ -n "$1" ] || return
     local hook="$1"
@@ -52,6 +54,7 @@ unset_allow_plugins() {
     composer_exec config --unset "allow-plugins.*/*" >/dev/null 2>&1 || true
 }
 
+# Copy the first .env template found to .env
 copy_env() {
     [ -f "$ENV_PATH" ] && return
     for source in .env.example .env.local .env.*; do
@@ -63,7 +66,7 @@ copy_env() {
     done
 }
 
-# download a zip/tar.gz project and extract to dest
+# Download a zip/tar.gz project and extract to dest
 download_and_extract() {
     local url="$1"
     local dest="$2"
@@ -86,10 +89,11 @@ web-mkdir "$APP_PATH" "$COMPOSER_HOME"
 cd "$APP_PATH"
 
 ################################################################################
-# case 1: project directory is empty
+# Case 1: project directory is empty
 if [ -z "$(ls -A "$APP_PATH")" ]; then
     hook pre-create-project
 
+    # Create the project from INITIAL_PROJECT: archive, git, composer or hook
     if [ -n "$INITIAL_PROJECT" ] && ! is-true "$DISABLE_AUTORUN_CREATING_PROJECT"; then
         case "$INITIAL_PROJECT" in
             http*.tar.gz | http*.zip)
@@ -123,6 +127,7 @@ if [ -z "$(ls -A "$APP_PATH")" ]; then
         debug-echo -s "Copied files from /source/ to $APP_PATH"
     fi
 
+    # Fresh project: install tools, then update packages
     if [ -f "$CONF_PATH" ]; then
         install_deps
         allow_plugins
@@ -153,7 +158,7 @@ fi
 ################################################################################
 vendor_dir="$(composer_exec config vendor-dir --quiet --absolute 2>/dev/null)"
 
-# case 2: project exists but vendor missing
+# Case 2: project exists but vendor missing
 if ! is-true "$DISABLE_AUTORUN_COMPOSER_INSTALL" && [ "$just_created" -ne 1 ]; then
     if [ -f "$CONF_PATH" ]; then
         if [ ! -d "$vendor_dir" ] || [ ! -e "$vendor_dir/composer/ClassLoader.php" ]; then
@@ -176,7 +181,7 @@ if ! is-true "$DISABLE_AUTORUN_COMPOSER_INSTALL" && [ "$just_created" -ne 1 ]; t
 fi
 
 ################################################################################
-# optional autoload optimization, only for an installed project with a lock file
+# Optional autoload optimization, only for an installed project with a lock file
 if is-true "${COMPOSER_OPTIMIZE_AUTOLOADER:-}" \
     && [ -f "$APP_PATH/composer.lock" ] \
     && [ -e "$vendor_dir/composer/ClassLoader.php" ]; then

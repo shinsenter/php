@@ -6,7 +6,7 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-# generate PHP config
+# Generate PHP config
 if has-cmd php && has-cmd php-envvars; then
     debug-echo "Generate PHP config."
     if is-true "$ALLOW_RUNTIME_PHP_ENVVARS"; then
@@ -18,7 +18,7 @@ if has-cmd php && has-cmd php-envvars; then
     fi
 fi
 
-# optimize PHP-FPM
+# Optimize PHP-FPM
 if has-cmd php-fpm && is-true "$ENABLE_TUNING_FPM"; then
     debug-echo -i "Tune PHP-FPM performance."
 
@@ -27,24 +27,24 @@ if has-cmd php-fpm && is-true "$ENABLE_TUNING_FPM"; then
     touch "$config_file"
     sed -i '/^; Tuning PM/,$d' "$config_file" 2>/dev/null || true
 
-    # gather system info
+    # Gather system info
     cpu_cores=$(container-limits cpu)
 
-    # read scaling from env or fallback to defaults
+    # Read scaling from env or fallback to defaults
     scale_children="${PHPFPM_SCALE_CHILDREN:-5}"
     scale_start="${PHPFPM_SCALE_START:-2}"
     scale_min_spare="${PHPFPM_SCALE_MIN_SPARE:-1}"
     scale_max_spare="${PHPFPM_SCALE_MAX_SPARE:-3}"
     max_requests="${PHPFPM_MAX_REQUESTS:-500}"
 
-    # a value the user passed to the container wins: tuning only replaces the defaults
+    # A value the user passed to the container wins: tuning only replaces the defaults
     # read /proc/1/environ once and match in the shell: no tr or grep per call
     nl='
 '
     proc_env="$nl$(tr '\0' '\n' </proc/1/environ 2>/dev/null)$nl"
     user_set() { case "$proc_env" in *"$nl$1="*) return 0 ;; esac; return 1; }
 
-    # calculate values
+    # Calculate values
     [ "$scale_children" -gt 0 ] 2>/dev/null || scale_children=1
     pm="dynamic"
     pm_max_children=$((cpu_cores * scale_children))
@@ -52,7 +52,7 @@ if has-cmd php-fpm && is-true "$ENABLE_TUNING_FPM"; then
         pm_max_children="$PHP_PM_MAX_CHILDREN"
     fi
 
-    # the other values follow max_children, so start and spare servers never exceed it
+    # The other values follow max_children, so start and spare servers never exceed it
     scaled() {
         local n=$((pm_max_children * $1 / scale_children))
         [ "$n" -ge 1 ] || n=1
@@ -82,7 +82,7 @@ EOF
     fi
 fi
 
-# load the custom-*.conf files last, so they win over the generated settings and the tuning.
+# Load the custom-*.conf files last, so they win over the generated settings and the tuning.
 # the other files in the directory are not loaded on purpose,
 # they would override the PHP_* variables.
 if has-cmd php-fpm && has-cmd php-envvars; then

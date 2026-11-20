@@ -20,6 +20,7 @@
 . /etc/os-release
 major="${VERSION_ID%%.*}"
 
+# Move Debian releases that deb.debian.org no longer serves to the archive
 if [ "$ID" = debian ] && [ -d /etc/apt ] && [ "${major:-99}" -lt 12 ]; then
     files="/etc/apt/sources.list /etc/apt/sources.list.d/*"
     # shellcheck disable=SC2086
@@ -31,7 +32,7 @@ if [ "$ID" = debian ] && [ -d /etc/apt ] && [ "${major:-99}" -lt 12 ]; then
         $files 2>/dev/null || true
     echo 'Acquire::Check-Valid-Until "false";' >/etc/apt/apt.conf.d/99-archive
 
-    # the signing keys of the oldest releases have expired
+    # The signing keys of the oldest releases have expired
     if [ "$major" -lt 11 ]; then
         # shellcheck disable=SC2086
         sed -i 's|^deb\(-src\)\{0,1\} http|deb\1 [trusted=yes] http|' $files 2>/dev/null || true
@@ -47,10 +48,10 @@ esac
 CA_CONF=/etc/ca-certificates.conf
 [ -f "$CA_CONF" ] || exit 0
 
-# an old ca-certificates package has no ISRG Root X1 yet
+# An old ca-certificates package has no ISRG Root X1 yet
 if [ "$ID" = debian ] && ! grep -q 'mozilla/ISRG_Root_X1.crt' "$CA_CONF"; then
     echo 'Install a newer ca-certificates package'
-    # the official images ship without package lists: clean up what we fetch
+    # The official images ship without package lists: clean up what we fetch
     lists="$(ls -A /var/lib/apt/lists 2>/dev/null | grep -vx -e partial -e lock)"
     [ -n "$lists" ] || apt-get update -qq
     apt-get install -qqy --no-install-recommends ca-certificates

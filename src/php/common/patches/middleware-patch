@@ -34,7 +34,7 @@ is_older() {
     [ -n "$installed" ] && [ "$(apk version -t "$installed" "$2-r0")" = '<' ]
 }
 
-# download <url> <file>: copies the file from the helper cache when it is there
+# Download <url> <file>: copies the file from the helper cache when it is there
 download() {
     if [ -f "/tmp/helper_cache/$2" ]; then
         cp "/tmp/helper_cache/$2" "$work/$2"
@@ -51,6 +51,7 @@ swap_libs() {
     cp -a "$1"/usr/lib/$2 /usr/lib/
 }
 
+# build_brotli: compile from source and replace the shared libraries
 build_brotli() {
     echo "Build brotli $BROTLI_VERSION"
     download "https://github.com/google/brotli/archive/refs/tags/v$BROTLI_VERSION.tar.gz" "brotli-$BROTLI_VERSION.tar.gz"
@@ -64,12 +65,13 @@ build_brotli() {
     ls -l /usr/lib/libbrotli*.so.*
 }
 
+# build_curl: compile from source, replace libcurl and curl, then check it
 build_curl() {
     echo "Build curl $CURL_VERSION"
     download "https://curl.se/download/curl-$CURL_VERSION.tar.xz" "curl-$CURL_VERSION.tar.xz"
     tar -xJf "$work/curl-$CURL_VERSION.tar.xz" -C "$work"
     cd "$work/curl-$CURL_VERSION"
-    # same options as the Alpine package
+    # Same options as the Alpine package
     # shellcheck disable=SC2086
     ./configure --prefix=/usr --disable-static --disable-manual --disable-ldap \
         --enable-ares --enable-ipv6 --enable-unix-sockets --enable-websockets \
@@ -99,6 +101,7 @@ cached_version() {
 # brotli tags look like v1.2.1, curl tags like curl-8_23_0
 BROTLI_VERSION="$(cached_version brotli tar.gz)"
 CURL_VERSION="$(cached_version curl tar.xz)"
+# No cached source: use the latest release
 if [ -z "$BROTLI_VERSION" ]; then
     BROTLI_VERSION="$(latest_release google/brotli)"
     BROTLI_VERSION="${BROTLI_VERSION#v}"
@@ -115,7 +118,7 @@ fi
 brotli=0
 curl=0
 is_older brotli-libs "$BROTLI_VERSION" && brotli=1
-# the latest curl needs OpenSSL 3 (libssl3 is Alpine 3.17 and newer)
+# The latest curl needs OpenSSL 3 (libssl3 is Alpine 3.17 and newer)
 if is_older curl "$CURL_VERSION"; then
     if apk info -e libssl3 >/dev/null; then
         curl=1
@@ -125,6 +128,7 @@ if is_older curl "$CURL_VERSION"; then
 fi
 [ "$brotli" = 1 ] || [ "$curl" = 1 ] || exit 0
 
+# Build tools go in a virtual package, removed at the end
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 deps='gcc make musl-dev'

@@ -7,6 +7,7 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 if [ -z "$DISABLE_AUTORUN_FIX_OWNER_GROUP" ] || ! is-true "$DISABLE_AUTORUN_FIX_OWNER_GROUP"; then
+    # Fix when forced by env, or when the owner of the index file is wrong
     index_path="$(app-index)"
     need_fixed=0
     if { [ -n "$FIX_APP_PATH_PERMISSION" ] && is-true "$FIX_APP_PATH_PERMISSION"; } \
@@ -23,6 +24,7 @@ if [ -z "$DISABLE_AUTORUN_FIX_OWNER_GROUP" ] || ! is-true "$DISABLE_AUTORUN_FIX_
         fi
     fi
 
+    # Fix it, and warn when it takes long
     if [ "$need_fixed" -eq 1 ]; then
         SECONDS=0
         web-chown fix
