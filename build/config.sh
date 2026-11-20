@@ -591,6 +591,11 @@ if [ "$SKIP_BUILD" != "1" ]; then
     fi
 
     if [ -n "$PHP_VERSION" ]; then
+        # A new PHP version can lack a variant for a while (for example 8.6-zts), so there is nothing to build from
+        if dockerhub_tag_missing "library/php" "$PHP_VERSION-${PHP_VARIANT#-}"; then
+            echo "WARN: no official image php:$PHP_VERSION-${PHP_VARIANT#-}, skip the build" >&2
+            SKIP_BUILD=1
+        fi
         PHP_SHA="$(get_dockerhub_tag_digest_or_now "library/php" "$PHP_VERSION-${PHP_VARIANT#-}")"
         BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(php:$PHP_VERSION-${PHP_VARIANT#-}@$PHP_SHA)"
 

@@ -489,6 +489,15 @@ test_helpers() {
     HELPER_CACHE_DIR="$tmp/hc" cache_file "http://x/y" y.txt
     check_eq "cache_file puts the file in the cache" "http://x/y" "$(cat "$tmp/hc/y.txt")"
 
+    # dockerhub_tag_missing: only the HTTP status 404 counts, with a curl stub (no network)
+    mkdir -p "$tmp/curl"
+    printf '#!/bin/sh\necho "$CURL_CODE"\n' > "$tmp/curl/curl"
+    chmod +x "$tmp/curl/curl"
+    check "dockerhub_tag_missing: 404 is missing" env PATH="$tmp/curl:$PATH" CURL_CODE=404 bash -c 'source "$1"; dockerhub_tag_missing library/php 8.6-zts' _ "$BASE_DIR/build/helpers.sh"
+    check_not "dockerhub_tag_missing: 200 is not missing" env PATH="$tmp/curl:$PATH" CURL_CODE=200 bash -c 'source "$1"; dockerhub_tag_missing library/php 8.5-zts' _ "$BASE_DIR/build/helpers.sh"
+    check_not "dockerhub_tag_missing: a rate limit is not missing" env PATH="$tmp/curl:$PATH" CURL_CODE=429 bash -c 'source "$1"; dockerhub_tag_missing library/php 8.6-zts' _ "$BASE_DIR/build/helpers.sh"
+    check_not "dockerhub_tag_missing: no answer is not missing" env PATH="$tmp/curl:$PATH" CURL_CODE=000 bash -c 'source "$1"; dockerhub_tag_missing library/php 8.6-zts' _ "$BASE_DIR/build/helpers.sh"
+
     # plan_matrix <platforms> <jq query on the first or second entry>
     plan() { plan_matrix "$1" | jq -r "$2"; }
     check_eq "plan_matrix: amd64 on x64" "ubuntu-26.04||linux-amd64" "$(plan linux/amd64 '.[0] | "\(.runner)|\(.qemu)|\(.slug)"')"

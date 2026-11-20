@@ -19,15 +19,15 @@ Code that runs as the application user (`www-data` by default), for example thro
 - Cause: by design. `web-do`, `autorun`, `ownership` and the `web-*` utilities need root to switch users and fix owners. `os-common.dockerfile` installs `/sbin/su-exec`, `autorun`, `ownership`, `web-*` and the entrypoint with mode 4755. Whether this `su-exec` build refuses to switch to root is not checked.
 - Fix: not fixed. Needs a design change, for example limiting these helpers to root or to a dedicated group.
 
-### [#469](https://github.com/shinsenter/php/issues/469) One failed base build skips the servers and apps of every PHP version
+## 6.3.0
+
+### [#469](https://github.com/shinsenter/php/issues/469) A missing upstream PHP image fails the build and skips the servers and apps of every PHP version
 
 On 2026-11-19 the upstream images `php:8.6-cli-alpine` and `php:8.6-zts-alpine` did not exist yet, so those builds failed. The jobs that build on top of them were skipped for every PHP version, and the `8.5-*` tags stayed on PHP 8.5.12 although 8.5.13 fixed two critical vulnerabilities. The maintainer built the 8.5 images by hand.
 
 - Cause: read from the workflows, not from the failed run log. `template-stack.yml` runs the servers with `needs: base`, and `base` is one call of `template-php.yml` for all PHP versions. One failed version fails `base`, so the servers of every version are skipped. `build-all.yml` runs `server-cache` with `needs: [prepare, cli, fpm]` and the apps with `needs: server-cache`, so the apps are skipped the same way.
-- Fix: not fixed. Needs a job graph where a failed version blocks only its own servers and apps. The upstream images exist now, so this stays hidden until the next PHP version is added before its Alpine images are published.
-- Related: `PHP_SKIP_MODULES` (6.3.0) stops an unsupported extension from failing a build. It does not cover a missing upstream image.
-
-## 6.3.0
+- Fix: `build/config.sh` skips a build, instead of failing it, when Docker Hub answers 404 for the official `php` tag it builds from. The servers and apps of the other versions then run as usual. Any other answer (an outage, a rate limit) does not skip a build. `php:8.6-zts` and `php:8.6-zts-alpine` are still missing upstream, so `zts` 8.6 is skipped.
+- Tested: `tests/run.sh helpers` covers 404, 200, 429 and no answer. `build/config.sh` gives `SKIP_BUILD=1` for `zts` 8.6 on Debian and Alpine and `0` for `fpm` and `cli` 8.6. A full pipeline run with a missing base is not tested.
 
 ### [#475](https://github.com/shinsenter/php/issues/475) Apache stops: "module log_config_module is built-in and can't be loaded"
 

@@ -136,6 +136,13 @@ get_dockerhub_tag_digest() {
 
 # Same as above, but a failed lookup returns a value that changes on every run,
 # so the image is rebuilt instead of being wrongly treated as up to date.
+# True only when Docker Hub answers 404 for the tag.
+# Any other answer (an outage, a rate limit, no network) is not "missing", so a build is never skipped by mistake.
+# Usage: dockerhub_tag_missing <namespace/repo> <tag>
+dockerhub_tag_missing() {
+    [ "$(curl -ksL -m 10 -o /dev/null -w '%{http_code}' "https://registry.hub.docker.com/v2/repositories/$1/tags/$2" 2>/dev/null)" = 404 ]
+}
+
 get_dockerhub_tag_digest_or_now() {
     local digest
     digest="$(get_dockerhub_tag_digest "$@")" || true

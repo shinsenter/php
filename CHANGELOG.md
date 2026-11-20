@@ -14,6 +14,7 @@ All notable changes to this project are documented in this file.
 - Point `latest` to PHP 8.5 until the extensions of PHP 8.6 are supported.
 - Build each platform in its own job, on a native ARM runner when one is available.
 - Fix `fpm-apache` failing to start with "module log_config_module is built-in and can't be loaded", and stop the build on a config syntax error (#475).
+- Skip a build when the official PHP image of its tag does not exist (for example `8.6-zts`), so one missing image no longer fails the run and skips the other builds (#469).
 
 
 ## [6.2.0] - 2026-11-19
