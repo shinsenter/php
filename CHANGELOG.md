@@ -4,7 +4,6 @@ All notable changes to this project are documented in this file.
 
 
 ## [Unreleased]
-- Point `latest` back to PHP 8.5, because the PHP 8.6 images still lack some modules (`apcu`, `igbinary`, `msgpack`, `redis`, `sodium`, `yaml`). The `8.6` tags stay available.
 
 
 ## [6.3.0] - 2026-11-21
@@ -12,7 +11,7 @@ All notable changes to this project are documented in this file.
 - Fix `fpm-apache` failing to start with "module log_config_module is built-in and can't be loaded" (#475). The build now stops on a config syntax error.
 - Skip PHP extensions that docker-php-extension-installer does not support for the PHP version, so one unsupported module no longer fails the build. Add `mbstring`, and run `pecl upgrade-all` before the extensions (the old call used a command that does not exist).
 - Skip a build when the official PHP image does not exist, so one missing image no longer fails the run and skips the other builds (#469). `zts` of PHP 8.6 builds on `8.6-rc` for now, and `frankenphp` of PHP 8.6 is skipped.
-- `latest` is PHP 8.6. Some modules are not installed on it yet (`apcu`, `igbinary`, `msgpack`, `redis`, `sodium`, `yaml`), because docker-php-extension-installer does not support them for PHP 8.6. FrankenPHP `latest` stays on PHP 8.5.
+- `latest` stays on PHP 8.5. The PHP 8.6 images are published as `8.6` tags without some modules (`apcu`, `igbinary`, `msgpack`, `redis`, `sodium`, `yaml`), because docker-php-extension-installer does not support them for PHP 8.6 yet.
 - The package records of Nginx and Apache (Debian and Alpine) now show the version built from source, so scanners no longer report CVEs of the older OS version.
 - Use less runner time and bandwidth in the workflows: each platform builds in its own job (on a native ARM runner when possible), one Trivy scan covers all images, and jobs without work are skipped.
 

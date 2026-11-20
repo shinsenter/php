@@ -21,7 +21,7 @@ Code that runs as the application user (`www-data` by default), for example thro
 
 ### The PHP 8.6 images lack some modules
 
-Checked on 2026-11-21. docker-php-extension-installer does not list `apcu`, `igbinary`, `msgpack`, `redis`, `sodium` and `yaml` for PHP 8.6, so the PHP 8.6 images are built without them (`PHP_SKIP_MODULES`). Code that needs one of them fails on the `8.6` tags. `latest` was PHP 8.6 in 6.3.0 and points to PHP 8.5 again for this reason.
+Checked on 2026-11-21. docker-php-extension-installer does not list `apcu`, `igbinary`, `msgpack`, `redis`, `sodium` and `yaml` for PHP 8.6, so the PHP 8.6 images are built without them (`PHP_SKIP_MODULES`). Code that needs one of them fails on the `8.6` tags. `latest` stays on PHP 8.5 for this reason.
 
 - Cause: the PHP 8.6 extensions have no release that IPE supports yet.
 - Fix: not fixed. The skip list is read from the IPE data file on every build, so a module comes back by itself once IPE lists it. Move `LATEST_PHP` in `build/config.sh` to 8.6 when the modules are back.
