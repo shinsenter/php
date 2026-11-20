@@ -7,7 +7,7 @@ All notable changes to this project are documented in this file.
 
 
 ## [6.2.1] - 2026-11-20
-- The package records of Nginx and Apache (Debian and Alpine) and of curl and brotli (Alpine) now show the version built from source, so scanners no longer report CVEs of the older OS version.
+- The package records of Nginx and Apache (Debian and Alpine) now show the version built from source, so scanners no longer report CVEs of the older OS version.
 
 
 ## [6.2.0] - 2026-11-19
