@@ -6,17 +6,14 @@ All notable changes to this project are documented in this file.
 ## [Unreleased]
 
 
-## [6.3.0] - 2026-11-20
-- The package records of Nginx and Apache (Debian and Alpine) now show the version built from source, so scanners no longer report CVEs of the older OS version.
+## [6.3.0] - 2026-11-21
 - Add `linux/arm/v7` (32-bit ARM) images. RoadRunner stays on `linux/amd64` and `linux/arm64`.
-- Skip PHP extensions that docker-php-extension-installer does not support for the PHP version, so one unsupported module no longer fails the build. Add `mbstring`.
-- Run `pecl upgrade-all` before installing extensions. The old call used a command that does not exist.
+- Fix `fpm-apache` failing to start with "module log_config_module is built-in and can't be loaded" (#475). The build now stops on a config syntax error.
+- Skip PHP extensions that docker-php-extension-installer does not support for the PHP version, so one unsupported module no longer fails the build. Add `mbstring`, and run `pecl upgrade-all` before the extensions (the old call used a command that does not exist).
+- Skip a build when the official PHP image does not exist, so one missing image no longer fails the run and skips the other builds (#469). `zts` of PHP 8.6 builds on `8.6-rc` for now, and `frankenphp` of PHP 8.6 is skipped.
 - Point `latest` to PHP 8.5 until the extensions of PHP 8.6 are supported.
-- Build each platform in its own job, on a native ARM runner when one is available.
-- Run one Trivy scan for all images at the end of the run, instead of one scan per image.
-- Fix `fpm-apache` failing to start with "module log_config_module is built-in and can't be loaded", and stop the build on a config syntax error (#475).
-- Skip a build when the official PHP image of its tag does not exist (for example `8.6-zts`), so one missing image no longer fails the run and skips the other builds (#469).
-- Build `zts` of PHP 8.6 on the `8.6-rc` image until upstream publishes `8.6-zts`, and skip `frankenphp` of PHP 8.6 (no upstream image yet).
+- The package records of Nginx and Apache (Debian and Alpine) now show the version built from source, so scanners no longer report CVEs of the older OS version.
+- Use less runner time and bandwidth in the workflows: each platform builds in its own job (on a native ARM runner when possible), one Trivy scan covers all images, and jobs without work are skipped.
 
 
 ## [6.2.0] - 2026-11-19
