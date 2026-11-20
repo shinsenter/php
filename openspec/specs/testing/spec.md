@@ -22,6 +22,7 @@ Run commands: `AGENTS.md`. Each test prints `<name>: N passed, M failed`, a `FAI
 | `build/versions.sh`, `build/helpers.sh` | `run.sh versions` |
 | `src/php-backports/` | `run.sh backports` |
 | `build/config.sh` | `run.sh config` |
+| `build/check-updates.sh` (start, cleanup, with a stub of `gh`) | `run.sh updates` |
 | `get_context_hash` | `run.sh fingerprint` |
 | Size helpers in `build/helpers.sh` | `run.sh size` |
 | Other pure functions in `build/helpers.sh` | `run.sh helpers` |
@@ -40,7 +41,8 @@ The repo SHALL follow these rules for: test selection and docker tests.
 - **WHEN** this area is changed
 - **THEN** all of the following hold:
 - A failing check SHALL be treated as a finding: fix the cause or tell the user. MUST NOT edit a test (or a backport patch) to make it pass without asking.
-- Add a test: write `test_<topic>` in `tests/run.sh` with `check`, `check_not`, `check_eq`, `check_re`, end with `finish`, add `<topic>` to the default list at the bottom. It SHALL stay offline (no `docker`, no network).
+- Add a test: write `test_<topic>` in `tests/run.sh` with `check`, `check_not`, `check_eq`, `check_re`, `has`, `lacks` (a file holds a text or not) and `join_lines`, end with `finish`, add `<topic>` to the default list at the bottom. It SHALL stay offline (no `docker`, no network).
+- Test the contract (ports, paths, defaults, behavior with stubs), not how a file is written: a check that greps an implementation detail breaks on every refactor. Group similar checks in a loop or a small function.
 - The `config` test runs only the paths of `build/config.sh` that end before a network call (Alpine on PHP below 7.1). MUST NOT add cases that reach the registry or GitHub API.
 - No-build checks: `sh -n`, `bash -n`, `git apply --check`, `git diff`.
 - Not covered offline, ask the user for a run: `patch -p1 --dry-run` on a source tree, image contents, hook and util runtime (`realpath -m` needs GNU, so `app-root` fails on macOS). Use `tests/build-test.sh`, `tests/compose-test.sh`.
@@ -51,4 +53,5 @@ The repo SHALL follow these rules for: test selection and docker tests.
 - A webapp needing setup before `/` answers gets a hook in `tests/compose-hooks/`, mounted into `/etc/hooks/post-create-project/` (Sulu, Craft CMS). The project is root-owned then, so the hook starts with `web-chown fix "$APP_PATH"`.
 - `compose-test.sh` pulls the image first and replaces a local build with a published tag. Retag the build to a tag absent from ghcr and pass `IMAGE_TAG=`.
 - `tests/scaling-test.sh`: see `openspec/specs/scaling/spec.md`.
-- `tests/tools/` holds helpers, not tests: `sbom.sh`, `image-slim-check.sh`, `workflow-check.sh` (actionlint and zizmor on `.github/` through Docker, read-only, no workflow run). `tests/logs/` is git-ignored, named `<YYYYMMDD>-<script>-...`.
+- The `Compose test` workflow (`compose-test.yml`, manual, after a release build) pulls the published images and runs `compose-test.sh -n 1` for each service and OS in its own job (default: the `latest` tags, all services). `TAG_PREFIX` is `dev-` by default in the script and empty in the workflow input. A failed check never fails the run, the result goes to the job summary.
+- `tests/tools/` holds helpers, not tests: `sbom.sh`, `image-slim-check.sh`, `cve-fix.sh` (trivy scan of the published images, then one Claude Code call to fix the cause), `workflow-check.sh` (actionlint and zizmor on `.github/` through Docker, read-only, no workflow run). `tests/logs/` is git-ignored, named `<YYYYMMDD>-<script>-...`.

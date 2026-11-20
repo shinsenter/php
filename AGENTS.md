@@ -13,7 +13,8 @@ Environment variables change PHP and FPM settings, so a change needs no rebuild.
 - Reuse code. One mechanism serves every PHP version, with no per-version branches in the logic.
 - Same behavior across PHP versions. Differences live in data, such as a per-version patch folder.
 - No bloat in the base image: no extra files or packages. Remove build packages in the layer that installs them.
-- Short, readable code. Comments explain why, not what.
+- Short, readable code.
+- Comments make a long file easy to scan: one short line above a block says what the block does. Add the reason when it is not obvious: a limit, a trap, a trade-off, a link to the source. Do not narrate line by line, and do not repeat a name. Same style in every file: short, plain, practical English. A one-line label starts with a capital letter and has no final period. Several sentences go one per line, each with a period. Rules: spec `conventions`.
 - Verify through the build log. Do not ship check files in the image.
 
 ## Behavioral guidelines
@@ -51,7 +52,8 @@ Format and OpenSpec change flow (`openspec/changes/<id>/`): spec `conventions`. 
 | `src/webapps/` | Images for PHP frameworks and applications |
 | `build/config.sh` | Produces the build variables: tag, platforms, context, fingerprint |
 | `build/versions.sh` | Version lists: maintained 8.6 to 8.2, outdated 8.1 to 5.6 |
-| `build/helpers.sh` | Shared functions: version compare, logging, registry lookups, hashing |
+| `build/helpers.sh` | Shared functions, one section per purpose: versions, remote content, downloads, IPE modules, published images, build plan, context and hashes |
+| `build/check-updates.sh` | Scripts of the Watch updates workflow: `check` (default), `start`, `cleanup` |
 | Other paths (patches, `nginx-build`, `.dockerfile-x/`, `tests/`, `.github/`) | spec `build-fingerprint` |
 
 Dockerfiles use the `INCLUDE ./path/name` syntax (dockerfile-x). `Dockerfile` and `meta.dockerfile` are generated at build time and git ignores them.
@@ -61,7 +63,7 @@ Utilities inside the image: `pkg-add` and `pkg-del` (install and remove packages
 ## Build and test
 
 - Trial build: `tests/build-test.sh <os> <app> <php-version> [server]`, for example `tests/build-test.sh '' with-nginx 8.4`. An empty `<os>` is Debian. It also builds the images it depends on. Variables: `SKIP_SQUASH=1`, `BUILD_TAG_PREFIX`.
-- Offline tests need no Docker, so run them after a change and report the real output: `tests/run.sh`, or `tests/run.sh lint|versions|backports|config|scaling|size|fingerprint|helpers`.
+- Offline tests need no Docker, so run them after a change and report the real output: `tests/run.sh`, or `tests/run.sh lint|versions|backports|config|scaling|ssh|defaults|size|fingerprint|helpers|updates`.
 - A failing check is a finding. Fix the cause or tell the user. Do not edit a test to make it pass.
 
 ## Working rules

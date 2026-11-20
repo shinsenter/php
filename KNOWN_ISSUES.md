@@ -19,6 +19,14 @@ Code that runs as the application user (`www-data` by default), for example thro
 - Cause: by design. `web-do`, `autorun`, `ownership` and the `web-*` utilities need root to switch users and fix owners. `os-common.dockerfile` installs `/sbin/su-exec`, `autorun`, `ownership`, `web-*` and the entrypoint with mode 4755. Whether this `su-exec` build refuses to switch to root is not checked.
 - Fix: not fixed. Needs a design change, for example limiting these helpers to root or to a dedicated group.
 
+### [#469](https://github.com/shinsenter/php/issues/469) One failed base build skips the servers and apps of every PHP version
+
+On 2026-11-19 the upstream images `php:8.6-cli-alpine` and `php:8.6-zts-alpine` did not exist yet, so those builds failed. The jobs that build on top of them were skipped for every PHP version, and the `8.5-*` tags stayed on PHP 8.5.12 although 8.5.13 fixed two critical vulnerabilities. The maintainer built the 8.5 images by hand.
+
+- Cause: read from the workflows, not from the failed run log. `template-stack.yml` runs the servers with `needs: base`, and `base` is one call of `template-php.yml` for all PHP versions. One failed version fails `base`, so the servers of every version are skipped. `build-all.yml` runs `server-cache` with `needs: [prepare, cli, fpm]` and the apps with `needs: server-cache`, so the apps are skipped the same way.
+- Fix: not fixed. Needs a job graph where a failed version blocks only its own servers and apps. The upstream images exist now, so this stays hidden until the next PHP version is added before its Alpine images are published.
+- Related: `PHP_SKIP_MODULES` (6.3.0) stops an unsupported extension from failing a build. It does not cover a missing upstream image.
+
 ## 6.1.0
 
 ### [#456](https://github.com/shinsenter/php/issues/456) Client IP behind Cloudflare wrong in the first 6.1.0 build

@@ -6,7 +6,7 @@ All notable changes to this project are documented in this file.
 ## [Unreleased]
 
 
-## [6.2.1] - 2026-11-20
+## [6.3.0] - 2026-11-20
 - The package records of Nginx and Apache (Debian and Alpine) now show the version built from source, so scanners no longer report CVEs of the older OS version.
 
 

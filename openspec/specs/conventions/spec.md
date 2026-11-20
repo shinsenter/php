@@ -26,6 +26,8 @@ The repo SHALL follow these rules for: formatting and comments.
 - **WHEN** this area is changed
 - **THEN** all of the following hold:
 - Every file created or edited SHALL match the surrounding file. Dockerfiles: one command per `RUN` line chained with `&&`; continuation lines indent 4 spaces, deeper arguments 4 more. Shell 4 spaces. YAML 2 spaces. No tabs.
+- Comments SHALL let a reader scan a long file: one short line above a block (a `RUN` step, a function, a group of related lines) that says what the block does. Add the reason when it is not obvious: a limit or trap, a trade-off, a link to the source. A block that is clear from its first line needs no comment. MUST NOT narrate line by line, restate a name or say what a single obvious line does. Keep the author header, section titles, a disabled option that is listed on purpose, and a `Usage:` line for a function or script that other files call. A comment-only change SHALL leave `grep -v '^ *#'` of the file the same.
+- Comment style SHALL be the same in every file: short, plain, practical English, no filler words, no emoji. A one-line label starts with a capital letter and has no final period (`# Install the PHP modules`). A comment of several sentences puts one sentence per line, each starting with a capital letter and ending with a period. Names of tools, commands and files keep their own spelling.
 - Comment blocks: one sentence per line, no fixed-width wrap, short sentences. A sentence over about 100 columns breaks at a comma, semicolon or before a conjunction ("so", "because", "when", "and"); never inside a path, quoted string or short phrase. Several very short sentences (about 40 columns or less) can share a line up to about 100 columns.
 
 ### Requirement: KNOWN_ISSUES.md
