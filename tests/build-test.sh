@@ -77,18 +77,19 @@ fi
     $command --tag "$BUILD_TAG" \
         --provenance=true --sbom=true \
         --platform  "linux/${PLATFORM:-$(uname -m)}" \
-        --build-arg DEBUG=$BUILD_DEBUG \
         --build-arg APACHE_VERSION=$APACHE_VERSION \
         --build-arg BUILD_DATE=$BUILD_DATE \
-        --build-arg BUILD_FROM_IMAGE=$BUILD_FROM_IMAGE \
-        --build-arg BUILD_TAG=$BUILD_TAG \
-        --build-arg BUILD_NAME=$BUILD_TAG \
         --build-arg BUILD_DESC=$BUILD_TAG \
+        --build-arg BUILD_FROM_IMAGE=$BUILD_FROM_IMAGE \
+        --build-arg BUILD_NAME=$BUILD_TAG \
         --build-arg BUILD_SOURCE_IMAGE=$BUILD_SOURCE_IMAGE \
+        --build-arg BUILD_TAG=$BUILD_TAG \
         --build-arg BUILD_TAG_PREFIX=$BUILD_TAG_PREFIX \
+        --build-arg DEBUG=$BUILD_DEBUG \
         --build-arg NGINX_VERSION=$NGINX_VERSION \
         --build-arg OS_BASE=$OS_BASE \
         --build-arg OS_VERSION=$OS_VERSION \
+        --build-arg PHP_SKIP_MODULES="$PHP_SKIP_MODULES" \
         --build-arg PHP_VARIANT=$PHP_VARIANT \
         --build-arg PHP_VERSION=$PHP_VERSION \
         --build-arg S6_PATH=$S6_PATH \
@@ -102,7 +103,7 @@ fi
 
 exit $exit_code
 
-# build examples
+# Build examples
 # PLATFORM=amd64 ./tests/build-test.sh '' 'base-os'
 # PLATFORM=amd64 ./tests/build-test.sh 'alpine' 'base-os'
 

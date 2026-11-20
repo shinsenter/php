@@ -23,9 +23,14 @@ ENV COMPOSER_ALLOW_SUPERUSER="1"
 ADD --link ./common/shell-php/ /usr/local/utils/
 
 ################################################################################
+
+ARG PHP_SKIP_MODULES
 RUN <<'EOF'
 echo 'Install Composer and PHP extensions'
 [ -z "$DEBUG" ] || set -x; set -e
+
+# Update PECL
+has-cmd pecl && pecl upgrade-all || true
 
 # Update PEAR
 if has-cmd pear; then
@@ -112,6 +117,7 @@ modules=(
     # lzf
     # mailparse
     # maxminddb
+    mbstring
     # mcrypt
     # md4c
     # memcache
@@ -215,7 +221,22 @@ modules=(
     # zookeeper
     # zstd
 )
-has-cmd pecl && upgrade-all || true
+
+# Skip the modules that IPE does not support on this PHP version (PHP_SKIP_MODULES, from build/config.sh),
+# because one failed module fails the whole install
+if [ -n "$PHP_SKIP_MODULES" ]; then
+    wanted=("${modules[@]}"); modules=()
+    for m in "${wanted[@]}"; do
+        # A module that PHP already has (for example mbstring before 8.6) is never skipped
+        if [[ " $PHP_SKIP_MODULES " == *" $m "* ]] && ! php -r 'exit(extension_loaded($argv[1]) ? 0 : 1);' "$m"; then
+            echo "WARN: skip $m, not supported on PHP $PHP_VERSION"
+        else
+            modules+=("$m")
+        fi
+    done
+fi
+
+# Install the modules, errors are ignored here and checked below
 phpaddmod "${modules[@]}"   || true
 
 # Show installed PHP modules and Composer version
@@ -229,7 +250,7 @@ if [[ "$php_version" =~ (alpha|beta|RC|dev) ]]; then
     echo "WARN: skip required modules check for pre-release PHP $php_version"
 else
     required_modules=(bcmath curl dom gd json mbstring mysqli opcache openssl pdo pdo_mysql pdo_pgsql pdo_sqlite phar session simplexml zlib)
-    # php -m lists opcache as "Zend OPcache", so normalize it to its module name.
+    # php -m lists opcache as "Zend OPcache", so normalize it to its module name
     installed_modules="$(php -m | sed 's/^Zend OPcache$/opcache/' | tr '[:upper:]' '[:lower:]')"
     missing_modules=()
     for module in "${required_modules[@]}"; do
