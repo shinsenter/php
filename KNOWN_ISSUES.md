@@ -27,6 +27,16 @@ On 2026-11-19 the upstream images `php:8.6-cli-alpine` and `php:8.6-zts-alpine` 
 - Fix: not fixed. Needs a job graph where a failed version blocks only its own servers and apps. The upstream images exist now, so this stays hidden until the next PHP version is added before its Alpine images are published.
 - Related: `PHP_SKIP_MODULES` (6.3.0) stops an unsupported extension from failing a build. It does not cover a missing upstream image.
 
+## 6.3.0
+
+### [#475](https://github.com/shinsenter/php/issues/475) Apache stops: "module log_config_module is built-in and can't be loaded"
+
+The `fpm-apache` images of 6.2.0 and 6.2.1 (checked on `8.3-fpm-apache`, Apache 2.4.71 Debian) fail to start with a syntax error in `/etc/apache2/modules.conf` for `log_config_module` and `unixd_module`. The reporter worked around it by commenting both lines in a mounted `modules.conf`.
+
+- Cause: in the published image `apache2 -l` lists `mod_log_config` and `mod_unixd` as compiled in, and the module folder also holds `mod_log_config.so` and `mod_unixd.so` from the build day. `apache-config.dockerfile` wrote every `.so` into `modules.conf` and enabled both modules with `a2enmod`, so Apache loaded them a second time. Why that binary has them built in, while a local build of the same files has them as modules, is not recorded.
+- Fix: the config step reads the built-in modules from `apache2 -l` (or `httpd -l`) and leaves them out of `modules.conf` and out of the `a2enmod` list. The build now stops when `apache2 -t` reports a syntax error.
+- Tested: on the published `8.3-fpm-apache` image, removing the two lines the new filter leaves out turns the error into `Syntax OK`. Local builds of `with-apache` pass `apache2 -t` on Debian 8.3, 7.4, 5.6 and Alpine 8.3, 7.4. Those local builds have both modules as shared, so they do not show the original error.
+
 ## 6.1.0
 
 ### [#456](https://github.com/shinsenter/php/issues/456) Client IP behind Cloudflare wrong in the first 6.1.0 build

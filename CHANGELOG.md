@@ -13,6 +13,7 @@ All notable changes to this project are documented in this file.
 - Run `pecl upgrade-all` before installing extensions. The old call used a command that does not exist.
 - Point `latest` to PHP 8.5 until the extensions of PHP 8.6 are supported.
 - Build each platform in its own job, on a native ARM runner when one is available.
+- Fix `fpm-apache` failing to start with "module log_config_module is built-in and can't be loaded", and stop the build on a config syntax error (#475).
 
 
 ## [6.2.0] - 2026-11-19
