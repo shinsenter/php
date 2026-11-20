@@ -50,7 +50,7 @@ The list comes from `build/versions.sh`. Only the latest image of each tag gets 
 
 ## Get security updates
 
-When PHP publishes a security release, the images are rebuilt after the official `php` image for that version appears on Docker Hub. The [Watch updates](https://code.shin.company/php/actions/workflows/watch-updates.yml) workflow checks every 30 minutes and builds only the affected versions. See [How Images Are Updated](README.md#how-images-are-updated).
+When PHP publishes a security release, the images are rebuilt after the official `php` image for that version appears on Docker Hub. The [Watch updates](https://code.shin.company/php/actions/workflows/watch-updates.yml) workflow checks about every 10 minutes and builds only the affected versions. See [How Images Are Updated](README.md#how-images-are-updated).
 
 To apply a fix as soon as it is available:
 

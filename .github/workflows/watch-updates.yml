@@ -12,7 +12,7 @@ name: Watch updates
 ################################################################################
 
 # Replaces the old daily build.
-# Every 30 minutes this workflow compares the published images with their current inputs
+# Every 10 minutes this workflow compares the published images with their current inputs
 # (official PHP images, Composer, IPE, s6-overlay, FrankenPHP, RoadRunner,
 # base OS images and the sources in this repository). It reads registry manifests only.
 # When something changed, it starts "Build all" for the affected PHP versions.
@@ -25,7 +25,10 @@ name: Watch updates
 
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    # Every 10 minutes, off-peak: GitHub delays or drops runs queued at :00 and :30.
+    # Some runs are still lost, so a short period keeps the gap small. Overlaps queue
+    # behind the concurrency group.
+    - cron: "5-59/10 * * * *"
   workflow_dispatch:
     inputs:
       keep_days:

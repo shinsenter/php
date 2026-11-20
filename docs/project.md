@@ -30,7 +30,7 @@ For stable, production-ready images we maintain dated tags in a separate reposit
 
 ## How Images Are Updated
 
-Images are no longer rebuilt on a daily schedule. The [Watch updates](https://code.shin.company/php/actions/workflows/watch-updates.yml) workflow runs every 30 minutes and compares each published image with its current inputs:
+Images are no longer rebuilt on a daily schedule. The [Watch updates](https://code.shin.company/php/actions/workflows/watch-updates.yml) workflow runs about every 10 minutes and compares each published image with its current inputs:
 
 - the official `php` image of that version (new PHP release or security fix)
 - Composer, docker-php-extension-installer, s6-overlay, FrankenPHP, RoadRunner
