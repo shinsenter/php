@@ -19,6 +19,14 @@ Code that runs as the application user (`www-data` by default), for example thro
 - Cause: by design. `web-do`, `autorun`, `ownership` and the `web-*` utilities need root to switch users and fix owners. `os-common.dockerfile` installs `/sbin/su-exec`, `autorun`, `ownership`, `web-*` and the entrypoint with mode 4755. Whether this `su-exec` build refuses to switch to root is not checked.
 - Fix: not fixed. Needs a design change, for example limiting these helpers to root or to a dedicated group.
 
+### `hyperf` and `mautic` have no `linux/arm/v7` image
+
+Found by the first full build with arm/v7 (2026-11-20, CI). Both images build for `linux/amd64` and `linux/arm64` only, through `platform=` in `APP_RULES` of `build/config.sh`.
+
+- Cause, `hyperf`: IPE installs `swoole-5.0.3` on arm/v7 and it does not compile with PHP 8.2 to 8.5 (`php_url_encode_hash_ex: too many arguments`). Why IPE picks that version is not recorded.
+- Cause, `mautic` on Debian: `imap` needs `libc-client2007e`, which depends on `libssl3`, and apt cannot install it on armhf (`Unmet dependencies`). The Debian armhf package may be named `libssl3t64`, not verified. `mautic` on Alpine did build for arm/v7, and is skipped with the rule for both.
+- Fix: not fixed. Remove the `platform=` rule when `swoole` and `imap` install on arm/v7.
+
 ## 6.3.0
 
 ### [#469](https://github.com/shinsenter/php/issues/469) A missing upstream PHP image fails the build and skips the servers and apps of every PHP version

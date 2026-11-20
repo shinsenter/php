@@ -52,7 +52,7 @@ flightphp:min=7.4 server=nginx
 grav:min=8.3 server=apache
 
 # https://hyperf.wiki/3.1/#/en/quick-start/install
-hyperf:min=8.2 server=nginx
+hyperf:min=8.2 server=nginx platform=linux/amd64,linux/arm64
 
 # https://docs.invoiceshelf.com/install/manual.html
 invoiceshelf:min=8.2 base=laravel
@@ -73,7 +73,7 @@ magento:min=8.3 latest=8.4 server=nginx
 matomo:min=8.1 server=apache
 
 # https://docs.mautic.org/en/5.x/getting_started/how_to_install_mautic.html#installing-with-composer
-mautic:min=8.2 server=apache
+mautic:min=8.2 server=apache platform=linux/amd64,linux/arm64
 
 # https://docs.nextcloud.com/server/latest/admin_manual/installation/system_requirements.html
 nextcloud:min=8.2 latest=8.5 server=apache
