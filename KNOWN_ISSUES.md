@@ -19,6 +19,13 @@ Code that runs as the application user (`www-data` by default), for example thro
 - Cause: by design. `web-do`, `autorun`, `ownership` and the `web-*` utilities need root to switch users and fix owners. `os-common.dockerfile` installs `/sbin/su-exec`, `autorun`, `ownership`, `web-*` and the entrypoint with mode 4755. Whether this `su-exec` build refuses to switch to root is not checked.
 - Fix: not fixed. Needs a design change, for example limiting these helpers to root or to a dedicated group.
 
+### The `latest` tag (PHP 8.6) lacks some modules
+
+Checked on 2026-11-21. docker-php-extension-installer does not list `apcu`, `igbinary`, `msgpack`, `redis`, `sodium` and `yaml` for PHP 8.6, so the PHP 8.6 images are built without them (`PHP_SKIP_MODULES`). Code that needs one of them fails on `latest`.
+
+- Cause: the PHP 8.6 extensions have no release that IPE supports yet.
+- Fix: not fixed. The skip list is read from the IPE data file on every build, so a module comes back by itself once IPE lists it. Use `8.5` tags when you need these modules.
+
 ### `hyperf` and `mautic` have no `linux/arm/v7` image
 
 Found by the first full build with arm/v7 (2026-11-20, CI). Both images build for `linux/amd64` and `linux/arm64` only, through `platform=` in `APP_RULES` of `build/config.sh`.

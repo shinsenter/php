@@ -248,7 +248,7 @@ OS="$1"; APP="$2"; PHP_VERSION="$3"; PREFER_SERVER="$4"
 APACHE_VERSION="${APACHE_VERSION:-stable}"
 COMPOSER_VERSION="${COMPOSER_VERSION:-latest}"
 IPE_VERSION="${IPE_VERSION:-latest}"
-LATEST_PHP="8.5"
+LATEST_PHP="8.6"
 LATEST_S6=
 NGINX_VERSION="${NGINX_VERSION:-mainline}"
 OS_BASE="${OS_BASE:-debian}"
@@ -344,6 +344,8 @@ case "$APP" in
         ;;
     with-f8p)
         verlt "$PHP_VERSION" "8.2" && SKIP_BUILD=1
+        # dunglas/frankenphp has no PHP 8.6 image yet, so its latest tag stays on 8.5
+        LATEST_PHP="8.5"
         PREFIX="frankenphp"
         BUILD_NAME="$DEFAULT_REPO/frankenphp"
         BUILD_SOURCE_IMAGE="dunglas/frankenphp:1-php$PHP_VERSION$SUFFIX"
