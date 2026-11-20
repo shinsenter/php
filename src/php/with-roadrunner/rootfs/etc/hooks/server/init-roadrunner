@@ -8,11 +8,11 @@
 ################################################################################
 set -e
 
-# user and group for RoadRunner
+# User and group for RoadRunner
 roadrunner-conf 'server.user'  "$APP_USER"
 roadrunner-conf 'server.group' "$APP_GROUP"
 
-# trust X-Forwarded-For and X-Forwarded-Proto only from TRUSTED_PROXIES
+# Trust X-Forwarded-For and X-Forwarded-Proto only from TRUSTED_PROXIES
 # the list is written in full because RoadRunner replaces its default list (the private ranges) when one is set
 # an empty list may fall back to that default, so loopback alone stands for "no proxy"
 if has-cmd yq; then
@@ -23,7 +23,7 @@ if has-cmd yq; then
     yq -i ".http.trusted_subnets = [$subnets]" "$APP_PATH/.rr.yaml"
 fi
 
-# enable debug logs
+# Enable debug logs
 if is-debug; then
     roadrunner-conf 'logs.level' 'debug'
     roadrunner-conf 'http.pool.debug' 'true'

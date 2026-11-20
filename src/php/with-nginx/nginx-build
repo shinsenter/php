@@ -15,7 +15,7 @@
 set -e
 echo "Build Nginx $NGINX_VERSION"
 
-# configure flags of the OS package, without the parts that cannot be rebuilt here:
+# Configure flags of the OS package, without the parts that cannot be rebuilt here:
 # third-party modules (--add-dynamic-module),
 # modules that need extra libraries (geoip, image_filter, perl, xslt), options removed from Nginx,
 # and --without-pcre2: old Alpine packages use PCRE, but only the PCRE2 headers are installed here
@@ -59,7 +59,7 @@ add_brotli() {
     [ -f /usr/include/brotli/encode.h ] || return 1
     mkdir -p /usr/src/nginx/ngx_brotli
     (cd /usr/src/nginx/ngx_brotli && fetch_source "https://github.com/google/ngx_brotli/archive/HEAD.tar.gz" "ngx_brotli.tar.gz") || return 1
-    # the module only looks for the library in its own deps folder,
+    # The module only looks for the library in its own deps folder,
     # so point that folder to the headers of the OS and let the linker find the OS library
     mkdir -p /usr/src/nginx/ngx_brotli/deps/brotli/c
     ln -s /usr/include /usr/src/nginx/ngx_brotli/deps/brotli/c/include
@@ -78,7 +78,7 @@ mkdir -p /usr/src/nginx
 cd /usr/src/nginx
 fetch_source "https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz" "nginx-$NGINX_VERSION.tar.gz"
 
-# modules that the OS package may not have
+# Modules that the OS package may not have
 extras=""
 
 # HTTP/3: old OS packages do not enable it, and configure refuses it when OpenSSL is too old

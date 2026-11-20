@@ -12,6 +12,7 @@
 
 case "$1" in
 cpu)
+    # cgroup v2 or v1 quota, rounded up to whole cores
     value=$(grep -c ^processor /proc/cpuinfo)
     if [ -r /sys/fs/cgroup/cpu.max ]; then
         read -r quota period </sys/fs/cgroup/cpu.max
@@ -26,6 +27,7 @@ cpu)
     esac
     ;;
 ram)
+    # cgroup v2 or v1 limit in MB, used only when below the host RAM
     value=$(free -m | awk '/^Mem:/{print $2}')
     for file in /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory/memory.limit_in_bytes; do
         [ -r "$file" ] || continue

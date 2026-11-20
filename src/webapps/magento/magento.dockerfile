@@ -35,10 +35,10 @@ RUN <<'EOF'
 echo 'Install PHP extensions'
 [ -z "$DEBUG" ] || set -x; set -e
 
-# install PHP modules
+# Install PHP modules
 phpaddmod ftp soap sodium sockets xsl
 
-# override nginx config
+# Override nginx config
 \rm -f /etc/nginx/custom.d/00-ext-*.conf
 \rm -f /etc/nginx/custom.d/*common.conf
 sed -i 's|MAGE_ROOT|APP_PATH|g' /etc/nginx/custom.d/magento.conf

@@ -6,7 +6,7 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-# ownership [new_group] [new_gid] [new_user] [new_uid]
+# Ownership [new_group] [new_gid] [new_user] [new_uid]
 # Requires root; Debian/Ubuntu or Alpine with shadow
 
 ################################################################################
@@ -14,7 +14,7 @@ OLD_GROUP="${DEFAULT_GROUP:-www-data}"
 OLD_USER="${DEFAULT_USER:-www-data}"
 DEFAULT_SHELL="$(type -P nologin)"
 
-# ensure group and user exist
+# Ensure group and user exist
 if ! getent group "$OLD_GROUP" >/dev/null 2>&1; then
     groupadd "$OLD_GROUP"
 fi
@@ -23,23 +23,23 @@ if ! id "$OLD_USER" >/dev/null 2>&1; then
     useradd -g "$OLD_GROUP" -M -s "$DEFAULT_SHELL" "$OLD_USER"
 fi
 
-# get old IDs
+# Get old IDs
 OLD_UID=$(id -u "$OLD_USER")
 OLD_GID=$(id -g "$OLD_USER")
 
 ################################################################################
-# get new IDs
+# Get new IDs
 NEW_GROUP="${1:-$OLD_GROUP}"
 NEW_GID="${2:-$OLD_GID}"
 NEW_USER="${3:-$OLD_USER}"
 NEW_UID="${4:-$OLD_UID}"
 
-# flags determine if any changes need to be made
+# Flags determine if any changes need to be made
 CHANGE_GROUP=0
 CHANGE_USER=0
 
 ################################################################################
-# decide if group needs change or creation
+# Decide if group needs change or creation
 if getent group "$NEW_GROUP" >/dev/null 2>&1; then
     debug-echo "Group $NEW_GROUP exists, skipping creation."
     PREV_GID="$(getent group "$NEW_GROUP" | cut -d: -f3)"
@@ -48,7 +48,7 @@ if getent group "$NEW_GROUP" >/dev/null 2>&1; then
             CHANGE_GROUP=1
             debug-echo -s "Changed $NEW_GROUP GID: $PREV_GID → $NEW_GID"
         else
-            # the GID belongs to another group: keep the current one so no file is moved to it
+            # The GID belongs to another group: keep the current one so no file is moved to it
             debug-echo -w "Cannot change $NEW_GROUP GID to $NEW_GID, keeping $PREV_GID."
             NEW_GID="$PREV_GID"
         fi
@@ -63,7 +63,7 @@ else
     debug-echo -s "Created group $NEW_GROUP (GID=$(getent group "$NEW_GROUP" | cut -d: -f3))"
 fi
 
-# decide if user needs change or creation
+# Decide if user needs change or creation
 if id "$NEW_USER" >/dev/null 2>&1; then
     debug-echo "User $NEW_USER exists, skipping creation."
     PREV_UID="$(id -u "$NEW_USER")"
@@ -74,7 +74,7 @@ if id "$NEW_USER" >/dev/null 2>&1; then
     fi
 else
     CHANGE_USER=1
-    # copy supplementary groups from original user
+    # Copy supplementary groups from original user
     SUPP=$(id -Gn "$OLD_USER" | tr ' ' ',')
     if [ "$NEW_UID" -ne "$OLD_UID" ]; then
         useradd -u "$NEW_UID" -g "$NEW_GROUP" -G "$SUPP" -M -s "$DEFAULT_SHELL" "$NEW_USER"
@@ -84,12 +84,12 @@ else
     debug-echo -s "Created user $NEW_USER (UID=$(id -u "$NEW_USER")) with groups: $SUPP"
 fi
 
-# update ownership if any change
+# Update ownership if any change
 if [ "$CHANGE_GROUP" -eq 1 ] || [ "$CHANGE_USER" -eq 1 ]; then
     FINAL_UID=$(id -u "$NEW_USER")
     FINAL_GID=$(getent group "$NEW_GROUP" | cut -d: -f3)
     debug-echo -w "Updating file ownership: ${OLD_UID}:${OLD_GID} → ${FINAL_UID}:${FINAL_GID}"
-    # skip mount points (host sockets and volumes), devices and sockets
+    # Skip mount points (host sockets and volumes), devices and sockets
     set --
     if is-true "$DISABLE_AUTORUN_FIX_OWNER_GROUP"; then
         set -- -path "$(app-path)" -o -path "$(app-root)" -o

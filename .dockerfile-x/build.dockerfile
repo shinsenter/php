@@ -8,7 +8,7 @@
 ################################################################################
 # dockerfile-x from the ./upstream submodule, with patched Go modules.
 # build.sh squashes the result into one layer. Context: this folder.
-ARG ORAS_VERSION=1.3.6
+ARG ORAS_VERSION=1.4.0
 
 ################################################################################
 # Frontend and oras, cross-compiled on the build platform
@@ -20,7 +20,7 @@ ENV CGO_ENABLED=0 \
     GOOS=linux \
     GOARCH=$TARGETARCH
 
-RUN apk add --no-cache git \
+RUN apk add --no-cache git upx \
     && git clone -q --depth 1 --branch "v$ORAS_VERSION" \
         https://github.com/oras-project/oras.git /oras
 
@@ -37,6 +37,9 @@ RUN --mount=type=bind,source=patches,target=/patches \
     /patches/bump-go-deps.sh \
     && go build -mod=vendor -trimpath -ldflags='-s -w' \
         -o /out/dockerfile-x-frontend .
+
+# Pack both Go binaries, the stage is not shipped so upx adds nothing to the image
+RUN upx --best --lzma -q /out/oras /out/dockerfile-x-frontend
 
 ################################################################################
 # CLI (ncc bundle packed by pkg), same steps as upstream

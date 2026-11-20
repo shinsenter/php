@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Enable the WebSocket Apache config only when WebSocket is on
 websocket_conf="/etc/apache2/custom.d/espocrm-websocket.conf"
 if ! is-true "$ESPOCRM_CONFIG_USE_WEB_SOCKET"; then
     mv "$websocket_conf"{,.disabled} &>/dev/null
@@ -12,5 +13,5 @@ fi
 # chmod 775 application/Espo/Modules client/modules
 # chmod 754 bin/command
 
-# service settings
+# Service settings
 s6-service espocrm-websocket $(is-true "$ESPOCRM_CONFIG_USE_WEB_SOCKET" && echo enable || echo disable)

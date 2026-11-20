@@ -18,7 +18,7 @@ echo "Build Apache $APACHE_VERSION"
 bin="$(command -v apache2 || command -v httpd)"
 [ -n "$bin" ]
 
-# modules go to the folder of the OS modules
+# Modules go to the folder of the OS modules
 module_dir="$(dirname "$(find /usr/lib -type f -name mod_mpm_event.so | head -n 1)")"
 [ -d "$module_dir" ]
 
@@ -30,7 +30,7 @@ info="$("$bin" -V 2>/dev/null || true)"
 macro() { echo "$info" | sed -n "s/^ *-D $1=\"\(.*\)\"\$/\1/p"; }
 [ -n "$(macro HTTPD_ROOT)" ] && [ -n "$(macro SERVER_CONFIG_FILE)" ]
 
-# configure defines these three itself (include/ap_config_auto.h) and that beats -D,
+# Configure defines these three itself (include/ap_config_auto.h) and that beats -D,
 # so they are rewritten after configure. The others take -D.
 cppflags=""
 for name in DEFAULT_PIDLOG DEFAULT_SCOREBOARD DEFAULT_ERRORLOG SUEXEC_BIN; do
@@ -44,7 +44,7 @@ limit="$(echo "$info" | sed -n 's/^ *-D DYNAMIC_MODULE_LIMIT=\([0-9]*\)$/\1/p')"
 # Modules that need libraries which are not installed here stay as the OS built them.
 mpms=""
 mods=""
-# extras are the modules that this build is for. They are dropped when the build fails with them,
+# Extras are the modules that this build is for. They are dropped when the build fails with them,
 # so that a source build with fewer features still beats the OS package
 extras="http2"
 # middleware-patch replaces the brotli library on old Alpine,
@@ -65,19 +65,19 @@ for file in "$module_dir"/mod_*.so; do
 done
 [ -n "$mpms" ]
 
-# the workflow puts the source in /tmp/helper_cache
+# The workflow puts the source in /tmp/helper_cache
 mkdir -p /usr/src/httpd
 cd /usr/src/httpd
 file="httpd-$APACHE_VERSION.tar.gz"
 if [ -f "/tmp/helper_cache/$file" ]; then
     tar -xzf "/tmp/helper_cache/$file" --strip-components=1
 else
-    # only the latest release stays on the mirror, older ones move to the archive
+    # Only the latest release stays on the mirror, older ones move to the archive
     { curl -fsSL "https://dlcdn.apache.org/httpd/$file" \
         || curl -fsSL "https://archive.apache.org/dist/httpd/$file"; } | tar -xz --strip-components=1
 fi
 
-# build <modules>: configure, compile and stage Apache with the given shared modules.
+# Build <modules>: configure, compile and stage Apache with the given shared modules.
 # eval keeps the quotes that CPPFLAGS has.
 build() {
     eval "CPPFLAGS='$cppflags' ./configure" \

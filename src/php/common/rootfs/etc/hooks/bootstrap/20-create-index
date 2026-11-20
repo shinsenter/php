@@ -21,7 +21,7 @@ if ((bool) trim((string) shell_exec('is-debug && echo 1 || echo 0'))) {
 PHP
 }
 
-# create index.php when it doesn't exist
+# Create index.php when it doesn't exist
 if ! is-true "$DISABLE_AUTORUN_GENERATING_INDEX"; then
     web-mkdir "$APP_ROOT"
     if [ -z "$(ls -A "$APP_ROOT")" ]; then

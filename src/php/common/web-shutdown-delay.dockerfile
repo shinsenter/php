@@ -12,7 +12,7 @@ echo 'Configure shutdown delay'
 env-default '# Seconds to wait before stopping the servers, so a load balancer can drain this container'
 env-default SHUTDOWN_DELAY '0'
 
-# create oneshot service that waits SHUTDOWN_DELAY seconds before the servers stop
+# Create oneshot service that waits SHUTDOWN_DELAY seconds before the servers stop
 # a service stops before the ones it depends on, so each web server adds itself as a dependency
 if has-cmd s6-service; then
     s6-service shutdown-delay oneshot '#!/usr/bin/env sh

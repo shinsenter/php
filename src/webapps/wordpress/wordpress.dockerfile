@@ -28,7 +28,7 @@ ADD --link ./rootfs/ /
 ENV DOCUMENT_ROOT=""
 ENV DISABLE_AUTORUN_GENERATING_INDEX=1
 
-# recommended PHP configuration limits
+# Recommended PHP configuration limits
 ENV PHP_MAX_EXECUTION_TIME="600"
 ENV PHP_MAX_INPUT_TIME="400"
 ENV PHP_MAX_INPUT_VARS="1000"
@@ -37,7 +37,7 @@ ENV PHP_POST_MAX_SIZE="48M"
 ENV PHP_UPLOAD_MAX_FILESIZE="32M"
 
 ################################################################################
-# installs wp-cli
+# Installs wp-cli
 ARG WPCLI_URL=https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 ARG WPCLI_PATH=/usr/local/bin/wp-cli
 
@@ -55,7 +55,7 @@ env-default WP_DEBUG            '$(is-debug && echo 1 || echo 0)'
 env-default WP_DEBUG_LOG        '$(log-path stdout)'
 env-default WORDPRESS_DEBUG     '$(is-debug && echo 1 || echo 0)'
 
-# the workflow puts the file in /tmp/helper_cache
+# The workflow puts the file in /tmp/helper_cache
 if [ -f /tmp/helper_cache/wp-cli.phar ]; then
     cp /tmp/helper_cache/wp-cli.phar "$WPCLI_PATH"
 else

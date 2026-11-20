@@ -3,6 +3,7 @@ PMA_CONFIG="$APP_PATH/config.inc.php"
 
 web-mkdir "$APP_PATH/tmp" "$APP_PATH/tmp/save" "$APP_PATH/tmp/upload"
 
+# Create config.inc.php from the template once, with a random secret
 if [ -f /etc/phpmyadmin-config.php ] && [ ! -f "$PMA_CONFIG" ] ; then
     web-do cp -p /etc/phpmyadmin-config.php "$PMA_CONFIG"
     sed -i "s/random_string_with_32_chars_long/$(php -r 'echo md5(uniqid());')/g" "$PMA_CONFIG" &>/dev/null

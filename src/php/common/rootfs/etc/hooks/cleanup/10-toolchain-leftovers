@@ -4,7 +4,7 @@ has-cmd dpkg-query || exit 0
 
 debug-echo "Remove toolchain leftovers."
 
-# patterns cover the names of every supported Debian release (libasan6 and libasan8, perl 5.32 and 5.40, ...)
+# Patterns cover the names of every supported Debian release (libasan6 and libasan8, perl 5.32 and 5.40, ...)
 # the status filter skips packages that dpkg only remembers as removed
 installed() {
     dpkg-query -Wf '${db:Status-Status} ${Package}\n' "$@" 2>/dev/null \

@@ -6,15 +6,16 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-# print the env path and exit
+# Print the env path and exit
 [ "$1" = "@" ] && echo "${ENV:-/usr/local/etc/.env}" && exit 0
 
 ################################################################################
-# append necessary paths to $PATH
+# Append necessary paths to $PATH
 ADD_PATHS="${1:-/usr/local/utils:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin}"
 DEL_PATHS="${2:-/usr/local/aliases}"
 IFS=:
 
+# Drop the DEL_PATHS entries from PATH
 if [ -n "$DEL_PATHS" ]; then
     kept=""
     for entry in $PATH; do
@@ -28,6 +29,7 @@ if [ -n "$DEL_PATHS" ]; then
     PATH="$kept"
 fi
 
+# Prepend the missing ADD_PATHS, keeping their order
 if [ -n "$ADD_PATHS" ]; then
     reversed=""
     for part in $ADD_PATHS; do

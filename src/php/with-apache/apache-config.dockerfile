@@ -33,36 +33,40 @@ env-default APACHE_MIN_SPARE_THREADS '10'
 env-default APACHE_START_SERVERS '2'
 env-default APACHE_THREADS_PER_CHILD '25'
 
-# port of the health checks (not exposed) and the URL that the startup check uses
+# Port of the health checks (not exposed) and the URL that the startup check uses
 env-default HEALTH_PORT '2020'
 env-default HEALTH_CHECK_URL 'http://127.0.0.1:${HEALTH_PORT}/healthz'
 
-# disable PHP-FPM logging to stdout
+# Disable PHP-FPM logging to stdout
 env-default PHP_LISTEN '/run/php-fpm.sock'
 env-default PHP_ACCESS_LOG '/var/log/php-fpm.log'
 
 CONF_FILE=/etc/apache2/apache2.conf
 MODS_FILE=/etc/apache2/modules.conf
 
+# Modules compiled into the binary cannot be loaded again: Apache stops with "is built-in and can't be loaded"
+builtin=" $( { apache2 -l || httpd -l; } 2>/dev/null | sed -n 's/^ *mod_\(.*\)\.c$/\1/p' | tr '\n' ' ') "
+
 if [ -f "$CONF_FILE" ]; then
-    # detect available modules
+    # Detect available modules
     if [ -d /etc/apache2/modules ]; then
         echo -e "# Begin Modules\n# End Modules" >$MODS_FILE
         for module_path in /etc/apache2/modules/*.so ; do
             module="${module_path##*mod_}"
+            [[ "$builtin" == *" ${module%.so} "* ]] && continue
             module="${module/.so/_module}"
             echo "Found ${module} at ${module_path}"
             sed -i "s|^# End Modules|#LoadModule ${module} ${module_path}\n# End Modules|" $MODS_FILE >/dev/null 2>&1
         done
     fi
 
-    # copy production config
+    # Copy production config
     if has-cmd httpd; then
         mv -f "$CONF_FILE" /etc/apache2/httpd.conf
     fi
 fi
 
-# create directories
+# Create directories
 mkdir -p /etc/apache2 \
     /etc/apache2/custom.d \
     /etc/apache2/mods-enabled \
@@ -72,20 +76,29 @@ mkdir -p /etc/apache2 \
     /var/log/apache2 \
     /usr/logs
 
-# configure default modules
+# Configure default modules
 a2dismod ado auth_digest autoindex cgi cgid dav dbd include info mime_magic mpm_prefork php userdir 2>&1 || true
-a2enmod \
-    access_compat alias auth_basic authn_core authn_file authz_core authz_host brotli \
+enable_mods=""
+for module in access_compat alias auth_basic authn_core authn_file authz_core authz_host brotli \
     cache deflate dir env expires filter headers http2 log_config mime \
-    mpm_event negotiation proxy proxy_fcgi remoteip reqtimeout rewrite setenvif ssl status unixd 2>&1 || true
+    mpm_event negotiation proxy proxy_fcgi remoteip reqtimeout rewrite setenvif ssl status unixd; do
+    [[ "$builtin" == *" $module "* ]] || enable_mods="$enable_mods $module"
+done
+a2enmod $enable_mods 2>&1 || true
 
-# fix ProxyFCGIBackendType directive for Apache 2.4
+# Fix ProxyFCGIBackendType directive for Apache 2.4
 if apache-has-error 'ProxyFCGIBackendType'; then
     echo 'Disable ProxyFCGIBackendType because it is not supported in this Apache version'
     sed -i 's/ProxyFCGIBackendType/#ProxyFCGIBackendType/g; s/ProxyFCGISetEnvIf/#ProxyFCGISetEnvIf/g' $CONF_FILE /etc/apache2/sites-enabled/01-health.conf
 fi
 
-# create s6 services
+# Stop the build on a config syntax error, so a bad module list never reaches users (#475)
+if apache-has-error 'Syntax error'; then
+    with-env apache2 -t || true
+    exit 1
+fi
+
+# Create s6 services
 if has-cmd s6-service; then
     s6-service apache requires php-fpm
     s6-service apache longrun '#!/usr/bin/env bash

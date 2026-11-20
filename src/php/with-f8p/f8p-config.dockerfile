@@ -27,7 +27,7 @@ env-default FRANKENPHP_CONFIG               ''
 env-default CADDY_REFERRER_POLICY           'strict-origin-when-cross-origin'
 env-default CADDY_READ_HEADER_TIMEOUT       '10s'
 
-# port of the health checks (not exposed) and the URL that the startup check uses
+# Port of the health checks (not exposed) and the URL that the startup check uses
 env-default HEALTH_PORT                     '2020'
 env-default HEALTH_CHECK_URL                'http://127.0.0.1:${HEALTH_PORT}/healthz'
 
@@ -39,7 +39,7 @@ if [ -f /etc/caddy/Caddyfile ]; then
     rm -f /tmp/Caddyfile.fmt
 fi
 
-# create s6 services
+# Create s6 services
 if has-cmd s6-service; then
     s6-service frankenphp longrun '#!/usr/bin/env bash
 if [ -f /etc/caddy/envvars ]; then source /etc/caddy/envvars; fi

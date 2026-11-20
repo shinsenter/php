@@ -1,0 +1,38 @@
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+
+name: Download digests
+description: Download the digest artifacts of every platform into /tmp/digests, and retry once on a failure
+
+inputs:
+  pattern:
+    description: Name pattern of the digest artifacts
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - # A fresh artifact can be listed before it can be downloaded
+      id: first
+      continue-on-error: true
+      uses: actions/download-artifact@v8
+      with:
+        path: /tmp/digests
+        pattern: ${{ inputs.pattern }}
+        merge-multiple: true
+
+    - if: ${{ steps.first.outcome == 'failure' }}
+      shell: bash
+      run: sleep 15
+
+    - if: ${{ steps.first.outcome == 'failure' }}
+      uses: actions/download-artifact@v8
+      with:
+        path: /tmp/digests
+        pattern: ${{ inputs.pattern }}
+        merge-multiple: true

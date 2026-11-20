@@ -50,50 +50,25 @@ concurrency:
 jobs:
   watch:
     runs-on: ubuntu-26.04-arm
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
 
+      # The logic lives in build/check-updates.sh, so it can be read and run outside of the workflow
       - name: Check published images
-        id: check
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
-        run: |
-          set -e
-          versions="$(./build/check-updates.sh)"
-          echo "PHP versions to build: ${versions:-none}"
-          echo "versions=$versions" >> "$GITHUB_OUTPUT"
+        id: check
+        run: ./build/check-updates.sh
 
       - name: Start build
         if: ${{ steps.check.outputs.versions != '' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSIONS: ${{ steps.check.outputs.versions }}
-        run: |
-          set -e
-
-          # Wait for the running build, it will pick up what changed so far
-          active="$(gh run list --workflow build-all.yml --limit 20 --json status \
-            --jq '[.[] | select(.status == "in_progress" or .status == "queued" or .status == "waiting" or .status == "pending")] | length')"
-          if [ "$active" != "0" ]; then
-            echo "Build all is still running ($active). Will check again later."
-            exit 0
-          fi
-
-          # Do not retry a failing build in a loop: wait 3 hours after a failed run
-          last="$(gh run list --workflow build-all.yml --limit 1 --json conclusion,createdAt \
-            --jq '.[0] | select(.conclusion == "failure") | .createdAt')"
-          if [ -n "$last" ]; then
-            age=$(( $(date +%s) - $(date -d "$last" +%s) ))
-            if [ "$age" -lt 10800 ]; then
-              echo "The last build failed ${age}s ago. Waiting before the next try."
-              exit 0
-            fi
-          fi
-
-          gh workflow run build-all.yml --ref main -f php_versions="$VERSIONS"
-          echo "Started Build all for: $VERSIONS"
+        run: ./build/check-updates.sh start "$VERSIONS"
 
       - name: Delete old runs
         if: ${{ always() }}
@@ -101,15 +76,4 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           KEEP_DAYS: ${{ inputs.keep_days }}
-        run: |
-          # The schedule has no input, so it falls back to 7 days
-          days="${KEEP_DAYS:-7}"
-          case "$days" in
-            ''|*[!0-9]*) echo "keep_days must be a whole number, got: $days"; exit 1 ;;
-          esac
-          echo "Delete finished runs older than $days days"
-          gh run list --limit 1000 --json databaseId,event,status,createdAt \
-            --jq ".[] | select(.status == \"completed\" and .event != \"release\" and (.createdAt | fromdateiso8601) < (now - $days * 86400)) | .databaseId" |
-            while read -r id; do
-                gh run delete "$id"
-            done
+        run: ./build/check-updates.sh cleanup "$KEEP_DAYS"

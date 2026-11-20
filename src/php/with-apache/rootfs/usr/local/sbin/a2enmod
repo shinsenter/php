@@ -13,7 +13,7 @@ while [ "$#" -gt 0 ]; do
 
     debug-echo -i "Enable apache module: $module"
 
-    # enable the module in all relevant conf files
+    # Enable the module in all relevant conf files
     if ! sed -i "$pattern" /etc/apache2/*.conf 2>/dev/null; then
         debug-echo -e "Failed to enable module: $module"
     fi

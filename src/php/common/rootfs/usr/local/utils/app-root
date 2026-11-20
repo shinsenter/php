@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 target="$DOCUMENT_ROOT"
 
-# check if the document root is an existing absolute path
+# Check if the document root is an existing absolute path
 case "$target" in
     /*) [ -d "$target" ] && { realpath -mqs "$target"; exit 0; } ;;
 esac

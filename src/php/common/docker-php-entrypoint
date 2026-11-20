@@ -8,10 +8,10 @@
 ################################################################################
 if [ "$(id -u)" != "0" ]; then debug-echo -c "Please run this container as the root user!" >&2; exit 1; fi
 
-# the guard keeps $(hostname) from running when nothing is printed
+# The guard keeps $(hostname) from running when nothing is printed
 [ -z "$DEBUG$DEBUG_MODE" ] || debug-echo -d "Starting container ${DOCKER_NAME:-$(hostname)}."
 
-# detect user-defined entrypoint
+# Detect user-defined entrypoint
 if [ -n "$SUPERVISOR_PHP_COMMAND" ]; then
     debug-echo "Start container with user-defined command: $SUPERVISOR_PHP_COMMAND"
     # xargs reads quotes without running anything inside them
@@ -32,17 +32,17 @@ if [ -n "$TZ" ] && [ -f "/usr/share/zoneinfo/$TZ" ]; then
     echo "$TZ" >/etc/timezone
 fi
 
-# fix ownership
+# Fix ownership
 ownership "${APP_GROUP:-www-data}" "${APP_GID:-}" "${APP_USER:-www-data}" "${APP_UID:-}"
 
-# ensure application directory exist
+# Ensure application directory exist
 # same value as app-path, without its process
 app_path="${WEBHOME:-${APP_PATH:-/var/www/html}}"
 web-mkdir "/var/www" "$app_path"
 cd "$app_path"
 
 ################################################################################
-# container boot hooks
+# Container boot hooks
 FIRST_RUN_FLAG="/var/local/first-run"
 if [ ! -e "$FIRST_RUN_FLAG" ]; then
     date > "$FIRST_RUN_FLAG"
@@ -54,17 +54,17 @@ fi
 hook onboot
 
 ################################################################################
-# fallback for docker-php-entrypoint
+# Fallback for docker-php-entrypoint
 if [ -x "/init" ]; then set -- /init "$@"; fi
 
-# fallback empty entrypoint
+# Fallback empty entrypoint
 if [ "$#" -eq 0 ]; then set -- /bin/bash; fi
 
-# same check as has-s6, without its two processes
+# Same check as has-s6, without its two processes
 s6_suffix=""
 if [ ! -x /command/s6-env ]; then s6_suffix="-non-s6"; fi
 
-# run bootstrap hooks to initialize the container
+# Run bootstrap hooks to initialize the container
 hook bootstrap ${s6_suffix:+bootstrap$s6_suffix}
 
 # find the composer bin dirs once.
@@ -81,14 +81,14 @@ hook post-boot ${s6_suffix:+post-boot$s6_suffix} \
     migration \
     onready
 
-# run hooks on exit (beta)
+# Run hooks on exit (beta)
 trap "hook onexit" SIGINT SIGTERM SIGKILL SIGQUIT EXIT
 
-# activity logging
+# Activity logging
 # the entrypoint runs as root and bash sets HOSTNAME: no whoami or hostname process
 echo "$(date) root@${HOSTNAME:-$(hostname)}:$PWD\$ ${0##*/} $@" >>/var/log/startup.log
 
-# start the container
+# Start the container
 exec in-app "$@"
 
 ################################################################################

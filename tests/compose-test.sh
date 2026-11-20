@@ -16,7 +16,8 @@
 #   -s             strict: follow redirects and pass only on HTTP 2xx (default: any HTTP answer)
 #   keyword        run only services whose name contains a keyword, "with-" is ignored
 #                  (default: all except cli, fpm and mysql, the shared test database)
-# IMAGE_TAG overrides the tag built from -v and -o: dev-php<version>[-alpine].
+# IMAGE_TAG overrides the tag built from -v and -o: <TAG_PREFIX>php<version>[-alpine] (or latest[-alpine]).
+# TAG_PREFIX is "dev-" by default, empty for the images of a release.
 # Results go to tests/logs/<date>-compose-<tag>.csv.
 # The csv has the columns service, status, result and header (all response header lines
 # on one line, or ERROR when the container never answered).
@@ -170,7 +171,7 @@ run_batch() {
 parse_args "$@"
 # Published tags are dev-php8.5[-alpine], but "latest" has no "php" part
 case "$PHP_VERSION" in latest) TAG_VERSION=latest ;; *) TAG_VERSION="php$PHP_VERSION" ;; esac
-export IMAGE_TAG="${IMAGE_TAG:-dev-$TAG_VERSION$SUFFIX}"
+export IMAGE_TAG="${IMAGE_TAG:-${TAG_PREFIX-dev-}$TAG_VERSION$SUFFIX}"
 export DEBUG="${DEBUG:-1}"
 export ENABLE_CRONTAB="${ENABLE_CRONTAB:-1}"
 

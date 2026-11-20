@@ -7,9 +7,12 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 
+# Helper functions of the build scripts and workflows, one section per purpose:
+# versions, remote content, downloads, IPE modules, published images, build plan, build context and hashes.
+# The functions only use each other at call time, so the order of the sections does not matter.
+
 # Where the build steps find the files that were downloaded once per run
 HELPER_CACHE_DIR="${HELPER_CACHE_DIR:-/tmp/helper_cache}"
-WPCLI_URL="${WPCLI_URL:-https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar}"
 
 ################################################################################
 # Versions
@@ -33,6 +36,7 @@ is_active_version() {
 # Remote content
 ################################################################################
 
+# Responses are cached for the rest of the day in /tmp/helper_cache.
 # Fetch a URL and keep the answer for the rest of the day.
 # TOKEN, when set, goes in as a bearer token. Other arguments go to curl.
 fetch_with_cache() {
@@ -132,10 +136,27 @@ get_dockerhub_tag_digest() {
 
 # Same as above, but a failed lookup returns a value that changes on every run,
 # so the image is rebuilt instead of being wrongly treated as up to date.
+# True only when Docker Hub answers 404 for the tag.
+# It reads the same cached answer as get_dockerhub_tag_digest, so it sends no request of its own.
+# Any other answer (an outage, a rate limit, no answer) is not "missing", so a build is never skipped by mistake.
+# Usage: dockerhub_tag_missing <namespace/repo> <tag>
+dockerhub_tag_missing() {
+    local json
+    json="$(dockerhub_api "$1/tags/$2" 2>/dev/null)" || return 1
+    case "$json" in *"httperror 404"*) return 0 ;; esac
+    return 1
+}
+
 get_dockerhub_tag_digest_or_now() {
     local digest
     digest="$(get_dockerhub_tag_digest "$@")" || true
     echo "${digest:-unknown-$(date +%s)}"
+}
+
+# Look a digest up only to fill the cache of this run (see the helper_cache artifact). A failed lookup is not an error.
+# Usage: cache_dockerhub_digest <namespace/repo> <tag>
+cache_dockerhub_digest() {
+    get_dockerhub_tag_digest "$@" >/dev/null || true
 }
 
 # Nginx version number from https://nginx.org.
@@ -171,8 +192,11 @@ resolve_apache_version() {
 }
 
 ################################################################################
-# Downloads for the build steps
+# Downloads once per run for the build steps
 ################################################################################
+
+WPCLI_URL="${WPCLI_URL:-https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar}"
+
 # Each cache_* function puts its files in HELPER_CACHE_DIR once per run,
 # so the image builds do not download them again (and do not call the GitHub API,
 # which allows 60 requests per hour without a token).
@@ -224,7 +248,7 @@ cache_apache_source() {
     local version
     version="$(resolve_apache_version "${APACHE_VERSION:-stable}")"
     case "$version" in ""|os) return 0 ;; esac
-    # only the latest release stays on the mirror, older ones move to the archive
+    # Only the latest release stays on the mirror, older ones move to the archive
     cache_file "https://dlcdn.apache.org/httpd/httpd-$version.tar.gz" "httpd-$version.tar.gz" \
         || cache_file "https://archive.apache.org/dist/httpd/httpd-$version.tar.gz" "httpd-$version.tar.gz" \
         || echo "Cannot cache Apache $version" >&2
@@ -255,6 +279,114 @@ cache_wpcli_source() {
     fi
     rm -f "$file"
     echo "Cannot cache wp-cli.phar" >&2
+}
+
+# Everything the prepare job of build-all.yml looks up once, so the image builds find it in the cache:
+# latest versions, source archives and the digests of the official images.
+# Usage: cache_run_inputs <php versions...>
+cache_run_inputs() {
+    local distro version variant
+
+    echo "Generating cache keys..."
+    get_github_latest_tag "composer/composer"
+    get_github_latest_tag "just-containers/s6-overlay"
+    get_github_latest_tag "mlocati/docker-php-extension-installer"
+    get_github_latest_tag "roadrunner-server/roadrunner"
+    cache_middleware_sources
+    cache_apache_source
+    cache_nginx_source
+    cache_s6_sources
+    cache_wpcli_source
+    # The list of modules that IPE does not support, read by build/config.sh in every job
+    get_ipe_unsupported "${1:-8.5}" >/dev/null || true
+
+    for distro in debian alpine; do
+        cache_dockerhub_digest "library/$distro" latest
+        [ "$distro" = "debian" ] && distro=""
+        for version; do
+            for variant in cli fpm zts; do
+                cache_dockerhub_digest "library/php" "${version}-${variant}${distro:+-$distro}"
+                # Temporary, with the rule in build/config.sh: zts of PHP 8.6 builds on the rc image
+                [ "$variant$version" = "zts8.6" ] && cache_dockerhub_digest "library/php" "${version}-rc-${variant}${distro:+-$distro}"
+                if [ "$variant" = "zts" ] && verlte "8.2" "$version"; then
+                    cache_dockerhub_digest "dunglas/frankenphp" "1-php${version}${distro:+-$distro}"
+                fi
+            done
+        done
+    done
+    cache_dockerhub_digest "library/ubuntu" latest
+}
+
+# Digests of the server images that were just published, for the app builds (job server-cache of build-all.yml).
+# laravel is not listed: it is built after that job, its digest is fetched later.
+# Usage: cache_server_digests <tag prefix> <php versions...>
+cache_server_digests() {
+    local tag_prefix="$1" distro version base
+    shift
+
+    for distro in debian alpine; do
+        [ "$distro" = "debian" ] && distro=""
+        for version; do
+            if verlt "7.1" "$version" || [ "$distro" = "" ]; then
+                for base in phpfpm-nginx phpfpm-apache roadrunner; do
+                    cache_dockerhub_digest "shinsenter/$base" "${tag_prefix}php${version//-rc/}${distro:+-$distro}"
+                done
+            fi
+        done
+    done
+}
+
+################################################################################
+# PHP extensions that docker-php-extension-installer (IPE) supports
+################################################################################
+
+# Modules that the data/supported-extensions file of docker-php-extension-installer (on stdin)
+# does not list for a PHP version, one per line. Each line is a module and the PHP versions it supports.
+# It prints nothing when no module lists the version (a version not tested yet, or a changed layout).
+# Usage: parse_ipe_unsupported <php version> < supported-extensions
+parse_ipe_unsupported() {
+    awk -v v="${1%-rc}" '
+        /^#/ || NF < 2 { next }
+        {
+            found = 0
+            for (i = 2; i <= NF; i++) if ($i == v) found = 1
+            if (found) ok++; else miss = miss $1 "\n"
+        }
+        END { if (ok > 0) printf "%s", miss }'
+}
+
+# The same, from the file of the latest release. The download is cached for 2 hours.
+# A failed download prints nothing, so no module is skipped.
+# Usage: get_ipe_unsupported <php version>
+get_ipe_unsupported() {
+    local data="$HELPER_CACHE_DIR/ipe-supported-extensions"
+
+    if [ -z "$(find "$data" -size +0 -mmin -120 2>/dev/null)" ]; then
+        mkdir -p "$HELPER_CACHE_DIR"
+        # Download to a temporary file first: parallel runs (build/check-updates.sh) must not read a half written file
+        download_file "https://raw.githubusercontent.com/mlocati/docker-php-extension-installer/master/data/supported-extensions" \
+            "$data.$$" 2>/dev/null && mv -f "$data.$$" "$data" || { rm -f "$data.$$"; return 0; }
+    fi
+    parse_ipe_unsupported "$1" < "$data"
+}
+
+# The modules of src/php/common/php-extensions.dockerfile that IPE does not support on a PHP version.
+# Only these go to the build, so a README change about other modules does not rebuild any image.
+# Usage: get_php_skip_modules <php version>
+get_php_skip_modules() {
+    local unsupported module
+    unsupported="$(get_ipe_unsupported "$1")"
+    [ -n "$unsupported" ] || return 0
+    for module in $(sed -n '/^modules=(/,/^)/p' "$BASE_DIR/src/php/common/php-extensions.dockerfile" \
+        | grep -E '^ +[a-z_0-9]+$' | tr -d ' '); do
+        case "
+$unsupported
+" in
+            *"
+$module
+"*) echo "$module" ;;
+        esac
+    done
 }
 
 ################################################################################
@@ -289,12 +421,12 @@ get_image_size() {
 }
 
 ################################################################################
-# Build plan
+# Build plan for the workflows
 ################################################################################
 
 # JSON matrix of the platform builds, one entry per platform of a comma list.
 # amd64 and 386 build on x64, arm64 on arm.
-# 32-bit ARM, ppc64le and s390x (base-os and base-s6 only) run under QEMU.
+# 32-bit ARM runs under QEMU, and so do ppc64le and s390x (base-os and base-s6 only).
 # Usage: plan_matrix <platforms>
 plan_matrix() {
     jq -cn --arg platforms "$1" '
@@ -306,8 +438,38 @@ plan_matrix() {
         })'
 }
 
+# The skip flag and the platform matrix of a build, as outputs for the build job (see template-common.yml).
+# Without any platform nothing is built, and the matrix keeps one dummy entry so the job list stays valid.
+# Usage: build_plan <platforms> <skip build, 0 or 1>
+build_plan() {
+    local matrix skip="${2:-0}"
+
+    matrix="$(plan_matrix "$1")"
+    if [ "$matrix" = "[]" ]; then
+        skip=1
+        matrix='[{"platform":"none","slug":"none","runner":"ubuntu-26.04","qemu":""}]'
+    fi
+    echo "skip=$skip"
+    echo "matrix=$matrix"
+}
+
+# Print a variable for the shell, or add it to the GitHub Actions environment.
+# In a workflow it also goes to BUILD_ENV_FILE, for the jobs that run after this one (see template-common.yml).
+# Usage: github_env <name> <value...>
+github_env() {
+    local name="$1"; shift
+    if [ -t 1 ] || [ -z "$GITHUB_ENV" ]; then
+        echo "$name='$*'"
+        return 0
+    fi
+    echo "$name=$*"
+    echo "$name=$*" >> "$GITHUB_ENV"
+    [ -z "$BUILD_ENV_FILE" ] || echo "$name=$*" >> "$BUILD_ENV_FILE"
+    return 0
+}
+
 ################################################################################
-# Build context
+# Build context and hashes
 ################################################################################
 
 # Folder with the security backports of a PHP version (empty when there is none)
@@ -338,25 +500,6 @@ prepare_build_context() {
     fi
     return 0
 }
-
-# Print a variable for the shell, or add it to the GitHub Actions environment.
-# In a workflow it also goes to BUILD_ENV_FILE, for the jobs that run after this one (see template-common.yml).
-# Usage: github_env <name> <value...>
-github_env() {
-    local name="$1"; shift
-    if [ -t 1 ] || [ -z "$GITHUB_ENV" ]; then
-        echo "$name='$*'"
-        return 0
-    fi
-    echo "$name=$*"
-    echo "$name=$*" >> "$GITHUB_ENV"
-    [ -z "$BUILD_ENV_FILE" ] || echo "$name=$*" >> "$BUILD_ENV_FILE"
-    return 0
-}
-
-################################################################################
-# Hashing
-################################################################################
 
 # Hash each file listed on stdin, in a stable order
 hash_files() {

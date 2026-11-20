@@ -9,7 +9,7 @@
 if [ "$#" -eq 0 ]; then exit 0; fi
 [ -d /tmp/hooks ] || web-mkdir /tmp/hooks >/dev/null 2>&1
 
-# a path is worth running when it is a file or a directory with something in it
+# A path is worth running when it is a file or a directory with something in it
 has_entries() {
     [ -e "$1" ] || return 1
     [ -d "$1" ] || return 0
@@ -23,7 +23,7 @@ for hook; do
     [ -z "$DEBUG$DEBUG_MODE" ] || debug-echo -d "Hook: $hook"
     : >"/tmp/hooks/$hook" 2>/dev/null || true
 
-    # most hooks have no script at all: skip the in-app, with-env and autorun processes
+    # Most hooks have no script at all: skip the in-app, with-env and autorun processes
     found=0
     for path in "/etc/hooks/$hook" "$APP_PATH/hooks/$hook"; do
         if has_entries "$path"; then found=1; break; fi

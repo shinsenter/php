@@ -19,6 +19,39 @@ Code that runs as the application user (`www-data` by default), for example thro
 - Cause: by design. `web-do`, `autorun`, `ownership` and the `web-*` utilities need root to switch users and fix owners. `os-common.dockerfile` installs `/sbin/su-exec`, `autorun`, `ownership`, `web-*` and the entrypoint with mode 4755. Whether this `su-exec` build refuses to switch to root is not checked.
 - Fix: not fixed. Needs a design change, for example limiting these helpers to root or to a dedicated group.
 
+### The `latest` tag (PHP 8.6) lacks some modules
+
+Checked on 2026-11-21. docker-php-extension-installer does not list `apcu`, `igbinary`, `msgpack`, `redis`, `sodium` and `yaml` for PHP 8.6, so the PHP 8.6 images are built without them (`PHP_SKIP_MODULES`). Code that needs one of them fails on `latest`.
+
+- Cause: the PHP 8.6 extensions have no release that IPE supports yet.
+- Fix: not fixed. The skip list is read from the IPE data file on every build, so a module comes back by itself once IPE lists it. Use `8.5` tags when you need these modules.
+
+### `hyperf` and `mautic` have no `linux/arm/v7` image
+
+Found by the first full build with arm/v7 (2026-11-20, CI). Both images build for `linux/amd64` and `linux/arm64` only, through `platform=` in `APP_RULES` of `build/config.sh`.
+
+- Cause, `hyperf`: IPE installs `swoole-5.0.3` on arm/v7 and it does not compile with PHP 8.2 to 8.5 (`php_url_encode_hash_ex: too many arguments`). Why IPE picks that version is not recorded.
+- Cause, `mautic` on Debian: `imap` needs `libc-client2007e`, which depends on `libssl3`, and apt cannot install it on armhf (`Unmet dependencies`). The Debian armhf package may be named `libssl3t64`, not verified. `mautic` on Alpine did build for arm/v7, and is skipped with the rule for both.
+- Fix: not fixed. Remove the `platform=` rule when `swoole` and `imap` install on arm/v7.
+
+## 6.3.0
+
+### [#469](https://github.com/shinsenter/php/issues/469) A missing upstream PHP image fails the build and skips the servers and apps of every PHP version
+
+On 2026-11-19 the upstream images `php:8.6-cli-alpine` and `php:8.6-zts-alpine` did not exist yet, so those builds failed. The jobs that build on top of them were skipped for every PHP version, and the `8.5-*` tags stayed on PHP 8.5.12 although 8.5.13 fixed two critical vulnerabilities. The maintainer built the 8.5 images by hand.
+
+- Cause: read from the workflows, not from the failed run log. `template-stack.yml` runs the servers with `needs: base`, and `base` is one call of `template-php.yml` for all PHP versions. One failed version fails `base`, so the servers of every version are skipped. `build-all.yml` runs `server-cache` with `needs: [prepare, cli, fpm]` and the apps with `needs: server-cache`, so the apps are skipped the same way.
+- Fix: `build/config.sh` skips a build, instead of failing it, when Docker Hub answers 404 for the official `php` tag it builds from. The servers and apps of the other versions then run as usual. Any other answer (an outage, a rate limit) does not skip a build. `php:8.6-zts` and `php:8.6-zts-alpine` are still missing upstream, so `zts` of PHP 8.6 builds on `php:8.6-rc-zts` for now, and `frankenphp` of PHP 8.6 is skipped. The lookups come from the cache that the prepare job fills, so a missing tag costs no request in the build jobs.
+- Tested: `tests/run.sh helpers` covers a 404 answer, a tag with a digest, a rate limit and no answer. `build/config.sh` gives `SKIP_BUILD=1` for `frankenphp` 8.6 and `0` for `zts`, `fpm` and `cli` 8.6, and a second run with a warm cache sends no request. A full pipeline run with a missing base is not tested.
+
+### [#475](https://github.com/shinsenter/php/issues/475) Apache stops: "module log_config_module is built-in and can't be loaded"
+
+The `fpm-apache` images of 6.2.0 and 6.2.1 (checked on `8.3-fpm-apache`, Apache 2.4.71 Debian) fail to start with a syntax error in `/etc/apache2/modules.conf` for `log_config_module` and `unixd_module`. The reporter worked around it by commenting both lines in a mounted `modules.conf`.
+
+- Cause: in the published image `apache2 -l` lists `mod_log_config` and `mod_unixd` as compiled in, and the module folder also holds `mod_log_config.so` and `mod_unixd.so` from the build day. `apache-config.dockerfile` wrote every `.so` into `modules.conf` and enabled both modules with `a2enmod`, so Apache loaded them a second time. Why that binary has them built in, while a local build of the same files has them as modules, is not recorded.
+- Fix: the config step reads the built-in modules from `apache2 -l` (or `httpd -l`) and leaves them out of `modules.conf` and out of the `a2enmod` list. The build now stops when `apache2 -t` reports a syntax error.
+- Tested: on the published `8.3-fpm-apache` image, removing the two lines the new filter leaves out turns the error into `Syntax OK`. Local builds of `with-apache` pass `apache2 -t` on Debian 8.3, 7.4, 5.6 and Alpine 8.3, 7.4. Those local builds have both modules as shared, so they do not show the original error.
+
 ## 6.1.0
 
 ### [#456](https://github.com/shinsenter/php/issues/456) Client IP behind Cloudflare wrong in the first 6.1.0 build

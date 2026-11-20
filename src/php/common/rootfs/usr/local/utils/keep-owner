@@ -24,7 +24,7 @@ norm() {
 }
 
 norm "$1"; path="$REPLY/"
-# the first base is app-path, without its process
+# The first base is app-path, without its process
 for base in "${WEBHOME:-${APP_PATH:-/var/www/html}}" "$(app-root)"; do
     norm "$base"; base="$REPLY"
     case "$path" in "$base"/*) exit 0 ;; esac

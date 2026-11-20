@@ -8,6 +8,7 @@
 ################################################################################
 conf_path="$(env-path @)"
 
+# Create the env file with its base content on first use
 if [ ! -f "$conf_path" ]; then
     mkdir -p "$(dirname $conf_path)"
     cat <<'ENVVARS' > "$conf_path"
@@ -19,7 +20,7 @@ APP_PATH="$(app-path)"
 APP_ROOT="$(app-root)"
 if command -v composer &>/dev/null; then
     if [ -z "$CACHED_COMPOSER_BIN_DIR" ]; then
-        # reuse the value of an earlier shell, unless composer.json is newer than it
+        # Reuse the value of an earlier shell, unless composer.json is newer than it
         if [ -r /run/composer-bin-dir ] && [ ! "$APP_PATH/composer.json" -nt /run/composer-bin-dir ]; then
             read -r CACHED_COMPOSER_BIN_DIR </run/composer-bin-dir
             export CACHED_COMPOSER_BIN_DIR
@@ -38,25 +39,25 @@ fi
 export TERM PATH APP_PATH APP_ROOT
 [ -d "$APP_PATH" ] && cd "$APP_PATH"
 
-# begin extra sources
+# Begin extra sources
 # end extra sources
 ENVVARS
     chmod +x "$conf_path"
 fi
 
-# print the environment variables when the command argument is empty
+# Print the environment variables when the command argument is empty
 if [ "$#" -eq 0 ]; then with-env; exit 0; fi
 
-# if the first argument is a file then use it
+# If the first argument is a file then use it
 case "$1" in
     /*)
         if [ -f "$1" ]; then
-            # check if the file is already sourced
+            # Check if the file is already sourced
             if ! grep -qF -- "source $1" "$conf_path"; then
                 sed -i "/# end extra sources/i source $1" "$conf_path"
             fi
 
-            # use the first argument as the config file
+            # Use the first argument as the config file
             conf_path="$1"
             shift
         fi
@@ -65,7 +66,7 @@ esac
 
 line="$@"
 
-# add a comment if the command argument starts with #
+# Add a comment if the command argument starts with #
 case "$line" in
     "#"*)
         if ! grep -qF -- "$line" "$conf_path"; then
@@ -76,7 +77,7 @@ case "$line" in
         ;;
 esac
 
-# add a bash alias
+# Add a bash alias
 case "$line" in
     "alias "*)
         echo "$line" >>"$conf_path"
@@ -84,7 +85,7 @@ case "$line" in
         ;;
 esac
 
-# add an environment variable
+# Add an environment variable
 name="$1"; shift
 set -- "$(echo "$@" | sed -e 's/\([\\"]\)/\\\1/g')"
 

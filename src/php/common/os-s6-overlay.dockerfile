@@ -19,14 +19,14 @@ if [ -n "$S6_VERSION" ] && ! has-s6; then
     SOURCE="https://github.com/just-containers/s6-overlay/releases/download/${S6_VERSION}"
     FALLBACK_ENTRYPOINT="/init-non-s6"
 
-    # install deps
+    # Install deps
     if [ ! -x "$(type -P xz)" ] || [ ! -x "$(type -P tar)" ]; then
         APK_PACKAGES="tar xz" \
         APT_PACKAGES="xz-utils" \
         pkg-add
     fi
 
-    # detect system's architecture
+    # Detect system's architecture
     case "$(uname -m)" in
         aarch64 ) S6_ARCH='aarch64' ;;
         arm64   ) S6_ARCH='aarch64' ;;
@@ -43,7 +43,7 @@ if [ -n "$S6_VERSION" ] && ! has-s6; then
         local url="$1"
         local path="${2:-$S6_PATH}/"
         if [ ! -e "$path" ]; then mkdir -p "$path"; fi
-        # the workflow puts the archives in /tmp/helper_cache
+        # The workflow puts the archives in /tmp/helper_cache
         local cached="/tmp/helper_cache/s6-$S6_VERSION-${url##*/}"
         if [ -f "$cached" ]; then
             tar Jxp -C "$path" -f "$cached"
@@ -52,10 +52,10 @@ if [ -n "$S6_VERSION" ] && ! has-s6; then
         fi
     }
 
-    # backup existing entrypoint
+    # Backup existing entrypoint
     if [ -x /init ]; then mv -f /init "$FALLBACK_ENTRYPOINT"; fi
 
-    # and install the right version of s6-overlay
+    # And install the right version of s6-overlay
     untar "${SOURCE}/s6-overlay-noarch.tar.xz"
     untar "${SOURCE}/s6-overlay-${S6_ARCH}.tar.xz"
     untar "${SOURCE}/syslogd-overlay-noarch.tar.xz"
@@ -83,7 +83,7 @@ if [ -n "$S6_VERSION" ] && ! has-s6; then
         env-default DISABLE_ONLIVE_HOOK '1'
     fi
 
-    # fix s6-overlay v3.2.3.2 migration
+    # Fix s6-overlay v3.2.3.2 migration
     if [ -e "${S6_PATH}/${S6_RUNTIME_BUNDLEDIR:-/etc/s6-overlay/user-bundles.d}" ]; then
         rm -rf "${S6_PATH}/etc/s6-overlay/s6-rc.d"/user{,2} &>/dev/null || true
     else
@@ -91,7 +91,7 @@ if [ -n "$S6_VERSION" ] && ! has-s6; then
         env-default S6_RUNTIME_BUNDLEDIR '/etc/s6-overlay/s6-rc.d'
     fi
 
-    # create oneshot service for checking web server
+    # Create oneshot service for checking web server
     if has-cmd s6-service; then
         s6-service \~verify-server oneshot '#!/usr/bin/env bash
 is-true "$DISABLE_ONLIVE_HOOK" && exit 0
@@ -99,7 +99,7 @@ WAIT_FOR_CODES="$ONLIVE_WAIT_CODES" wait-for "${HEALTH_CHECK_URL:-http://127.0.0
 '
     fi
 
-    # check whether to run the legacy entrypoint
+    # Check whether to run the legacy entrypoint
     if [ -x /init ] && [ -x "$FALLBACK_ENTRYPOINT" ]; then
         sed -i "s~^exec ~if [ \"\$#\" -gt 0 ]; then is-true \"\$KEEP_S6_SERVICES\" \&\& set -- $FALLBACK_ENTRYPOINT \"\$@\" || exec $FALLBACK_ENTRYPOINT \"\$@\"; fi\n\nexec ~" /init
     fi

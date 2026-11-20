@@ -15,17 +15,6 @@ source "$BASE_DIR/build/helpers.sh"
 source "$BASE_DIR/build/versions.sh"
 
 ################################################################################
-# Helpers
-################################################################################
-set_platforms() {
-    case "$1" in
-        ubuntu)        echo "linux/amd64,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x" ;;
-        debian|alpine) echo "linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x" ;;
-        *)             echo "linux/amd64,linux/arm64/v8" ;;
-    esac
-}
-
-################################################################################
 # Application rules
 ################################################################################
 APP_RULES="
@@ -63,7 +52,7 @@ flightphp:min=7.4 server=nginx
 grav:min=8.3 server=apache
 
 # https://hyperf.wiki/3.1/#/en/quick-start/install
-hyperf:min=8.2 server=nginx
+hyperf:min=8.2 server=nginx platform=linux/amd64,linux/arm64
 
 # https://docs.invoiceshelf.com/install/manual.html
 invoiceshelf:min=8.2 base=laravel
@@ -84,7 +73,7 @@ magento:min=8.3 latest=8.4 server=nginx
 matomo:min=8.1 server=apache
 
 # https://docs.mautic.org/en/5.x/getting_started/how_to_install_mautic.html#installing-with-composer
-mautic:min=8.2 server=apache
+mautic:min=8.2 server=apache platform=linux/amd64,linux/arm64
 
 # https://docs.nextcloud.com/server/latest/admin_manual/installation/system_requirements.html
 nextcloud:min=8.2 latest=8.5 server=apache
@@ -145,6 +134,20 @@ yii:server=apache
 # slim:server=apache
 "
 
+################################################################################
+# Functions
+################################################################################
+
+# Build platforms of an OS
+set_platforms() {
+    case "$1" in
+        ubuntu)        echo "linux/amd64,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x" ;;
+        debian|alpine) echo "linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x" ;;
+        *)             echo "linux/amd64,linux/arm/v7,linux/arm64/v8" ;;
+    esac
+}
+
+# Apply the rules of APP_RULES (above) and the server choice to the build variables of an app
 apply_app_rules() {
     app="$1"
     rules=$(printf '%s\n' "$APP_RULES" | awk -F: -v a="$app" '$1==a {sub($1":",""); print}')
@@ -196,6 +199,40 @@ apply_app_rules() {
     esac
 }
 
+# Digest of an official upstream image tag, stored in the variable named by $1 (unknown-<time> when the lookup fails).
+# A tag that Docker Hub reports as missing skips the build, because there is nothing to build from.
+# The 404 check runs only when the lookup fails, so a normal run makes no extra request.
+# Usage: upstream_digest <variable> <namespace/repo> <tag>
+upstream_digest() {
+    local digest
+    if ! digest="$(get_dockerhub_tag_digest "$2" "$3")"; then
+        if dockerhub_tag_missing "$2" "$3"; then
+            echo "WARN: no upstream image $2:$3, skip the build" >&2
+            SKIP_BUILD=1
+        fi
+        digest="unknown-$(date +%s)"
+    fi
+    printf -v "$1" '%s' "$digest"
+}
+
+# Build tags: expand_tags adds a tag for each tag that matches, add_tag appends tags
+expand_tags() {
+    local find="$1" add="$2" exclude="${3:-dummy}" out=""
+    for item in ${BUILD_TAGS//,/ }; do
+        out+="${out:+,}$item"
+        if [[ "$item" != *"$exclude"* ]] && echo "$item" | grep -Eq "$find"; then
+            out+="${out:+,}${item/$find/$add}"
+        fi
+    done
+    BUILD_TAGS="$out"
+}
+
+add_tag() {
+    for tag; do
+        [ -n "$tag" ] && BUILD_TAGS="${BUILD_TAGS:+$BUILD_TAGS,}$tag"
+    done
+}
+
 ################################################################################
 # Parse arguments
 ################################################################################
@@ -208,18 +245,18 @@ OS="$1"; APP="$2"; PHP_VERSION="$3"; PREFER_SERVER="$4"
 ################################################################################
 # Build environment variables
 ################################################################################
+APACHE_VERSION="${APACHE_VERSION:-stable}"
+COMPOSER_VERSION="${COMPOSER_VERSION:-latest}"
+IPE_VERSION="${IPE_VERSION:-latest}"
 LATEST_PHP="8.6"
 LATEST_S6=
-
-PHP_VARIANT="${PHP_VARIANT:-}"
-S6_VERSION="${S6_VERSION:-latest}"
 NGINX_VERSION="${NGINX_VERSION:-mainline}"
-APACHE_VERSION="${APACHE_VERSION:-stable}"
-S6_PATH="${S6_PATH:-}"
 OS_BASE="${OS_BASE:-debian}"
 OS_VERSION="${OS_VERSION:-latest}"
-IPE_VERSION="${IPE_VERSION:-latest}"
-COMPOSER_VERSION="${COMPOSER_VERSION:-latest}"
+PHP_SKIP_MODULES=
+PHP_VARIANT="${PHP_VARIANT:-}"
+S6_PATH="${S6_PATH:-}"
+S6_VERSION="${S6_VERSION:-latest}"
 
 BASE_REPO="php"
 DEFAULT_REPO="shinsenter"
@@ -227,31 +264,31 @@ DEFAULT_BUILD_NAME="$DEFAULT_REPO/php"
 DEFAULT_README="$BASE_DIR/README.md"
 MIRROR_REPO="${MIRROR_REPO:-}"
 
-BUILD_NAME="$DEFAULT_BUILD_NAME"
-BUILD_DATE="$(date +%Y-%m-%dT%T%z)"
-BUILD_REVISION="$(git rev-parse HEAD)"
-BUILD_FROM_IMAGE="$DEFAULT_BUILD_NAME"
-BUILD_SOURCE_IMAGE=
+BUILD_CACHE_KEY=
 BUILD_CONTEXT=
+BUILD_DATE="$(date +%Y-%m-%dT%T%z)"
+BUILD_DESC=
 BUILD_DOCKERFILE=
 BUILD_DOCKERFILE_SQUASHED=
+BUILD_FINGERPRINT=
+BUILD_FROM_IMAGE="$DEFAULT_BUILD_NAME"
+BUILD_NAME="$DEFAULT_BUILD_NAME"
+BUILD_PLATFORM="$(set_platforms default)"
 BUILD_README=
-BUILD_DESC=
+BUILD_REVISION="$(git rev-parse HEAD)"
+BUILD_SOURCE_IMAGE=
 BUILD_TAG=
 BUILD_TAGS=
 BUILD_TAG_PREFIX="${BUILD_TAG_PREFIX:-}"
 BUILD_TMP_NAME=
-BUILD_CACHE_KEY=
-BUILD_FINGERPRINT=
-BUILD_PLATFORM="$(set_platforms default)"
 
+ALLOW_RC=0
+BACKPORT_DIR=
+CHECK_ONLY="${CHECK_ONLY:-0}"
+FORCE_BUILD="${FORCE_BUILD:-0}"
 SKIP_BUILD="${SKIP_BUILD:-0}"
 SKIP_SQUASH="${SKIP_SQUASH:-0}"
-FORCE_BUILD="${FORCE_BUILD:-0}"
-CHECK_ONLY="${CHECK_ONLY:-0}"
-ALLOW_RC=0
 UPDATE_README=0
-BACKPORT_DIR=
 
 PREFIX="${APP#app-}"
 SUFFIX=
@@ -307,13 +344,14 @@ case "$APP" in
         ;;
     with-f8p)
         verlt "$PHP_VERSION" "8.2" && SKIP_BUILD=1
-        # dunglas/frankenphp has no PHP 8.6 image yet, so cap the build at 8.5
+        # dunglas/frankenphp has no PHP 8.6 image yet, so its latest tag stays on 8.5
         LATEST_PHP="8.5"
         PREFIX="frankenphp"
         BUILD_NAME="$DEFAULT_REPO/frankenphp"
         BUILD_SOURCE_IMAGE="dunglas/frankenphp:1-php$PHP_VERSION$SUFFIX"
         BUILD_DOCKERFILE="$BASE_DIR/src/php/with-f8p.dockerfile"
-        BUILD_CACHE_KEY="(frankenphp@$(get_dockerhub_tag_digest_or_now "dunglas/frankenphp" "1-php$PHP_VERSION$SUFFIX"))"
+        upstream_digest F8P_SHA "dunglas/frankenphp" "1-php$PHP_VERSION$SUFFIX"
+        BUILD_CACHE_KEY="(frankenphp@$F8P_SHA)"
         PHP_VARIANT="zts$SUFFIX"
         ;;
     with-roadrunner)
@@ -340,6 +378,8 @@ case "$APP" in
         BUILD_DOCKERFILE="$BASE_DIR/src/php/base-php.dockerfile"
         PHP_VARIANT="$APP$SUFFIX"
         ALLOW_RC=1
+        # Temporary: the official image has no 8.6-zts yet, only 8.6-rc-zts. Remove this line when it has
+        [ "$APP" = "zts" ] && [ "$PHP_VERSION" = "8.6" ] && PHP_VERSION="8.6-rc"
         ;;
 esac
 
@@ -398,29 +438,17 @@ if [ "$SKIP_BUILD" != "1" ]; then
     if [ "$APP" = "with-apache" ]; then
         APACHE_VERSION="$(resolve_apache_version "$APACHE_VERSION")"
     fi
+
+    # Modules that IPE does not support on this PHP version, skipped in src/php/common/php-extensions.dockerfile
+    if [ "$BUILD_DOCKERFILE" = "$BASE_DIR/src/php/base-php.dockerfile" ]; then
+        PHP_SKIP_MODULES="$(get_php_skip_modules "${PHP_VERSION%-rc}" | tr '\n' ' ' | sed 's/ $//')"
+    fi
 fi
 
 ################################################################################
 # Generate build tags
 ################################################################################
-expand_tags() {
-    local find="$1" add="$2" exclude="${3:-dummy}" out=""
-    for item in ${BUILD_TAGS//,/ }; do
-        out+="${out:+,}$item"
-        if [[ "$item" != *"$exclude"* ]] && echo "$item" | grep -Eq "$find"; then
-            out+="${out:+,}${item/$find/$add}"
-        fi
-    done
-    BUILD_TAGS="$out"
-}
-
-add_tag() {
-    for tag; do
-        [ -n "$tag" ] && BUILD_TAGS="${BUILD_TAGS:+$BUILD_TAGS,}$tag"
-    done
-}
-
-# Generate build tags
+# Tags by PHP version, app and variant
 if [ -n "$PHP_VERSION" ]; then
     if [ "$BUILD_NAME" = "$DEFAULT_BUILD_NAME" ]; then
         add_tag "$BUILD_NAME:$PHP_VERSION-$PREFIX$SUFFIX"
@@ -504,7 +532,7 @@ fi
 unset suffix SERVER_SUFFIX major unique_id
 
 ################################################################################
-# Build context, readme, description etc.
+# Build context, readme, description etc
 ################################################################################
 if [ "$DUMMY" = "1" ]; then
     BUILD_DOCKERFILE="$BASE_DIR/src/dummy.dockerfile"
@@ -540,7 +568,7 @@ fi
 if [ -n "$BUILD_README" ] && [ -f "$BUILD_README" ]; then
     BUILD_DESC="$(sed '3q;d' "$BUILD_README")"
 
-    # update readme on latest tag and not dev branch
+    # Update readme on latest tag and not dev branch
     if [[ "$BUILD_TAGS" == *'latest'* ]] && [ -z "$BUILD_TAG_PREFIX" ]; then
         UPDATE_README=1
     fi
@@ -582,12 +610,14 @@ if [ "$SKIP_BUILD" != "1" ]; then
     fi
 
     if [ -n "$PHP_VERSION" ]; then
-        PHP_SHA="$(get_dockerhub_tag_digest_or_now "library/php" "$PHP_VERSION-${PHP_VARIANT#-}")"
+        # A new PHP version can lack a variant for a while (for example 8.6-zts)
+        upstream_digest PHP_SHA "library/php" "$PHP_VERSION-${PHP_VARIANT#-}"
         BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(php:$PHP_VERSION-${PHP_VARIANT#-}@$PHP_SHA)"
 
         # Outdated versions are only rebuilt when their official PHP image changes
         if ! is_outdated_php "$PHP_VERSION"; then
             BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(IPE:$IPE_VERSION)/(composer:$COMPOSER_VERSION)"
+            [ -z "$PHP_SKIP_MODULES" ] || BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(ipe-skip:$(echo "$PHP_SKIP_MODULES" | md5sum | cut -c1-8))"
         fi
 
         # Alpine images get the latest brotli and curl (see src/php/common/patches/middleware-patch)
@@ -675,13 +705,14 @@ fi
 ################################################################################
 # Export Git action environment variables
 ################################################################################
+github_env APACHE_VERSION "$APACHE_VERSION"
 github_env BUILD_CACHE_KEY "$BUILD_CACHE_KEY"
-github_env BUILD_FINGERPRINT "$BUILD_FINGERPRINT"
 github_env BUILD_CONTEXT "$BUILD_CONTEXT"
 github_env BUILD_DATE "$BUILD_DATE"
 github_env BUILD_DESC "$BUILD_DESC"
 github_env BUILD_DOCKERFILE "$BUILD_DOCKERFILE"
 github_env BUILD_DOCKERFILE_SQUASHED "$BUILD_DOCKERFILE_SQUASHED"
+github_env BUILD_FINGERPRINT "$BUILD_FINGERPRINT"
 github_env BUILD_FROM_IMAGE "$BUILD_FROM_IMAGE"
 github_env BUILD_NAME "$BUILD_NAME"
 github_env BUILD_PLATFORM "$BUILD_PLATFORM"
@@ -689,15 +720,15 @@ github_env BUILD_README "$BUILD_README"
 github_env BUILD_REVISION "$BUILD_REVISION"
 github_env BUILD_SOURCE_IMAGE "$BUILD_SOURCE_IMAGE"
 github_env BUILD_TAG "$BUILD_TAG"
-github_env BUILD_TAG_PREFIX "$BUILD_TAG_PREFIX"
 github_env BUILD_TAGS "$BUILD_TAGS"
+github_env BUILD_TAG_PREFIX "$BUILD_TAG_PREFIX"
 github_env BUILD_TMP_NAME "$BUILD_TMP_NAME"
 github_env LATEST_PHP "$LATEST_PHP"
 github_env LATEST_S6 "$LATEST_S6"
-github_env APACHE_VERSION "$APACHE_VERSION"
 github_env NGINX_VERSION "$NGINX_VERSION"
 github_env OS_BASE "$OS_BASE"
 github_env OS_VERSION "$OS_VERSION"
+github_env PHP_SKIP_MODULES "$PHP_SKIP_MODULES"
 github_env PHP_VARIANT "$PHP_VARIANT"
 github_env PHP_VERSION "$PHP_VERSION"
 github_env S6_PATH "$S6_PATH"

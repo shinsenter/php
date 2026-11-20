@@ -10,6 +10,7 @@ keywords="update upgrade"
 upgrade=0
 packages=""
 
+# Split the update/upgrade keywords from the package names
 for arg in "$@"; do
     match=0
     for keyword in $keywords; do

@@ -31,7 +31,7 @@ EOF
   exit 0
 }
 
-# parse options
+# Parse options
 while [ $# -gt 0 ]; do
   case "$1" in
     -c|--cert-file) cert_file=$2; shift 2 ;;
@@ -53,7 +53,7 @@ fi
 domains="$@"
 primary="$1"
 
-# ensure output dir if absolute path
+# Ensure output dir if absolute path
 mkdir_p_if_abs() {
   case "$1" in
     /*) dir=$(dirname "$1"); [ -d "$dir" ] || mkdir -p "$dir" ;;
@@ -72,19 +72,19 @@ debug-echo "  Key:     $key_file"
 debug-echo "  Days:    $days"
 debug-echo "  DHParam: $dhparam_file ($dhparam_bits bits)"
 
-# create dhparam if missing
+# Create dhparam if missing
 if [ ! -f "$dhparam_file" ]; then
   debug-echo -i "Creating DH parameters..."
   openssl dhparam -out "$dhparam_file" "$dhparam_bits"
   chmod 644 "$dhparam_file"
 fi
 
-# cleanup san.cnf
+# Cleanup san.cnf
 san_conf="$cert_dir/san.cnf"
 cleanup() { rm -f "$san_conf"; }
 trap cleanup EXIT
 
-# build SAN config
+# Build SAN config
 {
   echo "[req]"
   echo "distinguished_name=dn"
@@ -111,11 +111,11 @@ trap cleanup EXIT
   done
 } > "$san_conf"
 
-# generate ECDSA key
+# Generate ECDSA key
 debug-echo -i "Generating ECDSA key (prime256v1)..."
 openssl ecparam -name prime256v1 -genkey -noout -out "$key_file"
 
-# generate self-signed certificate
+# Generate self-signed certificate
 debug-echo -i "Generating self-signed certificate..."
 openssl req -x509 -new -sha256 \
   -key "$key_file" -out "$cert_file" \
