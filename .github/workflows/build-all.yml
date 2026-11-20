@@ -68,6 +68,7 @@ permissions:
 jobs:
   prepare:
     runs-on: ubuntu-26.04-arm
+    timeout-minutes: 20
     outputs:
       tag_prefix: ${{ steps.init.outputs.tag_prefix }}
       php_versions: ${{ steps.init.outputs.php_versions }}
@@ -116,11 +117,24 @@ jobs:
           # Lookups shared by all jobs of this run (uploaded below as the helper_cache artifact)
           cache_run_inputs "${php_versions[@]}"
 
-      - uses: actions/upload-artifact@v7
+      - # The source archives, for the build jobs
+        uses: actions/upload-artifact@v7
         with:
           name: helper_cache
           overwrite: true
-          path: /tmp/helper_cache/
+          path: |
+            /tmp/helper_cache/
+            !/tmp/helper_cache/*.cache
+            !/tmp/helper_cache/ipe-supported-extensions
+
+      - # The small lookups, for the prepare jobs
+        uses: actions/upload-artifact@v7
+        with:
+          name: helper_lookups
+          overwrite: true
+          path: |
+            /tmp/helper_cache/*.cache
+            /tmp/helper_cache/ipe-supported-extensions
 
   ##########################################################
 
@@ -214,11 +228,12 @@ jobs:
 
   server-cache:
     runs-on: ubuntu-26.04-arm
+    timeout-minutes: 20
     needs: [prepare, cli, fpm]
     steps:
       - uses: actions/download-artifact@v8
         with:
-          name: helper_cache
+          name: helper_lookups
           path: /tmp/helper_cache/
 
       - uses: actions/checkout@v7
@@ -240,9 +255,11 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: helper_cache
+          name: helper_lookups
           overwrite: true
-          path: /tmp/helper_cache/
+          path: |
+            /tmp/helper_cache/*.cache
+            /tmp/helper_cache/ipe-supported-extensions
 
   ##########################################################
 

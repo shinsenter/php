@@ -50,6 +50,7 @@ concurrency:
 jobs:
   watch:
     runs-on: ubuntu-26.04-arm
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
 

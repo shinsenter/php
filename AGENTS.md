@@ -14,6 +14,7 @@ Environment variables change PHP and FPM settings, so a change needs no rebuild.
 - Same behavior across PHP versions. Differences live in data, such as a per-version patch folder.
 - No bloat in the base image: no extra files or packages. Remove build packages in the layer that installs them.
 - Short, readable code.
+- Spend few resources: bandwidth, runner time, CPU, memory, registry and API requests. Reuse a cached lookup, skip a job with no work, set a timeout on every job.
 - Comments make a long file easy to scan: one short line above a block says what the block does. Add the reason when it is not obvious: a limit, a trap, a trade-off, a link to the source. Do not narrate line by line, and do not repeat a name. Same style in every file: short, plain, practical English. A one-line label starts with a capital letter and has no final period. Several sentences go one per line, each with a period. Rules: spec `conventions`.
 - Verify through the build log. Do not ship check files in the image.
 
@@ -64,6 +65,7 @@ Utilities inside the image: `pkg-add` and `pkg-del` (install and remove packages
 
 - Trial build: `tests/build-test.sh <os> <app> <php-version> [server]`, for example `tests/build-test.sh '' with-nginx 8.4`. An empty `<os>` is Debian. It also builds the images it depends on. Variables: `SKIP_SQUASH=1`, `BUILD_TAG_PREFIX`.
 - Offline tests need no Docker, so run them after a change and report the real output: `tests/run.sh`, or `tests/run.sh lint|versions|backports|config|scaling|ssh|defaults|size|fingerprint|helpers|updates`.
+- All images at once: `tests/compose-test.sh` starts the servers and webapps in batches. The manual `Compose test` workflow runs it on the published images, one job per service and OS.
 - A failing check is a finding. Fix the cause or tell the user. Do not edit a test to make it pass.
 
 ## Working rules

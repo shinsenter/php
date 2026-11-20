@@ -69,6 +69,7 @@ jobs:
   prepare:
     name: ${{ inputs.php_version }} ${{ inputs.app_name }} ${{ inputs.server }} ${{ inputs.os }} (prepare)
     runs-on: ubuntu-26.04-arm
+    timeout-minutes: 20
     env:
       ARCHIVES_REPO: "shinsenter/php-archives"
       MIRROR_REPO: ghcr.io/shinsenter
@@ -79,16 +80,14 @@ jobs:
       fingerprint: ${{ steps.plan.outputs.fingerprint }}
       env: ${{ steps.plan.outputs.env }}
     steps:
-      -
+      - # Only the small lookups, not the source archives that the build jobs need
         uses: actions/download-artifact@v8
         with:
-          name: helper_cache
+          name: helper_lookups
           path: /tmp/helper_cache/
 
-      -
+      - # build/config.sh needs no submodule
         uses: actions/checkout@v7
-        with:
-          submodules: 'true'
 
       -
         name: Generate build config
@@ -130,6 +129,7 @@ jobs:
     needs: prepare
     if: ${{ needs.prepare.outputs.skip != '1' }}
     runs-on: ${{ matrix.runner }}
+    timeout-minutes: 180
     strategy:
       fail-fast: false
       matrix:
@@ -149,16 +149,19 @@ jobs:
       DOCKER_BUILDKIT: "1"
       PUBLISH_TO_GHCR: "1"
     steps:
-      -
+      - # The submodule .dockerfile-x/upstream (58 MB) is not needed here, only docker-squash is
         uses: actions/checkout@v7
-        with:
-          submodules: 'true'
 
       -
         name: Load build config
         env:
           BUILD_ENV: ${{ needs.prepare.outputs.env }}
         run: printf '%s\n' "$BUILD_ENV" >> "$GITHUB_ENV"
+
+      -
+        if: ${{ env.SKIP_SQUASH != '1' }}
+        name: Get docker-squash
+        run: git submodule update --init --depth 1 -- build/docker-squash
 
       -
         name: Prepare build context
@@ -267,8 +270,6 @@ jobs:
           docker pull --platform "$MATRIX_PLATFORM" "$BUILD_TMP_NAME"
           DEBUG= $SQUASH_CMD "$BUILD_TMP_NAME" -p >"$BUILD_DOCKERFILE_SQUASHED"
           cat "$BUILD_DOCKERFILE_SQUASHED"
-          docker images
-          df -h
 
       - # Only the pushed image uses zstd layers (smaller, faster pull), the temporary image above stays gzip
         if: ${{ env.SKIP_SQUASH != '1' }}
@@ -335,9 +336,11 @@ jobs:
   readme:
     name: ${{ inputs.php_version }} ${{ inputs.app_name }} ${{ inputs.server }} ${{ inputs.os }} (readme)
     needs: [prepare, build]
-    # Runs even when build is skipped (SKIP_BUILD), but not after a failure
-    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.build.result != 'failure' }}
+    # Runs even when build is skipped (SKIP_BUILD), but not after a failure.
+    # Most images have no README to update, and the job is skipped for them: a runner costs more than the update.
+    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.build.result != 'failure' && contains(needs.prepare.outputs.env, 'UPDATE_README=1') }}
     runs-on: ubuntu-26.04-arm
+    timeout-minutes: 10
     steps:
       -
         uses: actions/checkout@v7
