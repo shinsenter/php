@@ -103,12 +103,17 @@ runs:
       continue-on-error: true
       shell: bash
       run: |
+        # Exit code 10 means CVEs were found, so the summary is written only then
+        rc=0
         docker run --rm ghcr.io/aquasecurity/trivy:latest image --platform linux/amd64 \
             --quiet --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed \
-            --timeout 10m --format table "ghcr.io/$BUILD_TAG" | head -c 200000 >/tmp/scan.txt
-        {
-            echo "### Vulnerabilities in $BUILD_TAG (HIGH and CRITICAL, fixed upstream)"
-            echo '```'
-            cat /tmp/scan.txt
-            echo '```'
-        } >> "$GITHUB_STEP_SUMMARY"
+            --timeout 10m --exit-code 10 --format table "ghcr.io/$BUILD_TAG" >/tmp/scan.full || rc=$?
+        head -c 200000 /tmp/scan.full >/tmp/scan.txt
+        if [ "$rc" = 10 ]; then
+            {
+                echo "### Vulnerabilities in $BUILD_TAG (HIGH and CRITICAL, fixed upstream)"
+                echo '```'
+                cat /tmp/scan.txt
+                echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+        fi
