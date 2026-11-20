@@ -12,23 +12,23 @@ RUN <<'EOF'
 echo 'Configure Nginx'
 [ -z "$DEBUG" ] || set -x; set -e
 
-# add user to nginx group
+# Add user to nginx group
 SUPP_GROUPS=$(id -Gn "$APP_USER" | tr ' ' ',')
 usermod -G $APP_GROUP,nginx nginx &>/dev/null || true
 usermod -G $SUPP_GROUPS,nginx $APP_USER &>/dev/null || true
 
-# port of the health checks (not exposed) and the URL that the startup check uses
+# Port of the health checks (not exposed) and the URL that the startup check uses
 env-default HEALTH_PORT '2020'
 env-default HEALTH_CHECK_URL 'http://127.0.0.1:${HEALTH_PORT}/healthz'
 
-# seconds to keep an idle connection open, longer than the 90 s that Traefik keeps its own idle connections
+# Seconds to keep an idle connection open, longer than the 90 s that Traefik keeps its own idle connections
 env-default NGINX_KEEPALIVE_TIMEOUT '120'
 
-# disable PHP-FPM logging to stdout
+# Disable PHP-FPM logging to stdout
 env-default PHP_LISTEN '/run/php-fpm.sock'
 env-default PHP_ACCESS_LOG '/var/log/php-fpm.log'
 
-# create directories
+# Create directories
 mkdir -p /etc/nginx \
     /etc/nginx/custom.d \
     /etc/nginx/modules-enabled \
@@ -42,7 +42,7 @@ mkdir -p /etc/nginx \
     /var/tmp/nginx/scgi \
     /var/lib/nginx /var/log/nginx /run/nginx
 
-# create s6 services
+# Create s6 services
 if has-cmd s6-service; then
     s6-service nginx requires php-fpm
     s6-service nginx longrun '#!/usr/bin/env bash

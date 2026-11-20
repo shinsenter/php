@@ -23,7 +23,7 @@ else
     mpm_module='event'
 fi
 
-# adjustment factors per profile
+# Adjustment factors per profile
 case "$profile" in
   low)
     factor_start=1
@@ -42,6 +42,7 @@ case "$profile" in
     ;;
 esac
 
+# prefork sizes by processes, event sizes by threads
 if [ "$mpm_module" = "prefork" ]; then
     start_servers=$((cpu_cores * factor_start))
     min_spare_servers=$((cpu_cores * factor_spare))
@@ -67,10 +68,10 @@ else
     min_spare_threads=$((cpu_cores * factor_spare * 5))
     max_spare_threads=$((cpu_cores * factor_spare * 10))
     threads_per_child=25
-    # a multiple of ThreadsPerChild, and at least one child
+    # A multiple of ThreadsPerChild, and at least one child
     max_clients=$(awk "BEGIN {printf \"%d\", int($ram_mb / 10 * $factor_clients / $threads_per_child) * $threads_per_child}")
     [ "$max_clients" -ge "$threads_per_child" ] || max_clients=$threads_per_child
-    # one spare child, so a graceful restart can start new ones while old ones finish
+    # One spare child, so a graceful restart can start new ones while old ones finish
     server_limit=$((max_clients / threads_per_child + 1))
 
     cat <<EOF > "$config"

@@ -15,7 +15,7 @@ set \$APP_PATH '$APP_PATH';
 set \$APP_ROOT '$APP_ROOT';
 " >/etc/nginx/custom.d/00-set-variables.conf
 
-# health checks on their own port, so they answer for any Host header, without TLS and apart from the app routes
+# Health checks on their own port, so they answer for any Host header, without TLS and apart from the app routes
 # the port is not exposed: orchestrators call it on the container address, so it must listen on all addresses
 HEALTH_PORT="${HEALTH_PORT:-2020}"
 PING_PATH="${PHP_PING_PATH:-/ping}"
@@ -45,7 +45,7 @@ server {
 }
 HEALTHCONF
 
-# trust X-Forwarded-For and X-Forwarded-Proto from more proxies (CIDRs separated by comma or space)
+# Trust X-Forwarded-For and X-Forwarded-Proto from more proxies (CIDRs separated by comma or space)
 # this works only when real_ip is built in, because the same directive decides who is trusted
 \rm -f /etc/nginx/proxies.d/trusted.conf
 if [ -n "$TRUSTED_PROXIES" ] && grep -q '^[[:space:]]*real_ip_header' /etc/nginx/nginx.conf; then
@@ -54,7 +54,7 @@ if [ -n "$TRUSTED_PROXIES" ] && grep -q '^[[:space:]]*real_ip_header' /etc/nginx
     done
 fi
 
-# keep idle connections open longer than a proxy in front does, or the proxy may reuse a connection that just closed (502)
+# Keep idle connections open longer than a proxy in front does, or the proxy may reuse a connection that just closed (502)
 \rm -f /etc/nginx/custom.d/00-keepalive_timeout.conf
 if [ -n "$NGINX_KEEPALIVE_TIMEOUT" ]; then
     case "$NGINX_KEEPALIVE_TIMEOUT" in
@@ -63,12 +63,12 @@ if [ -n "$NGINX_KEEPALIVE_TIMEOUT" ]; then
     esac
 fi
 
-# adjust max upload size
+# Adjust max upload size
 if [ -n "$PHP_POST_MAX_SIZE" ]; then
     echo "client_max_body_size ${PHP_POST_MAX_SIZE};" >/etc/nginx/custom.d/00-client_max_body_size.conf
 fi
 
-# adjust max timeout
+# Adjust max timeout
 if [ -n "$PHP_MAX_EXECUTION_TIME" ] && [ "$PHP_MAX_EXECUTION_TIME" -gt "0" ]; then
     echo "
 send_timeout        ${PHP_MAX_EXECUTION_TIME};
@@ -84,7 +84,7 @@ fi
 
 web-chown fix /var/lib/nginx /var/log/nginx /run/nginx
 
-# the dhparam file is created at build time, a volume on /etc/ssl/site can hide it
+# The dhparam file is created at build time, a volume on /etc/ssl/site can hide it
 if [ -f /etc/ssl/site/dhparam.pem ]; then
     nginx-conf 'ssl_dhparam' '/etc/ssl/site/dhparam.pem'
 else
@@ -92,7 +92,7 @@ else
     nginx-conf '#ssl_dhparam' '/etc/ssl/site/dhparam.pem'
 fi
 
-# listen on IPv6 only when the kernel supports it
+# Listen on IPv6 only when the kernel supports it
 if [ -e /proc/net/if_inet6 ]; then
     sed -i 's/^\([[:space:]]*\)# listen \[::\]/\1listen [::]/' /etc/nginx/sites-enabled/*.conf /etc/nginx/custom.d/*.conf >/dev/null 2>&1
 else
@@ -100,7 +100,7 @@ else
     sed -i 's/^\([[:space:]]*\)listen \[::\]/\1# listen [::]/' /etc/nginx/sites-enabled/*.conf /etc/nginx/custom.d/*.conf >/dev/null 2>&1
 fi
 
-# enable debug logs
+# Enable debug logs
 if is-debug; then
     nginx-conf 'error_log' "$(log-path stdout) debug"
     debug-echo -w "🐞 Nginx is in DEBUG MODE 🐞"

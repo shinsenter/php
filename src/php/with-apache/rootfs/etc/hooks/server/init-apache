@@ -10,6 +10,7 @@ export APACHE_PID="${APACHE_PID:-/run/apache2.pid}"
 
 if [ -f /etc/apache2/envvars ]; then source /etc/apache2/envvars; fi
 
+# Match the Apache and proxy timeout to PHP_MAX_EXECUTION_TIME
 if [ -n "$PHP_MAX_EXECUTION_TIME" ] && [ "$PHP_MAX_EXECUTION_TIME" -gt "0" ]; then
     echo "
 Timeout ${PHP_MAX_EXECUTION_TIME}
@@ -19,7 +20,7 @@ Timeout ${PHP_MAX_EXECUTION_TIME}
 " >/etc/apache2/mods-enabled/timeout.conf
 fi
 
-# trust X-Forwarded-For and X-Forwarded-Proto from more proxies (CIDRs separated by comma or space)
+# Trust X-Forwarded-For and X-Forwarded-Proto from more proxies (CIDRs separated by comma or space)
 \rm -f /etc/apache2/mods-enabled/trusted-proxies.conf
 if [ -n "$TRUSTED_PROXIES" ]; then
     for cidr in $(trusted-proxies); do
@@ -32,7 +33,7 @@ web-chown fix \
     "$APACHE_LOG_DIR" "$APACHE_LOCK_DIR" "$APACHE_RUN_DIR" \
     /var/lib/apache2 /var/log/apache2 /run/apache2
 
-# modules to turn off at start, for example "cache cgid mime_magic negotiation"
+# Modules to turn off at start, for example "cache cgid mime_magic negotiation"
 if [ -n "$APACHE_DISABLE_MODULES" ]; then
     debug-echo -i "Disable Apache modules: $APACHE_DISABLE_MODULES"
     a2dismod $APACHE_DISABLE_MODULES

@@ -6,19 +6,19 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-# disable TLSv1.3 when not supported
+# Disable TLSv1.3 when not supported
 if nginx-has-error 'invalid value "TLSv1.3"'; then
     echo 'Disable TLSv1.3 because it is not supported in this Nginx version'
     nginx-conf 'ssl_protocols' 'TLSv1.2'
 fi
 
-# fix deprecated listen http2 directive for Nginx 1.25.1
+# Fix deprecated listen http2 directive for Nginx 1.25.1
 if nginx-has-error 'use the "http2" directive'; then
     sed -i 's/listen \(.\+\?\) http2/listen \1/g' /etc/nginx/sites-enabled/*.conf >/dev/null 2>&1
     echo "http2 on;" >/etc/nginx/custom.d/00-ext-http2.conf
 fi
 
-# remove listen parameters that old Nginx versions do not know:
+# Remove listen parameters that old Nginx versions do not know:
 # "reuseport" needs Nginx 1.9.1 and "http2" needs Nginx 1.9.5
 for param in reuseport http2; do
     if nginx-has-error "invalid parameter \"$param\""; then
@@ -27,7 +27,7 @@ for param in reuseport http2; do
     fi
 done
 
-# disable real_ip when the module is not built in
+# Disable real_ip when the module is not built in
 if nginx-has-error 'real_ip'; then
     echo 'Disable real_ip because it is not supported in this Nginx version'
     nginx-conf '#real_ip_header' 'X-Forwarded-For'
@@ -37,10 +37,10 @@ if nginx-has-error 'real_ip'; then
     printf 'set $client_https $https;\nset $client_scheme $scheme;\n' >/etc/nginx/custom.d/00-proxy-proto.conf
 fi
 
-# customize extensions
+# Customize extensions
 if nginx-has-error 'brotli'; then \rm -f /etc/nginx/custom.d/*brotli.conf; fi
 if nginx-has-error 'gzip';   then \rm -f /etc/nginx/custom.d/*gzip.conf;   fi
 if nginx-has-error 'http3' || nginx-has-error '"quic"'; then \rm -f /etc/nginx/custom.d/*http3.conf; fi
 
-# the server stops at the first error when it starts, so show what is left
+# The server stops at the first error when it starts, so show what is left
 with-env nginx -t || echo 'WARNING: nginx -t still fails after the fixes above' >&2

@@ -6,6 +6,7 @@
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
 # Copy files from the official image
+# take the binary, its config and its data folders from the FrankenPHP image
 COPY --link --from=frankenphp /usr/local/lib/libwatcher* /usr/local/lib/
 COPY --link --from=frankenphp /usr/local/bin/frankenphp /usr/local/bin/
 COPY --link --from=frankenphp /config/caddy /config/caddy
@@ -19,7 +20,7 @@ RUN <<'EOF'
 echo 'Install FrankenPHP'
 [ -z "$DEBUG" ] || set -x; set -e
 
-# install common packages
+# Install common packages
 APK_PACKAGES='libstdc++ mailcap libcap' \
 APT_PACKAGES='libstdc++6 mailcap libcap2-bin' \
 pkg-add && ldconfig /usr/local/lib
@@ -28,15 +29,15 @@ mkdir -p /config/caddy /data/caddy /etc/caddy /etc/frankenphp
 
 ! has-cmd frankenphp && exit 1
 
-# one Caddyfile for every frankenphp command, as in the official image
+# One Caddyfile for every frankenphp command, as in the official image
 ln -nsf /etc/caddy/Caddyfile /etc/frankenphp/Caddyfile
 
-# test frankenphp command
+# Test frankenphp command
 FRANKENPHP_PATH="/usr/local/bin/frankenphp"
 setcap cap_net_bind_service=+ep "$FRANKENPHP_PATH"
 "$FRANKENPHP_PATH" version || exit 1
 
-# alias for frankenphp
+# Alias for frankenphp
 ln -nsf "$FRANKENPHP_PATH" /usr/local/sbin/caddy
 
 # make frankenphp command alias
