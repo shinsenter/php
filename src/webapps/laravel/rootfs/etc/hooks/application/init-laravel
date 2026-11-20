@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# Prepare .env: app key and sqlite file
 if [ -f "$APP_PATH/.env" ]; then
     if grep -qx -- 'APP_KEY=' "$APP_PATH/.env"; then
         artisan key:generate || true
@@ -10,6 +11,7 @@ if [ -f "$APP_PATH/.env" ]; then
     fi
 fi
 
+# Run migrations, isolated when the command supports it
 if is-true "$LARAVEL_AUTO_MIGRATION"; then
     LARAVEL_AUTO_MIGRATION_COMMAND="${LARAVEL_AUTO_MIGRATION_COMMAND:-"migrate"}"
     MIGRATION_CMD="artisan $LARAVEL_AUTO_MIGRATION_COMMAND --force -n"
@@ -23,7 +25,7 @@ fi
 
 artisan storage:link || true
 
-# service settings
+# Service settings
 s6-service queue_worker $(is-true "$LARAVEL_ENABLE_QUEUE_WORKER" && echo enable || echo disable)
 s6-service scheduler    $(is-true "$LARAVEL_ENABLE_SCHEDULER"    && echo enable || echo disable)
 s6-service horizon      $(is-true "$LARAVEL_ENABLE_HORIZON"      && echo enable || echo disable)

@@ -46,19 +46,19 @@ RUN <<'EOF'
 echo 'Configure EspoCRM'
 [ -z "$DEBUG" ] || set -x; set -e
 
-# install zmq php extension
+# Install zmq php extension
 phpaddmod zmq || true
 
-# enable preload to bring a significant performance boost
+# Enable preload to bring a significant performance boost
 # see: https://docs.espocrm.com/administration/performance-tweaking/#preloading
 # env-default PHP_OPCACHE_PRELOAD '$(app-path)/preload.php'
 
-# enable mod_proxy and mod_proxy_wstunnel
+# Enable mod_proxy and mod_proxy_wstunnel
 if has-cmd s6-service; then
     a2enmod proxy proxy_wstunnel
 fi
 
-# create WebSocket services
+# Create WebSocket services
 if has-cmd s6-service; then
     s6-service espocrm-websocket longrun '#!/usr/bin/env bash
 if is-true "$ESPOCRM_CONFIG_USE_WEB_SOCKET"; then
