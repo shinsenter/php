@@ -51,6 +51,27 @@ swap_libs() {
     cp -a "$1"/usr/lib/$2 /usr/lib/
 }
 
+# set_apk_version <version> <package>...: make the package records say <version>-r0.
+# The files come from a source build, but the records keep the version of the Alpine
+# package, and scanners report the CVEs of that older version.
+set_apk_version() {
+    v="$1"; shift
+    for p in "$@"; do
+        # the old version also sits in pins like "libcurl=<old>" of the sibling packages
+        awk -v p="$p" -v n="$v-r0" 'function swap(s, o, r,   out, i) {
+                while ((i = index(s, o)) > 0) { out = out substr(s, 1, i - 1) r; s = substr(s, i + length(o)) }
+                return out s
+            }
+            BEGIN { RS = ORS = "\n\n" }
+            index("\n" $0 "\n", "\nP:" p "\n") && match($0, /\nV:[^\n]*/) {
+                o = substr($0, RSTART + 3, RLENGTH - 3); $0 = swap($0, o, n)
+            }
+            { print }' /lib/apk/db/installed > /tmp/apk-installed &&
+            cat /tmp/apk-installed > /lib/apk/db/installed
+        rm -f /tmp/apk-installed
+    done
+}
+
 build_brotli() {
     echo "Build brotli $BROTLI_VERSION"
     download "https://github.com/google/brotli/archive/refs/tags/v$BROTLI_VERSION.tar.gz" "brotli-$BROTLI_VERSION.tar.gz"
@@ -61,6 +82,7 @@ build_brotli() {
     cmake --build "$work/brotli-build" -j"$(nproc)"
     DESTDIR="$work/brotli-root" cmake --install "$work/brotli-build" --strip
     swap_libs "$work/brotli-root" 'libbrotli*.so.*'
+    set_apk_version "$BROTLI_VERSION" brotli-libs
     ls -l /usr/lib/libbrotli*.so.*
 }
 
@@ -80,6 +102,7 @@ build_curl() {
     cd /
     swap_libs "$work/curl-root" 'libcurl.so.*'
     cp -a "$work/curl-root/usr/bin/curl" /usr/bin/curl
+    set_apk_version "$CURL_VERSION" libcurl curl
     info="$(curl -V)"
     echo "$info"
     case "$info" in
