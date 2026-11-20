@@ -51,6 +51,20 @@ if [ -n "$NGINX_VERSION" ] && [ "$NGINX_VERSION" != os ]; then
         strip --strip-all "$(type -P nginx)" || true
         # make install keeps the binary of the OS package next to the new one
         rm -f "$(type -P nginx).old" /etc/nginx/*.default
+
+        # the package record still names the OS version, and scanners report it for the new binary
+        if [ -f /var/lib/dpkg/status ]; then
+            awk -v p=nginx -v n="$NGINX_VERSION" 'function swap(s, o, r,   out, i) {
+                while ((i = index(s, o)) > 0) { out = out substr(s, 1, i - 1) r; s = substr(s, i + length(o)) }
+                return out s
+            }
+            BEGIN { RS = ""; ORS = "\n\n" }
+            $0 ~ "(^|\n)Package: " p "(-[^\n]*)?(\n|$)" && match($0, /(^|\n)Version: [^\n]*/) {
+                v = substr($0, RSTART, RLENGTH); sub(/^\n?Version: /, "", v); $0 = swap($0, v, n)
+            }
+            { print }' /var/lib/dpkg/status > /tmp/dpkg-status && cat /tmp/dpkg-status > /var/lib/dpkg/status
+            rm -f /tmp/dpkg-status
+        fi
     else
         echo "WARNING: cannot build Nginx $NGINX_VERSION, keep the version from the OS package, which may lack security fixes" >&2
         NGINX_VERSION=os
