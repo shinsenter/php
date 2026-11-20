@@ -78,7 +78,7 @@ services:
   phpmyadmin:    { <<: *app, image: "ghcr.io/shinsenter/phpmyadmin:${IMAGE_TAG}",    ports: ["8122:80", "8222:443"] }
   spiral:        { <<: *app, image: "ghcr.io/shinsenter/spiral:${IMAGE_TAG}",        ports: ["8123:80", "8223:443"] }
   statamic:      { <<: *app, image: "ghcr.io/shinsenter/statamic:${IMAGE_TAG}",      ports: ["8124:80", "8224:443"] }
-  # Sulu needs its tables before / answers, and the image does not create them, so a test hook runs sulu:build.
+  # Sulu needs its tables before / answers, and the image does not create them, so a test hook runs sulu:build
   sulu:
     <<: *app
     image: "ghcr.io/shinsenter/sulu:${IMAGE_TAG}"
@@ -92,7 +92,7 @@ services:
   symfony:       { <<: *app, image: "ghcr.io/shinsenter/symfony:${IMAGE_TAG}",       ports: ["8126:80", "8226:443"] }
   wordpress:     { <<: *app, image: "ghcr.io/shinsenter/wordpress:${IMAGE_TAG}",     ports: ["8127:80", "8227:443"] }
   yii:           { <<: *app, image: "ghcr.io/shinsenter/yii:${IMAGE_TAG}",           ports: ["8128:80", "8228:443"] }
-  # Craft needs its tables and a first user before / answers, so a test hook runs the install.
+  # Craft needs its tables and a first user before / answers, so a test hook runs the install
   craftcms:
     <<: *app
     image: "ghcr.io/shinsenter/craftcms:${IMAGE_TAG}"

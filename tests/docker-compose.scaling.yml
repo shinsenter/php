@@ -15,7 +15,7 @@ services:
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
       - --entrypoints.web.address=:80
-      # test only: accept X-Forwarded-* from the test client, so the test can send them
+      # Test only: accept X-Forwarded-* from the test client, so the test can send them
       - --entrypoints.web.forwardedheaders.insecure=true
     ports:
       - "${SCALING_PORT:-8180}:80"
@@ -36,7 +36,7 @@ services:
       - traefik.http.routers.app.rule=PathPrefix(`/`)
       - traefik.http.routers.app.entrypoints=web
       - traefik.http.services.app.loadbalancer.server.port=80
-    # the images have no HEALTHCHECK, so it is defined here and reads HEALTH_CHECK_URL of the image
+    # The images have no HEALTHCHECK, so it is defined here and reads HEALTH_CHECK_URL of the image
     healthcheck:
       test: ["CMD-SHELL", "with-env sh -c 'curl -sf \"$$HEALTH_CHECK_URL\" >/dev/null'"]
       interval: 3s

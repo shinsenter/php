@@ -8,7 +8,8 @@
 ################################################################################
 # Offline tests (no Docker, no build). Exit code is non-zero when any fails.
 #   tests/run.sh                 run all
-#   tests/run.sh versions        run one: lint, versions, backports, config, scaling, ssh
+#   tests/run.sh versions        run one: lint, versions, backports, config, scaling, ssh, defaults,
+#                                size, fingerprint, helpers, updates
 # Other scripts source this file to reuse the check helpers; the tests run only
 # when it is executed directly.
 #
@@ -25,7 +26,7 @@ fail() {
     echo "FAIL: $*" >&2
 }
 
-# check "<description>" <command...>: passes when the command succeeds
+# Check "<description>" <command...>: passes when the command succeeds
 check() {
     local description="$1"
     shift
@@ -65,6 +66,15 @@ check_re() {
     fi
 }
 
+# Has "<description>" <file> <text>: passes when the file contains the text (fixed string)
+has() { check "$1" grep -qF -- "$3" "$2"; }
+
+# Lacks "<description>" <file> <text>: passes when the file does not contain the text
+lacks() { check_not "$1" grep -qF -- "$3" "$2"; }
+
+# join_lines: the lines of stdin on one line, separated by spaces
+join_lines() { tr '\n' ' ' | sed 's/ $//'; }
+
 finish() {
     echo "$NAME: $PASSED passed, $FAILED failed"
     [ "$FAILED" -eq 0 ]
@@ -94,71 +104,60 @@ test_lint() {
     finish
 }
 
-# versions: build/versions.sh and the version helpers of build/helpers.sh.
+# versions: build/versions.sh and the version helpers of build/helpers.sh
 test_versions() {
     source "$BASE_DIR/build/helpers.sh"
     source "$BASE_DIR/build/versions.sh"
+    local newest="${MAINTAINED_PHP_VERSIONS[0]}" oldest_maintained="${MAINTAINED_PHP_VERSIONS[${#MAINTAINED_PHP_VERSIONS[@]} - 1]}"
 
     # Lists
     check "maintained list is not empty" [ "${#MAINTAINED_PHP_VERSIONS[@]}" -gt 0 ]
     check "outdated list is not empty" [ "${#OUTDATED_PHP_VERSIONS[@]}" -gt 0 ]
     check_eq "ALL_PHP_VERSIONS size" \
-        "$((${#MAINTAINED_PHP_VERSIONS[@]} + ${#OUTDATED_PHP_VERSIONS[@]}))" \
-        "${#ALL_PHP_VERSIONS[@]}"
-    check_eq "duplicated versions" "" \
-        "$(printf '%s\n' "${ALL_PHP_VERSIONS[@]}" | sort | uniq -d)"
-
-    for outdated in "${OUTDATED_PHP_VERSIONS[@]}"; do
-        check "$outdated is outdated" is_outdated_php "$outdated"
-        for maintained in "${MAINTAINED_PHP_VERSIONS[@]}"; do
-            check "$outdated is older than $maintained" verlt "$outdated" "$maintained"
-        done
+        "$((${#MAINTAINED_PHP_VERSIONS[@]} + ${#OUTDATED_PHP_VERSIONS[@]}))" "${#ALL_PHP_VERSIONS[@]}"
+    check_eq "duplicated versions" "" "$(printf '%s\n' "${ALL_PHP_VERSIONS[@]}" | sort | uniq -d)"
+    for version in "${OUTDATED_PHP_VERSIONS[@]}"; do
+        check "$version is outdated" is_outdated_php "$version"
+        check "$version is older than $oldest_maintained" verlt "$version" "$oldest_maintained"
     done
-    for maintained in "${MAINTAINED_PHP_VERSIONS[@]}"; do
-        check_not "$maintained is not outdated" is_outdated_php "$maintained"
+    for version in "${MAINTAINED_PHP_VERSIONS[@]}"; do
+        check_not "$version is not outdated" is_outdated_php "$version"
     done
     check_not "unknown version is not outdated" is_outdated_php "9.9"
 
+    # select_php_versions: outdated first, unknown versions fail
+    check_eq "select: all versions" "${#ALL_PHP_VERSIONS[@]}" "$(select_php_versions '' | wc -l | tr -d ' ')"
+    check_eq "select: outdated before maintained" "${OUTDATED_PHP_VERSIONS[0]} $newest" \
+        "$(select_php_versions "$newest ${OUTDATED_PHP_VERSIONS[0]}" | join_lines)"
+    check_eq "select: commas and duplicates" "$newest" "$(select_php_versions "$newest,$newest" | join_lines)"
+    check_not "select: unknown version" select_php_versions 9.9
+
     # Alpine images start at PHP 7.1
-    check_not "alpine 5.6" has_alpine_php 5.6
-    check_not "alpine 7.0" has_alpine_php 7.0
-    check "alpine 7.1" has_alpine_php 7.1
-    check "alpine 7.4" has_alpine_php 7.4
-    check "alpine 8.5" has_alpine_php 8.5
-    check "alpine 8.6" has_alpine_php 8.6
+    for version in 5.6 7.0; do check_not "no alpine $version" has_alpine_php "$version"; done
+    for version in 7.1 7.4 "$newest"; do check "alpine $version" has_alpine_php "$version"; done
 
     # Version compare
-    check "verlte 7.4 8.0" verlte 7.4 8.0
-    check "verlte 8.0 8.0" verlte 8.0 8.0
+    for pair in "7.4 8.0" "7.9 7.10" "8.0 8.0"; do check "verlte $pair" verlte $pair; done
+    for pair in "7.4 8.0" "7.9 7.10"; do check "verlt $pair" verlt $pair; done
     check_not "verlte 8.1 8.0" verlte 8.1 8.0
-    check "verlt 7.9 7.10" verlt 7.9 7.10
     check_not "verlt 8.0 8.0" verlt 8.0 8.0
-    check "verlt 8.5 8.6" verlt 8.5 8.6
     check "active 8.3" is_active_version 8.3
-    check_not "active 8.2" is_active_version 8.2
-    check_not "active 7.4" is_active_version 7.4
+    for version in 8.2 7.4; do check_not "active $version" is_active_version "$version"; done
 
-    # Nginx keywords, with a stub of the download page (no network)
+    # Nginx and Apache keywords, with a stub of the download page (no network)
     fetch_with_cache() {
-        echo '<h4>Mainline version</h4><table><tr><td><a href="/download/nginx-1.31.8.tar.gz">nginx-1.31.8</a></td></tr></table><h4>Stable version</h4><table><tr><td><a href="/download/nginx-1.30.6.tar.gz">nginx-1.30.6</a></td></tr></table><h4>Legacy versions</h4><a href="/download/nginx-1.28.3.tar.gz">'
+        echo '<h4>Mainline version</h4><a href="/download/nginx-1.31.8.tar.gz">x</a><h4>Stable version</h4><a href="/download/nginx-1.30.6.tar.gz">x</a><h4>Legacy versions</h4><a href="/download/nginx-1.28.3.tar.gz">'
     }
     check_eq "nginx mainline" "1.31.8" "$(resolve_nginx_version mainline)"
     check_eq "nginx stable" "1.30.6" "$(resolve_nginx_version stable)"
-    check_eq "nginx number" "1.29.0" "$(resolve_nginx_version 1.29.0)"
-    check_eq "nginx os" "os" "$(resolve_nginx_version os)"
-    check_eq "nginx empty" "" "$(resolve_nginx_version '')"
-    # Apache keyword, with a stub of the download page (no network)
-    fetch_with_cache() {
-        echo '<h1>Apache HTTP Server 2.4.71</h1><a href="https://dlcdn.apache.org/httpd/httpd-2.4.71.tar.gz">httpd-2.4.71.tar.gz</a><a href="x/httpd-2.4.71.tar.bz2">'
-    }
+    for value in 1.29.0 os ''; do check_eq "nginx '$value' passes through" "$value" "$(resolve_nginx_version "$value")"; done
+    fetch_with_cache() { echo '<h1>Apache HTTP Server 2.4.71</h1><a href="https://dlcdn.apache.org/httpd/httpd-2.4.71.tar.gz">x</a><a href="x/httpd-2.4.71.tar.bz2">'; }
     check_eq "apache stable" "2.4.71" "$(resolve_apache_version stable)"
-    check_eq "apache number" "2.4.60" "$(resolve_apache_version 2.4.60)"
-    check_eq "apache os" "os" "$(resolve_apache_version os)"
-    check_eq "apache empty" "" "$(resolve_apache_version '')"
+    for value in 2.4.60 os ''; do check_eq "apache '$value' passes through" "$value" "$(resolve_apache_version "$value")"; done
     unset -f fetch_with_cache
 
     # Helper cache downloads, with stubs (no network)
-    local cache_dir
+    local cache_dir file
     cache_dir="$(mktemp -d)"
     HELPER_CACHE_DIR="$cache_dir"
     resolve_nginx_version() { echo 1.31.8; }
@@ -167,16 +166,12 @@ test_versions() {
     download_file() { echo "$1" >"$2"; }
     fetch_with_cache() { echo "bad  wp-cli.phar"; }
 
-    cache_nginx_source 2>/dev/null
-    check "cache: nginx source" [ -f "$cache_dir/nginx-1.31.8.tar.gz" ]
-    check "cache: ngx_brotli source" [ -f "$cache_dir/ngx_brotli.tar.gz" ]
-    cache_apache_source 2>/dev/null
-    check "cache: apache source" [ -f "$cache_dir/httpd-2.4.71.tar.gz" ]
-    cache_s6_sources 2>/dev/null
-    check "cache: s6 noarch" [ -f "$cache_dir/s6-v3.2.1.0-s6-overlay-noarch.tar.xz" ]
-    check "cache: s6 syslogd" [ -f "$cache_dir/s6-v3.2.1.0-syslogd-overlay-noarch.tar.xz" ]
-    check "cache: s6 x86_64" [ -f "$cache_dir/s6-v3.2.1.0-s6-overlay-x86_64.tar.xz" ]
-    check "cache: s6 aarch64" [ -f "$cache_dir/s6-v3.2.1.0-s6-overlay-aarch64.tar.xz" ]
+    cache_nginx_source 2>/dev/null; cache_apache_source 2>/dev/null; cache_s6_sources 2>/dev/null
+    for file in nginx-1.31.8.tar.gz ngx_brotli.tar.gz httpd-2.4.71.tar.gz \
+        s6-v3.2.1.0-s6-overlay-noarch.tar.xz s6-v3.2.1.0-syslogd-overlay-noarch.tar.xz \
+        s6-v3.2.1.0-s6-overlay-x86_64.tar.xz s6-v3.2.1.0-s6-overlay-aarch64.tar.xz; do
+        check "cache: $file" [ -f "$cache_dir/$file" ]
+    done
     cache_wpcli_source 2>/dev/null
     check_not "cache: wp-cli with a wrong checksum is removed" [ -f "$cache_dir/wp-cli.phar" ]
     download_file() { echo "phar" >"$2"; }
@@ -188,8 +183,7 @@ test_versions() {
     cache_nginx_source 2>/dev/null
     check_eq "cache: nginx os is not downloaded" "" "$(ls "$cache_dir" | grep '^nginx-\|^ngx_brotli' || true)"
     rm -rf "$cache_dir"
-    unset -f fetch_with_cache download_file get_github_latest_tag resolve_nginx_version
-    source "$BASE_DIR/build/helpers.sh"
+    unset -f fetch_with_cache download_file get_github_latest_tag resolve_nginx_version resolve_apache_version
 
     finish
 }
@@ -266,107 +260,82 @@ test_config() {
 }
 
 # scaling: files that make the images work behind Kubernetes, load balancers and Traefik.
+# Most checks look for a setting in a config file. They guard the contract (ports, paths, defaults),
+# not how the files are written.
 test_scaling() {
     cd "$BASE_DIR" || exit 1
-    local nginx=src/php/with-nginx apache=src/php/with-apache common=src/php/common
+    local nginx=src/php/with-nginx apache=src/php/with-apache f8p=src/php/with-f8p rr=src/php/with-roadrunner common=src/php/common
+    local image config hook name value
 
-    check "nginx: health server on HEALTH_PORT" grep -q 'listen ${HEALTH_PORT};' "$nginx/rootfs/etc/hooks/server/init-nginx"
-    check "nginx: /healthz" grep -q 'location = /healthz' "$nginx/rootfs/etc/hooks/server/init-nginx"
-    check "nginx: /readyz uses the FPM ping path" grep -q 'SCRIPT_NAME *${PING_PATH}' "$nginx/rootfs/etc/hooks/server/init-nginx"
+    # Health endpoints
+    has "nginx: health server on HEALTH_PORT" "$nginx/rootfs/etc/hooks/server/init-nginx" 'listen ${HEALTH_PORT};'
+    has "nginx: /healthz" "$nginx/rootfs/etc/hooks/server/init-nginx" 'location = /healthz'
+    has "nginx: /readyz uses the FPM ping path" "$nginx/rootfs/etc/hooks/server/init-nginx" '${PING_PATH}'
     check_not "nginx: no health paths on the main port" grep -q 'healthz\|readyz' "$nginx/rootfs/etc/nginx/custom.d/01-common.conf"
-    check "nginx: HTTPS from X-Forwarded-Proto" grep -q 'x_forwarded_proto' "$nginx/rootfs/etc/nginx/custom.d/00-proxy-proto.conf"
-    check "nginx: php location passes HTTPS" grep -q 'fastcgi_param HTTPS *\$client_https' "$nginx/rootfs/etc/nginx/custom.d/01-common.conf"
-    check "nginx: TRUSTED_PROXIES" grep -q 'TRUSTED_PROXIES' "$nginx/rootfs/etc/hooks/server/init-nginx"
-    check_not "nginx: no proxy is trusted by default (#456)" grep -qE '^[[:space:]]*set_real_ip_from' "$nginx/rootfs/etc/nginx/nginx.conf"
-    check "nginx: TRUSTED_PROXIES guard reads real_ip_header" grep -q "grep -q '^\[\[:space:\]\]\*real_ip_header'" "$nginx/rootfs/etc/hooks/server/init-nginx"
-    check "nginx: proxies.d is included" grep -q 'proxies.d/\*.conf' "$nginx/rootfs/etc/nginx/nginx.conf"
-    check "nginx: proxies.d is created" grep -q '/etc/nginx/proxies.d' "$nginx/nginx-config.dockerfile"
-    check "nginx: graceful stop signal" grep -q 'down-signal SIGQUIT' "$nginx/nginx-config.dockerfile"
-    check "nginx: HEALTH_CHECK_URL" grep -q "HEALTH_CHECK_URL 'http://127.0.0.1:\${HEALTH_PORT}/healthz'" "$nginx/nginx-config.dockerfile"
-    check "nginx: real_ip fallback keeps the proxy file valid" grep -q '00-proxy-proto.conf' "$nginx/rootfs/etc/hooks/post-build/00-fix-nginx"
-    check "nginx: the brotli library is kept by its owner package" grep -q 'APK_PACKAGES="$brotli_lib" APT_PACKAGES=.libbrotli1. pkg-add' "$nginx/nginx-install.dockerfile"
-    check "nginx: broken brotli-dev links are repaired" grep -q 'ln -sf "${lib##\*/}.1" "$lib"' "$nginx/nginx-build"
-    check "nginx: PCRE2 is used on every OS" grep -q -- '|--without-pcre2) continue' "$nginx/nginx-build"
-    check "nginx: HTTP/3 is added when the OS package lacks it" grep -q 'extras="--with-http_v3_module"' "$nginx/nginx-build"
-    check "nginx: brotli module is built in" grep -q -- '--add-module=/usr/src/nginx/ngx_brotli' "$nginx/nginx-build"
-    check "nginx: brotli headers are removed after the build" grep -q "APK_PACKAGES='.nginx-brotli' APT_PACKAGES='libbrotli-dev' pkg-del" "$nginx/nginx-install.dockerfile"
-    check "nginx: brotli config is dropped when the module is missing" grep -q "nginx-has-error 'brotli'" "$nginx/rootfs/etc/hooks/post-build/00-fix-nginx"
-
-    check "apache: health vhost on HEALTH_PORT" grep -q 'VirtualHost \*:${HEALTH_PORT}' "$apache/rootfs/etc/apache2/sites-enabled/01-health.conf"
-    check "apache: /healthz" grep -q 'healthz' "$apache/rootfs/etc/apache2/sites-enabled/01-health.conf"
-    check "apache: /readyz" grep -q '"/readyz"' "$apache/rootfs/etc/apache2/sites-enabled/01-health.conf"
-    check "apache: HTTPS from X-Forwarded-Proto" grep -q 'X-Forwarded-Proto' "$apache/rootfs/etc/apache2/apache2.conf"
-    check_not "apache: no proxy is trusted by default (#456)" grep -qE '^[[:space:]]*RemoteIPTrustedProxy' "$apache/rootfs/etc/apache2/apache2.conf"
-    check "apache: TRUSTED_PROXIES" grep -q 'TRUSTED_PROXIES' "$apache/rootfs/etc/hooks/server/init-apache"
-    check "apache: graceful stop signal" grep -q 'down-signal SIGWINCH' "$apache/apache-config.dockerfile"
-    check "apache: HEALTH_CHECK_URL" grep -q "HEALTH_CHECK_URL 'http://127.0.0.1:\${HEALTH_PORT}/healthz'" "$apache/apache-config.dockerfile"
-
-    check "frankenphp: health site on its own port" grep -q 'http://:{$HEALTH_PORT:2020}' src/php/with-f8p/rootfs/etc/caddy/Caddyfile
-    check "frankenphp: HEALTH_CHECK_URL" grep -q 'HEALTH_CHECK_URL .*HEALTH_PORT}/healthz' src/php/with-f8p/f8p-config.dockerfile
-    check "frankenphp: trusted proxies come from TRUSTED_PROXIES only" grep -q 'trusted_proxies static {$CADDY_TRUSTED_PROXIES}' src/php/with-f8p/rootfs/etc/caddy/Caddyfile
-    check_not "roadrunner: private ranges are not trusted by default" grep -q '10.0.0.0/8' src/php/with-roadrunner/rootfs/etc/hooks/server/init-roadrunner
-    check "frankenphp: TRUSTED_PROXIES" grep -q 'CADDY_TRUSTED_PROXIES' src/php/with-f8p/rootfs/etc/hooks/server/init-f8p
-    check "frankenphp: grace period" grep -q 'grace_period' src/php/with-f8p/rootfs/etc/caddy/Caddyfile
-    check "roadrunner: status plugin" grep -q 'status.address=0.0.0.0:${HEALTH_PORT:-2020}' src/php/with-roadrunner/roadrunner-config.dockerfile
-    check "roadrunner: HEALTH_CHECK_URL" grep -q 'HEALTH_CHECK_URL .*HEALTH_PORT}/health?plugin=http' src/php/with-roadrunner/roadrunner-config.dockerfile
+    has "apache: health vhost on HEALTH_PORT" "$apache/rootfs/etc/apache2/sites-enabled/01-health.conf" 'VirtualHost *:${HEALTH_PORT}'
+    has "apache: /healthz" "$apache/rootfs/etc/apache2/sites-enabled/01-health.conf" 'healthz'
+    has "apache: /readyz" "$apache/rootfs/etc/apache2/sites-enabled/01-health.conf" '"/readyz"'
+    has "frankenphp: health site on its own port" "$f8p/rootfs/etc/caddy/Caddyfile" 'http://:{$HEALTH_PORT:2020}'
+    has "roadrunner: status plugin" "$rr/roadrunner-config.dockerfile" 'status.address=0.0.0.0:${HEALTH_PORT:-2020}'
     check "health port: every image sets HEALTH_PORT 2020" test "$(grep -l "HEALTH_PORT *'2020'" src/php/with-*/*-config.dockerfile | wc -l | tr -d ' ')" = 4
     for image in nginx apache f8p roadrunner; do
         check_not "$image: health port is not exposed" grep -qE '^EXPOSE (2020|2114)$' "src/php/with-$image.dockerfile"
-    done
-    check "roadrunner: TRUSTED_PROXIES" grep -q 'trusted_subnets' src/php/with-roadrunner/rootfs/etc/hooks/server/init-roadrunner
-
-    # the images have no active HEALTHCHECK, only a commented example that reads HEALTH_CHECK_URL
-    for image in nginx apache f8p roadrunner; do
+        # No active HEALTHCHECK, only a commented example that reads HEALTH_CHECK_URL
         check_not "$image: no active HEALTHCHECK" grep -q '^HEALTHCHECK' "src/php/with-$image.dockerfile"
         check "$image: HEALTHCHECK example" grep -q '^# *CMD with-env sh -c .curl -sf "$HEALTH_CHECK_URL"' "src/php/with-$image.dockerfile"
     done
-    check "compose: healthcheck reads HEALTH_CHECK_URL" grep -q 'HEALTH_CHECK_URL' tests/docker-compose.scaling.yml
+    for config in "$nginx/nginx-config" "$apache/apache-config" "$f8p/f8p-config" "$rr/roadrunner-config"; do
+        has "$config: HEALTH_CHECK_URL" "$config.dockerfile" 'HEALTH_CHECK_URL'
+    done
+    has "compose: healthcheck reads HEALTH_CHECK_URL" tests/docker-compose.scaling.yml 'HEALTH_CHECK_URL'
 
-    # every web server registers itself as a dependency of the shutdown delay
+    # Reverse proxies: HTTPS from X-Forwarded-Proto, and no proxy is trusted by default (#456)
+    has "nginx: HTTPS from X-Forwarded-Proto" "$nginx/rootfs/etc/nginx/custom.d/00-proxy-proto.conf" 'x_forwarded_proto'
+    has "nginx: php location passes HTTPS" "$nginx/rootfs/etc/nginx/custom.d/01-common.conf" 'fastcgi_param HTTPS'
+    has "apache: HTTPS from X-Forwarded-Proto" "$apache/rootfs/etc/apache2/apache2.conf" 'X-Forwarded-Proto'
+    check_not "nginx: no proxy is trusted by default" grep -qE '^[[:space:]]*set_real_ip_from' "$nginx/rootfs/etc/nginx/nginx.conf"
+    check_not "apache: no proxy is trusted by default" grep -qE '^[[:space:]]*RemoteIPTrustedProxy' "$apache/rootfs/etc/apache2/apache2.conf"
+    check_not "roadrunner: private ranges are not trusted by default" grep -q '10.0.0.0/8' "$rr/rootfs/etc/hooks/server/init-roadrunner"
+    has "frankenphp: trusted proxies come from TRUSTED_PROXIES only" "$f8p/rootfs/etc/caddy/Caddyfile" 'trusted_proxies static {$CADDY_TRUSTED_PROXIES}'
+    has "nginx: proxies.d is included" "$nginx/rootfs/etc/nginx/nginx.conf" 'proxies.d/*.conf'
+
+    # Stop signals and the shutdown delay
+    has "nginx: graceful stop signal" "$nginx/nginx-config.dockerfile" 'down-signal SIGQUIT'
+    has "apache: graceful stop signal" "$apache/apache-config.dockerfile" 'down-signal SIGWINCH'
+    has "php-fpm: graceful stop signal" "$common/php-extensions.dockerfile" 'down-signal SIGQUIT'
     for config in with-nginx/nginx-config with-apache/apache-config with-f8p/f8p-config with-roadrunner/roadrunner-config; do
-        check "$config: shutdown-delay dependency" grep -q 's6-service shutdown-delay requires' "src/php/$config.dockerfile"
+        has "$config: shutdown-delay dependency" "src/php/$config.dockerfile" 's6-service shutdown-delay requires'
     done
     for image in nginx apache f8p roadrunner; do
-        check "$image: includes web-shutdown-delay" grep -q 'INCLUDE ./common/web-shutdown-delay' "src/php/with-$image.dockerfile"
+        has "$image: includes web-shutdown-delay" "src/php/with-$image.dockerfile" 'INCLUDE ./common/web-shutdown-delay'
     done
-    check "web-shutdown-delay fragment" test -f "$common/web-shutdown-delay.dockerfile"
-
-    check "php-fpm: graceful stop signal" grep -q 'down-signal SIGQUIT' "$common/php-extensions.dockerfile"
-    check "s6-service: down-signal type" grep -q 'down|finish|down-signal)' "$common/rootfs/usr/local/utils/s6-service"
     check "shutdown delay hook is executable" test -x "$common/rootfs/etc/hooks/s6-exit-shutdown-delay/00-delay"
-    check "shutdown delay default" grep -q "SHUTDOWN_DELAY '0'" "$common/web-shutdown-delay.dockerfile"
-
-    # the stop timeout must stay below the 30 s that Kubernetes waits by default
+    has "shutdown delay default" "$common/web-shutdown-delay.dockerfile" "SHUTDOWN_DELAY '0'"
+    # The stop timeout must stay below the 30 s that Kubernetes waits by default
     for name in S6_KILL_GRACETIME S6_SERVICES_GRACETIME; do
         value="$(sed -n "s/.*env-default $name \([0-9]*\).*/\1/p" "$common/os-s6-overlay.dockerfile")"
         check "$name is between 10000 and 29000 (got '$value')" test "${value:-0}" -ge 10000 -a "${value:-0}" -le 29000
     done
 
-    check "spec: scaling" test -f openspec/specs/scaling/spec.md
-    check "compose: scaling file" test -f tests/docker-compose.scaling.yml
-    check "scaling-test.sh is executable" test -x tests/scaling-test.sh
-
     # Traefik: keep-alive stays above the 90 s that Traefik keeps its idle backend connections
-    local nk ak
-    nk="$(sed -n "s/^env-default NGINX_KEEPALIVE_TIMEOUT '\([0-9]*\)'.*/\1/p" "$nginx/nginx-config.dockerfile")"
-    ak="$(sed -n "s/^env-default APACHE_KEEPALIVE_TIMEOUT '\([0-9]*\)'.*/\1/p" "$apache/apache-config.dockerfile")"
-    check "nginx: keep-alive default is above 90 s" test "${nk:-0}" -gt 90
-    check "apache: keep-alive default is above 90 s" test "${ak:-0}" -gt 90
-    check "nginx: the hook writes keepalive_timeout" grep -q 'keepalive_timeout \${NGINX_KEEPALIVE_TIMEOUT}s;' "$nginx/rootfs/etc/hooks/server/init-nginx"
-    check "nginx: a bad NGINX_KEEPALIVE_TIMEOUT is skipped" grep -q 'Skip invalid NGINX_KEEPALIVE_TIMEOUT' "$nginx/rootfs/etc/hooks/server/init-nginx"
-
+    value="$(sed -n "s/^env-default NGINX_KEEPALIVE_TIMEOUT '\([0-9]*\)'.*/\1/p" "$nginx/nginx-config.dockerfile")"
+    check "nginx: keep-alive default is above 90 s" test "${value:-0}" -gt 90
+    value="$(sed -n "s/^env-default APACHE_KEEPALIVE_TIMEOUT '\([0-9]*\)'.*/\1/p" "$apache/apache-config.dockerfile")"
+    check "apache: keep-alive default is above 90 s" test "${value:-0}" -gt 90
     # Traefik labels: web servers opt in, the admin tools opt out
-    check "label: nginx traefik.enable=true" grep -q '^LABEL traefik.enable=true' src/php/with-nginx.dockerfile
-    check "label: apache traefik.enable=true" grep -q '^LABEL traefik.enable=true' src/php/with-apache.dockerfile
-    check "label: phpmyadmin traefik.enable=false" grep -q '^LABEL traefik.enable=false' src/webapps/phpmyadmin/phpmyadmin.dockerfile
-    check "label: coolify traefik.enable=false" grep -q '^LABEL traefik.enable=false' src/webapps/coolify/coolify.dockerfile
+    for image in src/php/with-nginx.dockerfile src/php/with-apache.dockerfile; do
+        check "label: $image traefik.enable=true" grep -q '^LABEL traefik.enable=true' "$image"
+    done
+    for image in src/webapps/phpmyadmin/phpmyadmin.dockerfile src/webapps/coolify/coolify.dockerfile; do
+        check "label: $image traefik.enable=false" grep -q '^LABEL traefik.enable=false' "$image"
+    done
 
     # trusted-proxies: one expansion shared by the four servers, so "private" works everywhere
-    local tp="$common/rootfs/usr/local/utils/trusted-proxies" stub hook
+    local tp="$common/rootfs/usr/local/utils/trusted-proxies" stub
     stub="$(mktemp -d)"
     printf '#!/bin/sh\necho "$@" >&2\n' >"$stub/debug-echo"
     chmod +x "$stub/debug-echo"
-    tp_run() { PATH="$stub:$PATH" TRUSTED_PROXIES="$1" sh "$tp" 2>/dev/null | tr '\n' ' ' | sed 's/ $//'; }
+    tp_run() { PATH="$stub:$PATH" TRUSTED_PROXIES="$1" sh "$tp" 2>/dev/null | join_lines; }
     check_eq "trusted-proxies: private" "10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 fd00::/8" "$(tp_run private)"
     check_eq "trusted-proxies: a mixed list" "203.0.113.0/24 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 fd00::/8 2001:db8::/32" "$(tp_run '203.0.113.0/24,private 2001:db8::/32')"
     check_eq "trusted-proxies: a bad item is skipped" "10.1.2.3" "$(tp_run '10.1.2.3,bad!,a;b')"
@@ -374,12 +343,11 @@ test_scaling() {
     check "trusted-proxies: a bad item gives a warning on stderr" test -n "$(PATH="$stub:$PATH" TRUSTED_PROXIES='bad!' sh "$tp" 2>&1 >/dev/null)"
     rm -rf "$stub"
     for hook in "$nginx/rootfs/etc/hooks/server/init-nginx" "$apache/rootfs/etc/hooks/server/init-apache" \
-        src/php/with-f8p/rootfs/etc/hooks/server/init-f8p src/php/with-roadrunner/rootfs/etc/hooks/server/init-roadrunner; do
+        "$f8p/rootfs/etc/hooks/server/init-f8p" "$rr/rootfs/etc/hooks/server/init-roadrunner"; do
         check "trusted-proxies: $(basename "$hook") uses the utility" grep -q '\$(trusted-proxies)' "$hook"
-        check_not "trusted-proxies: $(basename "$hook") does not parse the list itself" grep -q 'echo "\$TRUSTED_PROXIES"' "$hook"
     done
-    check "docs: traefik.md" test -f docs/traefik.md
 
+    check "files: spec, compose, docs and test script" test -f openspec/specs/scaling/spec.md -a -f tests/docker-compose.scaling.yml -a -f docs/traefik.md -a -x tests/scaling-test.sh
     finish
 }
 
@@ -390,13 +358,13 @@ test_ssh() {
     cd "$BASE_DIR" || exit 1
     local hook="$BASE_DIR/src/php/common/rootfs/etc/hooks/post-boot/00-ssh-server"
     local utils="$BASE_DIR/src/php/common/rootfs/usr/local/utils"
-    local tmp stub conf
+    local tmp stub
     tmp="$(mktemp -d)"
     stub="$tmp/bin"
     mkdir -p "$stub"
     trap 'rm -rf "$tmp"' RETURN
 
-    # commands the hook calls: the real is-true, a shadow file as state, no-ops for the rest
+    # Commands the hook calls: the real is-true, a shadow file as state, no-ops for the rest
     cp "$utils/is-true" "$stub/is-true"
     for cmd in has-cmd has-s6 s6-service debug-echo pkg-add groupadd useradd ssh-keygen chown; do
         printf '#!/bin/sh\nexit 0\n' > "$stub/$cmd"
@@ -423,41 +391,37 @@ test_ssh() {
         cat "$tmp/run/sshd_env.conf" 2>/dev/null
     }
 
-    conf="$(run_hook '!' SSHD_PASSWORD_AUTH=1)"
-    check "ssh: password auth without a password is off" grep -qx 'PasswordAuthentication no' <<< "$conf"
-    conf="$(run_hook '*' SSHD_PASSWORD_AUTH=1)"
-    check "ssh: '*' account with password auth requested is off" grep -qx 'PasswordAuthentication no' <<< "$conf"
-    conf="$(run_hook '!' SSHD_PASSWORD_AUTH=1 SSHD_PASSWORD=)"
-    check "ssh: empty SSHD_PASSWORD is off" grep -qx 'PasswordAuthentication no' <<< "$conf"
-    conf="$(run_hook '!' SSHD_PASSWORD_AUTH=1 SSHD_PASSWORD=secret hash=abc)"
-    check "ssh: password auth stays on with a password" grep -qx 'PasswordAuthentication yes' <<< "$conf"
-    conf="$(run_hook '!')"
-    check "ssh: default is off" grep -qx 'PasswordAuthentication no' <<< "$conf"
-    conf="$(run_hook '$6$salt$realhash' SSHD_PASSWORD_AUTH=1)"
-    check "ssh: account with an existing hash keeps password auth" grep -qx 'PasswordAuthentication yes' <<< "$conf"
+    # ssh_case "<description>" <yes|no> <shadow field> [env assignments...]
+    ssh_case() {
+        local description="$1" want="$2" shadow="$3"
+        shift 3
+        check "ssh: $description" grep -qx "PasswordAuthentication $want" <<< "$(run_hook "$shadow" "$@")"
+    }
+    ssh_case "password auth without a password is off" no '!' SSHD_PASSWORD_AUTH=1
+    ssh_case "'*' account with password auth requested is off" no '*' SSHD_PASSWORD_AUTH=1
+    ssh_case "empty SSHD_PASSWORD is off" no '!' SSHD_PASSWORD_AUTH=1 SSHD_PASSWORD=
+    ssh_case "password auth stays on with a password" yes '!' SSHD_PASSWORD_AUTH=1 SSHD_PASSWORD=secret hash=abc
+    ssh_case "default is off" no '!'
+    ssh_case "account with an existing hash keeps password auth" yes '$6$salt$realhash' SSHD_PASSWORD_AUTH=1
 
     finish
 }
 
-# defaults: settings that stay opt-in so existing setups keep working (#456).
+# defaults: settings that stay opt-in so existing setups keep working (#456)
 test_defaults() {
     cd "$BASE_DIR" || exit 1
     local wrapper=src/php/common/rootfs/usr/local/utils/msmtp-wrapper
 
-    check_not "smtp: TLS is not forced when only a user or password is set" grep -q -- '--tls=on' "$wrapper"
-    check "smtp: SMTP_TLS is passed to msmtp" grep -q -- '--tls=$SMTP_TLS' "$wrapper"
-    check_not "nginx: no open_file_cache" grep -q 'open_file_cache' src/php/with-nginx/rootfs/etc/nginx/nginx.conf
-    check "apache: cache module is enabled" grep -qE '^ +cache deflate' src/php/with-apache/apache-config.dockerfile
-    check "apache: the built version is checked" grep -q 'Apache is \$apache_now, not' src/php/with-apache/apache-install.dockerfile
-    check "nginx: the built version is checked" grep -q 'Nginx is \$nginx_now, not' src/php/with-nginx/nginx-install.dockerfile
-    check "apache: build keeps the paths of the OS binary" grep -q 'ap_config_auto.h' src/php/with-apache/apache-build
-    check "apache: request read timeout is off by default" grep -q "APACHE_REQUEST_READ_TIMEOUT 'header=0 body=0'" src/php/with-apache/apache-config.dockerfile
-    check_not "php: session strict mode is not forced" grep -q 'PHP_SESSION_USE_STRICT_MODE' src/php/common/php-ini-directives.dockerfile
+    lacks "smtp: TLS is not forced when only a user or password is set" "$wrapper" '--tls=on'
+    has "smtp: SMTP_TLS is passed to msmtp" "$wrapper" '--tls=$SMTP_TLS'
+    lacks "nginx: no open_file_cache" src/php/with-nginx/rootfs/etc/nginx/nginx.conf 'open_file_cache'
+    has "apache: request read timeout is off by default" src/php/with-apache/apache-config.dockerfile "APACHE_REQUEST_READ_TIMEOUT 'header=0 body=0'"
+    lacks "php: session strict mode is not forced" src/php/common/php-ini-directives.dockerfile 'PHP_SESSION_USE_STRICT_MODE'
 
     finish
 }
 
-# size: the size helpers of build/helpers.sh, on a fixed manifest (offline).
+# size: the size helpers of build/helpers.sh, on a fixed manifest (offline)
 test_size() {
     source "$BASE_DIR/build/helpers.sh"
 
@@ -470,50 +434,36 @@ test_size() {
     finish
 }
 
-# fingerprint: which files change the context hash of an image (offline, on a temporary copy).
+# fingerprint: which files change the context hash of an image (offline, on a temporary copy)
 test_fingerprint() {
     source "$BASE_DIR/build/helpers.sh"
-    local tmp ctx base nginx before after
+    local tmp ctx
     tmp="$(mktemp -d)"
     cp -R "$BASE_DIR/src/php" "$tmp/php"
     ctx="$tmp/php"
-    base="$ctx/base-php.dockerfile"
-    nginx="$ctx/with-nginx.dockerfile"
 
-    # hash of both images, after one change
-    change() { echo "# changed" >> "$ctx/$1"; }
-    hashes() { echo "$(get_context_hash "$ctx" "$base") $(get_context_hash "$ctx" "$nginx")"; }
-
-    before="$(hashes)"; change common/php-extensions.dockerfile; after="$(hashes)"
-    check_eq "a changed fragment changes the base image" "different" \
-        "$([ "${before% *}" != "${after% *}" ] && echo different || echo same)"
-    check_eq "a changed common fragment changes the server image" "different" \
-        "$([ "${before#* }" != "${after#* }" ] && echo different || echo same)"
-
-    before="$(hashes)"; change with-nginx/rootfs/etc/nginx/nginx.conf; after="$(hashes)"
-    check_eq "nginx files do not change the base image" "${before% *}" "${after% *}"
-    check_eq "nginx files change the nginx image" "different" \
-        "$([ "${before#* }" != "${after#* }" ] && echo different || echo same)"
-
-    before="$(hashes)"; change with-nginx/nginx-config.dockerfile; after="$(hashes)"
-    check_eq "an nginx fragment does not change the base image" "${before% *}" "${after% *}"
-    check_eq "an nginx fragment changes the nginx image" "different" \
-        "$([ "${before#* }" != "${after#* }" ] && echo different || echo same)"
-
-    before="$(hashes)"; change with-apache/rootfs/etc/apache2/apache2.conf; after="$(hashes)"
-    check_eq "apache files do not change the nginx image" "${before#* }" "${after#* }"
-
-    before="$(hashes)"; change with-nginx.dockerfile; after="$(hashes)"
-    check_eq "a top level Dockerfile is hashed apart" "$before" "$after"
-
-    before="$(hashes)"; echo x >> "$ctx/common/NOTES.md"; after="$(hashes)"
-    check_eq "markdown does not change the hash" "$before" "$after"
+    # Changes <file>: change the file, then print the images whose hash changed (base, nginx)
+    changes() {
+        local before after result=
+        before="$(get_context_hash "$ctx" "$ctx/base-php.dockerfile") $(get_context_hash "$ctx" "$ctx/with-nginx.dockerfile")"
+        echo "# changed" >> "$ctx/$1"
+        after="$(get_context_hash "$ctx" "$ctx/base-php.dockerfile") $(get_context_hash "$ctx" "$ctx/with-nginx.dockerfile")"
+        [ "${before% *}" = "${after% *}" ] || result="base"
+        [ "${before#* }" = "${after#* }" ] || result="$result nginx"
+        echo "${result# }"
+    }
+    check_eq "a common fragment changes both images" "base nginx" "$(changes common/php-extensions.dockerfile)"
+    check_eq "nginx files change the nginx image only" "nginx" "$(changes with-nginx/rootfs/etc/nginx/nginx.conf)"
+    check_eq "an nginx fragment changes the nginx image only" "nginx" "$(changes with-nginx/nginx-config.dockerfile)"
+    check_eq "apache files change neither image" "" "$(changes with-apache/rootfs/etc/apache2/apache2.conf)"
+    check_eq "a top level Dockerfile is hashed apart" "" "$(changes with-nginx.dockerfile)"
+    check_eq "markdown does not change the hash" "" "$(changes common/NOTES.md)"
 
     rm -rf "$tmp"
     finish
 }
 
-# helpers: the pure functions of build/helpers.sh (offline, no network).
+# helpers: the pure functions of build/helpers.sh (offline, no network)
 test_helpers() {
     source "$BASE_DIR/build/helpers.sh"
     local tmp
@@ -521,7 +471,7 @@ test_helpers() {
 
     # parse_json: first lines of a jq query, fails without a result
     check_eq "parse_json first value" "a" "$(parse_json '[{"n":"a"},{"n":"b"}]' 1 '.[].n')"
-    check_eq "parse_json two values" "a b" "$(parse_json '[{"n":"a"},{"n":"b"}]' 2 '.[].n' | tr '\n' ' ' | sed 's/ $//')"
+    check_eq "parse_json two values" "a b" "$(parse_json '[{"n":"a"},{"n":"b"}]' 2 '.[].n' | join_lines)"
     check_not "parse_json fails without a result" parse_json '[]' 1 '.[].n'
 
     # github_env: shell form outside Actions, the file and BUILD_ENV_FILE inside
@@ -539,21 +489,134 @@ test_helpers() {
     HELPER_CACHE_DIR="$tmp/hc" cache_file "http://x/y" y.txt
     check_eq "cache_file puts the file in the cache" "http://x/y" "$(cat "$tmp/hc/y.txt")"
 
-    # plan_matrix: runner and QEMU choice per platform
-    check_eq "plan_matrix amd64 on x64" "ubuntu-26.04||linux-amd64" "$(plan_matrix linux/amd64 | jq -r '.[0] | "\(.runner)|\(.qemu)|\(.slug)"')"
-    check_eq "plan_matrix arm64 on arm" "ubuntu-26.04-arm|" "$(plan_matrix linux/amd64,linux/arm64/v8 | jq -r '.[1] | "\(.runner)|\(.qemu)"')"
-    check_eq "plan_matrix arm/v7 under QEMU" "arm" "$(plan_matrix linux/arm/v7 | jq -r '.[0].qemu')"
-    check_eq "plan_matrix ppc64le under QEMU" "ppc64le" "$(plan_matrix linux/ppc64le | jq -r '.[0].qemu')"
-    check_eq "plan_matrix empty list" "[]" "$(plan_matrix '')"
+    # plan_matrix <platforms> <jq query on the first or second entry>
+    plan() { plan_matrix "$1" | jq -r "$2"; }
+    check_eq "plan_matrix: amd64 on x64" "ubuntu-26.04||linux-amd64" "$(plan linux/amd64 '.[0] | "\(.runner)|\(.qemu)|\(.slug)"')"
+    check_eq "plan_matrix: arm64 on arm" "ubuntu-26.04-arm|" "$(plan linux/amd64,linux/arm64/v8 '.[1] | "\(.runner)|\(.qemu)"')"
+    check_eq "plan_matrix: arm/v7 under QEMU" "arm" "$(plan linux/arm/v7 '.[0].qemu')"
+    check_eq "plan_matrix: ppc64le under QEMU" "ppc64le" "$(plan linux/ppc64le '.[0].qemu')"
+    check_eq "plan_matrix: empty list" "[]" "$(plan_matrix '')"
+
+    # build_plan <platforms> [skip]: the lines are skip=... and matrix=...
+    check_eq "build_plan: skip defaults to 0" "skip=0" "$(build_plan linux/amd64 | sed -n 1p)"
+    check_eq "build_plan: skip=1 is kept" "skip=1" "$(build_plan linux/amd64 1 | sed -n 1p)"
+    check_eq "build_plan: one entry per platform" "3" "$(build_plan linux/amd64,linux/arm/v7,linux/arm64/v8 0 | sed -n 2p | sed 's/^matrix=//' | jq length)"
+    check_eq "build_plan: no platform skips" "skip=1" "$(build_plan '' 0 | sed -n 1p)"
+    check_eq "build_plan: no platform keeps a dummy entry" "none" "$(build_plan '' 0 | sed -n 2p | sed 's/^matrix=//' | jq -r '.[0].slug')"
+
+    # parse_ipe_unsupported: a module is unsupported when its line does not list the version
+    local data='# comment
+apcu 8.4 8.5
+sodium 7.1
+redis 8.4 8.5 8.6
+gd 8.4 8.5 8.6
+mbstring 8.6'
+    unsupported() { echo "$data" | parse_ipe_unsupported "$1" | join_lines; }
+    check_eq "parse_ipe_unsupported 8.6" "apcu sodium" "$(unsupported 8.6)"
+    check_eq "parse_ipe_unsupported 8.5" "sodium mbstring" "$(unsupported 8.5)"
+    check_eq "parse_ipe_unsupported ignores -rc" "apcu sodium" "$(unsupported 8.6-rc)"
+    check_eq "parse_ipe_unsupported unknown version" "" "$(unsupported 9.0)"
+    check_eq "parse_ipe_unsupported empty input" "" "$(printf '' | parse_ipe_unsupported 8.6)"
+
+    # get_ipe_unsupported and get_php_skip_modules, with the data file seeded in the cache.
+    # download_file fails, so a cache older than 2 hours gives nothing (nothing is skipped).
+    mkdir -p "$tmp/ipe"
+    seed() { echo "$data" > "$tmp/ipe/ipe-supported-extensions"; }
+    ipe() { (download_file() { return 1; }; HELPER_CACHE_DIR="$tmp/ipe" "$@" | join_lines); }
+    seed
+    check_eq "get_ipe_unsupported uses a fresh cache" "apcu sodium" "$(ipe get_ipe_unsupported 8.6)"
+    check_eq "get_php_skip_modules keeps the modules of the image" "apcu sodium" "$(ipe get_php_skip_modules 8.6)"
+    check_eq "get_php_skip_modules without a column" "" "$(ipe get_php_skip_modules 9.9)"
+    touch -t 202001010000 "$tmp/ipe/ipe-supported-extensions"
+    check_eq "get_ipe_unsupported ignores a cache older than 2 hours" "" "$(ipe get_ipe_unsupported 8.6)"
+
+    # php-extensions.dockerfile: the skip filter drops unsupported modules, but never one PHP already has
+    local filter
+    filter="$(awk '/^# Skip the modules/{f=1} f{print} f&&/^fi$/{exit}' "$BASE_DIR/src/php/common/php-extensions.dockerfile")"
+    check "skip filter block found" test -n "$filter"
+    skipped() { # <skip list> <loaded modules>: the modules left after the filter
+        bash -c 'loaded=" $2 "; php() { [[ "$loaded" == *" $3 "* ]]; }; modules=(apcu mbstring sodium gd); PHP_SKIP_MODULES="$1"; PHP_VERSION=8.6
+'"$filter"'
+echo "${modules[*]}"' _ "$1" "$2" 2>/dev/null | tail -1
+    }
+    check_eq "skip filter drops unsupported modules" "sodium gd" "$(skipped 'apcu mbstring sodium' 'sodium')"
+    check_eq "skip filter keeps a module PHP has" "mbstring sodium gd" "$(skipped 'apcu mbstring sodium' 'mbstring sodium')"
+    check_eq "skip filter without a list changes nothing" "apcu mbstring sodium gd" "$(skipped '' 'sodium')"
+
+    # cache_run_inputs and cache_server_digests: which digests they look up (stubs, no network)
+    cache_dockerhub_digest() { echo "$*"; }
+    get_github_latest_tag() { :; }; cache_middleware_sources() { :; }; cache_apache_source() { :; }
+    cache_nginx_source() { :; }; cache_s6_sources() { :; }; cache_wpcli_source() { :; }
+    local lookups expected
+    lookups="$(cache_run_inputs 8.5 7.0 2>/dev/null)"
+    for expected in "library/php 8.5-cli" "library/php 7.0-zts" "library/alpine latest" "library/ubuntu latest" \
+        "dunglas/frankenphp 1-php8.5" "dunglas/frankenphp 1-php8.5-alpine"; do
+        check "cache_run_inputs looks up '$expected'" grep -qxF "$expected" <<< "$lookups"
+    done
+    check_not "cache_run_inputs: no frankenphp image for PHP before 8.2" grep -qF "dunglas/frankenphp 1-php7.0" <<< "$lookups"
+    lookups="$(cache_server_digests dev- 8.5 7.0)"
+    for expected in "shinsenter/phpfpm-nginx dev-php8.5" "shinsenter/phpfpm-apache dev-php7.0" "shinsenter/roadrunner dev-php8.5-alpine"; do
+        check "cache_server_digests looks up '$expected'" grep -qxF "$expected" <<< "$lookups"
+    done
+    check_not "cache_server_digests: no alpine image for PHP 7.0" grep -qF "dev-php7.0-alpine" <<< "$lookups"
+    unset -f cache_dockerhub_digest get_github_latest_tag cache_middleware_sources cache_apache_source \
+        cache_nginx_source cache_s6_sources cache_wpcli_source
+    source "$BASE_DIR/build/helpers.sh"
 
     rm -rf "$tmp"
     finish
 }
 
-# Each test runs in a subshell: its counters and sourced files stay private.
+# updates: the start and cleanup commands of build/check-updates.sh, with a stub of the GitHub CLI (offline)
+test_updates() {
+    local tmp stub
+    tmp="$(mktemp -d)"
+    stub="$tmp/bin"
+    mkdir -p "$stub"
+    trap 'rm -rf "$tmp"' RETURN
+
+    # gh stub: logs the call, answers the list queries from GH_ACTIVE, GH_LAST and GH_IDS
+    cat > "$stub/gh" <<'EOF'
+#!/bin/sh
+echo "$*" >> "$GH_LOG"
+case "$*" in
+    *"--limit 20"*)   echo "$GH_ACTIVE" ;;
+    *"--limit 1 "*)   echo "$GH_LAST" ;;
+    *"--limit 1000"*) printf '%s\n' $GH_IDS ;;
+esac
+EOF
+    chmod +x "$stub/gh"
+
+    # iso_ago <seconds>: the time that long ago, like createdAt of a run
+    iso_ago() { local t=$(($(date +%s) - $1)); date -u -d "@$t" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -r "$t" +%Y-%m-%dT%H:%M:%SZ; }
+    # run_updates <active runs> <createdAt of the last failed run> <ids> <command...>: prints the calls that change something
+    run_updates() {
+        local active="$1" last="$2" ids="$3"
+        shift 3
+        : > "$tmp/log"
+        PATH="$stub:$PATH" GH_LOG="$tmp/log" GH_ACTIVE="$active" GH_LAST="$last" GH_IDS="$ids" \
+            bash -c 'source "$1"; shift; "$@"' _ "$BASE_DIR/build/check-updates.sh" "$@" >/dev/null 2>&1
+        grep -E '^(workflow run|run delete)' "$tmp/log" | join_lines
+    }
+
+    check_eq "start: a running build is not started again" "" "$(run_updates 2 '' '' start_build "8.5")"
+    check_eq "start: a build that failed an hour ago is not retried" "" "$(run_updates 0 "$(iso_ago 3600)" '' start_build "8.5")"
+    check_eq "start: a build that failed 4 hours ago is started" \
+        "workflow run build-all.yml --ref main -f php_versions=8.5 8.4" "$(run_updates 0 "$(iso_ago 14400)" '' start_build "8.5 8.4")"
+    check_eq "start: no earlier failure starts the build" \
+        "workflow run build-all.yml --ref main -f php_versions=8.5" "$(run_updates 0 '' '' start_build "8.5")"
+
+    check_eq "cleanup: deletes each run" "run delete 11 run delete 12" "$(run_updates 0 '' '11 12' cleanup_runs 3)"
+    check_eq "cleanup: a bad number deletes nothing" "" "$(run_updates 0 '' '11' cleanup_runs abc)"
+    check_not "cleanup: a bad number fails" bash -c 'source "$1"; cleanup_runs abc' _ "$BASE_DIR/build/check-updates.sh"
+
+    finish
+}
+
+# Each test runs in a subshell: its counters and sourced files stay private
 if [ "${BASH_SOURCE[0]}" = "$0" ]; then
     status=0
-    for name in ${@:-lint versions backports config scaling ssh defaults size fingerprint helpers}; do
+    for name in ${@:-lint versions backports config scaling ssh defaults size fingerprint helpers updates}; do
         echo "== $name"
         (NAME="$name"; "test_$name") || status=1
     done

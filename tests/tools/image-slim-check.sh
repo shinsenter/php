@@ -32,7 +32,7 @@ echo "== Summary ($OS)"
 echo "disk: $(du -xsm / 2>/dev/null | cut -f1) MB"
 echo "extensions: $(php -m 2>/dev/null | grep -v "^\[" | grep -c .)"
 
-# files first: probing packages with apk writes to /var/cache
+# Files first: probing packages with apk writes to /var/cache
 echo "== Leftover files"
 n="$(command -v nginx 2>/dev/null || true)"
 [ -z "$n" ] || [ ! -e "$n.old" ] || warn "file $n.old"
@@ -73,7 +73,7 @@ for f in $(command -v php) $(command -v php-fpm) $n "$ext_dir"/*.so; do
     [ -f "$f" ] || continue
     # opcache.so (PHP 8.4+) holds the string ".symtab" as data: its JIT writes ELF files for GDB
     case "$f" in */opcache.so) continue ;; esac
-    # the section name table keeps ".symtab" only when the symbols are still there
+    # The section name table keeps ".symtab" only when the symbols are still there
     ! grep -q "\.symtab" "$f" 2>/dev/null || warn "not stripped: $f"
 done
 

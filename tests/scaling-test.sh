@@ -6,7 +6,7 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-# Docker test for scaling: Traefik in front of several replicas of one web image.
+# Docker test for scaling: Traefik in front of several replicas of one web image
 #
 # Usage: tests/scaling-test.sh <image> [replicas]
 #   tests/scaling-test.sh shinsenter/phpfpm-nginx:local-php8.4
@@ -35,7 +35,7 @@ case "${SCALING_VARIANT:-$IMAGE}" in
     *)            READY_BODY="pong"; APP=1 ;;
 esac
 export SCALING_IMAGE="$IMAGE" SCALING_PORT="$PORT"
-# the plain Dockerfile keeps the worker app of the image, because RoadRunner cannot serve plain PHP files
+# The plain Dockerfile keeps the worker app of the image, because RoadRunner cannot serve plain PHP files
 [ "$APP" = 1 ] || export SCALING_DOCKERFILE=Dockerfile.plain
 
 TMP="$(mktemp -d)"
@@ -45,7 +45,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# running replicas of the app service, optionally filtered by health
+# Running replicas of the app service, optionally filtered by health
 replicas() {
     docker ps -q --filter label=com.docker.compose.project=scaling-test \
         --filter label=com.docker.compose.service=app "$@"
@@ -55,7 +55,7 @@ json_field() { sed -n "s/.*\"$1\":\"\([^\"]*\)\".*/\1/p"; }
 
 "${COMPOSE[@]}" up -d --build --scale app="$REPLICAS" || { echo "FAIL: compose up" >&2; exit 1; }
 
-# wait until every replica is healthy and Traefik has picked them up
+# Wait until every replica is healthy and Traefik has picked them up
 for _ in $(seq 1 60); do
     [ "$(replicas --filter health=healthy | wc -l)" -ge "$REPLICAS" ] && break
     sleep 2
@@ -63,7 +63,7 @@ done
 sleep 3
 check_eq "healthy replicas" "$REPLICAS" "$(replicas --filter health=healthy | wc -l | tr -d ' ')"
 
-# health endpoints on their own port, called on the address of a replica like an orchestrator does
+# Health endpoints on their own port, called on the address of a replica like an orchestrator does
 first="$(replicas | head -n 1)"
 code="$(docker exec "$first" with-env sh -c 'curl -s -o /dev/null -w "%{http_code}" "$HEALTH_CHECK_URL"')"
 check_eq "health endpoint status" "200" "$code"
@@ -73,11 +73,11 @@ if [ -n "$READY_BODY" ]; then
 fi
 
 if [ "$APP" = 1 ]; then
-    # load balancing: 30 requests must reach more than one replica
+    # Load balancing: 30 requests must reach more than one replica
     hosts="$(for _ in $(seq 1 30); do curl -s "$URL/" | json_field host; done | sort -u | wc -l | tr -d ' ')"
     check "requests reach more than one replica (got $hosts)" test "$hosts" -gt 1
 
-    # client address and HTTPS behind the proxy
+    # Client address and HTTPS behind the proxy
     body="$(curl -s -H 'X-Forwarded-Proto: https' -H 'X-Forwarded-For: 203.0.113.9' "$URL/")"
     check_eq "REMOTE_ADDR from X-Forwarded-For" "203.0.113.9" "$(json_field remote_addr <<<"$body")"
     check_eq "HTTPS from X-Forwarded-Proto" "on" "$(json_field https <<<"$body")"
@@ -86,7 +86,7 @@ if [ "$APP" = 1 ]; then
     check_eq "no HTTPS flag for plain HTTP" "" "$(json_field https <<<"$body")"
 fi
 
-# stop one replica while requests are running: they must finish
+# Stop one replica while requests are running: they must finish
 victim="$(replicas | tail -n 1)"
 if [ "$APP" = 1 ]; then
     for i in $(seq 1 $((REPLICAS * 2))); do

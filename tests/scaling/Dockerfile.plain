@@ -5,6 +5,6 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-# The image under test as it is, for variants that bring their own app (RoadRunner).
+# The image under test as it is, for variants that bring their own app (RoadRunner)
 ARG SCALING_IMAGE
 FROM ${SCALING_IMAGE}
