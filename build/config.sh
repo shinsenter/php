@@ -386,7 +386,7 @@ esac
 ################################################################################
 # Skip build if the latest supported PHP version is less than the build version
 if [ "$ALLOW_RC" != "1" ]; then
-        verlt "$LATEST_PHP" "$PHP_VERSION" && SKIP_BUILD=1
+    verlt "$LATEST_PHP" "$PHP_VERSION" && SKIP_BUILD=1
 fi
 
 # Skip build if there is no Alpine image for this PHP version
