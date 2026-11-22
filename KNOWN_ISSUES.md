@@ -36,6 +36,14 @@ Found by the first full build with arm/v7 (2026-11-20, CI). Both images build fo
 
 ## 6.3.0
 
+### [#478](https://github.com/shinsenter/php/issues/478) arm/v7 images contain an aarch64 `s6-overlay-suexec`
+
+The arm/v7 images stop at start with `Exec format error`: `s6-overlay-suexec` is an aarch64 binary.
+
+- Cause: `os-s6-overlay.dockerfile` chose the archive from `uname -m`, and an arm64 builder reports `aarch64` for an arm/v7 build.
+- Fix: the archive follows `TARGETARCH` and `TARGETVARIANT`, with `uname -m` as the fallback.
+- Tested: `tests/run.sh config` fails on the old file. Local arm/v7 builds (Alpine and Debian, `with-nginx` 8.5) have a 32-bit ARM binary. Not run in a container.
+
 ### [#469](https://github.com/shinsenter/php/issues/469) A missing upstream PHP image fails the build and skips the servers and apps of every PHP version
 
 On 2026-11-19 the upstream images `php:8.6-cli-alpine` and `php:8.6-zts-alpine` did not exist yet, so those builds failed. The jobs that build on top of them were skipped for every PHP version, and the `8.5-*` tags stayed on PHP 8.5.12 although 8.5.13 fixed two critical vulnerabilities. The maintainer built the 8.5 images by hand.

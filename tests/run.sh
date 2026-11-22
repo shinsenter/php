@@ -256,6 +256,16 @@ test_config() {
             "$(grep '^BUILD_TAG=' <<<"$output")"
     done
 
+    # s6-overlay archive: the platform decides, not uname (an arm64 builder reports aarch64 for arm/v7, #478)
+    local snippet
+    snippet="$(sed -n '/# Detect the target architecture/,/^    untar() {/p' \
+        "$BASE_DIR/src/php/common/os-s6-overlay.dockerfile" | sed '$d')"
+    s6_arch() { (TARGETARCH="$1" TARGETVARIANT="$2" machine="$3"; uname() { echo "$machine"; }; eval "$snippet"; echo "$S6_ARCH"); }
+    check_eq "s6 arch arm/v7 on an arm64 builder" arm "$(s6_arch arm v7 aarch64)"
+    check_eq "s6 arch arm/v6" armhf "$(s6_arch arm v6 aarch64)"
+    check_eq "s6 arch arm64" aarch64 "$(s6_arch arm64 '' x86_64)"
+    check_eq "s6 arch without platform args" arm "$(s6_arch '' '' armv7l)"
+
     finish
 }
 
