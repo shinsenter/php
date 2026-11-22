@@ -351,6 +351,9 @@ case "$APP" in
         upstream_digest F8P_SHA "dunglas/frankenphp" "1-php$PHP_VERSION$SUFFIX"
         BUILD_CACHE_KEY="(frankenphp@$F8P_SHA)"
         PHP_VARIANT="zts$SUFFIX"
+        # The cli image is already ZTS from PHP 8.6
+        verlte 8.6 "$PHP_VERSION" && PHP_VARIANT="cli$SUFFIX"
+        ALLOW_RC=1
         ;;
     with-roadrunner)
         verlt "$PHP_VERSION" "8.0" && SKIP_BUILD=1
@@ -376,8 +379,8 @@ case "$APP" in
         BUILD_DOCKERFILE="$BASE_DIR/src/php/base-php.dockerfile"
         PHP_VARIANT="$APP$SUFFIX"
         ALLOW_RC=1
-        # Temporary: the official image has no 8.6-zts yet, only 8.6-rc-zts. Remove this line when it has
-        [ "$APP" = "zts" ] && [ "$PHP_VERSION" = "8.6" ] && PHP_VERSION="8.6-rc"
+        # The official images are ZTS from PHP 8.6 and have no zts variant: the cli image gets the zts tags
+        [ "$APP" = "zts" ] && verlte 8.6 "$PHP_VERSION" && SKIP_BUILD=1
         ;;
 esac
 
@@ -455,6 +458,12 @@ if [ -n "$PHP_VERSION" ]; then
         if [ "$PREFIX" = "cli" ]; then
             add_tag "$BUILD_NAME:$PHP_VERSION$SUFFIX"
             [ "$PHP_VERSION" = "$LATEST_PHP" ] && add_tag "$BUILD_NAME:latest$SUFFIX"
+        fi
+
+        # The official images are ZTS from PHP 8.6, so cli is also the zts image
+        if [ "$PREFIX" = "cli" ] && verlte 8.6 "$PHP_VERSION"; then
+            add_tag "$BUILD_NAME:$PHP_VERSION-zts$SUFFIX"
+            [ "$PHP_VERSION" = "$LATEST_PHP" ] && add_tag "$BUILD_NAME:zts$SUFFIX"
         fi
 
     elif [ "${APP#with-}" != "$APP" ]; then
@@ -608,9 +617,12 @@ if [ "$SKIP_BUILD" != "1" ]; then
     fi
 
     if [ -n "$PHP_VERSION" ]; then
-        # A new PHP version can lack a variant for a while (for example 8.6-zts)
-        upstream_digest PHP_SHA "library/php" "$PHP_VERSION-${PHP_VARIANT#-}"
-        BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(php:$PHP_VERSION-${PHP_VARIANT#-}@$PHP_SHA)"
+        # A new PHP version can lack a variant for a while (for example 8.6-zts).
+        # with-f8p does not start from the official image: it builds on our zts image and copies dunglas/frankenphp
+        if [ "$APP" != "with-f8p" ]; then
+            upstream_digest PHP_SHA "library/php" "$PHP_VERSION-${PHP_VARIANT#-}"
+            BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(php:$PHP_VERSION-${PHP_VARIANT#-}@$PHP_SHA)"
+        fi
 
         # Outdated versions are only rebuilt when their official PHP image changes
         if ! is_outdated_php "$PHP_VERSION"; then
