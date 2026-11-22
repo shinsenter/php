@@ -8,7 +8,7 @@
 ENV NGINX_PID=/run/nginx.pid
 
 # Nginx version to build from https://nginx.org, a number like "1.30.6".
-# Empty or "os" keeps the version from the OS package.
+# Required: the OS package is only a reference for the build options and is removed after the build.
 # build/config.sh turns "mainline" and "stable" into a number,
 # so a new release changes the image fingerprint.
 ARG NGINX_VERSION=""
@@ -19,84 +19,51 @@ RUN --mount=type=bind,source=./with-nginx/nginx-build,target=/tmp/nginx-build \
 echo 'Install Nginx'
 [ -z "$DEBUG" ] || set -x; set -e
 
-# Install nginx from the OS: users, directories, runtime libraries,
-# and the configure flags that the official source is built with
-pkg-add nginx
+[ -n "$NGINX_VERSION" ] || { echo 'ERROR: NGINX_VERSION must be a version number (build with build/config.sh)' >&2; exit 1; }
 
-# Replace the binary with the official source
-if [ -n "$NGINX_VERSION" ] && [ "$NGINX_VERSION" != os ]; then
-    # Keep the runtime library: removing the build tools drops it otherwise
-    # (older Alpine nginx packages link to pcre, not pcre2)
-    APK_PACKAGES='pcre2' APT_PACKAGES='libpcre2-8-0' pkg-add
+# One install for the OS package and the build tools.
+# The OS package is only the reference of nginx-build for the configure flags.
+# It is removed completely after the build, so no package record stays for an upgrade to put back.
+# The build tools are removed right after the build
+export APK_PACKAGES='--virtual .nginx-deps nginx build-base linux-headers openssl-dev pcre2-dev zlib-dev'
+export APT_PACKAGES='nginx build-essential libssl-dev libpcre2-dev zlib1g-dev'
+pkg-add
 
-    # Build tools, removed right after the build
-    export APK_PACKAGES='--virtual .nginx-deps build-base linux-headers openssl-dev pcre2-dev zlib-dev'
-    export APT_PACKAGES='build-essential libssl-dev libpcre2-dev zlib1g-dev'
-    pkg-add
+# brotli headers for the brotli module,
+# installed apart so an OS without them still builds Nginx
+APK_PACKAGES='--virtual .nginx-brotli brotli-dev' APT_PACKAGES='libbrotli-dev' pkg-add
 
-    # brotli headers for the brotli module,
-    # installed apart so an OS without them still builds Nginx
-    APK_PACKAGES='--virtual .nginx-brotli brotli-dev' APT_PACKAGES='libbrotli-dev' pkg-add
+# The build runs in its own shell, and a failure stops the image build
+if sh /tmp/nginx-build; then
+    nginx_bin="$(command -v nginx)"
+    stage=/usr/src/nginx-stage
 
-    # Keep the brotli library when the headers are removed:
-    # Alpine has it in brotli-libs, or in brotli on old releases, so ask which package owns it
-    brotli_lib="$(apk info -W /usr/lib/libbrotlienc.so.1 2>/dev/null | sed -n 's/.* is owned by \(.*\)-[^-]*-r[0-9]*$/\1/p')"
-    APK_PACKAGES="$brotli_lib" APT_PACKAGES='libbrotli1' pkg-add
+    # The OS package made the folders of the paths built into its binary, and removes them with itself
+    dirs="$(nginx -V 2>&1 | tr ' ' '\n' | sed -n 's/^--[a-z-]*-path=//p' | grep -v '^stderr$' || true)"
 
-    # The build runs in its own shell:
-    # a failure before "make install" leaves the OS package untouched,
-    # and the build tools are removed in any case
-    if sh /tmp/nginx-build; then
-        make -C /usr/src/nginx install
-        strip --strip-all "$(type -P nginx)" || true
-        # make install keeps the binary of the OS package next to the new one
-        rm -f "$(type -P nginx).old" /etc/nginx/*.default
+    # Install into a stage while make and strip are still here.
+    # make install leaves default configs, a sample page and charset maps that nothing uses
+    make -C /usr/src/nginx install DESTDIR="$stage"
+    strip --strip-all "$stage$nginx_bin" || true
+    prefix="$(nginx -V 2>&1 | tr ' ' '\n' | sed -n 's/^--prefix=//p')"
+    rm -rf "$stage"/etc/nginx/*.default "$stage"/etc/nginx/koi-utf "$stage"/etc/nginx/koi-win "$stage"/etc/nginx/win-utf "$stage$prefix/html"
 
-        # The package records still name the OS version, and scanners report it for the new binary
-        if [ -f /var/lib/dpkg/status ]; then
-            awk -v p=nginx -v n="$NGINX_VERSION" 'function swap(s, o, r,   out, i) {
-                while ((i = index(s, o)) > 0) { out = out substr(s, 1, i - 1) r; s = substr(s, i + length(o)) }
-                return out s
-            }
-            BEGIN { RS = ""; ORS = "\n\n" }
-            $0 ~ "(^|\n)Package: " p "(-[^\n]*)?(\n|$)" && match($0, /(^|\n)Version: [^\n]*/) {
-                v = substr($0, RSTART, RLENGTH); sub(/^\n?Version: /, "", v); $0 = swap($0, v, n)
-            }
-            { print }' /var/lib/dpkg/status > /tmp/dpkg-status && cat /tmp/dpkg-status > /var/lib/dpkg/status
-            rm -f /tmp/dpkg-status
-        fi
-        # Same for the Alpine package database
-        if [ -f /lib/apk/db/installed ]; then
-            awk -v p=nginx -v n="$NGINX_VERSION-r0" 'function swap(s, o, r,   out, i) {
-                while ((i = index(s, o)) > 0) { out = out substr(s, 1, i - 1) r; s = substr(s, i + length(o)) }
-                return out s
-            }
-            BEGIN { RS = ORS = "\n\n" }
-            $0 ~ "(^|\n)P:" p "(-[^\n]*)?\n" && match($0, /\nV:[^\n]*/) {
-                o = substr($0, RSTART + 3, RLENGTH - 3); $0 = swap($0, o, n)
-            }
-            { print }' /lib/apk/db/installed > /tmp/apk-installed && cat /tmp/apk-installed > /lib/apk/db/installed
-            rm -f /tmp/apk-installed
-        fi
-    else
-        echo "WARNING: cannot build Nginx $NGINX_VERSION, keep the version from the OS package, which may lack security fixes" >&2
-        NGINX_VERSION=os
-    fi
+    # Keep the libraries of the new binary, then remove the OS package completely, with the build tools.
+    # On Alpine they are one virtual package, and apk refuses to remove a member of it alone
+    keep-libs /usr/src/nginx/objs/nginx
+    APK_PACKAGES='.nginx-deps .nginx-brotli' APT_PACKAGES='nginx nginx-common' pkg-del
 
-    rm -rf /usr/src/nginx
-    APK_PACKAGES='.nginx-brotli' APT_PACKAGES='libbrotli-dev' pkg-del
-    APK_PACKAGES='.nginx-deps' pkg-del
-    unset APK_PACKAGES APT_PACKAGES
+    cp -a "$stage"/. /
+    for path in $dirs; do mkdir -p "${path%/*}"; done
+else
+    echo "ERROR: cannot build Nginx $NGINX_VERSION" >&2
+    exit 1
 fi
 
-# Test nginx command
-nginx -V || exit 1
-
-# A build that succeeded must give the requested version (a failed one fell back to NGINX_VERSION=os above)
-if [ -n "$NGINX_VERSION" ] && [ "$NGINX_VERSION" != os ]; then
-    nginx_now="$(nginx -v 2>&1 | sed -n 's|^nginx version: nginx/\([0-9.]*\).*|\1|p')"
-    [ "$nginx_now" = "$NGINX_VERSION" ] || { echo "ERROR: Nginx is $nginx_now, not $NGINX_VERSION" >&2; exit 1; }
-fi
+rm -rf /usr/src/nginx /usr/src/nginx-stage
+APK_PACKAGES='.nginx-brotli' APT_PACKAGES='libbrotli-dev' pkg-del
+APK_PACKAGES='.nginx-deps' pkg-del
+unset APK_PACKAGES APT_PACKAGES
 
 # Clean up
 \rm -rf /var/www/localhost \

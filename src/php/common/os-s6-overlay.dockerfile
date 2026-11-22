@@ -9,6 +9,10 @@
 ARG S6_VERSION=""
 ARG S6_PATH=""
 
+# Set by BuildKit. uname -m is not enough: an arm64 builder runs arm/v7 builds as aarch64 (#478)
+ARG TARGETARCH
+ARG TARGETVARIANT
+
 ################################################################################
 RUN --mount=type=bind,source=./helper_cache,target=/tmp/helper_cache <<'EOF'
 [ -z "$DEBUG" ] || set -x; set -e
@@ -26,18 +30,28 @@ if [ -n "$S6_VERSION" ] && ! has-s6; then
         pkg-add
     fi
 
-    # Detect system's architecture
-    case "$(uname -m)" in
-        aarch64 ) S6_ARCH='aarch64' ;;
-        arm64   ) S6_ARCH='aarch64' ;;
-        armhf   ) S6_ARCH='armhf'   ;;
+    # Detect the target architecture, from the platform first and from uname when it is not set
+    case "${TARGETARCH}${TARGETVARIANT}" in
+        arm64*  ) S6_ARCH='aarch64' ;;
+        armv6   ) S6_ARCH='armhf'   ;;
         arm*    ) S6_ARCH='arm'     ;;
-        i4*     ) S6_ARCH='i486'    ;;
-        i6*     ) S6_ARCH='i686'    ;;
+        386     ) S6_ARCH='i686'    ;;
+        amd64   ) S6_ARCH='x86_64'  ;;
         riscv64 ) S6_ARCH='riscv64' ;;
-        s390*   ) S6_ARCH='s390x'   ;;
-        *       ) S6_ARCH='x86_64'  ;;
+        s390x   ) S6_ARCH='s390x'   ;;
     esac
+    if [ -z "$S6_ARCH" ]; then
+        case "$(uname -m)" in
+            aarch64|arm64 ) S6_ARCH='aarch64' ;;
+            armhf         ) S6_ARCH='armhf'   ;;
+            arm*          ) S6_ARCH='arm'     ;;
+            i4*           ) S6_ARCH='i486'    ;;
+            i6*           ) S6_ARCH='i686'    ;;
+            riscv64       ) S6_ARCH='riscv64' ;;
+            s390*         ) S6_ARCH='s390x'   ;;
+            *             ) S6_ARCH='x86_64'  ;;
+        esac
+    fi
 
     untar() {
         local url="$1"

@@ -104,7 +104,7 @@ See all tags on our [Docker Hub](https://hub.docker.com/r/shinsenter/php/tags).
 | I want to | Tag | Notes |
 |---|---|---|
 | Run scripts, workers or Composer | `cli` | Runs `php` and exits |
-| Use thread-safe PHP | `zts` | For extensions that need ZTS |
+| Use thread-safe PHP | `zts` | For extensions that need ZTS. From PHP 8.6 the official images are all ZTS, so `8.6-zts` is a tag of `cli` |
 | Put PHP-FPM behind my own web server or ingress | `fpm` | Listens on port 9000 |
 | Get a ready web server | `fpm-nginx` | Nginx + PHP-FPM, ports 80 and 443 |
 | Use Apache and `.htaccess` | `fpm-apache` | Apache + PHP-FPM, ports 80 and 443 |

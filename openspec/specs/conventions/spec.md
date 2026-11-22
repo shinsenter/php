@@ -41,6 +41,7 @@ The repo SHALL follow these rules for: known_issues.md.
 - Entry goes under the release that ships the fix, or `Open` until merged. It has the issue link, symptom, cause (or "not recorded") and fix.
 - MUST NOT write commit hashes (squash merge changes them).
 - Read the issue and its comments first; MUST NOT guess a cause.
+- Entries SHALL be short: a heading, one sentence of symptom, then Cause, Fix and Tested as one or two sentences each. MUST NOT include logs, check dates or ruled-out ideas.
 
 ### Requirement: Spec workflow (OpenSpec)
 

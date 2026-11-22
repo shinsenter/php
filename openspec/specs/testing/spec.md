@@ -45,6 +45,7 @@ The repo SHALL follow these rules for: test selection and docker tests.
 - Test the contract (ports, paths, defaults, behavior with stubs), not how a file is written: a check that greps an implementation detail breaks on every refactor. Group similar checks in a loop or a small function.
 - The `config` test runs only the paths of `build/config.sh` that end before a network call (Alpine on PHP below 7.1). MUST NOT add cases that reach the registry or GitHub API.
 - No-build checks: `sh -n`, `bash -n`, `git apply --check`, `git diff`.
+- A local Docker test SHALL run the squash step (no `SKIP_SQUASH=1`), because the cleanup hooks run only there and `apt-get full-upgrade` can put OS packages back over the ones built from source (#479). After the build, check the version and the config of what was built from source (`apache2 -v` shows `Unix` for a source build, `apache2 -t`). `SKIP_SQUASH=1` is for a quick syntax check of a Dockerfile only, and MUST NOT back a claim that an image works.
 - Not covered offline, ask the user for a run: `patch -p1 --dry-run` on a source tree, image contents, hook and util runtime (`realpath -m` needs GNU, so `app-root` fails on macOS). Use `tests/build-test.sh`, `tests/compose-test.sh`.
 
 ## Docker test notes

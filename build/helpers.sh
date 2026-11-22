@@ -160,13 +160,15 @@ cache_dockerhub_digest() {
 }
 
 # Nginx version number from https://nginx.org.
-# "mainline" and "stable" are looked up on the download page, "os", empty and numbers pass through.
-# Usage: resolve_nginx_version <mainline|stable|os|number>
+# "mainline" and "stable" are looked up on the download page, a number passes through.
+# "os" and empty are refused: Nginx is always built from source.
+# Usage: resolve_nginx_version <mainline|stable|number>
 resolve_nginx_version() {
     local want="$1" label page
     case "$want" in
         mainline) label=Mainline ;;
         stable)   label=Stable ;;
+        ""|os)    echo "NGINX_VERSION must be mainline, stable or a number" >&2; return 1 ;;
         *)        echo "$want"; return 0 ;;
     esac
     page="$(fetch_with_cache "https://nginx.org/en/download.html")" || return 1
@@ -177,12 +179,14 @@ resolve_nginx_version() {
 }
 
 # Apache version number from https://httpd.apache.org.
-# "stable" is the latest release of the download page, "os", empty and numbers pass through.
-# Usage: resolve_apache_version <stable|os|number>
+# "stable" is the latest release of the download page, a number passes through.
+# "os" and empty are refused: Apache is always built from source.
+# Usage: resolve_apache_version <stable|number>
 resolve_apache_version() {
     local want="$1" page
     case "$want" in
         stable) ;;
+        ""|os)  echo "APACHE_VERSION must be stable or a number" >&2; return 1 ;;
         *)      echo "$want"; return 0 ;;
     esac
     page="$(fetch_with_cache "https://httpd.apache.org/download.cgi")" || return 1
@@ -235,7 +239,7 @@ cache_middleware_sources() {
 cache_nginx_source() {
     local version
     version="$(resolve_nginx_version "${NGINX_VERSION:-mainline}")"
-    case "$version" in ""|os) return 0 ;; esac
+    [ -n "$version" ] || return 0
     cache_file "https://nginx.org/download/nginx-$version.tar.gz" "nginx-$version.tar.gz" \
         || echo "Cannot cache Nginx $version" >&2
     # ngx_brotli has no release: the latest commit is used, and it is not part of the fingerprint
@@ -247,7 +251,7 @@ cache_nginx_source() {
 cache_apache_source() {
     local version
     version="$(resolve_apache_version "${APACHE_VERSION:-stable}")"
-    case "$version" in ""|os) return 0 ;; esac
+    [ -n "$version" ] || return 0
     # Only the latest release stays on the mirror, older ones move to the archive
     cache_file "https://dlcdn.apache.org/httpd/httpd-$version.tar.gz" "httpd-$version.tar.gz" \
         || cache_file "https://archive.apache.org/dist/httpd/httpd-$version.tar.gz" "httpd-$version.tar.gz" \

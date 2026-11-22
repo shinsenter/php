@@ -36,13 +36,29 @@ Found by the first full build with arm/v7 (2026-11-20, CI). Both images build fo
 
 ## 6.3.0
 
+### [#478](https://github.com/shinsenter/php/issues/478) arm/v7 images contain an aarch64 `s6-overlay-suexec`
+
+The arm/v7 images stop at start with `Exec format error`: `s6-overlay-suexec` is an aarch64 binary.
+
+- Cause: `os-s6-overlay.dockerfile` chose the archive from `uname -m`, and an arm64 builder reports `aarch64` for an arm/v7 build.
+- Fix: the archive follows `TARGETARCH` and `TARGETVARIANT`, with `uname -m` as the fallback.
+- Tested: `tests/run.sh config` fails on the old file. Local arm/v7 builds (Alpine and Debian, `with-nginx` 8.5) have a 32-bit ARM binary. Not run in a container.
+
+### [#479](https://github.com/shinsenter/php/issues/479) `fpm-apache` of PHP 8.5 stops with "module log_config_module is built-in"
+
+Same error as #475. The published `php8.5` image has the Debian Apache binary, which compiles in `log_config`, `logio`, `unixd`, `version` and `watchdog`, while `modules.conf` still loads them.
+
+- Cause: the cleanup before the squash runs `apt-get full-upgrade`. The package records showed the source version `2.4.71`, which apt sees as older than the OS `2.4.71-1~deb13u1`, so apt put the OS Apache back over the source build.
+- Fix: Apache and Nginx are always built from source. The OS package is installed only to read the build options, and is removed completely after the build with its build tools, so no package record is left for an upgrade to replace. `keep-libs` keeps the runtime libraries of the new binary. `APACHE_VERSION=os` and `NGINX_VERSION=os` are refused.
+- Tested: local builds with the squash step on PHP 5.6 to 8.6, Debian and Alpine, for Apache and Nginx (48 builds): source binary, no OS package left, no missing library, `apache2 -t` OK, HTTP 200, no error in the log. The CI image of this fix is not tested.
+
 ### [#469](https://github.com/shinsenter/php/issues/469) A missing upstream PHP image fails the build and skips the servers and apps of every PHP version
 
 On 2026-11-19 the upstream images `php:8.6-cli-alpine` and `php:8.6-zts-alpine` did not exist yet, so those builds failed. The jobs that build on top of them were skipped for every PHP version, and the `8.5-*` tags stayed on PHP 8.5.12 although 8.5.13 fixed two critical vulnerabilities. The maintainer built the 8.5 images by hand.
 
 - Cause: read from the workflows, not from the failed run log. `template-stack.yml` runs the servers with `needs: base`, and `base` is one call of `template-php.yml` for all PHP versions. One failed version fails `base`, so the servers of every version are skipped. `build-all.yml` runs `server-cache` with `needs: [prepare, cli, fpm]` and the apps with `needs: server-cache`, so the apps are skipped the same way.
-- Fix: `build/config.sh` skips a build, instead of failing it, when Docker Hub answers 404 for the official `php` tag it builds from. The servers and apps of the other versions then run as usual. Any other answer (an outage, a rate limit) does not skip a build. `php:8.6-zts` and `php:8.6-zts-alpine` are still missing upstream, so `zts` of PHP 8.6 builds on `php:8.6-rc-zts` for now, and `frankenphp` of PHP 8.6 is skipped. The lookups come from the cache that the prepare job fills, so a missing tag costs no request in the build jobs.
-- Tested: `tests/run.sh helpers` covers a 404 answer, a tag with a digest, a rate limit and no answer. `build/config.sh` gives `SKIP_BUILD=1` for `frankenphp` 8.6 and `0` for `zts`, `fpm` and `cli` 8.6, and a second run with a warm cache sends no request. A full pipeline run with a missing base is not tested.
+- Fix: `build/config.sh` skips a build, instead of failing it, when Docker Hub answers 404 for the official `php` tag it builds from. The servers and apps of the other versions then run as usual. Any other answer (an outage, a rate limit) does not skip a build. `php:8.6-zts` does not exist, because the official images are ZTS from PHP 8.6. `zts` is not built from 8.6: `8.6-zts` is a tag of the `cli` image, and `frankenphp` builds on `cli`. The lookups come from the cache that the prepare job fills, so a missing tag costs no request in the build jobs.
+- Tested: `tests/run.sh helpers` covers a 404 answer, a tag with a digest, a rate limit and no answer. `build/config.sh` gives `SKIP_BUILD=0` for `frankenphp`, `fpm` and `cli` 8.6 and `1` for `zts` 8.6, and a second run with a warm cache sends no request. A full pipeline run with a missing base is not tested.
 
 ### [#475](https://github.com/shinsenter/php/issues/475) Apache stops: "module log_config_module is built-in and can't be loaded"
 

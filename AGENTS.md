@@ -26,6 +26,7 @@ This file wins on a conflict.
 - Keep it simple: minimum code, no speculative features or abstractions.
 - Change surgically: touch only what the request needs, match the existing style. Mention unrelated dead code, do not delete it.
 - Work toward a goal: define a check for each step and run it.
+- Save tokens and keep replies short: do what was asked, call the repo's own commands instead of new wrappers, group repeated status reports into one, and ask before widening the scope.
 
 ## Specs (OpenSpec)
 
@@ -64,7 +65,7 @@ Utilities inside the image: `pkg-add` and `pkg-del` (install and remove packages
 
 ## Build and test
 
-- Trial build: `tests/build-test.sh <os> <app> <php-version> [server]`, for example `tests/build-test.sh '' with-nginx 8.4`. An empty `<os>` is Debian. It also builds the images it depends on. Variables: `SKIP_SQUASH=1`, `BUILD_TAG_PREFIX`.
+- Trial build: `tests/build-test.sh <os> <app> <php-version> [server]`, for example `tests/build-test.sh '' with-nginx 8.4`. An empty `<os>` is Debian. It also builds the images it depends on. Variables: `SKIP_SQUASH=1`, `BUILD_TAG_PREFIX`. Run it with the squash, not `SKIP_SQUASH=1`: the cleanup hooks run only there and can overwrite packages built from source. Spec `testing`.
 - Offline tests need no Docker, so run them after a change and report the real output: `tests/run.sh`, or `tests/run.sh lint|versions|backports|config|scaling|ssh|defaults|size|fingerprint|helpers|updates|scan`.
 - All images at once: `tests/compose-test.sh` starts the servers and webapps in batches. The manual `Compose test` workflow runs it on the published images, one job per service and OS.
 - A failing check is a finding. Fix the cause or tell the user. Do not edit a test to make it pass.
@@ -80,7 +81,7 @@ Utilities inside the image: `pkg-add` and `pkg-del` (install and remove packages
 - Every commit must carry a valid signature (`%G?` shows `G`). `git commit` signs through `commit.gpgsign`. `git commit-tree` and scripted rewrites need `-S`. After any commit or rewrite, check with `git log --format='%h %G? %s'`.
 - `_OUTPUTS/` is a local scratch folder that git ignores. Do not commit it.
 - Do not touch `.env`, secrets, `.secrets` or `build/.secrets.example`.
-- When you fix a bug from a GitHub issue, also record it in `KNOWN_ISSUES.md` in the same change. Read the issue first and do not guess a cause. Format: spec `conventions`.
+- When you fix a bug from a GitHub issue, also record it in `KNOWN_ISSUES.md` in the same change. Read the issue first and do not guess a cause. Keep the entry short. Format: spec `conventions`.
 
 ## Ship flow ("ship 6.x")
 
