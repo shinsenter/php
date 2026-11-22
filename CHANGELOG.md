@@ -8,7 +8,7 @@ All notable changes to this project are documented in this file.
 
 ## [6.3.0] - 2026-11-21
 - Add `linux/arm/v7` (32-bit ARM) images. RoadRunner, Spiral, Hyperf and Mautic stay on `linux/amd64` and `linux/arm64`.
-- Fix `fpm-apache` failing to start with "module log_config_module is built-in and can't be loaded" (#475). The build now stops on a config syntax error.
+- Fix `fpm-apache` failing to start with "module log_config_module is built-in and can't be loaded" (#475, #479). Apache and Nginx are now always built from source and the OS package is removed after the build, so an upgrade can no longer put it back. `APACHE_VERSION=os` and `NGINX_VERSION=os` are refused. The build stops on a config syntax error.
 - Fix `linux/arm/v7` images that contained the aarch64 s6-overlay binaries and failed with `Exec format error` (#478).
 - Skip PHP extensions that docker-php-extension-installer does not support for the PHP version, so one unsupported module no longer fails the build. Add `mbstring`, and run `pecl upgrade-all` before the extensions (the old call used a command that does not exist).
 - Skip a build when the official PHP image does not exist, so one missing image no longer fails the run and skips the other builds (#469). `zts` of PHP 8.6 builds on `8.6-rc` for now, and `frankenphp` of PHP 8.6 is skipped.

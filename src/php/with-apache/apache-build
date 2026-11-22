@@ -9,7 +9,7 @@
 # Build Apache $APACHE_VERSION from https://httpd.apache.org with HTTP/2 and brotli.
 # It compiles into /usr/src/httpd and stages the result in /usr/src/httpd-stage.
 # with-apache/apache-install.dockerfile copies the staged binary and modules over the OS ones
-# when this script succeeds, so a failure leaves the OS package untouched.
+# when this script succeeds, and a failure stops the image build.
 # Mounted into a RUN step from the build context, not part of any image.
 ################################################################################
 set -e

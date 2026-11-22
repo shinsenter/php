@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+# Marks the shared libraries of the given binaries as installed on purpose,
+# so removing another package, or autoremove, does not take them away.
+# Usage: keep-libs <elf file...>
+if has-cmd apk; then
+    # musl ldd cannot list the libraries of a module, so read them from the ELF headers
+    # and let apk find the package of each by its so: name
+    needed="$(readelf -d "$@" 2>/dev/null | sed -n 's/.*Shared library: \[\(.*\)\]/\1/p' | sort -u)"
+    [ -z "$needed" ] || apk add --no-cache $(for lib in $needed; do echo "so:$lib"; done) >/dev/null
+else
+    libs="$(ldd "$@" 2>/dev/null | awk '/=>/ && $3 ~ /^\// {print $3}' | sort -u)"
+    pkgs="$(for lib in $libs; do dpkg -S "*/${lib##*/}" 2>/dev/null; done | sed -n 's/^\([^:]*\):.*/\1/p' | sort -u)"
+    [ -z "$pkgs" ] || apt-mark manual $pkgs >/dev/null
+fi

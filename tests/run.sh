@@ -150,10 +150,10 @@ test_versions() {
     }
     check_eq "nginx mainline" "1.31.8" "$(resolve_nginx_version mainline)"
     check_eq "nginx stable" "1.30.6" "$(resolve_nginx_version stable)"
-    for value in 1.29.0 os ''; do check_eq "nginx '$value' passes through" "$value" "$(resolve_nginx_version "$value")"; done
+    check_eq "nginx '1.29.0' passes through" 1.29.0 "$(resolve_nginx_version 1.29.0)"
     fetch_with_cache() { echo '<h1>Apache HTTP Server 2.4.71</h1><a href="https://dlcdn.apache.org/httpd/httpd-2.4.71.tar.gz">x</a><a href="x/httpd-2.4.71.tar.bz2">'; }
     check_eq "apache stable" "2.4.71" "$(resolve_apache_version stable)"
-    for value in 2.4.60 os ''; do check_eq "apache '$value' passes through" "$value" "$(resolve_apache_version "$value")"; done
+    check_eq "apache '2.4.60' passes through" 2.4.60 "$(resolve_apache_version 2.4.60)"
     unset -f fetch_with_cache
 
     # Helper cache downloads, with stubs (no network)
@@ -178,12 +178,17 @@ test_versions() {
     fetch_with_cache() { echo "$(echo phar | shasum -a 512 | awk '{print $1}')  wp-cli.phar"; }
     cache_wpcli_source 2>/dev/null
     check "cache: wp-cli with a matching checksum is kept" [ -f "$cache_dir/wp-cli.phar" ]
-    NGINX_VERSION=os; resolve_nginx_version() { echo os; }
-    rm -f "$cache_dir"/nginx-* "$cache_dir"/ngx_brotli*
-    cache_nginx_source 2>/dev/null
-    check_eq "cache: nginx os is not downloaded" "" "$(ls "$cache_dir" | grep '^nginx-\|^ngx_brotli' || true)"
     rm -rf "$cache_dir"
     unset -f fetch_with_cache download_file get_github_latest_tag resolve_nginx_version resolve_apache_version
+
+    # Both servers are always built from source: "os" and an empty value are refused, a number passes
+    for server in nginx apache; do
+        resolve() { bash -c 'source "$1/build/helpers.sh"; resolve_"$2"_version "$3"' _ "$BASE_DIR" "$server" "$1"; }
+        check_not "versions: $server refuses os" resolve os
+        check_not "versions: $server refuses an empty value" resolve ""
+        check_eq "versions: $server keeps a number" "2.4.1" "$(resolve 2.4.1)"
+    done
+    unset -f resolve
 
     finish
 }
@@ -312,6 +317,8 @@ test_scaling() {
     # Stop signals and the shutdown delay
     has "nginx: graceful stop signal" "$nginx/nginx-config.dockerfile" 'down-signal SIGQUIT'
     has "apache: graceful stop signal" "$apache/apache-config.dockerfile" 'down-signal SIGWINCH'
+    has "apache: the OS package is removed after the source build (#479)" "$apache/apache-install.dockerfile" 'keep-libs'
+    lacks "apache: no fallback to the OS package" "$apache/apache-install.dockerfile" 'APACHE_VERSION=os'
     has "php-fpm: graceful stop signal" "$common/php-extensions.dockerfile" 'down-signal SIGQUIT'
     for config in with-nginx/nginx-config with-apache/apache-config with-f8p/f8p-config with-roadrunner/roadrunner-config; do
         has "$config: shutdown-delay dependency" "src/php/$config.dockerfile" 's6-service shutdown-delay requires'
@@ -565,7 +572,7 @@ echo "${modules[*]}"' _ "$1" "$2" 2>/dev/null | tail -1
     get_github_latest_tag() { :; }; cache_middleware_sources() { :; }; cache_apache_source() { :; }
     cache_nginx_source() { :; }; cache_s6_sources() { :; }; cache_wpcli_source() { :; }
     local lookups expected
-    lookups="$(cache_run_inputs 8.5 7.0 2>/dev/null)"
+    lookups="$(HELPER_CACHE_DIR="$tmp/run-inputs" cache_run_inputs 8.5 7.0 2>/dev/null)"
     for expected in "library/php 8.5-cli" "library/php 7.0-zts" "library/alpine latest" "library/ubuntu latest" \
         "dunglas/frankenphp 1-php8.5" "dunglas/frankenphp 1-php8.5-alpine"; do
         check "cache_run_inputs looks up '$expected'" grep -qxF "$expected" <<< "$lookups"

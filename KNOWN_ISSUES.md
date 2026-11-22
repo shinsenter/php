@@ -44,6 +44,14 @@ The arm/v7 images stop at start with `Exec format error`: `s6-overlay-suexec` is
 - Fix: the archive follows `TARGETARCH` and `TARGETVARIANT`, with `uname -m` as the fallback.
 - Tested: `tests/run.sh config` fails on the old file. Local arm/v7 builds (Alpine and Debian, `with-nginx` 8.5) have a 32-bit ARM binary. Not run in a container.
 
+### [#479](https://github.com/shinsenter/php/issues/479) `fpm-apache` of PHP 8.5 stops with "module log_config_module is built-in"
+
+Same error as #475. The published `php8.5` image has the Debian Apache binary, which compiles in `log_config`, `logio`, `unixd`, `version` and `watchdog`, while `modules.conf` still loads them.
+
+- Cause: the cleanup before the squash runs `apt-get full-upgrade`. The package records showed the source version `2.4.71`, which apt sees as older than the OS `2.4.71-1~deb13u1`, so apt put the OS Apache back over the source build.
+- Fix: Apache and Nginx are always built from source. The OS package is installed only to read the build options, and is removed completely after the build with its build tools, so no package record is left for an upgrade to replace. `keep-libs` keeps the runtime libraries of the new binary. `APACHE_VERSION=os` and `NGINX_VERSION=os` are refused.
+- Tested: local builds with the squash step on PHP 5.6 to 8.6, Debian and Alpine, for Apache and Nginx (48 builds): source binary, no OS package left, no missing library, `apache2 -t` OK, HTTP 200, no error in the log. The CI image of this fix is not tested.
+
 ### [#469](https://github.com/shinsenter/php/issues/469) A missing upstream PHP image fails the build and skips the servers and apps of every PHP version
 
 On 2026-11-19 the upstream images `php:8.6-cli-alpine` and `php:8.6-zts-alpine` did not exist yet, so those builds failed. The jobs that build on top of them were skipped for every PHP version, and the `8.5-*` tags stayed on PHP 8.5.12 although 8.5.13 fixed two critical vulnerabilities. The maintainer built the 8.5 images by hand.
