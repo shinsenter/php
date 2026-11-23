@@ -15,7 +15,7 @@ Environment variables change PHP and FPM settings, so a change needs no rebuild.
 - No bloat in the base image: no extra files or packages. Remove build packages in the layer that installs them.
 - Short, readable code.
 - Spend few resources: bandwidth, runner time, CPU, memory, registry and API requests. Reuse a cached lookup, skip a job with no work, set a timeout on every job.
-- Comments make a long file easy to scan: one short line above a block says what the block does. Add the reason when it is not obvious: a limit, a trap, a trade-off, a link to the source. Do not narrate line by line, and do not repeat a name. Same style in every file: short, plain, practical English. A one-line label starts with a capital letter and has no final period. Several sentences go one per line, each with a period. Rules: spec `conventions`.
+- Comments make a long file easy to scan: one short line above a block says what the block does. Add the reason when it is not obvious: a limit, a trap, a trade-off, a link to the source. Do not narrate line by line, and do not repeat a name. A comment is one or two lines and states how the code works now: no history of a bug and no issue number (`KNOWN_ISSUES.md` keeps that). When you edit a block, shorten its comment instead of adding lines. Same style in every file: short, plain, practical English. A one-line label starts with a capital letter and has no final period. Several sentences go one per line, each with a period. Rules: spec `conventions`.
 - Verify through the build log. Do not ship check files in the image.
 
 ## Behavioral guidelines
