@@ -1,0 +1,6 @@
+# Node modules to raise before building the CLI (module@version, one per line).
+# Only modules that the bundle ships. Dev tools never reach the image.
+axios@1.20.0
+form-data@4.0.6
+protobufjs@7.6.1
+@grpc/grpc-js@1.14.5
