@@ -15,7 +15,7 @@ name: Compose test
 # It pulls the published images of the servers and the webapps and starts each one with tests/compose-test.sh.
 # Each service and OS is a job of its own, so one failure does not hide the others.
 # It never builds or pushes an image, and no other workflow depends on it.
-# A failed check does not fail the run: the result is only written to the job summary.
+# A failed check does not fail the run: the result goes to one job summary
 
 on:
   workflow_dispatch:
@@ -85,17 +85,49 @@ jobs:
           TAG_PREFIX: ${{ inputs.tag_prefix }}
         run: tests/compose-test.sh -n 1 -o "$OS" -v "$PHP_VERSION" "$SERVICE"
 
-      # Write the result lines to the job summary
-      - name: Write the summary
+      # Keep the result for the summary job
+      - name: Upload the result
         if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-${{ matrix.service }}-${{ matrix.os }}
+          path: tests/logs/*-compose-*.csv
+          if-no-files-found: ignore
+          retention-days: 1
+
+  # One summary: servers first, then webapps, sorted by name and OS
+  summary:
+    needs: compose-test
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: src/webapps
+
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: result-*
+          path: results
+
+      - name: Write the summary
         env:
-          OS: ${{ matrix.os }}
-          SERVICE: ${{ matrix.service }}
           PHP_VERSION: ${{ inputs.php_version }}
         run: |
           {
-              echo "### $SERVICE, PHP $PHP_VERSION, $OS"
-              echo '```'
-              cat tests/logs/*-compose-*.csv 2>/dev/null || echo "No result"
-              echo '```'
+              echo "## Compose test, PHP $PHP_VERSION"
+              # A folder in src/webapps means a webapp, otherwise a server
+              for dir in results/result-*; do
+                  [ -d "$dir" ] || continue
+                  key="${dir#results/result-}"
+                  name="${key%-*}"
+                  if [ -d "src/webapps/$name" ]; then group=1; else group=0; fi
+                  echo "$group $name ${key##*-}"
+              done | sort -k1,1n -k2,2 -k3,3 | while read -r _ name os; do
+                  echo "### $name, $os"
+                  echo '```'
+                  cat "results/result-$name-$os/"*.csv
+                  echo '```'
+              done
           } >>"$GITHUB_STEP_SUMMARY"
