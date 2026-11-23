@@ -34,6 +34,14 @@ Found by the first full build with arm/v7 (2026-11-20, CI). Both images build fo
 - Cause, `mautic` on Debian: `imap` needs `libc-client2007e`, which depends on `libssl3`, and apt cannot install it on armhf (`Unmet dependencies`). The Debian armhf package may be named `libssl3t64`, not verified. `mautic` on Alpine did build for arm/v7, and is skipped with the rule for both.
 - Fix: not fixed. Remove the `platform=` rule when `swoole` and `imap` install on arm/v7.
 
+### [#481](https://github.com/shinsenter/php/issues/481) `fpm-apache` stops: "Couldn't start ErrorLog process '/usr/bin/rotatelogs'"
+
+The Apache images of 6.3.0 have no `/usr/bin/rotatelogs`, so an `ErrorLog` that pipes to it fails at start.
+
+- Cause: Apache is built from source and the OS package, with `apache2-utils`, is removed. Only the `apache2` binary and the modules were copied back.
+- Fix: `apache-install.dockerfile` also copies the built `rotatelogs`, `htpasswd` and `htdigest`, with their libraries.
+- Tested: `with-apache` 8.2 built locally on arm64, Debian and Alpine. The three tools run, and Apache answers HTTP 200 with `ErrorLog` piped to `/usr/bin/rotatelogs`. amd64 and arm/v7 not run.
+
 ## 6.3.0
 
 ### [#478](https://github.com/shinsenter/php/issues/478) arm/v7 images contain an aarch64 `s6-overlay-suexec`

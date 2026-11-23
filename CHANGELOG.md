@@ -4,6 +4,7 @@ All notable changes to this project are documented in this file.
 
 
 ## [Unreleased]
+- Fix `rotatelogs` missing from the Apache images (#481). The build now keeps it, with `htpasswd` and `htdigest`, when it removes the OS package.
 
 
 ## [6.3.0] - 2026-11-21
