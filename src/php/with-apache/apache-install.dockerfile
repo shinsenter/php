@@ -7,11 +7,8 @@
 ################################################################################
 ENV APACHE_PID=/run/apache2.pid
 
-# Apache version to build from https://httpd.apache.org, a number like "2.4.71".
-# "stable" is the latest release of the 2.4 line (the only line the project publishes).
-# Required: the OS package is only a reference for the build options and is removed after the build.
-# build/config.sh turns "stable" into a number,
-# so a new release changes the image fingerprint.
+# Apache version to build, a number like "2.4.71" ("stable" is the latest 2.4 release)
+# Set by build/config.sh, so a new release changes the image fingerprint
 ARG APACHE_VERSION=""
 
 # Install Apache2
@@ -22,35 +19,35 @@ echo 'Install Apache2'
 
 [ -n "$APACHE_VERSION" ] || { echo 'ERROR: APACHE_VERSION must be a version number (build with build/config.sh)' >&2; exit 1; }
 
-# One install for the OS package and the build tools.
-# The OS package is only the reference of apache-build for paths, limits and modules.
-# It is removed completely after the build, so no package record stays for an upgrade to put back (#479).
-# The build tools are removed right after the build
+# OS package: the reference of apache-build for paths, limits and modules, removed after the build
+# Build tools: removed right after the build
 export APK_PACKAGES='--virtual .apache-deps apache2 apache2-proxy apache2-ssl apache2-utils build-base linux-headers apr-dev apr-util-dev nghttp2-dev openssl-dev pcre2-dev zlib-dev'
 export APT_PACKAGES='apache2 build-essential libapr1-dev libaprutil1-dev libnghttp2-dev libssl-dev libpcre2-dev zlib1g-dev'
 pkg-add
 
-# brotli headers for mod_brotli, installed apart so an OS without them still builds Apache
+# Brotli headers, apart so an OS without them still builds Apache
 APK_PACKAGES='--virtual .apache-brotli brotli-dev' APT_PACKAGES='libbrotli-dev' pkg-add
 
-# The build runs in its own shell, and a failure stops the image build
+# A build failure stops the image build
 if sh /tmp/apache-build; then
     module_dir="$(dirname "$(find /usr/lib -type f -name mod_mpm_event.so | head -n 1)")"
     apache_bin="$(command -v apache2 || command -v httpd)"
     stage=/usr/src/httpd-stage
 
-    # Strip while the build tools are still here, and keep the libraries of the new binary and the env file of the OS package
-    strip --strip-all "$stage/usr/sbin/${apache_bin##*/}" "$stage$module_dir"/*.so || true
-    keep-libs "$stage/usr/sbin/${apache_bin##*/}" "$stage$module_dir"/*.so
+    # Strip and keep the libraries while the build tools are here, keep envvars of the OS package
+    # Tools of apache2-utils: rotatelogs is in sbin of the stage, installed to /usr/bin
+    tools="$stage/usr/sbin/rotatelogs $stage/usr/bin/htpasswd $stage/usr/bin/htdigest"
+    strip --strip-all "$stage/usr/sbin/${apache_bin##*/}" $tools "$stage$module_dir"/*.so || true
+    keep-libs "$stage/usr/sbin/${apache_bin##*/}" $tools "$stage$module_dir"/*.so
     [ ! -f /etc/apache2/envvars ] || cp -p /etc/apache2/envvars /tmp/apache-envvars
 
-    # Remove the OS package completely, with the build tools.
-    # On Alpine they are one virtual package, and apk refuses to remove a member of it alone
+    # Remove the OS package with the build tools (one virtual package on Alpine)
     APK_PACKAGES='.apache-deps .apache-brotli' APT_PACKAGES='apache2 apache2-bin apache2-data apache2-utils' pkg-del
 
     mkdir -p "$module_dir" /etc/apache2
     cp -f "$stage$module_dir"/*.so "$module_dir"/
     cp -f "$stage/usr/sbin/${apache_bin##*/}" "$apache_bin"
+    cp -f $tools /usr/bin/
     cp -f "$stage/etc/apache2/mime.types" /etc/apache2/mime.types 2>/dev/null || true
     [ ! -f /tmp/apache-envvars ] || mv -f /tmp/apache-envvars /etc/apache2/envvars
 else

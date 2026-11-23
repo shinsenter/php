@@ -312,7 +312,8 @@ jobs:
         if: ${{ env.SKIP_PUSH != '1' }}
         uses: ./.github/actions/download-digests
         with:
-          pattern: digest-${{ needs.prepare.outputs.fingerprint }}-*
+          fingerprint: ${{ needs.prepare.outputs.fingerprint }}
+          slugs: ${{ join(fromJSON(needs.prepare.outputs.matrix).*.slug, ' ') }}
 
       -
         id: gather

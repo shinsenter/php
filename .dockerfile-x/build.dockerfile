@@ -72,12 +72,12 @@ LABEL moby.buildkit.frontend.caps="moby.buildkit.frontend.inputs,moby.buildkit.f
       org.opencontainers.image.version="1.6.0"
 
 RUN apk upgrade --no-cache \
-    && apk add --no-cache ca-certificates git \
+    && apk add --no-cache ca-certificates \
     && adduser -D -u 1000 dockerfile-x \
     && mkdir /workspace \
     && chown 1000:1000 /workspace \
     && rm -rf /usr/share/man /usr/share/doc /usr/share/info \
-        /usr/share/bash-completion /usr/share/git-core/templates \
+        /usr/share/bash-completion \
         /var/cache/apk/* /tmp/*
 
 COPY --from=go /out/ /usr/local/bin/
