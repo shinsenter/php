@@ -4,6 +4,7 @@ All notable changes to this project are documented in this file.
 
 
 ## [Unreleased]
+- Fix images that were built but never published when a run had more than 1000 artifacts. The last platform now fetches the digests by exact artifact name.
 - Fix `rotatelogs` missing from the Apache images (#481). The build now keeps it, with `htpasswd` and `htdigest`, when it removes the OS package.
 - Remove `git` from the `shinsenter/dockerfile-x` image: about 13 MB smaller and no `git` HIGH CVEs. Includes from a `git+` URL no longer work, local includes are not affected.
 

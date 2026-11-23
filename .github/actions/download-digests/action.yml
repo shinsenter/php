@@ -7,32 +7,65 @@
 ################################################################################
 
 name: Download digests
-description: Download the digest artifacts of every platform into /tmp/digests, and retry once on a failure
+description: Fetch the digest artifact of each platform into /tmp/digests, each one by its exact name
 
 inputs:
-  pattern:
-    description: Name pattern of the digest artifacts
+  fingerprint:
+    description: Fingerprint of the image, part of the artifact names
+    required: true
+  slugs:
+    description: Slugs of the platforms to fetch, separated by spaces
     required: true
 
 runs:
   using: composite
+  # Exact names: a pattern only sees the first 1000 artifacts of a run
   steps:
-    - # A fresh artifact can be listed before it can be downloaded
-      id: first
+    - if: ${{ contains(inputs.slugs, 'linux-386') }}
       continue-on-error: true
       uses: actions/download-artifact@v8
       with:
+        name: digest-${{ inputs.fingerprint }}-linux-386
         path: /tmp/digests
-        pattern: ${{ inputs.pattern }}
-        merge-multiple: true
 
-    - if: ${{ steps.first.outcome == 'failure' }}
-      shell: bash
-      run: sleep 15
-
-    - if: ${{ steps.first.outcome == 'failure' }}
+    - if: ${{ contains(inputs.slugs, 'linux-amd64') }}
+      continue-on-error: true
       uses: actions/download-artifact@v8
       with:
+        name: digest-${{ inputs.fingerprint }}-linux-amd64
         path: /tmp/digests
-        pattern: ${{ inputs.pattern }}
-        merge-multiple: true
+
+    - if: ${{ contains(inputs.slugs, 'linux-arm-v6') }}
+      continue-on-error: true
+      uses: actions/download-artifact@v8
+      with:
+        name: digest-${{ inputs.fingerprint }}-linux-arm-v6
+        path: /tmp/digests
+
+    - if: ${{ contains(inputs.slugs, 'linux-arm-v7') }}
+      continue-on-error: true
+      uses: actions/download-artifact@v8
+      with:
+        name: digest-${{ inputs.fingerprint }}-linux-arm-v7
+        path: /tmp/digests
+
+    - if: ${{ contains(inputs.slugs, 'linux-arm64-v8') }}
+      continue-on-error: true
+      uses: actions/download-artifact@v8
+      with:
+        name: digest-${{ inputs.fingerprint }}-linux-arm64-v8
+        path: /tmp/digests
+
+    - if: ${{ contains(inputs.slugs, 'linux-ppc64le') }}
+      continue-on-error: true
+      uses: actions/download-artifact@v8
+      with:
+        name: digest-${{ inputs.fingerprint }}-linux-ppc64le
+        path: /tmp/digests
+
+    - if: ${{ contains(inputs.slugs, 'linux-s390x') }}
+      continue-on-error: true
+      uses: actions/download-artifact@v8
+      with:
+        name: digest-${{ inputs.fingerprint }}-linux-s390x
+        path: /tmp/digests
