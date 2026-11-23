@@ -36,8 +36,7 @@ is_active_version() {
 # Remote content
 ################################################################################
 
-# Responses are cached for the rest of the day in /tmp/helper_cache.
-# Fetch a URL and keep the answer for the rest of the day.
+# Fetch a URL and cache the answer for the rest of the day in /tmp/helper_cache.
 # TOKEN, when set, goes in as a bearer token. Other arguments go to curl.
 fetch_with_cache() {
     local url="$1"
@@ -125,8 +124,7 @@ get_github_latest_release() {
 }
 
 # Digest of one exact tag on Docker Hub (e.g. library/php 8.5-fpm).
-# Do not use the "name=" search of the tags API for this: it matches substrings
-# and returns whichever tag was updated last (8.5-fpm-alpine3.23, 8.5-fpm-bookworm...).
+# Not the "name=" search of the tags API, which matches substrings.
 get_dockerhub_tag_digest() {
     local json
     json="$(dockerhub_api "$1/tags/$2")" || return 1
@@ -134,11 +132,8 @@ get_dockerhub_tag_digest() {
     parse_json "$json" 1 '.digest // .tag_last_pushed // empty'
 }
 
-# Same as above, but a failed lookup returns a value that changes on every run,
-# so the image is rebuilt instead of being wrongly treated as up to date.
-# True only when Docker Hub answers 404 for the tag.
-# It reads the same cached answer as get_dockerhub_tag_digest, so it sends no request of its own.
-# Any other answer (an outage, a rate limit, no answer) is not "missing", so a build is never skipped by mistake.
+# True only when Docker Hub answers 404 for the tag, from the cached answer of the lookup above.
+# Any other answer (an outage, a rate limit) is not "missing", so no build is skipped by mistake.
 # Usage: dockerhub_tag_missing <namespace/repo> <tag>
 dockerhub_tag_missing() {
     local json
@@ -147,6 +142,8 @@ dockerhub_tag_missing() {
     return 1
 }
 
+# Same as get_dockerhub_tag_digest, but a failed lookup returns a value that changes on every run,
+# so the image is rebuilt instead of being treated as up to date.
 get_dockerhub_tag_digest_or_now() {
     local digest
     digest="$(get_dockerhub_tag_digest "$@")" || true
@@ -159,8 +156,7 @@ cache_dockerhub_digest() {
     get_dockerhub_tag_digest "$@" >/dev/null || true
 }
 
-# Nginx version number from https://nginx.org.
-# "mainline" and "stable" are looked up on the download page, a number passes through.
+# Nginx version number from https://nginx.org ("mainline" and "stable" are looked up, or a number).
 # "os" and empty are refused: Nginx is always built from source.
 # Usage: resolve_nginx_version <mainline|stable|number>
 resolve_nginx_version() {
@@ -178,8 +174,7 @@ resolve_nginx_version() {
         | head -n 1 | sed 's/^nginx-//; s/\.tar\.gz$//'
 }
 
-# Apache version number from https://httpd.apache.org.
-# "stable" is the latest release of the download page, a number passes through.
+# Apache version number from https://httpd.apache.org ("stable" is looked up, a number passes).
 # "os" and empty are refused: Apache is always built from source.
 # Usage: resolve_apache_version <stable|number>
 resolve_apache_version() {
@@ -201,9 +196,8 @@ resolve_apache_version() {
 
 WPCLI_URL="${WPCLI_URL:-https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar}"
 
-# Each cache_* function puts its files in HELPER_CACHE_DIR once per run,
-# so the image builds do not download them again (and do not call the GitHub API,
-# which allows 60 requests per hour without a token).
+# Each cache_* function puts its files in HELPER_CACHE_DIR once per run, so the image builds
+# do not download them again or call the GitHub API (60 requests per hour without a token).
 # A failed download is not fatal, except for cache_middleware_sources:
 # the build step downloads the file itself.
 
@@ -344,8 +338,8 @@ cache_server_digests() {
 # PHP extensions that docker-php-extension-installer (IPE) supports
 ################################################################################
 
-# Modules that the data/supported-extensions file of docker-php-extension-installer (on stdin)
-# does not list for a PHP version, one per line. Each line is a module and the PHP versions it supports.
+# Modules that the IPE supported-extensions file (on stdin) does not list for a PHP version.
+# One module per line, with the PHP versions it supports.
 # It prints nothing when no module lists the version (a version not tested yet, or a changed layout).
 # Usage: parse_ipe_unsupported <php version> < supported-extensions
 parse_ipe_unsupported() {

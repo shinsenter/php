@@ -36,8 +36,7 @@ EXPOSE 443/udp
 
 CMD []
 # No default HEALTHCHECK, because the start can take long (git clone, composer install)
-# and each platform needs its own timing.
-# See openspec/specs/scaling/spec.md to set one for your case.
+# and each platform needs its own timing. See openspec/specs/scaling/spec.md to set one.
 # Example:
 # HEALTHCHECK --interval=15s --timeout=3s --start-period=120s --retries=3 \
 #     CMD with-env sh -c 'curl -sf "$HEALTH_CHECK_URL" >/dev/null || exit 1'

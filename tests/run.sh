@@ -261,7 +261,8 @@ test_config() {
             "$(grep '^BUILD_TAG=' <<<"$output")"
     done
 
-    # s6-overlay archive: the platform decides, not uname (an arm64 builder reports aarch64 for arm/v7, #478)
+    # The s6-overlay archive follows the platform, not uname.
+    # An arm64 builder reports aarch64 for arm/v7.
     local snippet
     snippet="$(sed -n '/# Detect the target architecture/,/^    untar() {/p' \
         "$BASE_DIR/src/php/common/os-s6-overlay.dockerfile" | sed '$d')"
@@ -275,8 +276,7 @@ test_config() {
 }
 
 # scaling: files that make the images work behind Kubernetes, load balancers and Traefik.
-# Most checks look for a setting in a config file. They guard the contract (ports, paths, defaults),
-# not how the files are written.
+# Most checks look for a setting in a config file, and guard the contract (ports, paths, defaults).
 test_scaling() {
     cd "$BASE_DIR" || exit 1
     local nginx=src/php/with-nginx apache=src/php/with-apache f8p=src/php/with-f8p rr=src/php/with-roadrunner common=src/php/common
@@ -304,7 +304,7 @@ test_scaling() {
     done
     has "compose: healthcheck reads HEALTH_CHECK_URL" tests/docker-compose.scaling.yml 'HEALTH_CHECK_URL'
 
-    # Reverse proxies: HTTPS from X-Forwarded-Proto, and no proxy is trusted by default (#456)
+    # Reverse proxies: HTTPS from X-Forwarded-Proto, and no proxy is trusted by default
     has "nginx: HTTPS from X-Forwarded-Proto" "$nginx/rootfs/etc/nginx/custom.d/00-proxy-proto.conf" 'x_forwarded_proto'
     has "nginx: php location passes HTTPS" "$nginx/rootfs/etc/nginx/custom.d/01-common.conf" 'fastcgi_param HTTPS'
     has "apache: HTTPS from X-Forwarded-Proto" "$apache/rootfs/etc/apache2/apache2.conf" 'X-Forwarded-Proto'
@@ -424,7 +424,7 @@ test_ssh() {
     finish
 }
 
-# defaults: settings that stay opt-in so existing setups keep working (#456)
+# defaults: settings that stay opt-in so existing setups keep working
 test_defaults() {
     cd "$BASE_DIR" || exit 1
     local wrapper=src/php/common/rootfs/usr/local/utils/msmtp-wrapper

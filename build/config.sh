@@ -199,9 +199,8 @@ apply_app_rules() {
     esac
 }
 
-# Digest of an official upstream image tag, stored in the variable named by $1 (unknown-<time> when the lookup fails).
-# A tag that Docker Hub reports as missing skips the build, because there is nothing to build from.
-# The 404 check runs only when the lookup fails, so a normal run makes no extra request.
+# Digest of an upstream image tag into the variable $1, or unknown-<time> when the lookup fails.
+# A tag that Docker Hub reports as missing skips the build, with no extra request on a normal run.
 # Usage: upstream_digest <variable> <namespace/repo> <tag>
 upstream_digest() {
     local digest
@@ -600,8 +599,7 @@ fi
 # Build fingerprint
 ################################################################################
 # The fingerprint covers everything that changes the content of the image.
-# It is stored in the published image (index annotation), so the next run can skip the build
-# when nothing changed, without any Actions cache.
+# It is stored in the published image, so the next run can skip the build when nothing changed.
 if [ "$SKIP_BUILD" != "1" ]; then
     BUILD_CACHE_KEY="($APP@$BUILD_TAG)${BUILD_CACHE_KEY:+/}$BUILD_CACHE_KEY"
     BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(platform:$BUILD_PLATFORM)"
