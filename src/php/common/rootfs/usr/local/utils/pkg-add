@@ -26,8 +26,6 @@ for arg in "$@"; do
     fi
 done
 
-# packages="$(echo "$packages" | sed 's/^ *//')"
-
 ################################################################################
 alpine() {
     if [ "$#" -gt 0 ] || [ "$upgrade" -eq 1 ]; then

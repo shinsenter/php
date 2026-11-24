@@ -7,7 +7,6 @@
 ################################################################################
 # Get IPE script
 # See: https://github.com/mlocati/docker-php-extension-installer
-# ARG IPE_SOURCE=https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions
 # ADD --link --chmod=755 $IPE_SOURCE /usr/local/bin/
 
 COPY --link --from=mlocati/php-extension-installer:latest --chmod=755 \
@@ -29,14 +28,14 @@ RUN <<'EOF'
 echo 'Install Composer and PHP extensions'
 [ -z "$DEBUG" ] || set -x; set -e
 
-# Update PECL
-has-cmd pecl && pecl upgrade-all || true
-
 # Update PEAR
 if has-cmd pear; then
     pear channel-update pear.php.net
     pear list-upgrades 2>&1 | grep -qF 'No upgrades available' || pear upgrade --force || true
 fi
+
+# Update PECL
+has-cmd pecl && pecl upgrade-all || true
 
 # Set Composer default settings
 env-default '# Environment variables for Composer'

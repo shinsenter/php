@@ -5,14 +5,6 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-# ARG BUILDPLATFORM
-# ARG BUILDOS
-# ARG BUILDARCH
-# ARG BUILDVARIANT
-# ARG TARGETPLATFORM
-# ARG TARGETOS
-# ARG TARGETARCH
-# ARG TARGETVARIAN
 
 ARG BUILD_REVISION
 ARG BUILD_DATE
