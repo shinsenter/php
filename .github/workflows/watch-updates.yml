@@ -11,23 +11,16 @@ name: Watch updates
 ################################################################################
 ################################################################################
 
-# Replaces the old daily build.
-# Every 10 minutes this workflow compares the published images with their current inputs
-# (official PHP images, Composer, IPE, s6-overlay, FrankenPHP, RoadRunner,
-# base OS images and the sources in this repository). It reads registry manifests only.
-# When something changed, it starts "Build all" for the affected PHP versions.
-#
-# Composer, IPE and s6-overlay updates rebuild the maintained versions only.
-# Outdated versions are rebuilt when their own official PHP image changes.
-#
-# It also deletes finished runs older than 7 days. Runs started by a release are kept.
-# A manual run can set "keep_days"; 0 deletes all finished runs.
+# Compare the published images with their inputs every 10 minutes (registry manifests only).
+# Start "Build all" for the PHP versions that changed.
+# Composer, IPE and s6-overlay rebuild the maintained versions only.
+# Outdated versions rebuild when their own PHP image changes.
+# Finished runs older than 7 days are deleted ("keep_days", 0 = all), release runs are kept.
 
 on:
   schedule:
     # Every 10 minutes, off-peak: GitHub delays or drops runs queued at :00 and :30.
-    # Some runs are still lost, so a short period keeps the gap small. Overlaps queue
-    # behind the concurrency group.
+    # Lost runs are covered by the short period, and overlaps queue behind the concurrency group.
     - cron: "5-59/10 * * * *"
   workflow_dispatch:
     inputs:

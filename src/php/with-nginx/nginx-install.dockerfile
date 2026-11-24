@@ -21,10 +21,8 @@ echo 'Install Nginx'
 
 [ -n "$NGINX_VERSION" ] || { echo 'ERROR: NGINX_VERSION must be a version number (build with build/config.sh)' >&2; exit 1; }
 
-# One install for the OS package and the build tools.
-# The OS package is only the reference of nginx-build for the configure flags.
-# It is removed completely after the build, so no package record stays for an upgrade to put back.
-# The build tools are removed right after the build
+# OS package: the reference of nginx-build for the configure flags, removed after the build
+# Build tools: removed right after the build
 export APK_PACKAGES='--virtual .nginx-deps nginx build-base linux-headers openssl-dev pcre2-dev zlib-dev'
 export APT_PACKAGES='nginx build-essential libssl-dev libpcre2-dev zlib1g-dev'
 pkg-add

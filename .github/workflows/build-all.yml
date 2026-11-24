@@ -11,11 +11,8 @@ name: Build all
 ################################################################################
 ################################################################################
 
-# There is no scheduled run any more.
-# The "Watch updates" workflow checks the upstream sources
-# and starts this workflow only for the PHP versions that need a new build.
-# Every image also compares its own fingerprint with the published one and skips the build
-# when nothing changed.
+# Started by "Watch updates" for the PHP versions that need a build, with no schedule of its own.
+# Each image skips the build when its fingerprint matches the published one.
 #
 # Jobs (each one calls template-stack.yml, template-php.yml or template-common.yml)
 #  prepare                                 selects the PHP versions and fills the helper cache

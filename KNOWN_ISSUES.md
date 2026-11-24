@@ -12,35 +12,33 @@ Where an entry says "cause not recorded", the issue thread does not say what was
 
 ### Setuid root helpers give a compromised app user a path to root
 
-Not reported on GitHub. Found while reviewing the default security settings (2026-11-03).
+Code that runs as the application user (`www-data` by default) can call helpers installed with the setuid bit and run commands as root.
 
-Code that runs as the application user (`www-data` by default), for example through a PHP vulnerability, can call helpers that are installed with the setuid bit and run commands as root.
-
-- Cause: by design. `web-do`, `autorun`, `ownership` and the `web-*` utilities need root to switch users and fix owners. `os-common.dockerfile` installs `/sbin/su-exec`, `autorun`, `ownership`, `web-*` and the entrypoint with mode 4755. Whether this `su-exec` build refuses to switch to root is not checked.
-- Fix: not fixed. Needs a design change, for example limiting these helpers to root or to a dedicated group.
+- Cause: by design. `web-do`, `autorun`, `ownership` and the `web-*` tools need root to switch users and fix owners, so `os-common.dockerfile` installs them with mode 4755. Not checked whether this `su-exec` build refuses to switch to root.
+- Fix: not fixed. Needs a design change, such as limiting the helpers to root or a dedicated group.
 
 ### The PHP 8.6 images lack some modules
 
-Checked on 2026-11-21. docker-php-extension-installer does not list `apcu`, `igbinary`, `msgpack`, `redis`, `sodium` and `yaml` for PHP 8.6, so the PHP 8.6 images are built without them (`PHP_SKIP_MODULES`). Code that needs one of them fails on the `8.6` tags. `latest` stays on PHP 8.5 for this reason.
+`apcu`, `igbinary`, `msgpack`, `redis`, `sodium` and `yaml` are missing from the `8.6` tags, so code that needs them fails. `latest` stays on PHP 8.5 until they are back.
 
-- Cause: the PHP 8.6 extensions have no release that IPE supports yet.
-- Fix: not fixed. The skip list is read from the IPE data file on every build, so a module comes back by itself once IPE lists it. Move `LATEST_PHP` in `build/config.sh` to 8.6 when the modules are back.
+- Cause: docker-php-extension-installer (IPE) does not support them for PHP 8.6 yet, so the build skips them (`PHP_SKIP_MODULES`).
+- Fix: not fixed. The build reads the IPE list each time, so a module returns when IPE adds it. Then move `LATEST_PHP` in `build/config.sh` to 8.6.
 
 ### `hyperf` and `mautic` have no `linux/arm/v7` image
 
-Found by the first full build with arm/v7 (2026-11-20, CI). Both images build for `linux/amd64` and `linux/arm64` only, through `platform=` in `APP_RULES` of `build/config.sh`.
+Both build for `linux/amd64` and `linux/arm64` only (`platform=` in `APP_RULES` of `build/config.sh`).
 
-- Cause, `hyperf`: IPE installs `swoole-5.0.3` on arm/v7 and it does not compile with PHP 8.2 to 8.5 (`php_url_encode_hash_ex: too many arguments`). Why IPE picks that version is not recorded.
-- Cause, `mautic` on Debian: `imap` needs `libc-client2007e`, which depends on `libssl3`, and apt cannot install it on armhf (`Unmet dependencies`). The Debian armhf package may be named `libssl3t64`, not verified. `mautic` on Alpine did build for arm/v7, and is skipped with the rule for both.
+- Cause, `hyperf`: IPE installs `swoole-5.0.3` on arm/v7, and it does not compile with PHP 8.2 to 8.5. Why IPE picks it is not recorded.
+- Cause, `mautic`: on Debian, `imap` needs `libc-client2007e`, which depends on `libssl3`, and apt cannot install it on armhf. Alpine built, but the rule skips both.
 - Fix: not fixed. Remove the `platform=` rule when `swoole` and `imap` install on arm/v7.
 
 ### [#481](https://github.com/shinsenter/php/issues/481) `fpm-apache` stops: "Couldn't start ErrorLog process '/usr/bin/rotatelogs'"
 
 The Apache images of 6.3.0 have no `/usr/bin/rotatelogs`, so an `ErrorLog` that pipes to it fails at start.
 
-- Cause: Apache is built from source and the OS package, with `apache2-utils`, is removed. Only the `apache2` binary and the modules were copied back.
-- Fix: `apache-install.dockerfile` also copies the built `rotatelogs`, `htpasswd` and `htdigest`, with their libraries.
-- Tested: `with-apache` 8.2 built locally on arm64, Debian and Alpine. The three tools run, and Apache answers HTTP 200 with `ErrorLog` piped to `/usr/bin/rotatelogs`. amd64 and arm/v7 not run.
+- Cause: the build removes the OS package with `apache2-utils` and copies back only `apache2` and the modules.
+- Fix: `apache-install.dockerfile` also copies `rotatelogs`, `htpasswd` and `htdigest` with their libraries.
+- Tested: `with-apache` 8.2 on arm64, Debian and Alpine. The tools run, and Apache answers 200 with the piped `ErrorLog`. amd64 and arm/v7 not run.
 
 ## 6.3.0
 
@@ -50,69 +48,68 @@ The arm/v7 images stop at start with `Exec format error`: `s6-overlay-suexec` is
 
 - Cause: `os-s6-overlay.dockerfile` chose the archive from `uname -m`, and an arm64 builder reports `aarch64` for an arm/v7 build.
 - Fix: the archive follows `TARGETARCH` and `TARGETVARIANT`, with `uname -m` as the fallback.
-- Tested: `tests/run.sh config` fails on the old file. Local arm/v7 builds (Alpine and Debian, `with-nginx` 8.5) have a 32-bit ARM binary. Not run in a container.
+- Tested: `tests/run.sh config` fails on the old file. Local arm/v7 builds have a 32-bit ARM binary. Not run in a container.
 
 ### [#479](https://github.com/shinsenter/php/issues/479) `fpm-apache` of PHP 8.5 stops with "module log_config_module is built-in"
 
-Same error as #475. The published `php8.5` image has the Debian Apache binary, which compiles in `log_config`, `logio`, `unixd`, `version` and `watchdog`, while `modules.conf` still loads them.
+Same error as #475, on the published `php8.5` image: the Debian Apache binary has `log_config` and other modules built in, while `modules.conf` still loads them.
 
-- Cause: the cleanup before the squash runs `apt-get full-upgrade`. The package records showed the source version `2.4.71`, which apt sees as older than the OS `2.4.71-1~deb13u1`, so apt put the OS Apache back over the source build.
-- Fix: Apache and Nginx are always built from source. The OS package is installed only to read the build options, and is removed completely after the build with its build tools, so no package record is left for an upgrade to replace. `keep-libs` keeps the runtime libraries of the new binary. `APACHE_VERSION=os` and `NGINX_VERSION=os` are refused.
-- Tested: local builds with the squash step on PHP 5.6 to 8.6, Debian and Alpine, for Apache and Nginx (48 builds): source binary, no OS package left, no missing library, `apache2 -t` OK, HTTP 200, no error in the log. The CI image of this fix is not tested.
+- Cause: the cleanup before the squash runs `apt-get full-upgrade`. Apt saw the source build `2.4.71` as older than the OS `2.4.71-1~deb13u1` and put the OS Apache back.
+- Fix: Apache and Nginx are always built from source and the OS package is removed after the build, so an upgrade has nothing to replace. `APACHE_VERSION=os` and `NGINX_VERSION=os` are refused.
+- Tested: 48 local builds with the squash step (PHP 5.6 to 8.6, Debian and Alpine, Apache and Nginx): source binary, `apache2 -t` OK, HTTP 200. The CI image is not tested.
 
 ### [#469](https://github.com/shinsenter/php/issues/469) A missing upstream PHP image fails the build and skips the servers and apps of every PHP version
 
-On 2026-11-19 the upstream images `php:8.6-cli-alpine` and `php:8.6-zts-alpine` did not exist yet, so those builds failed. The jobs that build on top of them were skipped for every PHP version, and the `8.5-*` tags stayed on PHP 8.5.12 although 8.5.13 fixed two critical vulnerabilities. The maintainer built the 8.5 images by hand.
+When `php:8.6-cli-alpine` did not exist yet, those builds failed and the jobs on top of them were skipped for every version. The `8.5-*` tags stayed on 8.5.12 although 8.5.13 fixed two critical vulnerabilities.
 
-- Cause: read from the workflows, not from the failed run log. `template-stack.yml` runs the servers with `needs: base`, and `base` is one call of `template-php.yml` for all PHP versions. One failed version fails `base`, so the servers of every version are skipped. `build-all.yml` runs `server-cache` with `needs: [prepare, cli, fpm]` and the apps with `needs: server-cache`, so the apps are skipped the same way.
-- Fix: `build/config.sh` skips a build, instead of failing it, when Docker Hub answers 404 for the official `php` tag it builds from. The servers and apps of the other versions then run as usual. Any other answer (an outage, a rate limit) does not skip a build. `php:8.6-zts` does not exist, because the official images are ZTS from PHP 8.6. `zts` is not built from 8.6: `8.6-zts` is a tag of the `cli` image, and `frankenphp` builds on `cli`. The lookups come from the cache that the prepare job fills, so a missing tag costs no request in the build jobs.
-- Tested: `tests/run.sh helpers` covers a 404 answer, a tag with a digest, a rate limit and no answer. `build/config.sh` gives `SKIP_BUILD=0` for `frankenphp`, `fpm` and `cli` 8.6 and `1` for `zts` 8.6, and a second run with a warm cache sends no request. A full pipeline run with a missing base is not tested.
+- Cause: `base` is one workflow call for all versions, so one failed version fails `base` and skips the servers and apps of the others. Read from the workflows, not from the failed run.
+- Fix: `build/config.sh` skips a build, instead of failing it, when Docker Hub answers 404 for the official `php` tag. Other answers (outage, rate limit) do not skip. `zts` is not built from 8.6: `8.6-zts` is a tag of `cli`.
+- Tested: `tests/run.sh helpers` covers a 404, a rate limit and no answer. `config.sh` gives `SKIP_BUILD=0` for `fpm` and `cli` 8.6 and `1` for `zts` 8.6. A full pipeline run is not tested.
 
 ### [#475](https://github.com/shinsenter/php/issues/475) Apache stops: "module log_config_module is built-in and can't be loaded"
 
-The `fpm-apache` images of 6.2.0 and 6.2.1 (checked on `8.3-fpm-apache`, Apache 2.4.71 Debian) fail to start with a syntax error in `/etc/apache2/modules.conf` for `log_config_module` and `unixd_module`. The reporter worked around it by commenting both lines in a mounted `modules.conf`.
+The `fpm-apache` images of 6.2.0 and 6.2.1 fail to start with a syntax error in `modules.conf` for `log_config_module` and `unixd_module`.
 
-- Cause: in the published image `apache2 -l` lists `mod_log_config` and `mod_unixd` as compiled in, and the module folder also holds `mod_log_config.so` and `mod_unixd.so` from the build day. `apache-config.dockerfile` wrote every `.so` into `modules.conf` and enabled both modules with `a2enmod`, so Apache loaded them a second time. Why that binary has them built in, while a local build of the same files has them as modules, is not recorded.
-- Fix: the config step reads the built-in modules from `apache2 -l` (or `httpd -l`) and leaves them out of `modules.conf` and out of the `a2enmod` list. The build now stops when `apache2 -t` reports a syntax error.
-- Tested: on the published `8.3-fpm-apache` image, removing the two lines the new filter leaves out turns the error into `Syntax OK`. Local builds of `with-apache` pass `apache2 -t` on Debian 8.3, 7.4, 5.6 and Alpine 8.3, 7.4. Those local builds have both modules as shared, so they do not show the original error.
+- Cause: the published image has both modules built in, but `apache-config.dockerfile` also wrote them to `modules.conf`, so Apache loaded them twice. Why that binary has them built in is not recorded.
+- Fix: the config step reads the built-in modules from `apache2 -l` and leaves them out. The build stops on an `apache2 -t` error.
+- Tested: on the published `8.3-fpm-apache`, removing the two lines gives `Syntax OK`. Local builds pass `apache2 -t` but have both modules as shared, so they do not show the original error.
 
 ## 6.1.0
 
 ### [#456](https://github.com/shinsenter/php/issues/456) Client IP behind Cloudflare wrong in the first 6.1.0 build
 
-Images built from the first `6.1.0` tag (2026-11-03) trusted `X-Forwarded-For` from the private ranges. An app behind Cloudflare then saw a Cloudflare address as the client IP. The tag was moved on 2026-11-08, so images built from it do not have this problem. Images that were pulled earlier keep it until they are pulled again.
+Images from the first `6.1.0` build trusted `X-Forwarded-For` from private ranges, so an app behind Cloudflare saw a Cloudflare address as the client IP. The tag was moved, so new images are fine. Images pulled earlier keep the problem.
 
-- Cause: Nginx and Apache trusted the private ranges by default. The load balancer between Cloudflare and the container is in a private range, so the server skipped it and took the next address in the header, a Cloudflare address, as the client. Before that the server left `REMOTE_ADDR` alone and the app read the header itself.
-- Fix: Nginx, Apache, FrankenPHP and RoadRunner trust no proxy by default. `TRUSTED_PROXIES` turns the feature on, and Cloudflare ranges can be listed there.
-- Same first build, not reported on GitHub: `SMTP_TLS` was on whenever `SMTP_USER` or `SMTP_PASSWORD` was set, and `PHP_SESSION_USE_STRICT_MODE` was `1`. Both are back to opt-in. The Apache `reqtimeout` and the Nginx `open_file_cache` defaults of that build were also removed.
-- Tested: `tests/run.sh scaling` and `tests/run.sh defaults` check the default configs. The PHP 8.4 Debian images of Apache, FrankenPHP and RoadRunner started and answered HTTP checks. Not tested with a real proxy in front.
+- Cause: Nginx and Apache trusted the private ranges by default. The load balancer in front is in one, so the server took the next address in the header, a Cloudflare one.
+- Fix: no proxy is trusted by default. `TRUSTED_PROXIES` turns it on, and Cloudflare ranges can go in it. The same build also turned `SMTP_TLS` on with `SMTP_USER` or `SMTP_PASSWORD`, set `PHP_SESSION_USE_STRICT_MODE` to `1`, and added Apache `reqtimeout` and Nginx `open_file_cache` defaults. All are back to opt-in or removed.
+- Tested: `tests/run.sh scaling` and `defaults`, and HTTP checks on PHP 8.4 Debian images. Not tested with a real proxy.
 
 ### [#454](https://github.com/shinsenter/php/issues/454) Alpine: sshd accepts passwords over 256 bytes for `*` accounts
 
-Not reported by a user. Found through https://sshhole.com/. On musl without PAM, `crypt()` returns `*` for a password longer than 256 bytes, and OpenSSH compares it with a `*` field in `/etc/shadow`. A password of 257 bytes or more then logs in to any account locked with `*`. Debian (glibc, PAM) is not affected.
+Not reported by a user. On Alpine, a password of 257 bytes or more logs in to any account locked with `*`. Debian is not affected.
 
-- Cause: with `ENABLE_SSHD=1` and `SSHD_PASSWORD_AUTH=1` but no `SSHD_PASSWORD`, the hook `00-ssh-server` set the field to `*` and still wrote `PasswordAuthentication yes`.
-- Fix: the hook writes `PasswordAuthentication no` when the account has no password, and prints a warning. An account with a real password keeps password login.
-- Still open: with `SSHD_PERMIT_ROOT_LOGIN=1` and password auth on for another user, `root` is `*` on Alpine 3.16 and later, so the same bypass works for `root`. Keep `SSHD_PERMIT_ROOT_LOGIN` off, or upgrade `openssh` to the fixed version once the Alpine repository has it.
-- Tested: `tests/run.sh ssh` runs the hook with stub commands and fails on the old hook. Not tested with a real sshd on Alpine.
+- Cause: with `ENABLE_SSHD=1` and `SSHD_PASSWORD_AUTH=1` but no `SSHD_PASSWORD`, the hook set the field to `*` and still wrote `PasswordAuthentication yes`. musl's `crypt()` returns `*` for such a password, which matches.
+- Fix: the hook writes `PasswordAuthentication no` for an account with no password and prints a warning.
+- Still open: with `SSHD_PERMIT_ROOT_LOGIN=1` and password auth on for another user, the bypass works for `root` on Alpine 3.16 and later. Keep `SSHD_PERMIT_ROOT_LOGIN` off.
+- Tested: `tests/run.sh ssh` with stub commands. Not tested with a real sshd.
 
 ### [#451](https://github.com/shinsenter/php/issues/451) `apache2: not found` in the Debian Apache images
 
-Debian images built after the cleanup change of 2026-11-04 started PHP-FPM but not Apache. The log shows `apache2: command not found` and `exec: apache2: not found`. Images built on `phpfpm-apache`, such as `codeigniter4:php8.5-apache`, had the same problem.
+Debian Apache images started PHP-FPM but not Apache (`apache2: command not found`), including images built on `phpfpm-apache`.
 
-- Cause: the cleanup hook `10-toolchain-leftovers` removed `perl`. The `apache2` package depends on `perl`, so `apt-get purge` removed `apache2` and `apache2-bin` with it.
-- The FrankenPHP Debian images lost `mailcap` and `media-types` in the same way, because both depend on `perl`. `media-types` provides `/etc/mime.types`. This produced no startup error.
-- Fix: the hook removes a package group only when `apt-get -s` shows that apt takes nothing else with it. The Apache and FrankenPHP images keep `perl`, and the build tools are still removed.
-- Tested: HTTP checks (`/`, `/index.php`, blocked `/.env`, security headers, no log errors, no restart) pass for Nginx, Apache, FrankenPHP and RoadRunner on Debian and Alpine with PHP 8.5, 8.4, 8.3 and 8.2 for the servers built so far. Older PHP versions were still being tested when this was merged.
+- Cause: the cleanup hook `10-toolchain-leftovers` removed `perl`, and `apt-get purge` took `apache2` with it. FrankenPHP Debian images lost `mailcap` and `media-types` the same way, with no startup error.
+- Fix: the hook removes a package group only when `apt-get -s` shows nothing else goes with it. Apache and FrankenPHP images keep `perl`.
+- Tested: HTTP checks pass for Nginx, Apache, FrankenPHP and RoadRunner on Debian and Alpine with PHP 8.5 to 8.2. Older versions were still being tested at merge.
 
 ## 6.0.0
 
 ### [#442](https://github.com/shinsenter/php/issues/442) Startup changed the owner of the host Docker socket
 
-With `APP_GID` set to a GID that already exists in the image (998 is `systemd-network` in Debian), `groupmod` failed but `ownership` still ran `find / -xdev` and moved every file with the old UID or GID to the new owner. `-xdev` does not skip a mount point that is a file, so a mounted `/var/run/docker.sock` changed from `root:docker` to `1001:33`. `DISABLE_AUTORUN_FIX_OWNER_GROUP` does not cover this step, as the entrypoint always runs `ownership`.
+`APP_GID` set to an existing GID made startup change the owner of mounted files, such as `/var/run/docker.sock` (`root:docker` to `1001:33`).
 
-- Fix: `ownership` keeps the current GID when `groupmod` fails. The `find` skips mount points, `/proc`, `/sys`, `/dev`, sockets and devices. `web-chown` uses `chown -h`, so a symlink in the application path no longer changes the file it points to.
-- Not tested in a container yet. The `find` expression was checked on a sample tree.
+- Cause: `groupmod` failed but `ownership` still ran `find / -xdev`, and `-xdev` does not skip a mount point that is a file. `DISABLE_AUTORUN_FIX_OWNER_GROUP` does not cover this step.
+- Fix: `ownership` keeps the current GID when `groupmod` fails, and `find` skips mount points, sockets and devices. `web-chown` uses `chown -h`.
+- Tested: the `find` expression on a sample tree. Not tested in a container.
 
 ## 5.9.0 and 5.8.0
 

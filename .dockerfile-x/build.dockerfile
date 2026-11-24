@@ -33,6 +33,7 @@ WORKDIR /app
 COPY upstream/go.mod upstream/go.sum upstream/main.go ./
 COPY upstream/vendor ./vendor
 COPY upstream/pkg ./pkg
+COPY patches/proxy_containers.go ./pkg/dtp/
 RUN --mount=type=bind,source=patches,target=/patches \
     /patches/bump-go-deps.sh \
     && go build -mod=vendor -trimpath -ldflags='-s -w' \
@@ -48,9 +49,11 @@ FROM node:18 AS cli
 ARG TARGETARCH
 
 WORKDIR /app
-COPY upstream/.yarnrc.yml upstream/yarn.lock ./
+COPY upstream/.yarnrc.yml upstream/yarn.lock upstream/package.json ./
 COPY upstream/.yarn .yarn
-RUN yarn fetch
+RUN --mount=type=bind,source=patches,target=/patches \
+    /patches/bump-yarn-deps.sh \
+    && yarn fetch
 
 COPY upstream/src ./src
 COPY upstream/index.js upstream/package.json ./

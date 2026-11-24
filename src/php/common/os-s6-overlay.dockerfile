@@ -9,7 +9,7 @@
 ARG S6_VERSION=""
 ARG S6_PATH=""
 
-# Set by BuildKit. uname -m is not enough: an arm64 builder runs arm/v7 builds as aarch64 (#478)
+# Set by BuildKit. uname -m is not enough: an arm64 builder runs arm/v7 builds as aarch64
 ARG TARGETARCH
 ARG TARGETVARIANT
 

@@ -4,48 +4,49 @@ All notable changes to this project are documented in this file.
 
 
 ## [Unreleased]
-- Fix images that were built but never published when a run had more than 1000 artifacts. The last platform now fetches the digests by exact artifact name.
-- Fix `rotatelogs` missing from the Apache images (#481). The build now keeps it, with `htpasswd` and `htdigest`, when it removes the OS package.
-- Remove `git` from the `shinsenter/dockerfile-x` image: about 13 MB smaller and no `git` HIGH CVEs. Includes from a `git+` URL no longer work, local includes are not affected.
+- Fix images built but not published when a run had over 1000 artifacts.
+- Fix `rotatelogs` missing from the Apache images (#481).
+- Remove `git` from `shinsenter/dockerfile-x`. Includes from a `git+` URL no longer work.
+- Backport the CVE-2026-109618 and CVE-2026-109619 fixes to PHP 7.2, 7.1 and 7.0. PHP 5.6 is still unpatched.
+- Fix the backport rebuild for PHP 7.2 and older.
+- Drop the Nginx brotli config when Nginx is built without brotli.
 
 
 ## [6.3.0] - 2026-11-21
-- Add `linux/arm/v7` (32-bit ARM) images. RoadRunner, Spiral, Hyperf and Mautic stay on `linux/amd64` and `linux/arm64`.
-- Fix `fpm-apache` failing to start with "module log_config_module is built-in and can't be loaded" (#475, #479). Apache and Nginx are now always built from source and the OS package is removed after the build, so an upgrade can no longer put it back. `APACHE_VERSION=os` and `NGINX_VERSION=os` are refused. The build stops on a config syntax error.
-- Fix `linux/arm/v7` images that contained the aarch64 s6-overlay binaries and failed with `Exec format error` (#478).
-- Skip PHP extensions that docker-php-extension-installer does not support for the PHP version, so one unsupported module no longer fails the build. Add `mbstring`, and run `pecl upgrade-all` before the extensions (the old call used a command that does not exist).
-- Skip a build when the official PHP image does not exist, so one missing image no longer fails the run and skips the other builds (#469). The official PHP 8.6 images are all ZTS, so `zts` is not built from 8.6: `8.6-zts` is a tag of the `cli` image, and `frankenphp` builds on it.
-- `latest` stays on PHP 8.5. The PHP 8.6 images are published as `8.6` tags without some modules (`apcu`, `igbinary`, `msgpack`, `redis`, `sodium`, `yaml`), because docker-php-extension-installer does not support them for PHP 8.6 yet.
-- The package records of Nginx and Apache (Debian and Alpine) now show the version built from source, so scanners no longer report CVEs of the older OS version.
-- Use less runner time and bandwidth in the workflows: each platform builds in its own job (on a native ARM runner when possible), one Trivy scan covers all images, and jobs without work are skipped.
+- Add `linux/arm/v7` images. Fix the aarch64 s6-overlay binaries that were shipped in them (#478).
+- Fix `fpm-apache` failing to start with `log_config_module` (#475, #479). Apache and Nginx are now always built from source, and `APACHE_VERSION=os` and `NGINX_VERSION=os` are refused.
+- Skip PHP extensions that docker-php-extension-installer does not support, and builds whose official PHP image does not exist (#469). Add `mbstring`.
+- `latest` stays on PHP 8.5. The 8.6 images lack `apcu`, `igbinary`, `msgpack`, `redis`, `sodium` and `yaml` for now, and `8.6-zts` is a tag of `cli`.
+- The Nginx and Apache package records show the built version, so scanners stop reporting CVEs of the OS version.
+- Use less runner time and bandwidth in the workflows.
 
 
 ## [6.2.0] - 2026-11-19
-- Add PHP 8.6 and make it `latest`. Drupal, PrestaShop, Nextcloud, EspoCRM, Joomla, Kirby, WordPress, Bedrock, Shopware and FrankenPHP stay at 8.5. Magento and Bagisto stay at 8.4.
-- Build Apache and Nginx from source, with HTTP/2 and brotli (and HTTP/3 for Nginx on older OS).
-- Raise the keep-alive of Nginx and Apache to 120 s (`NGINX_KEEPALIVE_TIMEOUT`, `APACHE_KEEPALIVE_TIMEOUT`).
+- Add PHP 8.6 and make it `latest`. Some apps stay on 8.5 or 8.4.
+- Build Apache and Nginx from source, with HTTP/2 and brotli.
+- Raise the keep-alive to 120 s (`NGINX_KEEPALIVE_TIMEOUT`, `APACHE_KEEPALIVE_TIMEOUT`).
 - Add `TRUSTED_PROXIES=private` and a Traefik guide.
 - Compress layers with zstd, sign images with cosign, report CVEs and size per publish.
 - Add Craft CMS, Shopware, Tempest, Joomla, PrestaShop and Nextcloud images.
-- Remove `vim-tiny` from Debian. Fix the build fingerprint, the Alpine Apache HTTP/2 modules and the WordPress download.
+- Remove `vim-tiny` from Debian and fix a few build bugs.
 
 
 ## [6.1.0] - 2026-11-08
 - Add `TRUSTED_PROXIES` for Nginx, Apache, FrankenPHP and RoadRunner. No proxy is trusted by default (#456).
-- Fix sshd in the Alpine images accepting any password over 256 bytes for an account without a password (#454). Password login stays off unless `SSHD_PASSWORD` is set.
-- Add Apache variables for deflate, keep-alive, expires, overrides, the MPM profile and `reqtimeout`. Add Nginx fallbacks for old `listen`, `real_ip`, `dhparam` and IPv6.
-- Change the security headers: `Referrer-Policy` is `strict-origin-when-cross-origin` (`APACHE_REFERRER_POLICY` in Apache), Apache adds `X-Content-Type-Options`, Nginx drops `X-XSS-Protection` and `Permissions-Policy`. Hide function arguments in exception traces (`PHP_ZEND_EXCEPTION_IGNORE_ARGS=1`).
-- Faster responses: larger Opcache and realpath cache, and Nginx keeps connections to PHP-FPM open.
-- Make Debian images 81 to 149 MB smaller and Alpine images 10 to 13 MB smaller. Debian has no `perl` unless a package needs it, and `vim-tiny` gives way to BusyBox `vi` (no `vim` command).
-- Raise the Go modules of `shinsenter/dockerfile-x` to clear HIGH CVEs. `moby/buildkit` stays at 0.23.2.
-- Fix the cleanup of backup and package config files and the Docker Hub README refresh. Add `tests/tools/image-slim-check.sh`.
+- Fix sshd in Alpine accepting any long password for an account without one (#454). Password login stays off unless `SSHD_PASSWORD` is set.
+- Add more Apache variables and Nginx fallbacks for old versions.
+- Change the security headers: `Referrer-Policy` is `strict-origin-when-cross-origin`, Apache adds `X-Content-Type-Options`, Nginx drops `X-XSS-Protection` and `Permissions-Policy`. Hide arguments in exception traces (`PHP_ZEND_EXCEPTION_IGNORE_ARGS=1`).
+- Faster responses: larger Opcache and realpath cache, and Nginx keeps PHP-FPM connections open.
+- Debian images are 81 to 149 MB smaller, Alpine 10 to 13 MB. No `perl` unless needed, and BusyBox `vi` replaces `vim-tiny`.
+- Raise the Go modules of `shinsenter/dockerfile-x` to clear HIGH CVEs.
+- Fix config file cleanup and the Docker Hub README refresh.
 
 
 ## [6.0.0] - 2026-10-27
 - Breaking: remove `APACHE_DOCUMENT_ROOT` and `NGINX_DOCUMENT_ROOT` (use `DOCUMENT_ROOT`) and `ENABLE_SSH` (use `ENABLE_SSHD`).
-- Remove the sources of the unmaintained images `zz-cakephp4`, `zz-crater`, `zz-fuelphp`, `zz-hypervel`, `zz-laminas`, `zz-phpixie` and `zz-slim`. Published tags stay on Docker Hub and are not updated.
-- Fix the startup ownership migration changing the owner of mounted files such as `/var/run/docker.sock` when `APP_GID` matches an existing group (#442).
-- Fix variables that did not match the docs, such as `ENABLE_TUNING_FPM`, `ENABLE_SSHD`, `DEFAULT_USER` and `SMTP_FROM`. Load `custom-*.conf` from `/usr/local/etc/php-fpm.d/` after the generated settings, and let `PHP_PM*` win over `ENABLE_TUNING_FPM`.
+- Remove the sources of the unmaintained `zz-*` images. Published tags stay on Docker Hub but get no updates.
+- Fix the startup ownership migration changing mounted files such as `/var/run/docker.sock` (#442).
+- Fix variables that did not match the docs (`ENABLE_TUNING_FPM`, `ENABLE_SSHD`, `DEFAULT_USER`, `SMTP_FROM`). `custom-*.conf` in `/usr/local/etc/php-fpm.d/` loads last, and `PHP_PM*` wins over `ENABLE_TUNING_FPM`.
 - Add `KNOWN_ISSUES.md`.
 
 

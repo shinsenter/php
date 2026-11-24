@@ -16,9 +16,8 @@ set -e
 echo "Build Nginx $NGINX_VERSION"
 
 # Configure flags of the OS package, without the parts that cannot be rebuilt here:
-# third-party modules (--add-dynamic-module),
-# modules that need extra libraries (geoip, image_filter, perl, xslt), options removed from Nginx,
-# and --without-pcre2: old Alpine packages use PCRE, but only the PCRE2 headers are installed here
+# third-party modules, modules that need extra libraries (geoip, image_filter, perl, xslt),
+# options removed from Nginx, and --without-pcre2 (old Alpine packages use PCRE, only PCRE2 is here)
 eval "set -- $(nginx -V 2>&1 | sed -n 's/^configure arguments: //p')"
 [ "$#" -gt 0 ]
 n=$#

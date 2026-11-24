@@ -56,13 +56,9 @@ on:
 ################################################################################
 ################################################################################
 
-# How it works
-#  - prepare: runs build/config.sh once, and plans one build job per platform.
-#  - build:   runs once per platform, on a runner of the same architecture where possible.
-#             QEMU is only used for the platforms that the runner cannot run itself (32-bit ARM),
-#             and only when a probe shows that it is needed.
-#             Each platform pushes its image by digest. The last one to finish publishes one multi-platform tag.
-#  - readme:  updates the Docker Hub description.
+# Prepare plans one build job per platform. Each build pushes its image by digest.
+# The last build to finish publishes the multi-platform tag.
+# Readme updates the Docker Hub description.
 
 jobs:
   # Runs build/config.sh once and hands the result to the jobs below

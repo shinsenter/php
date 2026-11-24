@@ -26,6 +26,7 @@ This file wins on a conflict.
 - Keep it simple: minimum code, no speculative features or abstractions.
 - Change surgically: touch only what the request needs, match the existing style. Mention unrelated dead code, do not delete it.
 - Work toward a goal: define a check for each step and run it.
+- Every time you write Markdown (changelog, PR, README, docs, issue reply), write short, like a person. Say what changed and why it matters. Do not list minor details: nobody writes that way.
 - Save tokens and keep replies short: do what was asked, call the repo's own commands instead of new wrappers, group repeated status reports into one, and ask before widening the scope.
 
 ## Specs (OpenSpec)

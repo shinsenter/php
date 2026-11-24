@@ -11,11 +11,9 @@ name: Compose test
 ################################################################################
 ################################################################################
 
-# Manual run, after the build of a release has finished.
-# It pulls the published images of the servers and the webapps and starts each one with tests/compose-test.sh.
-# Each service and OS is a job of its own, so one failure does not hide the others.
-# It never builds or pushes an image, and no other workflow depends on it.
-# A failed check does not fail the run: the result goes to one job summary
+# Manual run after a release build: test each published server and webapp with compose-test.sh.
+# Each service and OS is its own job, and a failed check does not fail the run (one job summary).
+# It never builds or pushes an image.
 
 on:
   workflow_dispatch:

@@ -23,9 +23,8 @@ module_dir="$(dirname "$(find /usr/lib -type f -name mod_mpm_event.so | head -n 
 [ -d "$module_dir" ]
 
 # Build options of the OS package, so the new binary behaves like the old one.
-# 1. Paths and limits built into the OS binary. The service starts without "-f",
-#    so Apache finds its config, pid file and scoreboard through them.
-#    "-V" exits with an error when the config variables are not set, so ignore its status.
+# 1. Paths and limits built into the OS binary, because the service starts without "-f".
+#    "-V" exits with an error when the config variables are not set, so its status is ignored.
 info="$("$bin" -V 2>/dev/null || true)"
 macro() { echo "$info" | sed -n "s/^ *-D $1=\"\(.*\)\"\$/\1/p"; }
 [ -n "$(macro HTTPD_ROOT)" ] && [ -n "$(macro SERVER_CONFIG_FILE)" ]

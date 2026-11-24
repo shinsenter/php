@@ -51,4 +51,4 @@ Maintainers can start a build by hand from the [Build all](https://code.shin.com
 
 ## Security updates
 
-The images are rebuilt when PHP publishes a security release. For end-of-life PHP 7.3, 7.4, 8.0 and 8.1, this project backports PHP security fixes (see [`src/php-backports`](https://code.shin.company/php/tree/main/src/php-backports)). To report a vulnerability, read [SECURITY.md](https://code.shin.company/php/blob/main/SECURITY.md). Known bugs and their fixes are in [KNOWN_ISSUES.md](https://code.shin.company/php/blob/main/KNOWN_ISSUES.md), and releases in [CHANGELOG.md](https://code.shin.company/php/blob/main/CHANGELOG.md).
+The images are rebuilt when PHP publishes a security release. For end-of-life PHP 8.1 to 7.0, this project backports PHP security fixes (see [`src/php-backports`](https://code.shin.company/php/tree/main/src/php-backports)). To report a vulnerability, read [SECURITY.md](https://code.shin.company/php/blob/main/SECURITY.md). Known bugs and their fixes are in [KNOWN_ISSUES.md](https://code.shin.company/php/blob/main/KNOWN_ISSUES.md), and releases in [CHANGELOG.md](https://code.shin.company/php/blob/main/CHANGELOG.md).

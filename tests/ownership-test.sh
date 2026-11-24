@@ -6,7 +6,7 @@
 #      - Author:  Mai Nhut Tan <shin@shin.company>
 #      - License: https://code.shin.company/php/blob/main/LICENSE
 ################################################################################
-# Docker test for issue #442:
+# Docker test:
 # the UID/GID change at startup must not touch mounted files such as /var/run/docker.sock.
 #
 # Usage: tests/ownership-test.sh <image> [app-uid]
@@ -32,9 +32,8 @@ CONFLICT_GID="$("${RUN[@]}" --entrypoint sh "$IMAGE" -c \
 [ -n "$CONFLICT_GID" ] || { echo "No other group found in $IMAGE" >&2; exit 1; }
 echo "Image $IMAGE: www-data is $WWW_UID:$WWW_GID, APP_UID=$APP_UID, APP_GID=$CONFLICT_GID (already in use)"
 
-# Runs as root before the entrypoint.
-# Files that the container can reach only through their mount point stand for a file on the host.
-# Owned by www-data, so an unsafe migration would match them.
+# Runs as root before the entrypoint. Mounted files stand for files on the host, owned by www-data,
+# so an unsafe migration would match them.
 read -r -d '' SETUP <<'EOF'
 set -e
 mkdir -p /host /srv/data /opt

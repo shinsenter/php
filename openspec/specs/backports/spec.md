@@ -59,7 +59,7 @@ The repo SHALL follow these rules for: prohibitions.
 - MUST remove a folder when the official image fixes that version, and update the README table.
 
 ## State (verify before relying)
-- Folders: 7.3, 7.4, 8.0, 8.1. The 7.3 patch is a hand port of 7.4.
-- Not covered: 7.0 to 7.2 (no upstream patch), 5.6.
+- Folders: 7.0, 7.1, 7.2, 7.3, 7.4, 8.0, 8.1. The 7.3 patch is a hand port of 7.4, and 7.2, 7.1, 7.0 each a hand port of the next newer one.
+- Not covered: 5.6.
 - Debian bullseye, buster, stretch switch to `archive.debian.org` during the build and stay so in the image.
 - Alpine with PHP below 8.0 needs the gnu-libiconv `iconv.h` symlink; the script creates it.

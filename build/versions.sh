@@ -27,8 +27,7 @@ has_alpine_php() {
 }
 
 # PHP versions to build, one per line, in build order. Fails on an unknown version.
-# Outdated versions go first: they build slower (old toolchains, PHP rebuilt from source for 7.3 to 8.1),
-# so they do not wait for a free runner at the end.
+# Outdated versions go first because they build slower, so they do not wait for a runner at the end.
 # Usage: select_php_versions [requested versions, separated by spaces or commas, empty = all]
 select_php_versions() {
     local requested="${1//,/ }" item version found

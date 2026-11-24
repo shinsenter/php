@@ -92,7 +92,7 @@ if apache-has-error 'ProxyFCGIBackendType'; then
     sed -i 's/ProxyFCGIBackendType/#ProxyFCGIBackendType/g; s/ProxyFCGISetEnvIf/#ProxyFCGISetEnvIf/g' $CONF_FILE /etc/apache2/sites-enabled/01-health.conf
 fi
 
-# Stop the build on a config syntax error, so a bad module list never reaches users (#475)
+# Stop the build on a config syntax error, so a bad module list never reaches users
 if apache-has-error 'Syntax error'; then
     with-env apache2 -t || true
     exit 1

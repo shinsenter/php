@@ -42,6 +42,9 @@ mkdir -p /etc/nginx \
     /var/tmp/nginx/scgi \
     /var/lib/nginx /var/log/nginx /run/nginx
 
+# Drop the brotli config when Nginx was built without the module
+nginx -V 2>&1 | grep -q brotli || rm -f /etc/nginx/custom.d/*brotli.conf
+
 # Create s6 services
 if has-cmd s6-service; then
     s6-service nginx requires php-fpm

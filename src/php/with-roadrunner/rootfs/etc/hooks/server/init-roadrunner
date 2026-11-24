@@ -12,9 +12,9 @@ set -e
 roadrunner-conf 'server.user'  "$APP_USER"
 roadrunner-conf 'server.group' "$APP_GROUP"
 
-# Trust X-Forwarded-For and X-Forwarded-Proto only from TRUSTED_PROXIES
-# the list is written in full because RoadRunner replaces its default list (the private ranges) when one is set
-# an empty list may fall back to that default, so loopback alone stands for "no proxy"
+# Trust X-Forwarded-For and X-Forwarded-Proto only from TRUSTED_PROXIES.
+# The list is written in full because RoadRunner replaces its default list (the private ranges).
+# An empty list may fall back to that default, so loopback alone stands for "no proxy".
 if has-cmd yq; then
     subnets='"127.0.0.1/32"'
     for cidr in $(trusted-proxies); do
