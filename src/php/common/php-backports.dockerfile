@@ -45,6 +45,16 @@ command -v apk >/dev/null 2>&1 && os=alpine
 
 echo "Rebuilding PHP $PHP_VERSION ($os) with the backports in ${dir##*/}"
 
+# Reuse the configure command of the installed PHP (it already has the flags of this variant: cli,
+# fpm or zts)
+configure_cmd="$(php -i | sed -n 's/^Configure Command => //p')"
+[ -n "$configure_cmd" ]
+
+# PHP 7.2 and older are built with libedit instead of readline, and PHP 7.1 and older have no argon2
+libedit="" argon2=""
+case "$configure_cmd" in *--with-libedit*) libedit=libedit-dev ;; esac
+case "$configure_cmd" in *--with-password-argon2*) argon2=libargon2-dev ;; esac
+
 # Build dependencies (same as the official PHP Dockerfiles)
 if [ "$os" = alpine ]; then
     apk add --no-cache --virtual .backports-deps \
@@ -53,6 +63,7 @@ if [ "$os" = alpine ]; then
         coreutils \
         curl-dev \
         gnu-libiconv-dev \
+        $libedit \
         libsodium-dev \
         libxml2-dev \
         linux-headers \
@@ -61,17 +72,21 @@ if [ "$os" = alpine ]; then
         patch \
         readline-dev \
         sqlite-dev
-    # make sure musl's iconv doesn't get used
-    rm -vf /usr/include/iconv.h
-    # PHP < 8 doesn't look deeper for GNU libiconv (php-src b480e68)
-    [ "${minor%%.*}" -ge 8 ] || ln -sfv /usr/include/gnu-libiconv/iconv.h /usr/include/iconv.h
+    # Use GNU libiconv only when the image was built with it (PHP 7.2 and older use musl's iconv)
+    case "$configure_cmd" in *--with-iconv*)
+        # make sure musl's iconv doesn't get used
+        rm -vf /usr/include/iconv.h
+        # PHP < 8 doesn't look deeper for GNU libiconv (php-src b480e68)
+        [ "${minor%%.*}" -ge 8 ] || ln -sfv /usr/include/gnu-libiconv/iconv.h /usr/include/iconv.h ;;
+    esac
 else
     sh /tmp/distro-patch
     savedAptMark="$(apt-mark showmanual)"
     apt-get update
     apt-get install -y --no-install-recommends \
-        libargon2-dev \
+        $argon2 \
         libcurl4-openssl-dev \
+        $libedit \
         libonig-dev \
         libreadline-dev \
         libsodium-dev \
@@ -81,11 +96,6 @@ else
         patch \
         zlib1g-dev
 fi
-
-# Reuse the configure command of the installed PHP (it already has the flags of this variant: cli,
-# fpm or zts)
-configure_cmd="$(php -i | sed -n 's/^Configure Command => //p')"
-[ -n "$configure_cmd" ]
 
 export CFLAGS="$PHP_CFLAGS" CPPFLAGS="$PHP_CPPFLAGS" LDFLAGS="$PHP_LDFLAGS" \
     PHP_BUILD_PROVIDER='https://github.com/docker-library/php' \
