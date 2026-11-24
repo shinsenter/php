@@ -14,11 +14,7 @@ Thanks for helping. Bug reports, fixes, docs and new web application images are 
 
 ## Report a bug or ask for a feature
 
-Open an [issue](https://code.shin.company/php/issues/new). A good bug report has:
-
-- the image tag (for example `shinsenter/php:8.4-fpm-apache`) and the OS (Debian or Alpine)
-- the command or compose file you ran
-- what you expected, and what happened, with logs (run with `-e DEBUG=1` for more detail)
+Open an [issue](https://code.shin.company/php/issues/new) with the image tag (for example `shinsenter/php:8.4-fpm-apache`), the OS, the command or compose file you ran, what you expected and what happened. Run with `-e DEBUG=1` for more logs.
 
 Check [KNOWN_ISSUES.md](KNOWN_ISSUES.md) first. For a security problem, follow [SECURITY.md](SECURITY.md) instead.
 
@@ -33,77 +29,44 @@ Check [KNOWN_ISSUES.md](KNOWN_ISSUES.md) first. For a security problem, follow [
 | `build/` | Build variables and version lists (`config.sh`, `versions.sh`) |
 | `tests/` | Offline checks (`run.sh`) and Docker tests |
 
+
 ## Make a change
 
-1. Fork the repository and create a branch from `main`, for example `feature/short-name`.
-2. Keep the change small. Touch only what the change needs.
-3. Run the offline tests. They need no Docker:
+1. Fork the repository and branch from `main`, for example `feature/short-name`.
+2. Keep the change small and touch only what it needs.
+3. Run the offline tests, no Docker needed: `tests/run.sh`, or `tests/run.sh <name>` for one area (`lint`, `backports`, `config`, `scaling` and more).
+4. If you changed an image, build it for one PHP version, for example `tests/build-test.sh '' with-nginx 8.4` (an empty first argument means Debian). Keep the squash step: the cleanup hooks run only there. Try a cleanup hook change on Apache, FrankenPHP, RoadRunner and Nginx, on Debian and Alpine.
+5. Open a pull request against `main`. Say what changed, why, and how you tested it, with the test output.
 
-   ```shell
-   tests/run.sh            # everything
-   tests/run.sh lint       # shell scripts and hooks
-   tests/run.sh versions   # build/versions.sh, build/helpers.sh
-   tests/run.sh backports  # src/php-backports/
-   tests/run.sh config     # build/config.sh
-   tests/run.sh scaling    # health checks, proxies, stop signals
-   ```
-
-4. If you changed an image, try a build for one PHP version:
-
-   ```shell
-   tests/build-test.sh '' with-nginx 8.4    # empty first argument means Debian
-   ```
-
-   Useful variables: `SKIP_SQUASH=1`, `BUILD_TAG_PREFIX`. A change to a cleanup hook should be tried on Apache, FrankenPHP, RoadRunner and Nginx, on Debian and Alpine.
-5. Open a pull request against `main`. Say what changed, why, and how you tested it. Paste the test output.
-
-A failing test is a finding. Fix the cause. Do not edit a test to make it pass.
+A failing test is a finding. Fix the cause, do not edit the test.
 
 
 ## Commit messages
 
-Use [Conventional Commits](https://www.conventionalcommits.org). The type sets the version bump:
+Use [Conventional Commits](https://www.conventionalcommits.org), one line in English, for example `fix: keep sshd password auth off for accounts without a password`. `fix:` bumps the patch version, `feat:` the minor, and `!` (for example `feat!:`) the major. `refactor:`, `docs:`, `test:` and `chore:` do not bump it.
 
-| Type | Bump |
-|---|---|
-| `fix:` | patch |
-| `feat:` | minor |
-| `feat!:`, `fix!:` | major |
-| `refactor:`, `docs:`, `test:`, `chore:` | none |
-
-One line, in English, for example `fix: keep sshd password auth off for accounts without a password`.
-
-If you fix a bug reported in an issue, also add it to [KNOWN_ISSUES.md](KNOWN_ISSUES.md) under the release that ships the fix. Read the issue first and do not guess the cause.
+If you fix a bug from an issue, also add it to [KNOWN_ISSUES.md](KNOWN_ISSUES.md) under the release that ships the fix. Read the issue first and do not guess the cause.
 
 
 ## Code style
 
-- Indent with 4 spaces in Dockerfiles and shell, 2 spaces in YAML. No tabs.
-- Dockerfile: one command per `RUN` line, chained with `&&`.
-- Comments explain why, one short sentence per line.
-- Match the style of the file you edit.
-- Keep the author header at the top of every new file. Copy it from `src/php/base-php.dockerfile`.
-- In image layers, use `pkg-add` and `pkg-del` instead of `apk` or `apt-get`, so Debian and Alpine behave the same.
-
-Design rules:
-
-- One mechanism serves every PHP version. Put differences in data (for example a patch folder), not in `if` branches.
-- No extra files or packages in the base image. Remove build packages in the layer that installs them.
-- Verify through the build log. Do not ship check files in the image.
+- 4 spaces in Dockerfiles and shell, 2 in YAML, no tabs. Match the file you edit.
+- One command per `RUN` line, chained with `&&`. In image layers use `pkg-add` and `pkg-del`, not `apk` or `apt-get`, so Debian and Alpine behave the same.
+- Comments say why, one short sentence per line. Keep the author header on every new file (copy it from `src/php/base-php.dockerfile`).
+- One mechanism serves every PHP version: put differences in data (for example a patch folder), not in `if` branches.
+- No extra files or packages in the base image. Check the result in the build log, not with files shipped in the image.
 
 
 ## Add a security backport
 
-Only data changes. Add a patch file to `src/php-backports/php<major.minor>/`, then add a row to the table in `src/php-backports/README.md`. Do not edit `php-backports.dockerfile`, `base-php.dockerfile` or `build/config.sh`.
-
-Name the file `<YYYYMMDD>-<NN>-<name>.patch` and do not rename or reorder existing patches. The file name order is the apply order and part of the image fingerprint. Details are in [src/php-backports/README.md](src/php-backports/README.md).
+Only data changes. Add a patch to `src/php-backports/php<major.minor>/` and a row to the table in `src/php-backports/README.md`. Do not edit `php-backports.dockerfile`, `base-php.dockerfile` or `build/config.sh`. Do not rename or reorder patches: the file name order is the apply order and part of the image fingerprint. Name a new one `<YYYYMMDD>-<NN>-<name>.patch`. Details: [src/php-backports/README.md](src/php-backports/README.md).
 
 
 ## Documentation
 
-The READMEs in `src/` are published on Docker Hub. Line 3 of each file is the short description, so keep it as `<emoji> (PHP) <caption>` under 90 characters (no `(PHP)` for the base OS images). Every web application and web server README links back to [shinsenter/php](https://hub.docker.com/r/shinsenter/php).
+The READMEs in `src/` are published on Docker Hub. Line 3 of each file is the short description: `<emoji> (PHP) <caption>`, under 90 characters (no `(PHP)` for the base OS images). Each web application and web server README links back to [shinsenter/php](https://hub.docker.com/r/shinsenter/php).
 
-See also [accessibility](docs/accessibility.md).
+Write docs short and plain, like a person. See also [accessibility](docs/accessibility.md).
 
 
 ## License and credit
