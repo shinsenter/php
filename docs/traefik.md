@@ -77,7 +77,7 @@ For RoadRunner use `healthcheck.path=/health?plugin=http`. FrankenPHP and Apache
 
 `private` means `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16` and `fd00::/8`. Use it only when nothing outside your private network can reach the container directly. Otherwise list the exact address of Traefik, for example `172.18.0.0/16`.
 
-The web images carry the label `traefik.enable=true`, so with `exposedbydefault=false` they still need a router rule but not the enable label. The `phpmyadmin` and `coolify` images carry `traefik.enable=false`: they are tools with admin rights, and nothing routes them until you set `traefik.enable=true` in your own labels. A label in your Compose file replaces the one in the image.
+The web images carry `traefik.enable=true`, so with `exposedbydefault=false` they need a router rule but not the enable label. The `phpmyadmin` and `coolify` images carry `traefik.enable=false`, because they are admin tools: nothing routes them until you set `traefik.enable=true` in your own labels, which replace the ones in the image.
 
 `SHUTDOWN_DELAY` stays `0` in the image because a delay slows down every `docker stop` and `docker compose up` for people who run without a proxy. Traefik with the Docker provider needs a few seconds to notice that a container is stopping, so `5` is a safe value there.
 

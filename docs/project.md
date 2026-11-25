@@ -36,7 +36,7 @@ Images are no longer rebuilt on a daily schedule. The [Watch updates](https://co
 - Composer, docker-php-extension-installer, s6-overlay, FrankenPHP, RoadRunner
 - the base OS images and the files in this repository
 
-When an input changes, only the affected PHP versions are built again. Images that are still up to date are skipped without being pulled or built. A Composer, extension installer or s6-overlay update rebuilds the maintained versions only. Outdated versions are rebuilt when their official PHP image changes.
+When an input changes, only the affected PHP versions are built again, and up-to-date images are skipped. A Composer, extension installer or s6-overlay update rebuilds the maintained versions only. Outdated versions are rebuilt when their official PHP image changes.
 
 Each published image carries the fingerprint of its inputs in the `org.shinsenter.build.fingerprint` annotation of the image index:
 
@@ -51,4 +51,4 @@ Maintainers can start a build by hand from the [Build all](https://code.shin.com
 
 ## Security updates
 
-The images are rebuilt when PHP publishes a security release. For end-of-life PHP 8.1 to 7.0, this project backports PHP security fixes (see [`src/php-backports`](https://code.shin.company/php/tree/main/src/php-backports)). To report a vulnerability, read [SECURITY.md](https://code.shin.company/php/blob/main/SECURITY.md). Known bugs and their fixes are in [KNOWN_ISSUES.md](https://code.shin.company/php/blob/main/KNOWN_ISSUES.md), and releases in [CHANGELOG.md](https://code.shin.company/php/blob/main/CHANGELOG.md).
+The images are rebuilt when PHP publishes a security release. For end-of-life PHP 8.1 to 7.0, this project backports the fixes (see [`src/php-backports`](https://code.shin.company/php/tree/main/src/php-backports)). To report a vulnerability, read [SECURITY.md](https://code.shin.company/php/blob/main/SECURITY.md). Known bugs are in [KNOWN_ISSUES.md](https://code.shin.company/php/blob/main/KNOWN_ISSUES.md) and releases in [CHANGELOG.md](https://code.shin.company/php/blob/main/CHANGELOG.md).
