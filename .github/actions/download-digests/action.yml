@@ -19,53 +19,24 @@ inputs:
 
 runs:
   using: composite
-  # Exact names: a pattern only sees the first 1000 artifacts of a run
   steps:
-    - if: ${{ contains(inputs.slugs, 'linux-386') }}
-      continue-on-error: true
-      uses: actions/download-artifact@v8
-      with:
-        name: digest-${{ inputs.fingerprint }}-linux-386
-        path: /tmp/digests
-
-    - if: ${{ contains(inputs.slugs, 'linux-amd64') }}
-      continue-on-error: true
-      uses: actions/download-artifact@v8
-      with:
-        name: digest-${{ inputs.fingerprint }}-linux-amd64
-        path: /tmp/digests
-
-    - if: ${{ contains(inputs.slugs, 'linux-arm-v6') }}
-      continue-on-error: true
-      uses: actions/download-artifact@v8
-      with:
-        name: digest-${{ inputs.fingerprint }}-linux-arm-v6
-        path: /tmp/digests
-
-    - if: ${{ contains(inputs.slugs, 'linux-arm-v7') }}
-      continue-on-error: true
-      uses: actions/download-artifact@v8
-      with:
-        name: digest-${{ inputs.fingerprint }}-linux-arm-v7
-        path: /tmp/digests
-
-    - if: ${{ contains(inputs.slugs, 'linux-arm64-v8') }}
-      continue-on-error: true
-      uses: actions/download-artifact@v8
-      with:
-        name: digest-${{ inputs.fingerprint }}-linux-arm64-v8
-        path: /tmp/digests
-
-    - if: ${{ contains(inputs.slugs, 'linux-ppc64le') }}
-      continue-on-error: true
-      uses: actions/download-artifact@v8
-      with:
-        name: digest-${{ inputs.fingerprint }}-linux-ppc64le
-        path: /tmp/digests
-
-    - if: ${{ contains(inputs.slugs, 'linux-s390x') }}
-      continue-on-error: true
-      uses: actions/download-artifact@v8
-      with:
-        name: digest-${{ inputs.fingerprint }}-linux-s390x
-        path: /tmp/digests
+    # Ask the API by exact name, since a pattern only sees the first 1000 artifacts of a run
+    # A platform that is not done yet is one info line, never an annotation: the errors are the build steps
+    - shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        FINGERPRINT: ${{ inputs.fingerprint }}
+        SLUGS: ${{ inputs.slugs }}
+      run: |
+        mkdir -p /tmp/digests
+        missing=
+        for slug in $SLUGS; do
+          url="repos/$GITHUB_REPOSITORY/actions"
+          id="$(gh api "$url/runs/$GITHUB_RUN_ID/artifacts?name=digest-$FINGERPRINT-$slug" --jq '.artifacts[0].id // empty' 2>/dev/null)" || id=
+          if [ -n "$id" ] && gh api "$url/artifacts/$id/zip" >"/tmp/$slug.zip" 2>/dev/null && unzip -qo "/tmp/$slug.zip" -d /tmp/digests; then
+            rm -f "/tmp/$slug.zip"
+          else
+            missing="$missing $slug"
+          fi
+        done
+        [ -z "$missing" ] || echo "Digest not ready yet for:$missing"

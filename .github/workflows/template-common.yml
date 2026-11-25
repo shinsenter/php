@@ -131,6 +131,7 @@ jobs:
       matrix:
         include: ${{ fromJSON(needs.prepare.outputs.matrix) }}
     permissions:
+      actions: read
       packages: write
       contents: read
       id-token: write
