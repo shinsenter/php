@@ -499,10 +499,6 @@ if [ -n "$PHP_VERSION" ]; then
             expand_tags ":php7.4" ":php7"
             expand_tags ":7.4" ":7"
             ;;
-        8.6)
-            expand_tags ":php8.6" ":php8"
-            expand_tags ":8.6" ":8"
-            ;;
         "$LATEST_PHP")
             major=${PHP_VERSION%%.*}
             expand_tags ":php$PHP_VERSION" ":php$major"

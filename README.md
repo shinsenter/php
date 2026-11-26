@@ -188,7 +188,7 @@ The images start PHP-FPM with one generated file, `/usr/local/etc/php-fpm.d/zz-d
 3. `ENABLE_TUNING_FPM=1`, which sets the `pm.*` values from the CPU limit of the container. A `PHP_PM*` variable you pass replaces the matching tuned value, and the other tuned values follow `PHP_PM_MAX_CHILDREN`.
 4. The defaults of the image.
 
-`PHP_*` variables are the main way to configure PHP-FPM. If you prefer a file, mount it with a name that matches `custom-*.conf`. The container looks for these files when it starts, so restart it after you add one. A pool with the same name as the generated one (`[www]`) is merged, and your values win:
+`PHP_*` variables are the main way to configure PHP-FPM. If you prefer a file, mount it as `custom-*.conf` and restart the container, because the files are read at start. A pool with the same name as the generated one (`[www]`) is merged, and your values win:
 
 ```shell
 docker run -v ./custom-www.conf:/usr/local/etc/php-fpm.d/custom-www.conf:ro \
@@ -254,6 +254,8 @@ docker run -p 80:80 -p 443:443 -p 443:443/udp \
 ### Pre-installed PHP extensions, hooks and autorun scripts
 
 The list of pre-installed extensions, the hooks and the autorun scripts are in [docs/extending.md](https://code.shin.company/php/blob/main/docs/extending.md).
+
+
 ### Adding PHP Extensions
 
 Use the `phpaddmod` helper to install and configure extensions in one step - no need for `docker-php-ext-install` or manual php.ini edits.
@@ -322,14 +324,14 @@ If a proxy or load balancer ends TLS for you, see the next section.
 
 By default no proxy is trusted. `REMOTE_ADDR` stays the address of the connection, and your app reads `X-Forwarded-For` itself.
 
-Set `TRUSTED_PROXIES` (CIDRs, separated by comma or space) to let the server use the client address from `X-Forwarded-For` and honor `X-Forwarded-Proto` (it then sets `$_SERVER['HTTPS']`). It works on Nginx, Apache, FrankenPHP and RoadRunner. The word `private` stands for the private ranges `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16` and `fd00::/8`, where Docker networks, Kubernetes pods and most proxies live:
+Set `TRUSTED_PROXIES` (CIDRs, separated by comma or space) to use the client address from `X-Forwarded-For` and the scheme from `X-Forwarded-Proto` (it then sets `$_SERVER['HTTPS']`). It works on Nginx, Apache, FrankenPHP and RoadRunner. `private` stands for `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16` and `fd00::/8`, where Docker networks and Kubernetes pods live:
 
 ```shell
 docker run -e TRUSTED_PROXIES=private \
     -p 80:80 shinsenter/php:8.6-fpm-nginx
 ```
 
-You can mix both forms, for example `private,203.0.113.0/24`. Only listed proxies can set these headers, so a client that connects directly cannot fake them. Use `private` only when nothing outside your private network can reach the container directly. With Cloudflare in front, list your load balancer and the Cloudflare ranges.
+You can mix both, for example `private,203.0.113.0/24`. Only listed proxies can set these headers. Use `private` only when nothing outside your private network can reach the container. With Cloudflare in front, list your load balancer and the Cloudflare ranges.
 
 Traefik: see [docs/traefik.md](https://code.shin.company/php/blob/main/docs/traefik.md) for a working Compose file and the settings that avoid 502 errors during deploys.
 
@@ -480,7 +482,7 @@ The most used variables are below. Every other setting, with its default, is in 
 
 ## Deploy to your own server
 
-[muken](https://github.com/shinsenter/muken) is a command-line tool, in its own repository, that puts these images on a VPS: it installs Docker and a proxy, deploys with no downtime, rolls back on a failed health check, and can create the server and the DNS records for you (DigitalOcean, Hetzner, Cloudflare). Start with `muken init`. A short page is in [docs/muken.md](https://code.shin.company/php/blob/main/docs/muken.md), and the guide is in the muken repository.
+[muken](https://github.com/shinsenter/muken) is a separate command-line tool that deploys these images to a VPS with no downtime and rolls back on a failed health check. It can also create the server and the DNS records (DigitalOcean, Hetzner, Cloudflare). Start with `muken init`. See [docs/muken.md](https://code.shin.company/php/blob/main/docs/muken.md) and the guide in the muken repository.
 
 
 ## About This Project
@@ -490,12 +492,10 @@ The platforms, stable tags, update process and security updates are in [docs/pro
 
 ### Support the project
 
-Keeping these images rebuilt for every PHP release takes ongoing work. If they save you time, you can help keep them going:
+Keeping these images rebuilt for every PHP release takes work. If they save you time, you can help:
 
 - ☕ [Donate via PayPal](https://www.paypal.me/shinsenter)
 - 💖 [Sponsor on GitHub](https://github.com/sponsors/shinsenter)
-
-**Plan for 2027:** the project plans to open a sponsors program in 2027. Details will be announced in this README before it starts.
 
 Bug reports, fixes and docs are welcome too. See [CONTRIBUTING.md](https://code.shin.company/php/blob/main/CONTRIBUTING.md) or open an [issue](https://code.shin.company/php/issues/new).
 

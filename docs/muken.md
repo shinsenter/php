@@ -15,7 +15,7 @@ muken puts the `shinsenter/php` images on a server you own, with no downtime and
 - Code, releases and guide: https://github.com/shinsenter/muken
 - Site: https://shinsenter.github.io/muken/
 
-You describe your app in a short file and run one command. muken installs Docker and Traefik on the server, starts the new version next to the old one, moves visitors over when the new one is healthy, and goes back by itself when it is not. It knows every image and app of this project (WordPress, Laravel, Symfony, Drupal, Nextcloud and more).
+You describe your app in a short file and run one command. muken installs Docker and Traefik on the server, starts the new version next to the old one, moves visitors over when it is healthy, and goes back by itself when it is not. It knows every image and app of this project (WordPress, Laravel, Symfony, Drupal, Nextcloud and more).
 
 ```shell
 muken init     # answer a few questions
