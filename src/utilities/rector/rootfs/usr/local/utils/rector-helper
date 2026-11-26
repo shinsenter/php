@@ -1,0 +1,286 @@
+#!/usr/bin/env php
+<?php
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+# Helper of rector-upgrade. Usage: rector-helper detect|constraint|bump|files|config ...
+# The syntax stays valid from PHP 5.6 up: no scalar types, no arrow functions, no match.
+
+// Print an error and return the exit code 1
+function fail($message)
+{
+    fwrite(STDERR, "rector-upgrade: $message\n");
+
+    return 1;
+}
+
+// Whether a folder holds a .php file, skipping vendor, node_modules and .git
+function has_php($dir)
+{
+    $skipped = ['vendor', 'node_modules', '.git'];
+    $filter  = new RecursiveCallbackFilterIterator(
+        new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS),
+        function ($file) use ($skipped) {
+            return !($file->isDir() && in_array($file->getFilename(), $skipped, true));
+        }
+    );
+    $items = new RecursiveIteratorIterator(
+        $filter,
+        RecursiveIteratorIterator::LEAVES_ONLY,
+        RecursiveIteratorIterator::CATCH_GET_CHILD
+    );
+
+    foreach ($items as $file) {
+        if ($file->isFile() && strtolower($file->getExtension()) === 'php') {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// Make a path absolute against the project
+function absolute($path, $project)
+{
+    return substr($path, 0, 1) === '/' ? $path : "$project/$path";
+}
+
+// Make every path of a list absolute against the project
+function absolute_all($paths, $project)
+{
+    $list = [];
+    foreach ($paths as $path) {
+        $list[] = absolute($path, $project);
+    }
+
+    return $list;
+}
+
+// Comma-separated environment variable into a list
+function env_list($name)
+{
+    return array_values(array_filter(array_map('trim', explode(',', (string) getenv($name)))));
+}
+
+// Is the folder a PHP project? Prints the marker it found
+function cmd_detect($project)
+{
+    if (!is_dir($project)) {
+        return fail("'$project' is not a directory");
+    }
+
+    $empty = [];
+    foreach (env_list('RECTOR_PATHS') as $path) {
+        $full = absolute($path, $project);
+        $ok   = is_dir($full) ? has_php($full) : (is_file($full) && substr($full, -4) === '.php');
+        if (!$ok) {
+            $empty[] = $path;
+        }
+    }
+    if ($empty) {
+        return fail('RECTOR_PATHS has no PHP files: ' . implode(', ', $empty));
+    }
+
+    if (is_file("$project/composer.json")) {
+        echo "composer.json\n";
+
+        return 0;
+    }
+    if (has_php($project)) {
+        echo "*.php files\n";
+
+        return 0;
+    }
+
+    return fail(
+        "'$project' is not a PHP project (no composer.json and no .php file outside vendor/, node_modules/, .git/)"
+    );
+}
+
+// Lowest PHP version that a composer constraint allows, or null when it has no lower bound
+function lower_bound($constraint)
+{
+    $min = null;
+    foreach (preg_split('/\s*\|\|?\s*/', trim($constraint)) as $alternative) {
+        $alternative = preg_replace(
+            ['/@\w+|-dev\b/', '/^(\S+)\s+-\s+\S+$/', '/(>=|<=|!=|[<>=^~])\s+/'],
+            ['',              '>=$1',                '$1'],
+            $alternative
+        );
+        $max = null;
+        foreach (preg_split('/[\s,]+/', trim($alternative)) as $part) {
+            if (!preg_match('/^(?:>=|>|==|=|\^|~)?v?(\d+)(?:\.(\d+))?(?:\.(\d+))?/', $part, $m)) {
+                continue;
+            }
+            $minor   = isset($m[2]) ? $m[2] : 0;
+            $patch   = isset($m[3]) ? $m[3] : 0;
+            $version = $m[1] . '.' . $minor . '.' . $patch;
+            if ($max === null || version_compare($version, $max, '>')) {
+                $max = $version;
+            }
+        }
+        if ($max === null) {
+            return null;
+        }
+        if ($min === null || version_compare($max, $min, '<')) {
+            $min = $max;
+        }
+    }
+
+    return $min;
+}
+
+// Exit 0 when require.php is at or above the target, 1 when below, 2 when unknown
+function cmd_constraint($file, $target)
+{
+    $json       = is_file($file) ? json_decode((string) file_get_contents($file), true) : null;
+    $constraint = is_array($json) && isset($json['require']['php']) ? $json['require']['php'] : null;
+    $low        = is_string($constraint) ? lower_bound($constraint) : null;
+    if ($low === null) {
+        return 2;
+    }
+
+    echo "$constraint\n";
+
+    return version_compare($low, "$target.0", '>=') ? 0 : 1;
+}
+
+// Set require.php to ^<target> in place, so the rest of the file keeps its format
+function cmd_bump($file, $target)
+{
+    $raw     = (string) file_get_contents($file);
+    $pattern = '/("require"\s*:\s*\{[^{}]*?"php"\s*:\s*)"[^"]*"/s';
+    $new     = preg_replace($pattern, '$1"^' . $target . '"', $raw, 1, $count);
+    $json    = $count === 1 ? json_decode($new, true) : null;
+    $php     = isset($json['require']['php']) ? $json['require']['php'] : null;
+
+    if ($php !== "^$target") {
+        fwrite(STDERR, "WARN: cannot change require.php in composer.json, change it yourself.\n");
+
+        return 1;
+    }
+    if (file_put_contents($file, $new) === false) {
+        return fail("cannot write $file");
+    }
+    echo "composer.json: require.php is now ^$target\n";
+
+    return 0;
+}
+
+// Print the files Rector will change, relative to the project: from the JSON result, else from the diff
+function cmd_files($json, $diff, $project)
+{
+    $data  = is_file($json) ? json_decode((string) file_get_contents($json), true) : null;
+    $diffs = isset($data['file_diffs']) ? $data['file_diffs'] : [];
+    $files = [];
+    foreach ($diffs as $entry) {
+        if (isset($entry['file'])) {
+            $files[] = $entry['file'];
+        }
+    }
+    if (!$files && is_file($diff)) {
+        preg_match_all('/^\s*\d+\)\s+(\S.*?)(?::\d+)?\s*$/m', (string) file_get_contents($diff), $m);
+        $files = $m[1];
+    }
+
+    $prefix = "$project/";
+    foreach (array_unique($files) as $file) {
+        echo (strpos($file, $prefix) === 0 ? substr($file, strlen($prefix)) : $file) . "\n";
+    }
+
+    return 0;
+}
+
+// The default Rector config. The nowdoc end marker stays in column 0, older PHP needs that
+function config_template()
+{
+    return <<<'PHP'
+<?php
+use Rector\Config\RectorConfig;
+
+// SafeDeclareStrictTypesRector is skipped: strict_types changes how PHP checks types at run time
+// withPhpVersion tells Rector the project is already on the target, or it skips the rules of that version
+$builder = RectorConfig::configure()
+    ->withPaths(__PATHS__)
+    ->withPhpVersion(__VERSION_ID__)
+    ->withSkip(array_merge(__SKIP__, [Rector\TypeDeclaration\Rector\StmtsAwareInterface\SafeDeclareStrictTypesRector::class]))
+    ->withPreparedSets(deadCode: true, codeQuality: true);
+
+// withPhpSets takes one php<MajorMinor> flag per version and adds every set up to it.
+// Use the target, or the highest flag this Rector knows.
+$known = [];
+foreach ((new ReflectionMethod($builder, 'withPhpSets'))->getParameters() as $param) {
+    $name = $param->getName();
+    if (preg_match('/^php\d+$/', $name) && (int) substr($name, 3) <= __LEVEL__) {
+        $known[] = $name;
+    }
+}
+sort($known, SORT_NATURAL);
+$flag = end($known);
+if ($flag !== 'php__LEVEL__') {
+    fwrite(STDERR, "rector-upgrade: this Rector has no set for PHP __TARGET__, using $flag\n");
+}
+
+// A string key is a named argument
+return call_user_func_array([$builder, 'withPhpSets'], [$flag => true]);
+
+PHP;
+}
+
+// Write a default Rector config for the target PHP version
+function cmd_config($target, $out, $project)
+{
+    $paths = env_list('RECTOR_PATHS');
+    if (!$paths) {
+        foreach (['app', 'src', 'lib', 'config', 'public', 'tests'] as $dir) {
+            if (is_dir("$project/$dir")) {
+                $paths[] = $dir;
+            }
+        }
+    }
+
+    $skip = array_merge(['vendor', 'node_modules'], env_list('RECTOR_SKIP'));
+
+    // 8.6 becomes 80600, the id that Rector uses for a PHP version
+    $parts      = explode('.', $target);
+    $version_id = (int) $parts[0] * 10000 + (int) (isset($parts[1]) ? $parts[1] : 0) * 100;
+
+    $config = strtr(config_template(), [
+        '__PATHS__'      => var_export(absolute_all($paths ? $paths : ['.'], $project), true),
+        '__SKIP__'       => var_export(absolute_all($skip, $project), true),
+        '__LEVEL__'      => (int) str_replace('.', '', $target),
+        '__TARGET__'     => $target,
+        '__VERSION_ID__' => $version_id,
+    ]);
+
+    return file_put_contents($out, $config) === false ? fail("cannot write $out") : 0;
+}
+
+$command = isset($argv[1]) ? $argv[1] : '';
+$args    = array_pad(array_slice($argv, 2), 3, '');
+
+switch ($command) {
+    case 'detect':
+        $code = cmd_detect($args[0]);
+        break;
+    case 'constraint':
+        $code = cmd_constraint($args[0], $args[1]);
+        break;
+    case 'bump':
+        $code = cmd_bump($args[0], $args[1]);
+        break;
+    case 'files':
+        $code = cmd_files($args[0], $args[1], $args[2]);
+        break;
+    case 'config':
+        $code = cmd_config($args[0], $args[1], $args[2]);
+        break;
+    default:
+        $code = fail('usage: rector-helper detect|constraint|bump|files|config');
+}
+
+exit($code);

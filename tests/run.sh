@@ -675,10 +675,186 @@ EOF
     finish
 }
 
+# rector: the rector-upgrade flow with stub commands and a temporary git repository, so it needs no Docker.
+# The PHP helper is checked only when php is installed on the host.
+test_rector() {
+    cd "$BASE_DIR" || exit 1
+    local dir="$BASE_DIR/src/utilities/rector/rootfs/usr/local/utils"
+    local tmp stub project
+    tmp="$(mktemp -d)"
+    stub="$tmp/bin"
+    project="$tmp/app"
+    mkdir -p "$stub"
+    trap 'rm -rf "$tmp"' RETURN
+
+    # Stubs: the real is-true, a helper with a chosen verdict, and a php that plays Rector
+    cp "$BASE_DIR/src/php/common/rootfs/usr/local/utils/is-true" "$stub/is-true"
+    cp "$BASE_DIR/src/php/common/rootfs/usr/local/utils/has-cmd" "$stub/has-cmd"
+    cat > "$stub/rector-helper" <<'STUB'
+#!/bin/sh
+case "$1" in
+    detect) echo "composer.json" ;;
+    constraint) [ "${STUB_CONSTRAINT_RC:-1}" = 0 ] && echo "^8.4"; exit "${STUB_CONSTRAINT_RC:-1}" ;;
+    bump) echo "{\"require\":{\"php\":\"^$3\"}}" > "$2"; echo "composer.json: require.php is now ^$3" ;;
+    config) echo "<?php" > "$3" ;;
+    files) [ -z "$STUB_FILES" ] || printf '%s\n' "$STUB_FILES" ;;
+esac
+STUB
+    cat > "$stub/php" <<'STUB'
+#!/bin/sh
+case " $* " in
+    *" --version "*) echo "Rector 9.9.9" ;;
+    *" --dry-run "*) echo "dry run $*"; exit "${STUB_DRY_RC:-2}" ;;
+    *) echo "changed" > "$PWD/changed.php"; [ ! -f "$PWD/src/a.php" ] || echo upgraded > "$PWD/src/a.php" ;;
+esac
+STUB
+    chmod +x "$stub"/*
+
+    # new_project: a clean git repository with one commit
+    new_project() {
+        rm -rf "$project"
+        mkdir -p "$project"
+        git -C "$project" init -q
+        echo '{}' > "$project/composer.json"
+        git -C "$project" add -A
+        git -C "$project" -c user.name=t -c user.email=t@t commit -q -m init
+    }
+
+    # run_rector <env assignments...>: runs the script in the project, sets $out and $rc
+    run_rector() {
+        rc=0
+        out="$(env -i PATH="$stub:/usr/bin:/bin" HOME="$tmp" RECTOR_PROJECT_PATH="$project" "$@" \
+            bash "$dir/rector-upgrade" 2>&1)" || rc=$?
+    }
+
+    local out rc
+    new_project
+    run_rector RECTOR_TARGET_PHP=
+    check_eq "no target version stops with 1" 1 "$rc"
+    run_rector RECTOR_TARGET_PHP=9.0
+    check_eq "target above 8.6 stops with 1" 1 "$rc"
+    check_eq "a stop leaves the branch alone" "" "$(git -C "$project" branch --list 'migration-to-*')"
+
+    run_rector RECTOR_TARGET_PHP=8.4 STUB_CONSTRAINT_RC=0
+    check_eq "project already at the target exits 0" 0 "$rc"
+    check_eq "already at the target makes no branch" "" "$(git -C "$project" branch --list 'migration-to-*')"
+    run_rector RECTOR_TARGET_PHP=8.4 STUB_CONSTRAINT_RC=0 RECTOR_FORCE=1
+    check_eq "RECTOR_FORCE=1 skips the version check" 0 "$rc"
+    check_eq "forced run makes the branch" "migration-to-php-8.4" "$(git -C "$project" branch --list 'migration-to-*' | tr -d ' *')"
+
+    new_project
+    run_rector RECTOR_TARGET_PHP=8.4
+    check_eq "a clean run exits 0" 0 "$rc"
+    check_eq "the run is on the new branch" "migration-to-php-8.4" "$(git -C "$project" branch --show-current)"
+    check "the diff report is saved" test -f "$project/.rector-report/rector.diff"
+    check "the JSON report is saved" test -f "$project/.rector-report/rector.json"
+    check "the Rector version is saved" grep -q "9.9.9" "$project/.rector-report/rector-version.txt"
+    check "Rector changes are applied" test -f "$project/changed.php"
+    check_eq "git shows only the upgrade, not the reports" "$(printf ' M composer.json\n?? changed.php')" "$(git -C "$project" status --porcelain)"
+    check "composer.json requires the target" grep -q '\^8.4' "$project/composer.json"
+    check "nothing is committed" test "$(git -C "$project" rev-list --count HEAD)" = 1
+
+    run_rector RECTOR_TARGET_PHP=8.4
+    check_eq "an existing branch stops with 1" 1 "$rc"
+
+    new_project
+    run_rector RECTOR_TARGET_PHP=8.4 RECTOR_UPDATE_COMPOSER=0
+    check_eq "RECTOR_UPDATE_COMPOSER=0 leaves composer.json" '{}' "$(cat "$project/composer.json")"
+
+    new_project
+    echo junk > "$project/.DS_Store"
+    run_rector RECTOR_TARGET_PHP=8.4
+    check_eq "an untracked .DS_Store does not count as dirty" 0 "$rc"
+
+    new_project
+    echo dirty > "$project/dirty.txt"
+    run_rector RECTOR_TARGET_PHP=8.4
+    check_eq "a dirty tree stops with 1" 1 "$rc"
+    check_eq "a dirty tree makes no branch" "" "$(git -C "$project" branch --list 'migration-to-*')"
+    run_rector RECTOR_TARGET_PHP=8.4 RECTOR_ALLOW_DIRTY=1 RECTOR_BRANCH=custom
+    check_eq "RECTOR_ALLOW_DIRTY=1 runs on a dirty tree" 0 "$rc"
+    check_eq "RECTOR_BRANCH names the branch" custom "$(git -C "$project" branch --show-current)"
+
+    # No git: run in place, with the originals saved and a restore script
+    new_project
+    mkdir -p "$project/src"
+    echo orig > "$project/src/a.php"
+    rm -rf "$project"/.git
+    run_rector RECTOR_TARGET_PHP=8.4 STUB_FILES=src/a.php
+    check_eq "no git repository still exits 0" 0 "$rc"
+    check_eq "the file is changed in place" upgraded "$(cat "$project/src/a.php")"
+    check_eq "the original is saved" orig "$(cat "$project/.rector-report/backup/files/src/a.php")"
+    check "a restore script is saved" test -x "$project/.rector-report/backup/restore"
+    check "composer.json requires the target" grep -q '\^8.4' "$project/composer.json"
+    check_eq "the original composer.json is saved" '{}' "$(cat "$project/.rector-report/backup/files/composer.json")"
+    sh "$project/.rector-report/backup/restore" >/dev/null
+    check_eq "restore puts the original back" orig "$(cat "$project/src/a.php")"
+    check_eq "restore puts composer.json back" '{}' "$(cat "$project/composer.json")"
+
+    # A second run keeps the saved original, or recreates it from the working folder
+    run_rector RECTOR_TARGET_PHP=8.4 STUB_FILES=src/a.php
+    check_eq "keep leaves the saved original" orig "$(cat "$project/.rector-report/backup/files/src/a.php")"
+    echo second > "$project/src/a.php"
+    run_rector RECTOR_TARGET_PHP=8.4 STUB_FILES=src/a.php RECTOR_BACKUP_EXISTING=recreate
+    check_eq "recreate saves the working folder again" second "$(cat "$project/.rector-report/backup/files/src/a.php")"
+    run_rector RECTOR_TARGET_PHP=8.4 RECTOR_BACKUP_EXISTING=maybe
+    check_eq "a wrong RECTOR_BACKUP_EXISTING stops with 1" 1 "$rc"
+
+    # Changes found but no file list: stop before the change
+    echo orig > "$project/src/a.php"
+    run_rector RECTOR_TARGET_PHP=8.4
+    check_eq "no file list stops with 1" 1 "$rc"
+    check_eq "no file list leaves the file alone" orig "$(cat "$project/src/a.php")"
+
+    new_project
+    run_rector RECTOR_TARGET_PHP=8.4
+    check_not "without rector.php the config is generated" grep -q "Config: $project/rector.php" <<<"$out"
+    new_project
+    echo '<?php' > "$project/rector.php"
+    git -C "$project" add -A
+    git -C "$project" -c user.name=t -c user.email=t@t commit -q -m config
+    run_rector RECTOR_TARGET_PHP=8.4
+    check "rector.php of the project is used" grep -q "Config: $project/rector.php" <<<"$out"
+
+    new_project
+    run_rector RECTOR_TARGET_PHP=8.4 STUB_DRY_RC=1
+    check_eq "a Rector failure in the dry run stops with 1" 1 "$rc"
+
+    # The PHP helper, when php is installed on the host
+    if command -v php >/dev/null 2>&1; then
+        local helper="$dir/rector-helper" file="$tmp/composer.json"
+        check "helper has valid PHP syntax" php -l "$helper"
+        constraint() { echo "{\"require\":{\"php\":\"$1\"}}" > "$file"; php "$helper" constraint "$file" "$2" >/dev/null 2>&1; }
+        local c rc_want
+        for c in '^8.4:8.4:0' '>=8.5:8.4:0' '~8.4.0:8.4:0' '8.4.*:8.4:0' '^8.3:8.4:1' '^7.4 || ^8.0:8.4:1' '>=7.4 <8.0:8.4:1' '>=8.4 || ^8.5:8.4:0' '*:8.4:2' '<9.0:8.4:2'; do
+            rc=0
+            constraint "${c%%:*}" "$(echo "$c" | cut -d: -f2)" || rc=$?
+            rc_want="${c##*:}"
+            check_eq "constraint ${c%%:*} for target $(echo "$c" | cut -d: -f2)" "$rc_want" "$rc"
+        done
+        rc=0
+        echo '{}' > "$file"
+        php "$helper" constraint "$file" 8.4 >/dev/null 2>&1 || rc=$?
+        check_eq "no require.php is unknown" 2 "$rc"
+        rm -rf "$tmp/empty"
+        mkdir -p "$tmp/empty"
+        echo '{"file_diffs":[{"file":"/x/src/a.php"}]}' > "$tmp/r.json"
+        check_eq "files lists the changed files relative to the project" "src/a.php" "$(php "$helper" files "$tmp/r.json" "$tmp/none" /x)"
+        check_not "an empty folder is not a PHP project" php "$helper" detect "$tmp/empty"
+        echo '<?php' > "$tmp/empty/a.php"
+        check "a folder with a .php file is a PHP project" php "$helper" detect "$tmp/empty"
+        check "the default config has valid PHP syntax" bash -c "php '$helper' config 8.4 '$tmp/c.php' '$tmp/empty' && php -l '$tmp/c.php'"
+    else
+        echo "rector: php not found, helper checks skipped" >&2
+    fi
+
+    finish
+}
+
 # Each test runs in a subshell: its counters and sourced files stay private
 if [ "${BASH_SOURCE[0]}" = "$0" ]; then
     status=0
-    for name in ${@:-lint versions backports config scaling ssh defaults size fingerprint helpers updates scan}; do
+    for name in ${@:-lint versions backports config scaling ssh defaults size fingerprint helpers updates scan rector}; do
         echo "== $name"
         (NAME="$name"; "test_$name") || status=1
     done

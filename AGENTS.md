@@ -52,7 +52,8 @@ Format and OpenSpec change flow (`openspec/changes/<id>/`): spec `conventions`. 
 | `src/php/common/` | Shared dockerfile fragments and `rootfs/` (hooks, utils) |
 | `src/php/with-*.dockerfile`, `with-*/` | Web servers: apache, nginx, roadrunner, frankenphp |
 | `src/php-backports/php<X.Y>/` | Security patches for end-of-life PHP (spec `backports`) |
-| `src/webapps/` | Images for PHP frameworks and applications |
+| `src/webapps/` | Images for PHP frameworks and applications (`app-<name>`) |
+| `src/utilities/` | Command-line tools on top of the `cli` image, built after it with the servers (`utl-<name>`) |
 | `build/config.sh` | Produces the build variables: tag, platforms, context, fingerprint |
 | `build/versions.sh` | Version lists: maintained 8.6 to 8.2, outdated 8.1 to 5.6 |
 | `build/helpers.sh` | Shared functions, one section per purpose: versions, remote content, downloads, IPE modules, published images, build plan, context and hashes |

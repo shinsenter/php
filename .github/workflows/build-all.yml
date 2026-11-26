@@ -205,7 +205,7 @@ jobs:
     needs: [prepare]
     with:
       base: cli
-      servers: '["with-roadrunner"]'
+      servers: '["with-roadrunner","utl-rector"]'
       tag_prefix: ${{ needs.prepare.outputs.tag_prefix }}
       php_versions: ${{ needs.prepare.outputs.php_versions }}
       force_build: ${{ fromJSON(needs.prepare.outputs.force_build) }}

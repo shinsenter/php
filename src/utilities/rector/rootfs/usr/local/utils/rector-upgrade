@@ -1,0 +1,162 @@
+#!/usr/bin/env bash
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+# One-step PHP upgrade with Rector. Settings come from RECTOR_* environment variables, see the README
+set -euo pipefail
+
+PROJECT="${RECTOR_PROJECT_PATH:-/app}"
+TARGET="${RECTOR_TARGET_PHP:-}"
+BRANCH="${RECTOR_BRANCH:-migration-to-php-$TARGET}"
+REPORT="${RECTOR_REPORT_DIR:-$PROJECT/.rector-report}"
+RECTOR="php ${APP_ROOT:-/var/www/html}/vendor/bin/rector"
+HELPER="rector-helper"
+
+die() { echo "rector-upgrade: $*" >&2; exit 1; }
+
+# Changes in the git tree. The OS junk files that the host hides with a global ignore do not count
+git_changes() {
+    git status --porcelain --untracked-files=all | grep -Ev '^\?\? (.*/)?(\.DS_Store|Thumbs\.db|desktop\.ini)$' || true
+}
+
+# Target version: <major>.<minor> from 5.6 to 8.6
+case "$TARGET" in
+    5.6|7.[0-4]|8.[0-6]) ;;
+    *) die "set RECTOR_TARGET_PHP to <major>.<minor> from 5.6 to 8.6, for example 8.4" ;;
+esac
+
+# What to do with a backup left by an earlier run (no git only): keep it or recreate it
+BACKUP_MODE="${RECTOR_BACKUP_EXISTING:-keep}"
+case "$BACKUP_MODE" in
+    keep|recreate) ;;
+    *) die "set RECTOR_BACKUP_EXISTING to keep or recreate" ;;
+esac
+
+# Is it a PHP project, and is it older than the target?
+marker="$($HELPER detect "$PROJECT")" || exit 1
+echo "Project: $PROJECT ($marker)"
+
+if ! is-true "${RECTOR_FORCE:-0}"; then
+    rc=0
+    constraint="$($HELPER constraint "$PROJECT/composer.json" "$TARGET")" || rc=$?
+    case "$rc" in
+        0) echo "composer.json requires php $constraint: nothing to upgrade to PHP $TARGET."; exit 0 ;;
+        2) echo "WARN: cannot read the PHP version of the project, going on." >&2 ;;
+    esac
+fi
+
+# Raise require.php of composer.json to the target after the run, unless RECTOR_UPDATE_COMPOSER=0
+composer_bump=0
+if is-true "${RECTOR_UPDATE_COMPOSER:-1}"; then
+    rc=0
+    $HELPER constraint "$PROJECT/composer.json" "$TARGET" >/dev/null || rc=$?
+    [ "$rc" = 1 ] && composer_bump=1
+fi
+
+# Config: rector.php of the project, else a generated one
+CONFIG="$PROJECT/rector.php"
+if [ ! -f "$CONFIG" ]; then
+    CONFIG="$(mktemp -d)/rector.php"
+    $HELPER config "$TARGET" "$CONFIG" "$PROJECT" || exit 1
+fi
+echo "Config: $CONFIG"
+
+# Git: a clean tree and a new branch. Without git the originals are backed up before the change
+# safe.directory counts only from a config file, not from -c or GIT_CONFIG_COUNT
+GIT_CONFIG_GLOBAL="$(mktemp)"
+printf '[safe]\ndirectory = *\n' >"$GIT_CONFIG_GLOBAL"
+export GIT_CONFIG_GLOBAL
+cd "$PROJECT"
+USE_GIT=1
+has-cmd git || die "git is missing in this image"
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 || USE_GIT=0
+mkdir -p "$REPORT"
+if [ "$USE_GIT" = 1 ]; then
+    git show-ref --verify --quiet "refs/heads/$BRANCH" && die "branch $BRANCH already exists"
+    if [ -n "$(git_changes)" ] && ! is-true "${RECTOR_ALLOW_DIRTY:-0}"; then
+        die "uncommitted changes found, commit them first or set RECTOR_ALLOW_DIRTY=1"
+    fi
+    git checkout -q -b "$BRANCH"
+    echo "Branch: $BRANCH"
+
+    # Keep the report folder out of git when it is inside the project
+    case "$(realpath "$REPORT")/" in
+        "$(realpath "$PROJECT")"/*)
+            exclude="$(git rev-parse --git-path info/exclude)"
+            mkdir -p "$(dirname "$exclude")"
+            grep -qxF "${REPORT#"$PROJECT"/}/" "$exclude" 2>/dev/null || echo "${REPORT#"$PROJECT"/}/" >>"$exclude"
+            ;;
+    esac
+else
+    echo "WARN: $PROJECT is not a git repository, running in place. Originals are saved in $REPORT/backup." >&2
+fi
+
+# Rector options: process, config, memory limit and the extra flags of the user
+args=(process --config="$CONFIG" --no-progress-bar --no-ansi)
+[ -n "${RECTOR_MEMORY_LIMIT:-}" ] && args+=(--memory-limit="$RECTOR_MEMORY_LIMIT")
+# shellcheck disable=SC2206
+args+=(${RECTOR_ARGS:-})
+$RECTOR --version | tee "$REPORT/rector-version.txt"
+
+# Dry run first: the diff and the JSON result go to the report folder (exit 2 means changes found)
+changes=0
+for format in console json; do
+    rc=0
+    $RECTOR "${args[@]}" --dry-run --output-format="$format" >"$REPORT/rector.${format/console/diff}" || rc=$?
+    case "$rc" in 0) ;; 2) changes=1 ;; *) die "Rector failed with exit code $rc, see $REPORT" ;; esac
+done
+
+# No git: save the original of every file that Rector will change, and a script to put them back
+files=""
+if [ "$USE_GIT" = 0 ] && { [ "$changes" = 1 ] || [ "$composer_bump" = 1 ]; }; then
+    backup="$REPORT/backup"
+    [ "$BACKUP_MODE" = recreate ] && rm -rf "$backup"
+    [ -d "$backup/files" ] && echo "Backup found in $backup: keeping the originals it already has."
+    mkdir -p "$backup/files"
+
+    if [ "$changes" = 1 ]; then
+        files="$($HELPER files "$REPORT/rector.json" "$REPORT/rector.diff" "$PROJECT")"
+        [ -n "$files" ] || die "cannot list the files to back up, nothing was changed"
+    fi
+    if [ "$composer_bump" = 1 ]; then files="${files:+$files$'\n'}composer.json"; fi
+    while IFS= read -r file; do
+        # An original saved by an earlier run stays as it is
+        [ -e "$backup/files/$file" ] && continue
+        mkdir -p "$backup/files/$(dirname "$file")"
+        cp -p "$PROJECT/$file" "$backup/files/$file"
+    done <<<"$files"
+
+    cat >"$backup/restore" <<'RESTORE'
+#!/bin/sh
+# Put the saved files back. Usage: restore [project-folder] (default: two levels above this folder)
+here="$(cd "$(dirname "$0")" && pwd)"
+project="${1:-$(cd "$here/../.." && pwd)}"
+cd "$here/files" || exit 1
+find . -type f | while IFS= read -r file; do
+    mkdir -p "$project/$(dirname "$file")"
+    cp -p "$file" "$project/$file"
+done
+echo "Restored the saved files to $project"
+RESTORE
+    chmod +x "$backup/restore"
+fi
+
+# Apply the changes
+rc=0
+$RECTOR "${args[@]}" >"$REPORT/rector-apply.log" || rc=$?
+[ "$rc" -eq 0 ] || { echo "rector-upgrade: Rector failed with exit code $rc, see $REPORT" >&2; exit "$rc"; }
+
+if [ "$composer_bump" = 1 ]; then $HELPER bump "$PROJECT/composer.json" "$TARGET" || composer_bump=0; fi
+
+echo "Report: $REPORT"
+if [ "$USE_GIT" = 1 ]; then
+    echo "Changed files: $(git_changes | wc -l | tr -d ' ')"
+    echo "Review with 'git diff', delete the branch to undo: git checkout - && git branch -D $BRANCH"
+else
+    echo "Changed files: $(printf '%s\n' "${files:-}" | grep -c . || true)"
+    echo "Review with rector.diff, undo with: sh $REPORT/backup/restore"
+fi
