@@ -160,7 +160,12 @@ apply_app_rules() {
         case $key in
             min)      verlt "$PHP_VERSION" "$val" && SKIP_BUILD=1 ;;
             latest)   LATEST_PHP="$val" ;;
-            base)     BUILD_FROM_IMAGE="$DEFAULT_REPO/$val"; USE_SERVER="" PREFER_SERVER="" ;;
+            base)
+                BUILD_FROM_IMAGE="$DEFAULT_REPO/$val"; USE_SERVER="" PREFER_SERVER=""
+                # Below the minimum of its base app nothing rebuilds the base, so the app would sit on a stale one
+                base_min="$(printf '%s\n' "$APP_RULES" | sed -n "s/^$val:.*min=\([0-9.]*\).*/\1/p")"
+                if [ -n "$base_min" ] && verlt "$PHP_VERSION" "$base_min"; then SKIP_BUILD=1; fi
+                ;;
             server)   USE_SERVER="$val" ;;
             variant)  PHP_VARIANT="$val$SUFFIX" ;;
             platform) BUILD_PLATFORM="$val" ;;
