@@ -261,6 +261,13 @@ test_config() {
             "$(grep '^BUILD_TAG=' <<<"$output")"
     done
 
+    # An app on top of another app starts at the minimum PHP of its base: below it the base is never rebuilt
+    for case in app-invoiceshelf:8.2:1 app-invoiceshelf:8.3:0 app-sulu:8.3:1 app-sulu:8.4:0; do
+        IFS=: read -r app version want <<<"$case"
+        check_eq "$app $version: SKIP_BUILD" "SKIP_BUILD='$want'" \
+            "$(config_value '' "$app" "$version" | grep '^SKIP_BUILD=')"
+    done
+
     # The s6-overlay archive follows the platform, not uname.
     # An arm64 builder reports aarch64 for arm/v7.
     local snippet
