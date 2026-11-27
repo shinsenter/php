@@ -44,7 +44,7 @@ fi
 if [ -n "${RECURSIVE:-1}" ] && [ -n "$BUILD_FROM_IMAGE" ]; then
     deps=""
     case "$BUILD_FROM_IMAGE" in
-        */php)              deps="${PHP_VARIANT/-$1/}" ;;
+        */php)              deps="${PHP_VARIANT/-$1/}"; deps="${deps:-cli}" ;;
         */phpfpm-apache)    deps="with-apache" ;;
         */phpfpm-nginx)     deps="with-nginx" ;;
         */roadrunner)       deps="with-roadrunner" ;;
@@ -112,3 +112,6 @@ exit $exit_code
 
 # PLATFORM=amd64 ./tests/build-test.sh '' 'app-laravel' 8.5
 # PLATFORM=amd64 ./tests/build-test.sh 'alpine' 'app-laravel' 8.5
+
+# PLATFORM=amd64 ./tests/build-test.sh '' 'utl-rector' 8.6
+# PLATFORM=amd64 ./tests/build-test.sh 'alpine' 'utl-rector' 8.6

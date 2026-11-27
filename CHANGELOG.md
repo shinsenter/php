@@ -4,6 +4,7 @@ All notable changes to this project are documented in this file.
 
 
 ## [Unreleased]
+- Add `shinsenter/rector`: upgrade a mounted PHP project to a newer PHP with Rector, in one step.
 - Fix images built but not published when a run had over 1000 artifacts.
 - Fix `rotatelogs` missing from the Apache images (#481).
 - Remove `git` from `shinsenter/dockerfile-x`. Includes from a `git+` URL no longer work.

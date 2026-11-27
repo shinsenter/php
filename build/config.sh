@@ -84,6 +84,9 @@ phpmyadmin:min=7.2 server=nginx
 # https://devdocs.prestashop-project.org/9/basics/installation/system-requirements/
 prestashop:min=8.2 latest=8.5 server=apache
 
+# https://getrector.com/documentation (built on the cli image, no web server)
+rector:min=8.6 latest=8.6 variant=cli
+
 # https://developer.shopware.com/docs/guides/hosting/
 shopware:min=8.2 latest=8.5 server=nginx
 
@@ -157,7 +160,12 @@ apply_app_rules() {
         case $key in
             min)      verlt "$PHP_VERSION" "$val" && SKIP_BUILD=1 ;;
             latest)   LATEST_PHP="$val" ;;
-            base)     BUILD_FROM_IMAGE="$DEFAULT_REPO/$val"; USE_SERVER="" PREFER_SERVER="" ;;
+            base)
+                BUILD_FROM_IMAGE="$DEFAULT_REPO/$val"; USE_SERVER="" PREFER_SERVER=""
+                # Below the minimum of its base app nothing rebuilds the base, so the app would sit on a stale one
+                base_min="$(printf '%s\n' "$APP_RULES" | sed -n "s/^$val:.*min=\([0-9.]*\).*/\1/p")"
+                if [ -n "$base_min" ] && verlt "$PHP_VERSION" "$base_min"; then SKIP_BUILD=1; fi
+                ;;
             server)   USE_SERVER="$val" ;;
             variant)  PHP_VARIANT="$val$SUFFIX" ;;
             platform) BUILD_PLATFORM="$val" ;;
@@ -199,6 +207,23 @@ apply_app_rules() {
     esac
 }
 
+# A value that never matches the previous run, for a lookup that failed
+unknown_now() {
+    echo "unknown-$(date +%s)"
+}
+
+# Resolve a "latest" version into the variable $1 from the newest tag of the GitHub repo $2
+# Usage: resolve_latest <variable> <owner/repo> <name for the error message>
+resolve_latest() {
+    local version
+    version="$(get_github_latest_tag "$2" 1)"
+    if [ -z "$version" ]; then
+        echo "Failed to get the latest $3 version" >&2
+        exit 1
+    fi
+    printf -v "$1" '%s' "$version"
+}
+
 # Digest of an upstream image tag into the variable $1, or unknown-<time> when the lookup fails.
 # A tag that Docker Hub reports as missing skips the build, with no extra request on a normal run.
 # Usage: upstream_digest <variable> <namespace/repo> <tag>
@@ -209,7 +234,7 @@ upstream_digest() {
             echo "WARN: no upstream image $2:$3, skip the build" >&2
             SKIP_BUILD=1
         fi
-        digest="unknown-$(date +%s)"
+        digest="$(unknown_now)"
     fi
     printf -v "$1" '%s' "$digest"
 }
@@ -230,6 +255,19 @@ add_tag() {
     for tag; do
         [ -n "$tag" ] && BUILD_TAGS="${BUILD_TAGS:+$BUILD_TAGS,}$tag"
     done
+}
+
+# Add the tag $1 of this image, and the tag $2 too when this is the latest PHP version
+add_tag_latest() {
+    add_tag "$BUILD_NAME:$1"
+    if [ "$PHP_VERSION" = "$LATEST_PHP" ]; then
+        add_tag "$BUILD_NAME:$2"
+    fi
+}
+
+# Add one entry to the fingerprint source
+add_cache_key() {
+    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/($1)"
 }
 
 ################################################################################
@@ -290,6 +328,13 @@ SKIP_SQUASH="${SKIP_SQUASH:-0}"
 UPDATE_README=0
 
 PREFIX="${APP#app-}"
+# app-* (webapps) and utl-* (utilities) are built FROM another image of this project
+IS_APP=0
+IS_SERVER=0
+case "$APP" in
+    app-*|utl-*) IS_APP=1 ;;
+    with-*)      IS_SERVER=1 ;;
+esac
 SUFFIX=
 USE_SERVER=
 
@@ -364,13 +409,19 @@ case "$APP" in
         BUILD_CACHE_KEY="(roadrunner@$(get_github_latest_tag "roadrunner-server/roadrunner" | head -c19))"
         ALLOW_RC=1
         ;;
-    app-*)
-        APP_NAME="${APP#app-}"
+    app-*|utl-*)
+        # app-<name> lives in src/webapps, utl-<name> (a utility on top of cli) in src/utilities
+        APP_NAME="${APP#*-}"
+        APP_DIR=webapps
+        [ "${APP#utl-}" = "$APP" ] || APP_DIR=utilities
         BUILD_NAME="$DEFAULT_REPO/$APP_NAME"
-        BUILD_DOCKERFILE="$BASE_DIR/src/webapps/$APP_NAME/$APP_NAME.dockerfile"
+        BUILD_DOCKERFILE="$BASE_DIR/src/$APP_DIR/$APP_NAME/$APP_NAME.dockerfile"
         PHP_VARIANT="fpm$SUFFIX"
         apply_app_rules "$APP_NAME"
-        BUILD_CACHE_KEY="($BUILD_FROM_IMAGE@$(get_dockerhub_tag_digest_or_now "$BUILD_FROM_IMAGE" "${BUILD_TAG_PREFIX}php${PHP_VERSION%-rc}${SUFFIX}"))"
+        # Parent tag: shinsenter/php uses <version>-cli, the server images use php<version>
+        PARENT_TAG="${BUILD_TAG_PREFIX}php${PHP_VERSION%-rc}${SUFFIX}"
+        [ "$BUILD_FROM_IMAGE" = "$DEFAULT_BUILD_NAME" ] && PARENT_TAG="${BUILD_TAG_PREFIX}${PHP_VERSION%-rc}-cli${SUFFIX}"
+        BUILD_CACHE_KEY="($BUILD_FROM_IMAGE@$(get_dockerhub_tag_digest_or_now "$BUILD_FROM_IMAGE" "$PARENT_TAG"))"
         ;;
     *)
         S6_VERSION=
@@ -401,31 +452,11 @@ fi
 # Lazy load the latest meta versions when necessary
 ################################################################################
 if [ "$SKIP_BUILD" != "1" ]; then
-    # Composer
-    if [ "$COMPOSER_VERSION" = "latest" ]; then
-        COMPOSER_VERSION="$(get_github_latest_tag "composer/composer" 1)"
-        if [ -z "$COMPOSER_VERSION" ]; then
-            echo "Failed to get the latest Composer version" >&2
-            exit 1
-        fi
-    fi
+    [ "$COMPOSER_VERSION" != "latest" ] || resolve_latest COMPOSER_VERSION "composer/composer" "Composer"
+    [ "$IPE_VERSION" != "latest" ] || resolve_latest IPE_VERSION "mlocati/docker-php-extension-installer" "docker-php-extension-installer"
 
-    # IPE (docker-php-extension-installer)
-    if [ "$IPE_VERSION" = "latest" ]; then
-        IPE_VERSION="$(get_github_latest_tag "mlocati/docker-php-extension-installer" 1)"
-        if [ -z "$IPE_VERSION" ]; then
-            echo "Failed to get the latest docker-php-extension-installer version" >&2
-            exit 1
-        fi
-    fi
-
-    # s6-overlay
     if [ "$S6_VERSION" = "latest" ]; then
-        LATEST_S6="$(get_github_latest_tag "just-containers/s6-overlay" 1)"
-        if [ -z "$LATEST_S6" ]; then
-            echo "Failed to get the latest s6-overlay version" >&2
-            exit 1
-        fi
+        resolve_latest LATEST_S6 "just-containers/s6-overlay" "s6-overlay"
         S6_VERSION="$LATEST_S6"
     fi
 
@@ -451,23 +482,19 @@ fi
 # Tags by PHP version, app and variant
 if [ -n "$PHP_VERSION" ]; then
     if [ "$BUILD_NAME" = "$DEFAULT_BUILD_NAME" ]; then
-        add_tag "$BUILD_NAME:$PHP_VERSION-$PREFIX$SUFFIX"
-        [ "$PHP_VERSION" = "$LATEST_PHP" ] && add_tag "$BUILD_NAME:$PREFIX$SUFFIX"
+        add_tag_latest "$PHP_VERSION-$PREFIX$SUFFIX" "$PREFIX$SUFFIX"
 
         if [ "$PREFIX" = "cli" ]; then
-            add_tag "$BUILD_NAME:$PHP_VERSION$SUFFIX"
-            [ "$PHP_VERSION" = "$LATEST_PHP" ] && add_tag "$BUILD_NAME:latest$SUFFIX"
+            add_tag_latest "$PHP_VERSION$SUFFIX" "latest$SUFFIX"
         fi
 
         # The official images are ZTS from PHP 8.6, so cli is also the zts image
         if [ "$PREFIX" = "cli" ] && verlte 8.6 "$PHP_VERSION"; then
-            add_tag "$BUILD_NAME:$PHP_VERSION-zts$SUFFIX"
-            [ "$PHP_VERSION" = "$LATEST_PHP" ] && add_tag "$BUILD_NAME:zts$SUFFIX"
+            add_tag_latest "$PHP_VERSION-zts$SUFFIX" "zts$SUFFIX"
         fi
 
-    elif [ "${APP#with-}" != "$APP" ]; then
-        add_tag "$BUILD_NAME:php$PHP_VERSION$SUFFIX"
-        [ "$PHP_VERSION" = "$LATEST_PHP" ] && add_tag "$BUILD_NAME:latest$SUFFIX"
+    elif [ "$IS_SERVER" = 1 ]; then
+        add_tag_latest "php$PHP_VERSION$SUFFIX" "latest$SUFFIX"
 
         case "$APP" in
             with-apache)     suffix=fpm-apache ;;
@@ -480,26 +507,18 @@ if [ -n "$PHP_VERSION" ]; then
             expand_tags "$BUILD_NAME:latest" "$DEFAULT_BUILD_NAME:$suffix"
             expand_tags "$BUILD_NAME:php$PHP_VERSION" "$DEFAULT_BUILD_NAME:$PHP_VERSION-$suffix"
         }
-    elif [ "${APP#app-}" != "$APP" ]; then
+    elif [ "$IS_APP" = 1 ]; then
         if [ -z "$PREFER_SERVER" ] || [ "$PREFER_SERVER" = "$USE_SERVER" ]; then
-            add_tag "$BUILD_NAME:php$PHP_VERSION$SUFFIX"
-            [ "$PHP_VERSION" = "$LATEST_PHP" ] && add_tag "$BUILD_NAME:latest$SUFFIX"
+            add_tag_latest "php$PHP_VERSION$SUFFIX" "latest$SUFFIX"
         fi
         SERVER_SUFFIX="${PREFER_SERVER:+-$PREFER_SERVER}"
-        add_tag "$BUILD_NAME:php$PHP_VERSION$SERVER_SUFFIX$SUFFIX"
+        # An app without a server (rector) has no extra tag
+        [ -z "$SERVER_SUFFIX" ] || add_tag "$BUILD_NAME:php$PHP_VERSION$SERVER_SUFFIX$SUFFIX"
     fi
 
     # Alias major versions
     case "$PHP_VERSION" in
-        5.6)
-            expand_tags ":php5.6" ":php5"
-            expand_tags ":5.6" ":5"
-            ;;
-        7.4)
-            expand_tags ":php7.4" ":php7"
-            expand_tags ":7.4" ":7"
-            ;;
-        "$LATEST_PHP")
+        5.6|7.4|"$LATEST_PHP")
             major=${PHP_VERSION%%.*}
             expand_tags ":php$PHP_VERSION" ":php$major"
             expand_tags ":$PHP_VERSION" ":$major"
@@ -598,16 +617,18 @@ fi
 # It is stored in the published image, so the next run can skip the build when nothing changed.
 if [ "$SKIP_BUILD" != "1" ]; then
     BUILD_CACHE_KEY="($APP@$BUILD_TAG)${BUILD_CACHE_KEY:+/}$BUILD_CACHE_KEY"
-    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(platform:$BUILD_PLATFORM)"
+    add_cache_key "platform:$BUILD_PLATFORM"
 
-    [ -n "$S6_VERSION" ] && BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(s6@$S6_VERSION)"
-    [ "$APP" = "with-nginx" ] && BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(nginx@$NGINX_VERSION)"
-    [ "$APP" = "with-apache" ] && BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(apache@$APACHE_VERSION)"
+    [ -n "$S6_VERSION" ] && add_cache_key "s6@$S6_VERSION"
+    [ "$APP" = "with-nginx" ] && add_cache_key "nginx@$NGINX_VERSION"
+    [ "$APP" = "with-apache" ] && add_cache_key "apache@$APACHE_VERSION"
+    # Rector is installed at build time, a new release needs a rebuild
+    [ "$APP" = "utl-rector" ] && add_cache_key "rector@$(get_github_latest_tag "rectorphp/rector" | head -c19)"
 
     if [ -z "$PHP_VERSION" ] && [ -n "$OS_BASE" ]; then
         # base-os and base-s6 are built FROM the OS image
         OS_SHA="$(get_dockerhub_tag_digest_or_now "library/$OS_BASE" "$OS_VERSION")"
-        BUILD_CACHE_KEY="$BUILD_CACHE_KEY/($OS_BASE:$OS_VERSION@$OS_SHA)"
+        add_cache_key "$OS_BASE:$OS_VERSION@$OS_SHA"
     fi
 
     if [ -n "$PHP_VERSION" ]; then
@@ -615,45 +636,47 @@ if [ "$SKIP_BUILD" != "1" ]; then
         # with-f8p does not start from the official image: it builds on our zts image and copies dunglas/frankenphp
         if [ "$APP" != "with-f8p" ]; then
             upstream_digest PHP_SHA "library/php" "$PHP_VERSION-${PHP_VARIANT#-}"
-            BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(php:$PHP_VERSION-${PHP_VARIANT#-}@$PHP_SHA)"
+            add_cache_key "php:$PHP_VERSION-${PHP_VARIANT#-}@$PHP_SHA"
         fi
 
         # Outdated versions are only rebuilt when their official PHP image changes
         if ! is_outdated_php "$PHP_VERSION"; then
-            BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(IPE:$IPE_VERSION)/(composer:$COMPOSER_VERSION)"
-            [ -z "$PHP_SKIP_MODULES" ] || BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(ipe-skip:$(echo "$PHP_SKIP_MODULES" | md5sum | cut -c1-8))"
+            add_cache_key "IPE:$IPE_VERSION"
+            add_cache_key "composer:$COMPOSER_VERSION"
+            [ -z "$PHP_SKIP_MODULES" ] || add_cache_key "ipe-skip:$(echo "$PHP_SKIP_MODULES" | md5sum | cut -c1-8)"
         fi
 
         # Alpine images get the latest brotli and curl (see src/php/common/patches/middleware-patch)
-        if [ "$OS_BASE" = "alpine" ] && [ "${APP#with-}" = "$APP" ] && [ "${APP#app-}" = "$APP" ]; then
-            BROTLI_TAG="$(get_github_latest_release "google/brotli" || echo "unknown-$(date +%s)")"
-            CURL_TAG="$(get_github_latest_release "curl/curl" || echo "unknown-$(date +%s)")"
-            BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(brotli:$BROTLI_TAG)/(curl:$CURL_TAG)"
+        if [ "$OS_BASE" = "alpine" ] && [ "$IS_SERVER" != 1 ] && [ "$IS_APP" != 1 ]; then
+            BROTLI_TAG="$(get_github_latest_release "google/brotli" || unknown_now)"
+            CURL_TAG="$(get_github_latest_release "curl/curl" || unknown_now)"
+            add_cache_key "brotli:$BROTLI_TAG"
+            add_cache_key "curl:$CURL_TAG"
         fi
 
         # WP-CLI is downloaded at build time, the published checksum tells when it changes
         if [ "$APP" = "app-wordpress" ]; then
             WPCLI_SUM="$(fetch_with_cache "$WPCLI_URL.sha512" 2>/dev/null | head -c 12)"
-            BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(wpcli:${WPCLI_SUM:-unknown-$(date +%s)})"
+            add_cache_key "wpcli:${WPCLI_SUM:-$(unknown_now)}"
         fi
 
         # Servers are built FROM shinsenter/php, so their parent image matters too
-        if [ "${APP#with-}" != "$APP" ]; then
+        if [ "$IS_SERVER" = 1 ]; then
             PARENT_TAG="${BUILD_TAG_PREFIX}${PHP_VERSION//-rc/}-${PHP_VARIANT}"
             PARENT_SHA="$(get_dockerhub_tag_digest_or_now "$DEFAULT_BUILD_NAME" "$PARENT_TAG")"
-            BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(parent:$PARENT_TAG@$PARENT_SHA)"
+            add_cache_key "parent:$PARENT_TAG@$PARENT_SHA"
         fi
     fi
 
-    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(buildfile:$(path_hash "$BUILD_DOCKERFILE" | head -c10))"
+    add_cache_key "buildfile:$(path_hash "$BUILD_DOCKERFILE" | head -c10)"
     context_hash="$(get_context_hash "$BUILD_CONTEXT" "$BUILD_DOCKERFILE")"
-    BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(buildcontext:$context_hash)"
+    add_cache_key "buildcontext:$context_hash"
 
     # The backports are copied into the context only when building,
     # so they are hashed from their source (patches and the Dockerfile that applies them)
     if [ -n "$BACKPORT_DIR" ]; then
         backport_hash="$(path_hash "$BACKPORT_DIR" "$BASE_DIR/src/php/common/php-backports.dockerfile" | shasum | head -c10)"
-        BUILD_CACHE_KEY="$BUILD_CACHE_KEY/(backports@$backport_hash)"
+        add_cache_key "backports@$backport_hash"
     fi
     BUILD_FINGERPRINT="$(echo -n "$BUILD_CACHE_KEY" | shasum | head -c32)"
 else
@@ -675,7 +698,7 @@ BUILD_TMP_NAME="localhost:5000/$(path_hash "$BUILD_CACHE_KEY" | head -c10)"
 ################################################################################
 # Correct the PHP variant for apps
 ################################################################################
-[ "${APP:0:4}" = "app-" ] && PHP_VARIANT="$SUFFIX"
+[ "$IS_APP" = 1 ] && PHP_VARIANT="$SUFFIX"
 
 ################################################################################
 # Skip the build when the published image is already up to date

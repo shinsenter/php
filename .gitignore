@@ -10,6 +10,7 @@
 src/php/php-backports/
 src/php/helper_cache/
 src/webapps/*/helper_cache/
+src/utilities/*/helper_cache/
 myproject
 
 !.env.example

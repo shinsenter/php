@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+################################################################################
+#     These setups are part of the project: https://code.shin.company/php
+#     Please respect the intellectual effort that went into creating them.
+#     If you use or copy these ideas, proper credit would be appreciated.
+#      - Author:  Mai Nhut Tan <shin@shin.company>
+#      - License: https://code.shin.company/php/blob/main/LICENSE
+################################################################################
+# Run as the owner of the mounted project, so files written there keep their owner
+[ -z "${APP_UID:-}${APP_GID:-}" ] || exit 0
+project="${RECTOR_PROJECT_PATH:-/app}"
+[ -d "$project" ] || exit 0
+
+uid="$(stat -c %u "$project")"
+gid="$(stat -c %g "$project")"
+[ "$uid" != "0" ] || exit 0
+
+ownership "${APP_GROUP:-www-data}" "$gid" "${APP_USER:-www-data}" "$uid"
